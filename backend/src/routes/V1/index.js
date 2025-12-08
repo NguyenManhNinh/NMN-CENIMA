@@ -77,6 +77,15 @@ const defaultRoutes = [
     path: '/chatbot',
     route: require('./chatbotRoutes')
   }
+  // TODO: Enable after Docker rebuild
+  // {
+  //   path: '/feedbacks',
+  //   route: require('./feedbackRoutes')
+  // },
+  // {
+  //   path: '/faqs',
+  //   route: require('./faqRoutes')
+  // }
 ];
 
 defaultRoutes.forEach(route => {

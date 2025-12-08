@@ -20,6 +20,8 @@ const Voucher = require('../src/models/Voucher');
 const Banner = require('../src/models/Banner');
 const Article = require('../src/models/Article');
 const Event = require('../src/models/Event');
+const Feedback = require('../src/models/Feedback');
+const FAQ = require('../src/models/FAQ');
 
 const log = (msg, type = 'INFO') => {
   const icons = { INFO: 'ℹ️', SUCCESS: '✅', ERROR: '❌' };
@@ -263,6 +265,86 @@ async function seedCMS() {
   }
 }
 
+async function seedFeedbacks() {
+  log('Seeding Feedbacks...');
+
+  const feedbacks = [
+    {
+      name: 'Nguyễn Văn A',
+      email: 'nguyenvana@example.com',
+      phone: '0901234567',
+      topic: 'SERVICE',
+      content: 'Nhân viên phục vụ rất nhiệt tình và chuyên nghiệp. Tôi sẽ quay lại!',
+      rating: 5,
+      status: 'RESOLVED'
+    },
+    {
+      name: 'Trần Thị B',
+      email: 'tranthib@example.com',
+      phone: '0912345678',
+      topic: 'FACILITIES',
+      content: 'Ghế ngồi hơi cũ, nên thay mới để tăng trải nghiệm khách hàng.',
+      rating: 3,
+      status: 'PENDING'
+    }
+  ];
+
+  for (const f of feedbacks) {
+    const exists = await Feedback.findOne({ email: f.email, content: f.content });
+    if (!exists) {
+      await Feedback.create(f);
+      log(`  Created Feedback from: ${f.name}`, 'SUCCESS');
+    }
+  }
+}
+
+async function seedFAQs() {
+  log('Seeding FAQs...');
+
+  const faqs = [
+    {
+      question: 'Làm thế nào để đặt vé online?',
+      answer: 'Bạn chọn phim → Chọn suất chiếu → Chọn ghế → Thanh toán. Vé điện tử sẽ được gửi qua email.',
+      category: 'BOOKING',
+      order: 1,
+      isPopular: true
+    },
+    {
+      question: 'Tôi có thể hủy vé đã đặt không?',
+      answer: 'Vé đã thanh toán không thể hủy. Vui lòng kiểm tra kỹ thông tin trước khi thanh toán.',
+      category: 'BOOKING',
+      order: 2,
+      isPopular: true
+    },
+    {
+      question: 'NMN Cinema chấp nhận thanh toán bằng gì?',
+      answer: 'Chúng tôi chấp nhận: VNPay (QR, ATM, Visa/Mastercard).',
+      category: 'PAYMENT',
+      order: 3
+    },
+    {
+      question: 'Làm sao để tích điểm thành viên?',
+      answer: 'Đăng nhập tài khoản trước khi thanh toán. Điểm được cộng tự động sau mỗi giao dịch thành công.',
+      category: 'MEMBERSHIP',
+      order: 4
+    },
+    {
+      question: 'Tôi quên mật khẩu, phải làm sao?',
+      answer: 'Nhấn "Quên mật khẩu" tại trang đăng nhập. Link đặt lại mật khẩu sẽ được gửi qua email.',
+      category: 'ACCOUNT',
+      order: 5
+    }
+  ];
+
+  for (const faq of faqs) {
+    const exists = await FAQ.findOne({ question: faq.question });
+    if (!exists) {
+      await FAQ.create(faq);
+      log(`  Created FAQ: ${faq.question}`, 'SUCCESS');
+    }
+  }
+}
+
 async function main() {
   console.log('\n╔════════════════════════════════════════════╗');
   console.log('║      NMN CINEMA - SEED DATA SCRIPT        ║');
@@ -279,6 +361,8 @@ async function main() {
     await seedCombos();
     await seedVouchers();
     await seedCMS();
+    await seedFeedbacks();
+    await seedFAQs();
 
     console.log('\n✅ SEED COMPLETED SUCCESSFULLY!');
     console.log('────────────────────────────────');
