@@ -2,9 +2,9 @@
 
 > Website Quản lý Rạp chiếu phim Tích hợp Thanh toán Trực tuyến và AI Chatbot
 
-[![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-7.x-green.svg)](https://www.mongodb.com/)
-[![Express](https://img.shields.io/badge/Express-4.x-blue.svg)](https://expressjs.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-v24.11.0-green.svg)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-v7.6.0-green.svg)](https://www.mongodb.com/)
+[![Express](https://img.shields.io/badge/Express-v4.21.4-blue.svg)](https://expressjs.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
 ## 📋 Mục lục
@@ -46,27 +46,27 @@
 
 | Hạng mục | Công nghệ | Phiên bản |
 |----------|-----------|-----------|
-| Runtime | Node.js | 18.x LTS |
-| Framework | Express.js | 4.21.x |
-| Database | MongoDB | 7.x |
-| ODM | Mongoose | 8.8.x |
-| Auth | JWT + bcrypt | jsonwebtoken 9.x |
-| Realtime | Socket.io | 4.8.x |
+| Runtime | Node.js | v24.11.0 |
+| Framework | Express.js | ^4.21.4 |
+| Database | MongoDB | ^7.6.0 |
+| ODM | Mongoose | ^8.8.0 |
+| Auth | JWT + bcrypt | jsonwebtoken ^9.0.2 |
+| Realtime | Socket.io | ^4.8.1 |
 | Payment | VNPay | Sandbox/Production |
 | AI | Google Gemini API | 1.5 Flash |
-| Email | Nodemailer | 6.x |
-| Docs | Swagger | swagger-jsdoc 6.x |
-| Logging | Winston | 3.x |
+| Email | Nodemailer | ^6.9.5 |
+| Docs | Swagger | swagger-jsdoc ^6.1.0 |
+| Logging | Winston | ^3.10.0 |
 | Security | helmet, cors, xss-clean | latest |
-| Validation | Joi | 17.x |
+| Validation | Joi | ^17.10.1 |
 
 ---
 
 ## 📦 Cài đặt
 
 ### Yêu cầu hệ thống
-- Node.js >= 18.x
-- MongoDB >= 7.x (hoặc MongoDB Atlas)
+- Node.js >= v24.11.0
+- MongoDB >= ^7.6.0 (hoặc MongoDB Atlas)
 - npm hoặc yarn
 - Docker Desktop (tùy chọn)
 
@@ -414,14 +414,7 @@ backend/
 ---
 
 ## �👨‍💻 Tác giả
-
 **Nguyễn Mạnh Ninh**
 - MSSV: 2200571
 - Lớp: D101K14
-- Đồ án tốt nghiệp 2025
-
----
-
-## 📄 License
-
-MIT License - Xem file [LICENSE](LICENSE) để biết thêm chi tiết.
+- Đồ án tốt nghiệp 2026
