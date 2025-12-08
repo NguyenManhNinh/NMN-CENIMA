@@ -77,7 +77,9 @@ const defaultRoutes = [
     path: '/chatbot',
     route: require('./chatbotRoutes')
   }
-  // TODO: Enable after Docker rebuild
+  // NOTE: Feedback & FAQ features implemented but disabled in Docker
+  // Files exist: feedbackController.js, faqController.js, Feedback.js, FAQ.js
+  // To enable: Uncomment below and rebuild Docker with --no-cache
   // {
   //   path: '/feedbacks',
   //   route: require('./feedbackRoutes')
