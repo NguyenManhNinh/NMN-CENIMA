@@ -57,4 +57,4 @@ networks:
 # Volumes
 volumes:
   mongo_data:
-  mongo_config:
+  mongo_config: 

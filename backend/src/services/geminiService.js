@@ -38,7 +38,7 @@ LƯU Ý QUAN TRỌNG: Mọi thông tin về phim, giá vé, combo, khuyến mãi
  */
 exports.chat = async (userMessage, conversationHistory = [], context = {}) => {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'models/gemini-2.5-flash' });
 
     // Xây dựng context động từ dữ liệu thực
     let dynamicContext = '\n\n=== DỮ LIỆU THỰC TỪ HỆ THỐNG (CHỈ TRẢ LỜI DỰA TRÊN DỮ LIỆU NÀY) ===';
@@ -152,7 +152,7 @@ exports.chat = async (userMessage, conversationHistory = [], context = {}) => {
     console.error('Gemini API Error:', error);
     return {
       success: false,
-      message: 'Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau hoặc liên hệ hotline 1900-xxxx để được hỗ trợ. 🙏',
+      message: 'Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau hoặc liên hệ hotline 0849045706 để được hỗ trợ. 🙏',
       error: error.message
     };
   }

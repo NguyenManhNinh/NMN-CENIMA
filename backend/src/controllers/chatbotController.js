@@ -74,13 +74,13 @@ exports.sendMessage = catchAsync(async (req, res, next) => {
     .lean();
 
   // 3. Combo F&B đang bán
-  const combos = await Combo.find({ status: 'active' })
+  const combos = await Combo.find({ status: 'ACTIVE' })
     .select('name description price items')
     .lean();
 
   // 4. Voucher/Khuyến mãi còn hiệu lực
   const activeVouchers = await Voucher.find({
-    status: 'active',
+    status: 'ACTIVE',
     validTo: { $gte: new Date() }
   })
     .select('code value type description')
@@ -106,7 +106,7 @@ exports.sendMessage = catchAsync(async (req, res, next) => {
     .lean();
 
   // 6. Danh sách rạp
-  const cinemas = await Cinema.find({ status: 'active' })
+  const cinemas = await Cinema.find({ status: 'ACTIVE' })
     .select('name address phone')
     .lean();
 

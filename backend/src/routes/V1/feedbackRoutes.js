@@ -1,6 +1,6 @@
 const express = require('express');
-const feedbackController = require('../controllers/feedbackController');
-const { protect, restrictTo } = require('../middlewares/authMiddleware');
+const feedbackController = require('../../controllers/feedbackController');
+const { protect, restrictTo } = require('../../middlewares/authMiddleware');
 
 const router = express.Router();
 

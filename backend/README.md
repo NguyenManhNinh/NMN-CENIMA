@@ -174,7 +174,7 @@ docker-compose down
 # Dừng và xóa volumes (XÓA DATA!)
 docker-compose down -v
 ```
-
+docker-compose down; docker-compose build --no-cache backend; docker-compose up -d
 ### Services
 
 | Service | Port | Mô tả |
