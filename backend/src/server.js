@@ -12,9 +12,13 @@ process.on('uncaughtException', err => {
 dotenv.config();
 const app = require('./app');
 const connectDB = require('./config/db');
+const redisService = require('./services/redisService');
 
 // Kết nối Database
 connectDB();
+
+// Khởi tạo Redis (optional - chạy tốt kể cả khi Redis không available)
+redisService.initRedis();
 
 // Khởi động Server
 const port = process.env.PORT || 5000;

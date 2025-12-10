@@ -6,6 +6,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cors = require('cors');
+const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
@@ -18,6 +19,8 @@ const {
   errorLogger
 } = require('./middlewares/loggerMiddleware');
 const { RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS } = require('./config/constants');
+const { globalLimiter } = require('./middlewares/rateLimitMiddleware');
+const redisService = require('./services/redisService');
 
 // Import routes
 const routes = require('./routes/V1');
@@ -36,6 +39,9 @@ app.options('*', cors());
 // Set security HTTP headers
 app.use(helmet());
 
+// Compress responses
+app.use(compression());
+
 // Development logging với Morgan
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -44,13 +50,8 @@ if (process.env.NODE_ENV === 'development') {
 // Request logging với Correlation ID (cho cả dev và prod)
 app.use(requestLogger);
 
-// Limit requests from same API
-const limiter = rateLimit({
-  max: RATE_LIMIT_MAX,
-  windowMs: RATE_LIMIT_WINDOW_MS,
-  message: 'Quá nhiều yêu cầu từ IP này, vui lòng thử lại sau 1 giờ!'
-});
-app.use('/api', limiter);
+// Rate limiting - Sử dụng Redis store cho cluster mode
+app.use('/api', globalLimiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
