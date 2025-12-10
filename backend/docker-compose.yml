@@ -35,7 +35,7 @@ services:
     container_name: nmn-cinema-mongo
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongo_data:/data/db
       - mongo_config:/data/configdb
