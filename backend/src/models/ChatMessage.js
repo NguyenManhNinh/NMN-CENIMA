@@ -17,7 +17,7 @@ const chatMessageSchema = new mongoose.Schema({
     required: true
   },
   intent: {
-    type: String // Nếu là BOT, lưu intent (VD: 'booking_query')
+    type: String // Nếu là BOT,lưu intent
   }
 }, {
   timestamps: { createdAt: true, updatedAt: false }

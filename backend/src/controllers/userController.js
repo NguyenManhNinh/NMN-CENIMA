@@ -113,3 +113,59 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4) Gửi token mới
   createSendToken(user, 200, res);
 });
+
+/**
+ * Admin: Cập nhật thông tin user
+ */
+exports.updateUser = catchAsync(async (req, res, next) => {
+  // Không cho phép cập nhật password qua route này
+  if (req.body.password || req.body.passwordConfirm) {
+    return next(
+      new AppError('Không thể cập nhật mật khẩu qua route này!', 400)
+    );
+  }
+
+  // Lọc các trường cho phép cập nhật
+  const filteredBody = filterObj(
+    req.body,
+    'name',
+    'email',
+    'phone',
+    'role',
+    'isActive',
+    'avatar',
+    'rank'
+  );
+
+  const user = await User.findByIdAndUpdate(req.params.id, filteredBody, {
+    new: true,
+    runValidators: true
+  });
+
+  if (!user) {
+    return next(new AppError('Không tìm thấy người dùng với ID này', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user
+    }
+  });
+});
+
+/**
+ * Admin: Xóa user (hard delete hoặc soft delete)
+ */
+exports.deleteUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+
+  if (!user) {
+    return next(new AppError('Không tìm thấy người dùng với ID này', 404));
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
+});

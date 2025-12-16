@@ -6,8 +6,8 @@ const logger = require('../utils/logger');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USERNAME, // VD: tên@gmail.com
-    pass: process.env.EMAIL_PASSWORD  // VD: app-specific-password
+    user: process.env.EMAIL_USERNAME, // VD: manhninh@gmail.com
+    pass: process.env.EMAIL_PASSWORD  // VD: manhninh
   }
 });
 

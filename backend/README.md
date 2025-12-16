@@ -53,7 +53,7 @@
 | Auth | JWT + bcrypt | jsonwebtoken ^9.0.2 |
 | Realtime | Socket.io | ^4.8.1 |
 | Payment | VNPay | Sandbox/Production |
-| AI | Google Gemini API | 1.5 Flash |
+| AI | Google Gemini API | gemini-2.5-flash |
 | Email | Nodemailer | ^6.9.5 |
 | Docs | Swagger | swagger-jsdoc ^6.1.0 |
 | Logging | Winston | ^3.10.0 |
@@ -163,7 +163,7 @@ Server sẽ chạy tại: `http://localhost:5000`
 docker-compose up -d --build
 
 # Chạy (không rebuild)
-docker-compose up -d
+
 
 # Xem logs
 docker-compose logs -f backend

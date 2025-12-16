@@ -25,7 +25,7 @@ const showtimeSchema = new mongoose.Schema({
   },
   endAt: {
     type: Date,
-    // Tính toán dựa trên movie.duration + thời gian dọn phòng (logic controller)
+    // Tính toán dựa trên movie.duration + thời gian dọn phòng 
     required: [true, 'Vui lòng nhập thời gian kết thúc!']
   },
   basePrice: {
@@ -37,7 +37,7 @@ const showtimeSchema = new mongoose.Schema({
     enum: ['2D', '3D', 'IMAX'], // Khớp với Room.type
     default: '2D'
   },
-  // Danh sách ghế hỏng/bảo trì riêng cho suất này (Theo Schema)
+  // Danh sách ghế hỏng/bảo trì riêng cho suất này
   maintenanceSeats: [{
     type: String
   }],

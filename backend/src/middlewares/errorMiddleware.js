@@ -47,7 +47,7 @@ const sendErrorProd = (err, res) => {
     });
   } else {
     // Lỗi Programming hoặc lỗi lạ: Không rò rỉ chi tiết lỗi cho client
-    console.error('ERROR 💥', err);
+    console.error('ERROR', err);
 
     res.status(500).json({
       status: 'error',
