@@ -1,0 +1,945 @@
+/**
+ * =============================================================================
+ * HEADER COMPONENT - Thanh điều hướng theo phong cách Galaxy Cinema
+ * =============================================================================
+ * Vị trí: src/components/Layout/ClientLayout/Header/Header.jsx
+ *
+ * Bố cục:
+ * - Logo bên trái
+ * - Menu có Mega Menu (Phim dropdown với grid phim)
+ * - Bên phải: Icon tìm kiếm, Đăng nhập/Avatar
+ *
+ * Tính năng Mega Menu:
+ * - "Phim" dropdown hiển thị grid 4 phim đang chiếu + 4 phim sắp chiếu
+ * =============================================================================
+ */
+
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  Button,
+  IconButton,
+  Typography,
+  Container,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+  Menu,
+  MenuItem,
+  Avatar,
+  InputBase,
+  useMediaQuery,
+  useTheme,
+  Paper,
+  Popper,
+  Fade,
+  Rating
+} from '@mui/material';
+import {
+  Search as SearchIcon,
+  Menu as MenuIcon,
+  Person as PersonIcon,
+  History as HistoryIcon,
+  Logout as LogoutIcon,
+  Close as CloseIcon,
+  Movie as MovieIcon,
+  Event as EventIcon,
+  Article as ArticleIcon,
+  KeyboardArrowDown as ArrowDownIcon,
+  ConfirmationNumber as TicketIcon,
+  PlayCircleOutline as TrailerIcon
+} from '@mui/icons-material';
+
+// Logo
+import LogoNMNCinema from '../../../../assets/images/NMN_CENIMA_LOGO.png';
+
+// Mock data cho Mega Menu
+import { getNowShowingMovies, getComingSoonMovies } from '../../../../mocks/mockMovies';
+
+// COLORS - Màu sắc theo Galaxy Cinema
+const COLORS = {
+  primary: '#f26b38',      // Cam chủ đạo
+  text: '#333333',         // Chữ đen
+  textLight: '#666666',    // Chữ xám
+  white: '#ffffff',
+  border: '#e0e0e0',       // Viền xám nhạt
+  hover: '#f5f5f5'         // Hover background
+};
+
+// STYLES
+const styles = {
+  appBar: {
+    backgroundColor: COLORS.white,
+    boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+    borderBottom: `1px solid ${COLORS.border}`,
+    transition: 'transform 0.3s ease-in-out'
+  },
+  appBarHidden: {
+    transform: 'translateY(-100%)'
+  },
+  toolbar: {
+    minHeight: '70px !important',
+    justifyContent: 'space-between',
+    gap: 2
+  },
+  logo: {
+    display: 'flex',
+    alignItems: 'center',
+    textDecoration: 'none'
+  },
+  logoImage: {
+    height: 96,
+    width: 'auto'
+  },
+  navMenu: {
+    display: { xs: 'none', md: 'flex' },
+    alignItems: 'center',
+    gap: 0.5
+  },
+  navButton: {
+    color: COLORS.text,
+    fontWeight: 500,
+    fontSize: '0.9rem',
+    textTransform: 'none',
+    px: 1.5,
+    py: 1,
+    '&:hover': {
+      backgroundColor: COLORS.hover,
+      color: COLORS.primary
+    },
+    '&:focus': {
+      outline: 'none'
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none'
+    }
+  },
+  navButtonActive: {
+    color: COLORS.primary
+  },
+  rightSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1
+  },
+  searchIcon: {
+    color: COLORS.textLight,
+    '&:hover': { color: COLORS.primary }
+  },
+  loginBtn: {
+    color: COLORS.text,
+    fontWeight: 500,
+    fontSize: '0.9rem',
+    textTransform: 'none',
+    '&:hover': {
+      backgroundColor: 'transparent',
+      color: COLORS.primary
+    }
+  },
+  searchBox: {
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 1,
+    px: 1.5,
+    py: 0.5
+  },
+  searchInput: {
+    fontSize: '0.9rem',
+    width: 200
+  },
+  // Mega Menu styles
+  megaMenu: {
+    mt: 1,
+    p: 2,
+    minWidth: 600,
+    maxWidth: 750,
+    maxHeight: '80vh',     // Giới hạn chiều cao
+    overflowY: 'auto',     // Cho phép scroll
+    borderRadius: 2,
+    boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+  },
+  megaMenuSection: {
+    mb: 2
+  },
+  megaMenuTitle: {
+    fontWeight: 600,
+    color: COLORS.primary,
+    fontSize: '0.85rem',
+    mb: 1.5,
+    pl: 0.5,
+    borderLeft: `3px solid ${COLORS.primary}`
+  },
+  movieGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: 1.5
+  },
+  movieCard: {
+    textDecoration: 'none',
+    display: 'block',
+    position: 'relative',
+    '&:hover .movie-poster': {
+      filter: 'brightness(0.5)'
+    },
+    '&:hover .movie-overlay': {
+      opacity: 1
+    }
+  },
+  moviePosterWrapper: {
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: 1
+  },
+  moviePoster: {
+    width: '100%',
+    aspectRatio: '2/3',
+    objectFit: 'cover',
+    display: 'block',
+    transition: 'filter 0.3s',
+    userSelect: 'none',
+    pointerEvents: 'none'  // Ngăn kéo thả ảnh
+  },
+  movieOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 1,
+    opacity: 0,
+    transition: 'opacity 0.3s'
+  },
+  buyTicketBtn: {
+    backgroundColor: COLORS.primary,
+    color: '#fff',
+    fontWeight: 600,
+    fontSize: '0.75rem',
+    textTransform: 'none',
+    px: 2,
+    py: 0.75,
+    borderRadius: 1,
+    '&:hover': {
+      backgroundColor: COLORS.primary
+    }
+  },
+  trailerBtn: {
+    backgroundColor: 'transparent',
+    color: '#fff',
+    fontWeight: 500,
+    fontSize: '0.75rem',
+    textTransform: 'none',
+    border: '1px solid #fff',
+    px: 2,
+    py: 0.5,
+    borderRadius: 1,
+    '&:hover': {
+      backgroundColor: 'rgba(255,255,255,0.1)'
+    }
+  },
+  movieTitle: {
+    fontSize: '1rem',
+    fontWeight: 500,
+    color: COLORS.text,
+    mt: 0.5,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  },
+  viewAllBtn: {
+    mt: 1.5,
+    color: COLORS.primary,
+    fontWeight: 500,
+    fontSize: '0.85rem',
+    textTransform: 'none',
+    '&:hover': {
+      backgroundColor: 'rgba(242, 107, 56, 0.1)'
+    }
+  }
+};
+
+// MENU ITEMS - Để trống (Tất cả đều dùng dropdown riêng)
+const menuItems = [];
+
+// GÓC ĐIỆN ẢNH MENU ITEMS
+const blogMenuItems = [
+  { label: 'Thể loại phim', path: '/blog/genres' },
+  { label: 'Diễn viên', path: '/blog/actors' },
+  { label: 'Đạo diễn', path: '/blog/directors' }
+];
+
+// SỰ KIỆN MENU ITEMS
+const eventMenuItems = [
+  { label: 'Khuyến mãi', path: '/events/promotions' },
+  { label: 'Ưu đãi thành viên', path: '/events/member-benefits' },
+  { label: 'Sự kiện đặc biệt', path: '/events/special' }
+];
+
+// HEADER COMPONENT
+function Header() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
+
+  // State
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountMenuAnchor, setAccountMenuAnchor] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Hide on scroll state
+  const [hideHeader, setHideHeader] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Mega Menu state - Phim
+  const [movieMenuAnchor, setMovieMenuAnchor] = useState(null);
+  const [movieMenuOpen, setMovieMenuOpen] = useState(false);
+  const [nowShowingMovies, setNowShowingMovies] = useState([]);
+  const [comingSoonMovies, setComingSoonMovies] = useState([]);
+
+  // Dropdown state - Góc điện ảnh
+  const [blogMenuAnchor, setBlogMenuAnchor] = useState(null);
+  const [blogMenuOpen, setBlogMenuOpen] = useState(false);
+
+  // Dropdown state - Sự kiện
+  const [eventMenuAnchor, setEventMenuAnchor] = useState(null);
+  const [eventMenuOpen, setEventMenuOpen] = useState(false);
+
+  // TODO: Redux/Context auth
+  const isLoggedIn = false;
+  const user = null;
+
+  // Load movies cho Mega Menu
+  useEffect(() => {
+    setNowShowingMovies(getNowShowingMovies().slice(0, 4));
+    setComingSoonMovies(getComingSoonMovies().slice(0, 4));
+  }, []);
+
+  // Hide on scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Chỉ ẩn khi kéo xuống quá 100px
+      if (currentScrollY > 100) {
+        // Kéo xuống -> ẩn header
+        if (currentScrollY > lastScrollY) {
+          setHideHeader(true);
+        }
+        // Kéo lên -> hiện header
+        else {
+          setHideHeader(false);
+        }
+      } else {
+        setHideHeader(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // HANDLERS
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const toggleSearch = () => setSearchOpen(!searchOpen);
+
+  const handleAccountMenuOpen = (e) => setAccountMenuAnchor(e.currentTarget);
+  const handleAccountMenuClose = () => setAccountMenuAnchor(null);
+
+  // Mega Menu handlers với delay để cho phép di chuyển mượt từ nút sang menu
+  const menuCloseTimeoutRef = useRef(null);
+
+  const handleMovieMenuOpen = (e) => {
+    // Hủy timeout đóng nếu có
+    if (menuCloseTimeoutRef.current) {
+      clearTimeout(menuCloseTimeoutRef.current);
+      menuCloseTimeoutRef.current = null;
+    }
+    setMovieMenuAnchor(e.currentTarget);
+    setMovieMenuOpen(true);
+  };
+
+  const handleMovieMenuClose = () => {
+    // Delay 150ms trước khi đóng, cho phép user di chuyển sang menu
+    menuCloseTimeoutRef.current = setTimeout(() => {
+      setMovieMenuOpen(false);
+    }, 150);
+  };
+
+  const handleMenuEnter = () => {
+    // Khi vào menu, hủy timeout đóng
+    if (menuCloseTimeoutRef.current) {
+      clearTimeout(menuCloseTimeoutRef.current);
+      menuCloseTimeoutRef.current = null;
+    }
+  };
+
+  const handleMenuLeave = () => {
+    // Khi rời menu, đóng menu
+    setMovieMenuOpen(false);
+  };
+
+  // Blog Menu handlers
+  const blogMenuCloseTimeoutRef = useRef(null);
+
+  const handleBlogMenuOpen = (e) => {
+    if (blogMenuCloseTimeoutRef.current) {
+      clearTimeout(blogMenuCloseTimeoutRef.current);
+      blogMenuCloseTimeoutRef.current = null;
+    }
+    setBlogMenuAnchor(e.currentTarget);
+    setBlogMenuOpen(true);
+  };
+
+  const handleBlogMenuClose = () => {
+    blogMenuCloseTimeoutRef.current = setTimeout(() => {
+      setBlogMenuOpen(false);
+    }, 50);  // Nhanh hơn - 50ms thay vì 150ms
+  };
+
+  const handleBlogMenuEnter = () => {
+    if (blogMenuCloseTimeoutRef.current) {
+      clearTimeout(blogMenuCloseTimeoutRef.current);
+      blogMenuCloseTimeoutRef.current = null;
+    }
+  };
+
+  const handleBlogMenuLeave = () => {
+    setBlogMenuOpen(false);
+  };
+
+  // Event Menu handlers
+  const eventMenuCloseTimeoutRef = useRef(null);
+
+  const handleEventMenuOpen = (e) => {
+    if (eventMenuCloseTimeoutRef.current) {
+      clearTimeout(eventMenuCloseTimeoutRef.current);
+      eventMenuCloseTimeoutRef.current = null;
+    }
+    setEventMenuAnchor(e.currentTarget);
+    setEventMenuOpen(true);
+  };
+
+  const handleEventMenuClose = () => {
+    eventMenuCloseTimeoutRef.current = setTimeout(() => {
+      setEventMenuOpen(false);
+    }, 50);
+  };
+
+  const handleEventMenuEnter = () => {
+    if (eventMenuCloseTimeoutRef.current) {
+      clearTimeout(eventMenuCloseTimeoutRef.current);
+      eventMenuCloseTimeoutRef.current = null;
+    }
+  };
+
+  const handleEventMenuLeave = () => {
+    setEventMenuOpen(false);
+  };
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/movies?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+      setSearchOpen(false);
+    }
+  };
+
+  const handleLogout = () => {
+    handleAccountMenuClose();
+    navigate('/');
+  };
+
+  // RENDER - Mega Menu cho Phim
+  const renderMovieMegaMenu = () => (
+    <Popper
+      open={movieMenuOpen}
+      anchorEl={movieMenuAnchor}
+      placement="bottom"
+      transition
+      style={{ zIndex: 1300 }}
+      modifiers={[
+        {
+          name: 'offset',
+          options: {
+            offset: [0, 10]  // Khoảng cách từ anchor
+          }
+        },
+        {
+          name: 'preventOverflow',
+          options: {
+            padding: 16
+          }
+        }
+      ]}
+    >
+      {({ TransitionProps }) => (
+        <Fade {...TransitionProps} timeout={200}>
+          <Paper
+            sx={styles.megaMenu}
+            onMouseEnter={handleMenuEnter}
+            onMouseLeave={handleMenuLeave}
+          >
+            <Box>
+              {/* PHIM ĐANG CHIẾU */}
+              <Box sx={styles.megaMenuSection}>
+                <Typography sx={styles.megaMenuTitle}>
+                  PHIM ĐANG CHIẾU
+                </Typography>
+                <Box sx={styles.movieGrid}>
+                  {nowShowingMovies.map((movie) => (
+                    <Box key={movie._id} sx={styles.movieCard}>
+                      {/* Poster wrapper với overlay */}
+                      <Box sx={styles.moviePosterWrapper}>
+                        <Box
+                          component="img"
+                          className="movie-poster"
+                          src={movie.posterUrl}
+                          alt={movie.title}
+                          sx={styles.moviePoster}
+                        />
+                        {/* Overlay chỉ có nút Mua vé */}
+                        <Box className="movie-overlay" sx={styles.movieOverlay}>
+                          <Button
+                            component={Link}
+                            to={`/booking/${movie._id}`}
+                            sx={styles.buyTicketBtn}
+                            startIcon={<TicketIcon />}
+                            onClick={handleMovieMenuClose}
+                          >
+                            Mua vé
+                          </Button>
+                        </Box>
+                      </Box>
+                      {/* Title */}
+                      <Typography
+                        component={Link}
+                        to={`/movie/${movie._id}`}
+                        sx={{ ...styles.movieTitle, textDecoration: 'none' }}
+                        onClick={handleMovieMenuClose}
+                      >
+                        {movie.title}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+
+              <Divider sx={{ my: 1.5 }} />
+
+              {/* PHIM SẮP CHIẾU */}
+              <Box sx={styles.megaMenuSection}>
+                <Typography sx={styles.megaMenuTitle}>
+                  PHIM SẮP CHIẾU
+                </Typography>
+                <Box sx={styles.movieGrid}>
+                  {comingSoonMovies.map((movie) => (
+                    <Box key={movie._id} sx={styles.movieCard}>
+                      {/* Poster wrapper với overlay */}
+                      <Box sx={styles.moviePosterWrapper}>
+                        <Box
+                          component="img"
+                          className="movie-poster"
+                          src={movie.posterUrl}
+                          alt={movie.title}
+                          sx={styles.moviePoster}
+                        />
+                        {/* Overlay chỉ có nút Mua vé */}
+                        <Box className="movie-overlay" sx={styles.movieOverlay}>
+                          <Button
+                            component={Link}
+                            to={`/booking/${movie._id}`}
+                            sx={styles.buyTicketBtn}
+                            startIcon={<TicketIcon />}
+                            onClick={handleMovieMenuClose}
+                          >
+                            Mua vé
+                          </Button>
+                        </Box>
+                      </Box>
+                      {/* Title */}
+                      <Typography
+                        component={Link}
+                        to={`/movie/${movie._id}`}
+                        sx={{ ...styles.movieTitle, textDecoration: 'none' }}
+                        onClick={handleMovieMenuClose}
+                      >
+                        {movie.title}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+          </Paper>
+        </Fade>
+      )}
+    </Popper>
+  );
+
+  // RENDER - Dropdown Menu cho Góc điện ảnh (Galaxy Cinema style)
+  const renderBlogMenu = () => (
+    <Popper
+      open={blogMenuOpen}
+      anchorEl={blogMenuAnchor}
+      placement="bottom-start"
+      transition
+      style={{ zIndex: 1300 }}
+    >
+      {({ TransitionProps }) => (
+        <Fade {...TransitionProps} timeout={80}>
+          <Paper
+            sx={{
+              mt: 0.5,
+              py: 0.5,
+              minWidth: 160,
+              borderRadius: 1,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}
+            onMouseEnter={handleBlogMenuEnter}
+            onMouseLeave={handleBlogMenuLeave}
+          >
+            {blogMenuItems.map((item) => (
+              <Box
+                key={item.path}
+                component={Link}
+                to={item.path}
+                onClick={() => setBlogMenuOpen(false)}
+                sx={{
+                  display: 'block',
+                  px: 2.5,
+                  py: 1.2,
+                  textDecoration: 'none',
+                  color: COLORS.text,
+                  fontSize: '0.95rem',
+                  fontWeight: 400,
+                  textAlign: 'center',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                    color: COLORS.primary
+                  }
+                }}
+              >
+                {item.label}
+              </Box>
+            ))}
+          </Paper>
+        </Fade>
+      )}
+    </Popper>
+  );
+
+  // RENDER - Dropdown Menu cho Sự kiện (Galaxy Cinema style)
+  const renderEventMenu = () => (
+    <Popper
+      open={eventMenuOpen}
+      anchorEl={eventMenuAnchor}
+      placement="bottom-start"
+      transition
+      style={{ zIndex: 1300 }}
+    >
+      {({ TransitionProps }) => (
+        <Fade {...TransitionProps} timeout={80}>
+          <Paper
+            sx={{
+              mt: 0.5,
+              py: 0.5,
+              minWidth: 180,
+              borderRadius: 1,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}
+            onMouseEnter={handleEventMenuEnter}
+            onMouseLeave={handleEventMenuLeave}
+          >
+            {eventMenuItems.map((item) => (
+              <Box
+                key={item.path}
+                component={Link}
+                to={item.path}
+                onClick={() => setEventMenuOpen(false)}
+                sx={{
+                  display: 'block',
+                  px: 2.5,
+                  py: 1.2,
+                  textDecoration: 'none',
+                  color: COLORS.text,
+                  fontSize: '0.95rem',
+                  fontWeight: 400,
+                  textAlign: 'center',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                    color: COLORS.primary
+                  }
+                }}
+              >
+                {item.label}
+              </Box>
+            ))}
+          </Paper>
+        </Fade>
+      )}
+    </Popper>
+  );
+
+  // RENDER - Mobile Menu
+  const renderMobileMenu = () => (
+    <Drawer
+      anchor="left"
+      open={mobileMenuOpen}
+      onClose={toggleMobileMenu}
+      PaperProps={{
+        sx: { width: 280, backgroundColor: COLORS.white }
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
+        <Box component="img" src={LogoNMNCinema} alt="NMN Cinema" sx={{ height: 35 }} />
+        <IconButton onClick={toggleMobileMenu}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+
+      <Divider />
+
+      <List>
+        {/* Phim menu items */}
+        <ListItem
+          component={Link}
+          to="/movies?status=now"
+          onClick={toggleMobileMenu}
+          sx={{ color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+        >
+          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+            <MovieIcon />
+          </ListItemIcon>
+          <ListItemText primary="Phim đang chiếu" />
+        </ListItem>
+        <ListItem
+          component={Link}
+          to="/movies?status=coming"
+          onClick={toggleMobileMenu}
+          sx={{ color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+        >
+          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+            <MovieIcon />
+          </ListItemIcon>
+          <ListItemText primary="Phim sắp chiếu" />
+        </ListItem>
+
+        <Divider sx={{ my: 1 }} />
+
+        {menuItems.map((item) => (
+          <ListItem
+            key={item.path}
+            component={Link}
+            to={item.path}
+            onClick={toggleMobileMenu}
+            sx={{
+              color: COLORS.text,
+              '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary }
+            }}
+          >
+            <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.label} />
+          </ListItem>
+        ))}
+      </List>
+    </Drawer>
+  );
+
+  // RENDER - Account Menu
+  const renderAccountMenu = () => (
+    <Menu
+      anchorEl={accountMenuAnchor}
+      open={Boolean(accountMenuAnchor)}
+      onClose={handleAccountMenuClose}
+      PaperProps={{ sx: { mt: 1, minWidth: 180 } }}
+    >
+      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/profile'); }}>
+        <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
+        Hồ sơ cá nhân
+      </MenuItem>
+      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/tickets'); }}>
+        <ListItemIcon><HistoryIcon fontSize="small" /></ListItemIcon>
+        Lịch sử đặt vé
+      </MenuItem>
+      <Divider />
+      <MenuItem onClick={handleLogout}>
+        <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
+        Đăng xuất
+      </MenuItem>
+    </Menu>
+  );
+
+  // RENDER CHÍNH
+  return (
+    <AppBar
+      position="sticky"
+      sx={{
+        ...styles.appBar,
+        ...(hideHeader ? styles.appBarHidden : {})
+      }}
+    >
+      <Container maxWidth="xl">
+        <Toolbar sx={styles.toolbar} disableGutters>
+
+          {/* === PHẦN TRÁI: Menu mobile + Logo === */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {isMobile && (
+              <IconButton onClick={toggleMobileMenu} sx={{ color: COLORS.text }}>
+                <MenuIcon />
+              </IconButton>
+            )}
+
+            <Box component={Link} to="/" sx={styles.logo}>
+              <Box
+                component="img"
+                src={LogoNMNCinema}
+                alt="NMN Cinema"
+                sx={styles.logoImage}
+              />
+            </Box>
+          </Box>
+
+          {/* === PHẦN GIỮA: Menu (Desktop) === */}
+          <Box sx={styles.navMenu}>
+            {/* Nút Phim với Mega Menu - bọc trong Box để xử lý hover */}
+            <Box
+              onMouseEnter={handleMovieMenuOpen}
+              onMouseLeave={(e) => {
+                // Chỉ đóng nếu chuột không di chuyển vào menu
+                const rect = e.currentTarget.getBoundingClientRect();
+                if (e.clientY < rect.bottom) {
+                  handleMovieMenuClose();
+                }
+              }}
+            >
+              <Button
+                sx={{
+                  ...styles.navButton,
+                  ...(movieMenuOpen ? styles.navButtonActive : {})
+                }}
+                endIcon={<ArrowDownIcon sx={{ fontSize: 18 }} />}
+              >
+                Phim
+              </Button>
+            </Box>
+
+            {/* Nút Góc điện ảnh với dropdown */}
+            <Box
+              onMouseEnter={handleBlogMenuOpen}
+              onMouseLeave={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                if (e.clientY < rect.bottom) {
+                  handleBlogMenuClose();
+                }
+              }}
+            >
+              <Button
+                sx={{
+                  ...styles.navButton,
+                  ...(blogMenuOpen ? styles.navButtonActive : {})
+                }}
+                endIcon={<ArrowDownIcon sx={{ fontSize: 18 }} />}
+              >
+                Góc điện ảnh
+              </Button>
+            </Box>
+
+            {/* Nút Sự kiện với dropdown */}
+            <Box
+              onMouseEnter={handleEventMenuOpen}
+              onMouseLeave={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                if (e.clientY < rect.bottom) {
+                  handleEventMenuClose();
+                }
+              }}
+            >
+              <Button
+                sx={{
+                  ...styles.navButton,
+                  ...(eventMenuOpen ? styles.navButtonActive : {})
+                }}
+                endIcon={<ArrowDownIcon sx={{ fontSize: 18 }} />}
+              >
+                Sự kiện
+              </Button>
+            </Box>
+          </Box>
+
+          {/* === PHẦN PHẢI: Search + Login === */}
+          <Box sx={styles.rightSection}>
+            {searchOpen ? (
+              <Box sx={styles.searchBox}>
+                <InputBase
+                  placeholder="Tìm phim..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleSearch}
+                  sx={styles.searchInput}
+                  autoFocus
+                />
+                <IconButton size="small" onClick={toggleSearch}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ) : (
+              <IconButton onClick={toggleSearch} sx={styles.searchIcon}>
+                <SearchIcon />
+              </IconButton>
+            )}
+
+            {isLoggedIn ? (
+              <>
+                <IconButton onClick={handleAccountMenuOpen}>
+                  <Avatar src={user?.avatar} alt={user?.name} sx={{ width: 32, height: 32 }} />
+                </IconButton>
+                {renderAccountMenu()}
+              </>
+            ) : (
+              <Button
+                component={Link}
+                to="/login"
+                sx={styles.loginBtn}
+                startIcon={<PersonIcon />}
+              >
+                Đăng Nhập
+              </Button>
+            )}
+          </Box>
+
+        </Toolbar>
+      </Container>
+
+      {/* Mega Menu cho Phim */}
+      {renderMovieMegaMenu()}
+
+      {/* Dropdown Menu cho Góc điện ảnh */}
+      {renderBlogMenu()}
+
+      {/* Dropdown Menu cho Sự kiện */}
+      {renderEventMenu()}
+
+      {/* Mobile Menu Drawer */}
+      {renderMobileMenu()}
+    </AppBar>
+  );
+}
+
+export default Header;

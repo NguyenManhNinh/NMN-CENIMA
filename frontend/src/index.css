@@ -28,6 +28,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  overscroll-behavior-y: none;  /* Chặn hiệu ứng nảy khi cuộn hết trang */
+  scroll-behavior: smooth;      /* Cuộn mượt mà */
 }
 
 h1 {
