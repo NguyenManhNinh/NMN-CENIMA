@@ -47,7 +47,7 @@ const styles = {
     aspectRatio: '21/9',
     objectFit: 'cover',
     display: 'block',
-    backgroundColor: '#1a3a5c',
+    backgroundColor: 'white',
     userSelect: 'none'  // Ngăn kéo thả ảnh
   },
   navButton: {
@@ -79,15 +79,15 @@ const styles = {
     width: 10,
     height: 10,
     borderRadius: '50%',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(243, 5, 5, 0.3)',
     cursor: 'pointer',
     transition: 'background-color 0.3s, transform 0.3s',
     border: 'none',
-    padding: 0
+    padding: 0,
   },
   dotActive: {
-    backgroundColor: '#f26b38',
-    transform: 'scale(1.2)'
+    backgroundColor: '#00405d',
+    transform: 'scale(1.2)',
   }
 };
 

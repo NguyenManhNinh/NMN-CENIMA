@@ -18,7 +18,7 @@ const styles = {
   }
 };
 
-// CLIENT LAYOUT COMPONENT
+//CLIENT LAYOUT COMPONENT
 function ClientLayout() {
   return (
     <Box sx={styles.root}>

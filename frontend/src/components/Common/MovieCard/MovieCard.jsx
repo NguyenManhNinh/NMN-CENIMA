@@ -1,22 +1,3 @@
-/**
- * =============================================================================
- * MOVIE CARD - Thẻ hiển thị phim
- * =============================================================================
- * Vị trí: src/components/Common/MovieCard/MovieCard.jsx
- *
- * Chức năng:
- * - Hiển thị poster, tên phim, đánh giá, nhãn độ tuổi
- * - Hover overlay với nút Mua vé và Xem trailer
- * - Click vào card để xem chi tiết phim
- *
- * Props:
- * - movie: Object chứa thông tin phim
- * - onTrailerClick: Callback khi click nút Trailer
- *
- * Dependencies: @mui/material
- * =============================================================================
- */
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -35,9 +16,7 @@ import {
   ConfirmationNumber as TicketIcon
 } from '@mui/icons-material';
 
-// ============================================================================
 // STYLES
-// ============================================================================
 const styles = {
   // Card container
   card: {
@@ -115,29 +94,23 @@ const styles = {
   }
 };
 
-// ============================================================================
 // HELPER - Lấy màu cho nhãn độ tuổi
-// ============================================================================
 const getAgeRatingColor = (rating) => {
   const colors = {
     'P': 'success',    // Phổ biến - xanh lá
-    'C13': 'info',     // 13+ - xanh dương
-    'C16': 'warning',  // 16+ - cam
-    'C18': 'error'     // 18+ - đỏ
+    'T13': 'info',     // 13+ - xanh dương
+    'T16': 'warning',  // 16+ - cam
+    'T18': 'error'     // 18+ - đỏ
   };
   return colors[rating] || 'default';
 };
 
-// ============================================================================
 // MOVIE CARD COMPONENT
-// ============================================================================
 function MovieCard({ movie, onTrailerClick }) {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
-  // --------------------------------------------------------------------------
   // HANDLERS
-  // --------------------------------------------------------------------------
 
   // Click nút Mua vé
   const handleBuyTicket = (e) => {
@@ -158,9 +131,7 @@ function MovieCard({ movie, onTrailerClick }) {
     navigate(`/movie/${movie._id}`);
   };
 
-  // --------------------------------------------------------------------------
   // RENDER
-  // --------------------------------------------------------------------------
   return (
     <Card
       sx={styles.card}

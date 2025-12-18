@@ -1,19 +1,3 @@
-/**
- * =============================================================================
- * HEADER COMPONENT - Thanh điều hướng theo phong cách Galaxy Cinema
- * =============================================================================
- * Vị trí: src/components/Layout/ClientLayout/Header/Header.jsx
- *
- * Bố cục:
- * - Logo bên trái
- * - Menu có Mega Menu (Phim dropdown với grid phim)
- * - Bên phải: Icon tìm kiếm, Đăng nhập/Avatar
- *
- * Tính năng Mega Menu:
- * - "Phim" dropdown hiển thị grid 4 phim đang chiếu + 4 phim sắp chiếu
- * =============================================================================
- */
-
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -64,7 +48,7 @@ import { getNowShowingMovies, getComingSoonMovies } from '../../../../mocks/mock
 
 // COLORS - Màu sắc theo Galaxy Cinema
 const COLORS = {
-  primary: '#f26b38',      // Cam chủ đạo
+  primary: '#00405d',      // Cam chủ đạo
   text: '#333333',         // Chữ đen
   textLight: '#666666',    // Chữ xám
   white: '#ffffff',
@@ -221,8 +205,8 @@ const styles = {
     transition: 'opacity 0.3s'
   },
   buyTicketBtn: {
-    backgroundColor: COLORS.primary,
-    color: '#fff',
+    backgroundColor: '#FCF54C',
+    color: '#0e0f11ff',
     fontWeight: 600,
     fontSize: '0.75rem',
     textTransform: 'none',
@@ -230,7 +214,7 @@ const styles = {
     py: 0.75,
     borderRadius: 1,
     '&:hover': {
-      backgroundColor: COLORS.primary
+      backgroundColor: '#F9F400'
     }
   },
   trailerBtn: {
@@ -798,7 +782,7 @@ function Header() {
       <Container maxWidth="xl">
         <Toolbar sx={styles.toolbar} disableGutters>
 
-          {/* === PHẦN TRÁI: Menu mobile + Logo === */}
+          {/*PHẦN TRÁI: Menu mobile + Logo*/}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {isMobile && (
               <IconButton onClick={toggleMobileMenu} sx={{ color: COLORS.text }}>
@@ -816,7 +800,7 @@ function Header() {
             </Box>
           </Box>
 
-          {/* === PHẦN GIỮA: Menu (Desktop) === */}
+          {/*PHẦN GIỮA: Menu (Desktop)*/}
           <Box sx={styles.navMenu}>
             {/* Nút Phim với Mega Menu - bọc trong Box để xử lý hover */}
             <Box
@@ -883,7 +867,7 @@ function Header() {
             </Box>
           </Box>
 
-          {/* === PHẦN PHẢI: Search + Login === */}
+          {/*PHẦN PHẢI: Search + Login*/}
           <Box sx={styles.rightSection}>
             {searchOpen ? (
               <Box sx={styles.searchBox}>

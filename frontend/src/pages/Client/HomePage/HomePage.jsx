@@ -1,24 +1,3 @@
-/**
- * =============================================================================
- * HOMEPAGE - Trang chủ website
- * =============================================================================
- * Vị trí: src/pages/Client/HomePage/HomePage.jsx
- *
- * Chức năng:
- * - Hiển thị Banner Slider quảng cáo
- * - Danh sách phim với tabs (Đang chiếu / Sắp chiếu)
- * - Modal trailer
- * - Nút "Xem thêm" để load thêm phim
- *
- * Cấu trúc:
- * 1. Banner Slider
- * 2. Movie Section (Tabs + Grid)
- * 3. Trailer Modal
- *
- * Dependencies: @mui/material, components/Common
- * =============================================================================
- */
-
 import { useState, useEffect } from 'react';
 import {
   Box,
@@ -34,15 +13,13 @@ import {
 import { Movie as MovieIcon } from '@mui/icons-material';
 
 // Components
-import { BannerSlider, MovieCard, TrailerModal } from '../../../components/Common';
+import { BannerSlider, MovieCard, TrailerModal, QuickBookingBar } from '../../../components/Common';
 
 // Mock data (sẽ thay bằng API sau)
 import { mockMovies, getNowShowingMovies, getComingSoonMovies } from '../../../mocks/mockMovies';
 import mockBanners from '../../../mocks/mockBanners';
 
-// ============================================================================
 // STYLES
-// ============================================================================
 const styles = {
   // Section phim
   movieSection: {
@@ -53,9 +30,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: 4,
-    mb: 3,
-    borderBottom: '1px solid #e0e0e0',
-    pb: 2
+    mb: 3
   },
   sectionTitle: {
     fontWeight: 700,
@@ -88,8 +63,7 @@ const styles = {
       color: '#1a3a5c !important'
     },
     '& .MuiTabs-indicator': {
-      backgroundColor: '#f26b38',
-      height: 3
+      display: 'none'
     }
   },
   // Grid phim
@@ -116,22 +90,16 @@ const styles = {
   }
 };
 
-// ============================================================================
 // CONSTANTS
-// ============================================================================
 const MOVIES_PER_PAGE = 8; // Số phim hiển thị mỗi lần
 
 // Tab values
 const TAB_NOW_SHOWING = 0;
 const TAB_COMING_SOON = 1;
 
-// ============================================================================
 // HOMEPAGE COMPONENT
-// ============================================================================
 function HomePage() {
-  // --------------------------------------------------------------------------
   // STATE
-  // --------------------------------------------------------------------------
   const [activeTab, setActiveTab] = useState(TAB_NOW_SHOWING);
   const [visibleCount, setVisibleCount] = useState(MOVIES_PER_PAGE);
   const [loading, setLoading] = useState(false);  // Không loading vì dùng mock data
@@ -142,10 +110,7 @@ function HomePage() {
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
 
-  // --------------------------------------------------------------------------
   // EFFECTS
-  // --------------------------------------------------------------------------
-
   // Load dữ liệu khi component mount
   useEffect(() => {
     loadData();
@@ -156,10 +121,7 @@ function HomePage() {
     loadMoviesByTab();
   }, [activeTab]);
 
-  // --------------------------------------------------------------------------
   // DATA LOADING
-  // --------------------------------------------------------------------------
-
   // Load tất cả dữ liệu ban đầu
   const loadData = async () => {
     setLoading(true);
@@ -191,10 +153,7 @@ function HomePage() {
     }
   };
 
-  // --------------------------------------------------------------------------
   // HANDLERS
-  // --------------------------------------------------------------------------
-
   // Đổi tab
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -217,9 +176,7 @@ function HomePage() {
     setSelectedMovie(null);
   };
 
-  // --------------------------------------------------------------------------
   // RENDER - Skeleton loading
-  // --------------------------------------------------------------------------
   const renderSkeletons = () => (
     <Grid container spacing={3}>
       {[...Array(8)].map((_, index) => (
@@ -232,9 +189,7 @@ function HomePage() {
     </Grid>
   );
 
-  // --------------------------------------------------------------------------
   // RENDER - Danh sách phim
-  // --------------------------------------------------------------------------
   const renderMovieGrid = () => {
     const visibleMovies = movies.slice(0, visibleCount);
     const hasMore = visibleCount < movies.length;
@@ -268,15 +223,16 @@ function HomePage() {
     );
   };
 
-  // --------------------------------------------------------------------------
   // RENDER CHÍNH
-  // --------------------------------------------------------------------------
   return (
     <Box>
-      {/* ========== BANNER SLIDER ========== */}
+      {/* BANNER SLIDER */}
       <BannerSlider banners={banners} />
 
-      {/* ========== MOVIE SECTION ========== */}
+      {/* QUICK BOOKING BAR - Đặt vé nhanh */}
+      <QuickBookingBar />
+
+      {/* MOVIE SECTION */}
       <Box sx={styles.movieSection}>
         <Container maxWidth="lg">
           {/* Header + Tabs inline - Galaxy style */}
@@ -300,7 +256,7 @@ function HomePage() {
         </Container>
       </Box>
 
-      {/* ========== TRAILER MODAL ========== */}
+      {/* TRAILER MODAL */}
       <TrailerModal
         open={trailerOpen}
         onClose={handleCloseTrailer}

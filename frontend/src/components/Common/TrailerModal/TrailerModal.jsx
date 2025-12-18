@@ -1,24 +1,3 @@
-/**
- * =============================================================================
- * TRAILER MODAL - Modal phát video trailer (Chỉ video, không header)
- * =============================================================================
- * Vị trí: src/components/Common/TrailerModal/TrailerModal.jsx
- *
- * Chức năng:
- * - Hiển thị popup video trailer từ YouTube
- * - Chỉ có video + nút X đóng ở góc
- * - Đóng khi click overlay hoặc nút X
- *
- * Props:
- * - open: Boolean - mở/đóng modal
- * - onClose: Function - callback khi đóng
- * - trailerUrl: String - URL embed YouTube
- * - movieTitle: String - tên phim (cho title iframe)
- *
- * Dependencies: @mui/material, @mui/icons-material
- * =============================================================================
- */
-
 import {
   Dialog,
   IconButton,
@@ -26,9 +5,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 
-// ============================================================================
 // STYLES - Chỉ video, nút X ở góc
-// ============================================================================
 const styles = {
   dialog: {
     '& .MuiDialog-paper': {
@@ -74,13 +51,9 @@ const styles = {
   }
 };
 
-// ============================================================================
 // TRAILER MODAL COMPONENT
-// ============================================================================
 function TrailerModal({ open, onClose, trailerUrl, movieTitle }) {
-  // --------------------------------------------------------------------------
   // Chuyển đổi URL YouTube sang embed URL nếu cần
-  // --------------------------------------------------------------------------
   const getEmbedUrl = (url) => {
     if (!url) return '';
 
@@ -94,9 +67,7 @@ function TrailerModal({ open, onClose, trailerUrl, movieTitle }) {
     return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
   };
 
-  // --------------------------------------------------------------------------
   // RENDER
-  // --------------------------------------------------------------------------
   return (
     <Dialog
       open={open}
