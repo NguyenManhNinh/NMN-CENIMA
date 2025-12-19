@@ -42,7 +42,7 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 const styles = {
   wrapper: {
     backgroundColor: '#fff',
-    borderBottom: '3px solid #00405d',
+    borderBottom: '3px solid #FFD700',
     py: 0,
     p: 1.5
   },

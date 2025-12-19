@@ -152,7 +152,76 @@ export const mockMovies = [
     releaseDate: '2025-02-01',
     status: 'COMING',
     rating: 4.5
-  }
+  },
+  {
+    _id: 'Kung Fu Panda 4',
+    title: 'Kung Fu Panda 4',
+    slug: 'kung-fu-panda-4',
+    description: 'Po phải tìm kiếm người kế nhiệm và đối đầu với kẻ thù mới có khả năng thay đổi hình dạng.',
+    director: 'Mike Mitchell',
+    actors: ['Jack Black', 'Awkwafina', 'Viola Davis'],
+    duration: 94,
+    ageRating: 'P',
+    genres: ['Animation', 'Action', 'Comedy'],
+    posterUrl: 'https://image.tmdb.org/t/p/w500/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg',
+    bannerUrl: 'https://example.com/banner11.jpg',
+    trailerUrl: 'https://www.youtube.com/embed/example11',
+    releaseDate: '2025-02-01',
+    status: 'COMING',
+    rating: 4.5
+  },
+  {
+    _id: 'Kung Fu Panda 5',
+    title: 'Kung Fu Panda 4',
+    slug: 'kung-fu-panda-4',
+    description: 'Po phải tìm kiếm người kế nhiệm và đối đầu với kẻ thù mới có khả năng thay đổi hình dạng.',
+    director: 'Mike Mitchell',
+    actors: ['Jack Black', 'Awkwafina', 'Viola Davis'],
+    duration: 94,
+    ageRating: 'P',
+    genres: ['Animation', 'Action', 'Comedy'],
+    posterUrl: 'https://image.tmdb.org/t/p/w500/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg',
+    bannerUrl: 'https://example.com/banner11.jpg',
+    trailerUrl: 'https://www.youtube.com/embed/example11',
+    releaseDate: '2025-02-01',
+    status: 'COMING',
+    rating: 4.5
+  },
+  {
+    _id: 'Kung Fu Panda 6',
+    title: 'Kung Fu Panda 4',
+    slug: 'kung-fu-panda-4',
+    description: 'Po phải tìm kiếm người kế nhiệm và đối đầu với kẻ thù mới có khả năng thay đổi hình dạng.',
+    director: 'Mike Mitchell',
+    actors: ['Jack Black', 'Awkwafina', 'Viola Davis'],
+    duration: 94,
+    ageRating: 'P',
+    genres: ['Animation', 'Action', 'Comedy'],
+    posterUrl: 'https://image.tmdb.org/t/p/w500/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg',
+    bannerUrl: 'https://example.com/banner11.jpg',
+    trailerUrl: 'https://www.youtube.com/embed/example11',
+    releaseDate: '2025-02-01',
+    status: 'COMING',
+    rating: 4.5
+  },
+  {
+    _id: 'Kung Fu Panda 7',
+    title: 'Kung Fu Panda 4',
+    slug: 'kung-fu-panda-4',
+    description: 'Po phải tìm kiếm người kế nhiệm và đối đầu với kẻ thù mới có khả năng thay đổi hình dạng.',
+    director: 'Mike Mitchell',
+    actors: ['Jack Black', 'Awkwafina', 'Viola Davis'],
+    duration: 94,
+    ageRating: 'P',
+    genres: ['Animation', 'Action', 'Comedy'],
+    posterUrl: 'https://image.tmdb.org/t/p/w500/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg',
+    bannerUrl: 'https://example.com/banner11.jpg',
+    trailerUrl: 'https://www.youtube.com/embed/example11',
+    releaseDate: '2025-02-01',
+    status: 'COMING',
+    rating: 4.5
+  },
+
 ];
 
 // Lấy phim đang chiếu

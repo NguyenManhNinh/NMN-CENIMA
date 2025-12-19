@@ -301,8 +301,10 @@ function BlogSection() {
         <Box sx={{ textAlign: 'center' }}>
           <Button
             variant="outlined"
-            endIcon={<ArrowIcon />}
-            sx={styles.viewMoreButton}
+            sx={{
+              ...styles.viewMoreButton,
+              fontSize: '1rem',
+            }}
             onClick={() => navigate('/goc-dien-anh')}
           >
             Xem thêm

@@ -46,6 +46,10 @@ import LogoNMNCinema from '../../../../assets/images/NMN_CENIMA_LOGO.png';
 // Mock data cho Mega Menu
 import { getNowShowingMovies, getComingSoonMovies } from '../../../../mocks/mockMovies';
 
+// Auth Context and Modals
+import { useAuth } from '../../../../contexts/AuthContext';
+import { LoginModal, RegisterModal, ForgotPasswordModal } from '../../../Common';
+
 // COLORS - Màu sắc theo Galaxy Cinema
 const COLORS = {
   primary: '#00405d',      // Cam chủ đạo
@@ -63,6 +67,7 @@ const styles = {
     boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
     borderBottom: `1px solid ${COLORS.border}`,
     transition: 'transform 0.3s ease-in-out'
+
   },
   appBarHidden: {
     transform: 'translateY(-100%)'
@@ -94,15 +99,32 @@ const styles = {
     textTransform: 'none',
     px: 1.5,
     py: 1,
+    border: 0,
+    outline: 0,
     '&:hover': {
       backgroundColor: COLORS.hover,
-      color: COLORS.primary
+      color: COLORS.primary,
+      border: 0
     },
     '&:focus': {
-      outline: 'none'
+      outline: 0,
+      boxShadow: 'none',
+      border: 0
+    },
+    '&:active': {
+      outline: 0,
+      boxShadow: 'none',
+      border: 0
     },
     '&.Mui-focusVisible': {
-      outline: 'none'
+      outline: 0,
+      boxShadow: 'none',
+      border: 0
+    },
+    '&:focus-visible': {
+      outline: 0,
+      boxShadow: 'none',
+      border: 0
     }
   },
   navButtonActive: {
@@ -115,7 +137,9 @@ const styles = {
   },
   searchIcon: {
     color: COLORS.textLight,
-    '&:hover': { color: COLORS.primary }
+    '&:hover': { color: COLORS.primary },
+    '&:focus': { outline: 'none' },
+    '&.Mui-focusVisible': { outline: 'none' }
   },
   loginBtn: {
     color: COLORS.text,
@@ -125,7 +149,9 @@ const styles = {
     '&:hover': {
       backgroundColor: 'transparent',
       color: COLORS.primary
-    }
+    },
+    '&:focus': { outline: 'none' },
+    '&.Mui-focusVisible': { outline: 'none' }
   },
   searchBox: {
     display: 'flex',
@@ -148,7 +174,12 @@ const styles = {
     maxHeight: '80vh',     // Giới hạn chiều cao
     overflowY: 'auto',     // Cho phép scroll
     borderRadius: 2,
-    boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+    boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+    '&::-webkit-scrollbar': {
+      display: 'none'
+    },
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none'
   },
   megaMenuSection: {
     mb: 2
@@ -300,9 +331,13 @@ function Header() {
   const [eventMenuAnchor, setEventMenuAnchor] = useState(null);
   const [eventMenuOpen, setEventMenuOpen] = useState(false);
 
-  // TODO: Redux/Context auth
-  const isLoggedIn = false;
-  const user = null;
+  // Auth Modals state
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
+
+  // Auth from Context
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Load movies cho Mega Menu
   useEffect(() => {
@@ -442,8 +477,9 @@ function Header() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleAccountMenuClose();
+    await logout();
     navigate('/');
   };
 
@@ -815,6 +851,8 @@ function Header() {
               }}
             >
               <Button
+                disableRipple
+                disableFocusRipple
                 sx={{
                   ...styles.navButton,
                   ...(movieMenuOpen ? styles.navButtonActive : {})
@@ -836,6 +874,8 @@ function Header() {
               }}
             >
               <Button
+                disableRipple
+                disableFocusRipple
                 sx={{
                   ...styles.navButton,
                   ...(blogMenuOpen ? styles.navButtonActive : {})
@@ -857,6 +897,8 @@ function Header() {
               }}
             >
               <Button
+                disableRipple
+                disableFocusRipple
                 sx={{
                   ...styles.navButton,
                   ...(eventMenuOpen ? styles.navButtonActive : {})
@@ -890,7 +932,7 @@ function Header() {
               </IconButton>
             )}
 
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <>
                 <IconButton onClick={handleAccountMenuOpen}>
                   <Avatar src={user?.avatar} alt={user?.name} sx={{ width: 32, height: 32 }} />
@@ -899,8 +941,7 @@ function Header() {
               </>
             ) : (
               <Button
-                component={Link}
-                to="/login"
+                onClick={() => setLoginModalOpen(true)}
                 sx={styles.loginBtn}
                 startIcon={<PersonIcon />}
               >
@@ -923,6 +964,36 @@ function Header() {
 
       {/* Mobile Menu Drawer */}
       {renderMobileMenu()}
+
+      {/* Auth Modals */}
+      <LoginModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onSwitchToRegister={() => {
+          setLoginModalOpen(false);
+          setRegisterModalOpen(true);
+        }}
+        onForgotPassword={() => {
+          setLoginModalOpen(false);
+          setForgotPasswordModalOpen(true);
+        }}
+      />
+      <RegisterModal
+        open={registerModalOpen}
+        onClose={() => setRegisterModalOpen(false)}
+        onSwitchToLogin={() => {
+          setRegisterModalOpen(false);
+          setLoginModalOpen(true);
+        }}
+      />
+      <ForgotPasswordModal
+        open={forgotPasswordModalOpen}
+        onClose={() => setForgotPasswordModalOpen(false)}
+        onBackToLogin={() => {
+          setForgotPasswordModalOpen(false);
+          setLoginModalOpen(true);
+        }}
+      />
     </AppBar>
   );
 }

@@ -15,6 +15,7 @@ import { Movie as MovieIcon } from '@mui/icons-material';
 // Components
 import { BannerSlider, MovieCard, TrailerModal, QuickBookingBar, BlogSection } from '../../../components/Common';
 import { PromotionSection } from '../../../components/Common'; // Tạm thời ẩn
+import { Link } from 'react-router-dom';
 
 // Mock data (sẽ thay bằng API sau)
 import { mockMovies, getNowShowingMovies, getComingSoonMovies } from '../../../mocks/mockMovies';
@@ -90,17 +91,18 @@ const styles = {
     py: 1,
     fontWeight: 600,
     textTransform: 'none',
-    borderColor: '#f9a825',
-    color: '#f9a825',
+    borderColor: '#FFFF33',
+    color: '#FFFF33',
     '&:hover': {
-      borderColor: '#f57f17',
-      backgroundColor: 'rgba(249, 168, 37, 0.1)'
+      borderColor: '#FFFF33',
+      backgroundColor: 'rgba(255, 255, 51, 0.1)',
+      color: '#FFFF33'
     }
   }
 };
 
 // CONSTANTS
-const MOVIES_PER_PAGE = 8; // Số phim hiển thị mỗi lần
+const MOVIES_PER_PAGE = 8; // Số phim hiển thị mỗi hàng
 
 // Tab values
 const TAB_NOW_SHOWING = 0;
@@ -216,18 +218,20 @@ function HomePage() {
           ))}
         </Grid>
 
-        {/* Nút Xem thêm */}
-        {hasMore && (
-          <Box sx={styles.loadMoreContainer}>
-            <Button
-              variant="outlined"
-              onClick={handleLoadMore}
-              sx={styles.loadMoreButton}
-            >
-              Xem thêm ({movies.length - visibleCount} phim)
-            </Button>
-          </Box>
-        )}
+        {/* Nút Xem thêm - Link đến trang movies */}
+        <Box sx={styles.loadMoreContainer}>
+          <Button
+            component={Link}
+            to={activeTab === TAB_NOW_SHOWING ? '/phim-dang-chieu?status=now-showing' : '/phim-sap-chieu?status=coming-soon'}
+            variant="outlined"
+            sx={{
+              ...styles.loadMoreButton,
+              fontSize: '1rem',
+              color: '#FFFF33',
+            }}>
+            Xem thêm
+          </Button>
+        </Box>
       </>
     );
   };
