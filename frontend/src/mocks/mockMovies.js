@@ -1,7 +1,7 @@
 // Mock Movies Data - Dữ liệu phim mẫu
 export const mockMovies = [
   {
-    _id: 'movie1',
+    _id: 'Avengers: Endgame',
     title: 'Avengers: Endgame',
     slug: 'avengers-endgame',
     description: 'Sau sự kiện tàn khốc của Avengers: Infinity War, vũ trụ đang trong cảnh đổ nát. Với sự giúp đỡ của các đồng minh còn lại, các Avengers tập hợp một lần nữa để đảo ngược hành động của Thanos và khôi phục sự cân bằng cho vũ trụ.',

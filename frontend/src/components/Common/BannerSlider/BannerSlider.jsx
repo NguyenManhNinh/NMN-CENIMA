@@ -12,8 +12,7 @@ const styles = {
     position: 'relative',
     width: '100%',
     overflow: 'hidden',
-    backgroundColor: '#f5f5f5',
-    py: { xs: 1, md: 2 }
+    backgroundColor: '#f5f5f5'
   },
   slidesWrapper: {
     display: 'flex',
@@ -22,23 +21,17 @@ const styles = {
   },
   slide: {
     flexShrink: 0,
-    width: { xs: '85%', md: '70%' },
+    width: '100%',
     position: 'relative',
     cursor: 'pointer',
-    transition: 'transform 0.3s, opacity 0.3s',
-    mx: { xs: 0.5, md: 1 },
-    borderRadius: 1,
-    overflow: 'hidden',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+    transition: 'opacity 0.5s ease-in-out'
   },
   slideActive: {
-    transform: 'scale(1)',
     opacity: 1,
     zIndex: 2
   },
   slideInactive: {
-    transform: 'scale(0.92)',
-    opacity: 0.5,
+    opacity: 1,
     zIndex: 1
   },
   image: {
@@ -70,24 +63,27 @@ const styles = {
     right: { xs: 5, md: 15 }
   },
   dotsContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: '50%',
+    transform: 'translateX(-50%)',
     display: 'flex',
-    justifyContent: 'center',
     gap: 1,
-    mt: 2
+    zIndex: 10
   },
   dot: {
-    width: 10,
-    height: 10,
+    width: 12,
+    height: 12,
     borderRadius: '50%',
-    backgroundColor: 'rgba(243, 5, 5, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     cursor: 'pointer',
     transition: 'background-color 0.3s, transform 0.3s',
-    border: 'none',
-    padding: 0,
+    border: '2px solid white',
+    padding: 0
   },
   dotActive: {
-    backgroundColor: '#00405d',
-    transform: 'scale(1.2)',
+    backgroundColor: '#1a3a5c',
+    transform: 'scale(1.2)'
   }
 };
 
@@ -121,10 +117,8 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
 
   if (!banners.length) return null;
 
-  // Center mode transform
-  const slideWidth = 72;
-  const centerOffset = (100 - slideWidth) / 2;
-  const translateX = -currentIndex * slideWidth + centerOffset;
+  // Full width mode - show one banner at a time
+  const translateX = -currentIndex * 100;
 
   return (
     <Box sx={styles.container}>

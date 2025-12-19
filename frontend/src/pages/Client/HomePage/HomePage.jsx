@@ -14,17 +14,25 @@ import { Movie as MovieIcon } from '@mui/icons-material';
 
 // Components
 import { BannerSlider, MovieCard, TrailerModal, QuickBookingBar, BlogSection } from '../../../components/Common';
-// import { PromotionSection } from '../../../components/Common'; // Tạm thời ẩn
+import { PromotionSection } from '../../../components/Common'; // Tạm thời ẩn
 
 // Mock data (sẽ thay bằng API sau)
 import { mockMovies, getNowShowingMovies, getComingSoonMovies } from '../../../mocks/mockMovies';
 import mockBanners from '../../../mocks/mockBanners';
 
+// Background image
+import filmBackground from '../../../assets/images/film-bg.png';
+
 // STYLES
 const styles = {
   // Section phim
   movieSection: {
-    py: 5
+    py: 5,
+    backgroundImage: `url(${filmBackground})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed'
   },
   // Header của section - Galaxy style
   sectionHeader: {
@@ -36,10 +44,10 @@ const styles = {
   sectionTitle: {
     fontWeight: 700,
     fontSize: { xs: '1.25rem', md: '1.5rem' },
-    color: '#1a3a5c',
+    color: '#F9F400',
     textTransform: 'uppercase',
     pl: 2,
-    borderLeft: '4px solid #1a3a5c',
+    borderLeft: '4px solid #F9F400',
     letterSpacing: 1
   },
   // Tabs inline với title
@@ -47,9 +55,9 @@ const styles = {
     minHeight: 'auto',
     '& .MuiTab-root': {
       fontWeight: 600,
-      fontSize: '1rem',
+      fontSize: '1.34rem',
       textTransform: 'none',
-      color: '#666',
+      color: '#858e8fff',
       minHeight: 'auto',
       py: 0.5,
       px: 2,
@@ -61,7 +69,7 @@ const styles = {
       }
     },
     '& .Mui-selected': {
-      color: '#1a3a5c !important'
+      color: '#6EC3C9 !important'
     },
     '& .MuiTabs-indicator': {
       display: 'none'
@@ -257,8 +265,8 @@ function HomePage() {
         </Container>
       </Box>
 
-      {/* PROMOTION SECTION - Tạm thời ẩn */}
-      {/* <PromotionSection /> */}
+      {/* PROMOTION SECTION - Tạm thời ẩn-Ưu đãi */}
+      <PromotionSection />
 
       {/* BLOG SECTION - Góc điện ảnh */}
       <BlogSection />

@@ -88,8 +88,9 @@ const styles = {
   },
   navButton: {
     color: COLORS.text,
-    fontWeight: 500,
-    fontSize: '0.9rem',
+    fontWeight: 700,
+    fontSize: '1rem',
+    fontFamily: ' DM Sans", system-ui, sans-serif',
     textTransform: 'none',
     px: 1.5,
     py: 1,
@@ -257,16 +258,16 @@ const menuItems = [];
 
 // GÓC ĐIỆN ẢNH MENU ITEMS
 const blogMenuItems = [
-  { label: 'Thể loại phim', path: '/blog/genres' },
-  { label: 'Diễn viên', path: '/blog/actors' },
-  { label: 'Đạo diễn', path: '/blog/directors' }
+  { label: 'Thể loại phim', path: '/the-loai-phim' },
+  { label: 'Diễn viên', path: '/dien-vien' },
+  { label: 'Đạo diễn', path: '/dao-dien' }
 ];
 
 // SỰ KIỆN MENU ITEMS
 const eventMenuItems = [
-  { label: 'Khuyến mãi', path: '/events/promotions' },
-  { label: 'Ưu đãi thành viên', path: '/events/member-benefits' },
-  { label: 'Sự kiện đặc biệt', path: '/events/special' }
+  { label: 'Khuyến mãi', path: '/khuyen-mai' },
+  { label: 'Ưu đãi thành viên', path: '/uu-dai-thanh-vien' },
+  { label: 'Sự kiện đặc biệt', path: '/su-kien-dac-biet' }
 ];
 
 // HEADER COMPONENT
@@ -498,7 +499,7 @@ function Header() {
                         <Box className="movie-overlay" sx={styles.movieOverlay}>
                           <Button
                             component={Link}
-                            to={`/booking/${movie._id}`}
+                            to={`/dat-ve/${movie._id}`}
                             sx={styles.buyTicketBtn}
                             startIcon={<TicketIcon />}
                             onClick={handleMovieMenuClose}
@@ -544,7 +545,7 @@ function Header() {
                         <Box className="movie-overlay" sx={styles.movieOverlay}>
                           <Button
                             component={Link}
-                            to={`/booking/${movie._id}`}
+                            to={`/dat-ve/${movie._id}`}
                             sx={styles.buyTicketBtn}
                             startIcon={<TicketIcon />}
                             onClick={handleMovieMenuClose}

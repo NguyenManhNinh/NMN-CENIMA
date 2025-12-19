@@ -1,7 +1,7 @@
 export const mockBlogs = [
   // Thể loại phim
   {
-    _id: 'genre1',
+    _id: 'Những Pha Rượt Đuổi Mãn Nhãn',
     title: 'Phim Hành Động - Những Pha Rượt Đuổi Mãn Nhãn',
     category: 'Thể loại phim',
     imageUrl: 'https://www.galaxycine.vn/media/2025/12/8/preview-avatar-fire-and-ash-mot-tuyet-tac-nua-cua-james-cameron-6_1765204784694.jpg',
@@ -12,7 +12,7 @@ export const mockBlogs = [
     createdAt: '2024-12-15'
   },
   {
-    _id: 'genre2',
+    _id: 'Những Thước Phim Ám Ảnh',
     title: 'Phim Kinh Dị - Những Thước Phim Ám Ảnh',
     category: 'Thể loại phim',
     imageUrl: 'https://www.galaxycine.vn/media/2025/12/3/zootopia-2-disney-thua-biet-khan-gia-muon-gi-6_1764774408476.jpg',
@@ -23,7 +23,7 @@ export const mockBlogs = [
     createdAt: '2024-12-14'
   },
   {
-    _id: 'genre3',
+    _id: 'Những Câu Chuyện Đẹp Về Tình Yêu',
     title: 'Phim Tình Cảm - Những Câu Chuyện Đẹp Về Tình Yêu',
     category: 'Thể loại phim',
     imageUrl: 'https://www.galaxycine.vn/media/2025/11/30/quan-k-nam-mot-phim-viet-vua-dep-lai-vua-hay-5_1764474870488.jpg',
@@ -34,7 +34,7 @@ export const mockBlogs = [
     createdAt: '2024-12-13'
   },
   {
-    _id: 'genre4',
+    _id: 'Thế Giới Màu Sắc Diệu Kỳ',
     title: 'Phim Hoạt Hình - Thế Giới Màu Sắc Diệu Kỳ',
     category: 'Thể loại phim',
     imageUrl: 'https://www.galaxycine.vn/media/2025/11/17/750_1763373893620.jpg',
@@ -46,7 +46,7 @@ export const mockBlogs = [
   },
   // Diễn viên, Đạo diễn
   {
-    _id: 'person1',
+    _id: 'James Cameron - Vua Của Những Bom Tấn',
     title: 'James Cameron - Vua Của Những Bom Tấn',
     category: 'Diễn viên, Đạo diễn',
     imageUrl: 'https://www.galaxycine.vn/media/2025/12/7/750_1765080791109.jpg',
@@ -57,7 +57,7 @@ export const mockBlogs = [
     createdAt: '2024-12-10'
   },
   {
-    _id: 'person2',
+    _id: 'Trấn Thành - Từ MC Đến Đạo Diễn Triệu View',
     title: 'Trấn Thành - Từ MC Đến Đạo Diễn Triệu View',
     category: 'Diễn viên, Đạo diễn',
     imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&h=450&fit=crop',
@@ -79,7 +79,7 @@ export const mockBlogs = [
     createdAt: '2024-12-05'
   },
   {
-    _id: 'person4',
+    _id: 'Hoàng Thùy Linh - Ngôi Sao Đa Tài Của Showbiz Việt',
     title: 'Hoàng Thùy Linh - Ngôi Sao Đa Tài Của Showbiz Việt',
     category: 'Diễn viên, Đạo diễn',
     imageUrl: 'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?w=800&h=450&fit=crop',

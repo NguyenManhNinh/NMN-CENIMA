@@ -15,6 +15,8 @@ import {
   PlayCircle as PlayIcon,
   ConfirmationNumber as TicketIcon
 } from '@mui/icons-material';
+// Background image
+import filmBackground from '../../../assets/images/film-bg.png';
 
 // STYLES
 const styles = {
@@ -22,7 +24,6 @@ const styles = {
   card: {
     width: '100%',
     position: 'relative',
-    borderRadius: 1,
     overflow: 'hidden',
     cursor: 'pointer',
     transition: 'transform 0.3s, box-shadow 0.3s',
@@ -117,7 +118,7 @@ function MovieCard({ movie, onTrailerClick }) {
   // Click nút Mua vé
   const handleBuyTicket = (e) => {
     e.stopPropagation(); // Ngăn trigger click card
-    navigate(`/movie/${movie._id}/showtimes`);
+    navigate(`/dat-ve/${movie._id}/lich-chieu-phim`);
   };
 
   // Click nút Xem trailer
@@ -130,7 +131,7 @@ function MovieCard({ movie, onTrailerClick }) {
 
   // Click vào card -> Chi tiết phim
   const handleCardClick = () => {
-    navigate(`/movie/${movie._id}`);
+    navigate(`/chi-tiet-phim/${movie._id}`);
   };
 
   // RENDER

@@ -70,8 +70,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '0.75rem',
-    fontWeight: 600,
+    fontSize: '0.93rem',
+    fontWeight: 700,
     ml: 2,
     mr: 1,
     flexShrink: 0
@@ -82,7 +82,7 @@ const styles = {
     alignItems: 'center'
   },
   buyButton: {
-    backgroundColor: '#F9A825',
+    backgroundColor: '#F9F400',
     color: '#184785',
     fontWeight: 600,
     fontSize: '1rem',
@@ -91,19 +91,20 @@ const styles = {
     px: 4,
     height: '100%',
     '&:hover': {
-      backgroundColor: '#AE7519'
+      backgroundColor: '#F9F400'
     },
     '&:disabled': {
-      backgroundColor: '#F9A825',
+      backgroundColor: '#F9F400',
       color: '#184785'
     }
   },
   menuItem: {
-    fontSize: '0.9rem',
+    fontSize: '1rem',
     py: 1.5
   },
   placeholder: {
-    color: '#C82E31'
+    color: '#C82E31',
+    fontSize: '0.9rem'
   }
 };
 
@@ -198,7 +199,7 @@ function QuickBookingBar() {
   const handleBuyTicket = () => {
     if (selectedMovie && selectedCinema && selectedDate && selectedShowtime) {
       // Navigate to seat selection page
-      navigate(`/booking/seats?movie=${selectedMovie}&cinema=${selectedCinema}&date=${selectedDate}&showtime=${selectedShowtime}`);
+      navigate(`/dat-ve/?phim=${selectedMovie}&rap=${selectedCinema}&ngay=${selectedDate}&gio=${selectedShowtime}`);
     }
   };
 

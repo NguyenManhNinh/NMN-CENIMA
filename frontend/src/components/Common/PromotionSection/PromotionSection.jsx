@@ -11,15 +11,23 @@ import {
 // Mock data - sẽ thay bằng API
 import { getOngoingEvents } from '../../../mocks/mockEvents';
 
+// Background image
+import filmBackground from '../../../assets/images/background-uudai.png';
+
 // CONSTANTS
-const EVENTS_PER_PAGE = 3;       // Số events hiển thị mỗi lần
+const EVENTS_PER_PAGE = 4;       // Số events hiển thị mỗi lần (4 cards)
 const AUTO_ROTATE_INTERVAL = 20000; // 20 giây
+const CARD_WIDTH = 264.76;       // Chiều rộng card
+const CARD_HEIGHT = 397.14;      // Chiều cao card
 
 // STYLES
 const styles = {
   section: {
     py: 5,
-    backgroundColor: '#f5f5f5'
+    backgroundImage: `url(${filmBackground})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
   },
   sectionHeader: {
     display: 'flex',
@@ -32,9 +40,8 @@ const styles = {
     fontSize: { xs: '1.25rem', md: '1.5rem' },
     color: '#1a3a5c',
     textTransform: 'uppercase',
-    pl: 2,
-    borderLeft: '4px solid #1a3a5c',
-    letterSpacing: 1
+    letterSpacing: 1,
+    textAlign: 'center'
   },
   dotsContainer: {
     display: 'flex',
@@ -44,14 +51,14 @@ const styles = {
     width: 10,
     height: 10,
     borderRadius: '50%',
-    backgroundColor: 'rgba(0, 64, 93, 0.3)',
+    backgroundColor: '#F9F400',
     cursor: 'pointer',
     transition: 'all 0.3s',
     border: 'none',
     padding: 0
   },
   dotActive: {
-    backgroundColor: '#00405d',
+    backgroundColor: '#5BBD2B',
     transform: 'scale(1.2)'
   },
   gridContainer: {
@@ -65,9 +72,11 @@ const styles = {
   },
   imageContainer: {
     overflow: 'hidden',
-    aspectRatio: '16/9',
-    position: 'relative',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 1,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    position: 'relative'
   },
   image: {
     width: '100%',
@@ -83,7 +92,7 @@ const styles = {
   title: {
     fontSize: '1rem',
     fontWeight: 700,
-    color: '#333',
+    color: '#1a3a5c',
     mt: 1.5,
     lineHeight: 1.4,
     display: '-webkit-box',
@@ -149,7 +158,7 @@ function PromotionSection() {
   }, [totalPages, goToNextPage]);
 
   const handleEventClick = (eventId) => {
-    navigate(`/events/${eventId}`);
+    navigate(`/khuyen-mai/${eventId}`);
   };
 
   return (
@@ -157,10 +166,23 @@ function PromotionSection() {
       <Container maxWidth="lg">
         {/* Header với dots pagination */}
         <Box sx={styles.sectionHeader}>
-          <Typography variant="h5" component="h2" sx={styles.sectionTitle}>
-            ƯU ĐÃI
-          </Typography>
-
+          <Box sx={{ textAlign: 'center', flex: 1 }}>
+            <Typography variant="h5" component="h2" sx={styles.sectionTitle}>
+              ƯU ĐÃI - KHUYẾN MẠI
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '0.95rem',
+                color: '#666',
+                mt: 1,
+                maxWidth: 700,
+                mx: 'auto',
+                lineHeight: 1.6
+              }}
+            >
+              Hệ thống rạp NMN Cinema luôn là cụm rạp có nhiều chương trình ưu đãi khuyến mại nổi bật, cập nhật thường xuyên theo tuần/tháng để khách hàng dễ dàng săn vé rẻ và nhận quà hấp dẫn.
+            </Typography>
+          </Box>
           {/* Dots indicator */}
           {totalPages > 1 && (
             <Box sx={styles.dotsContainer}>
@@ -190,7 +212,7 @@ function PromotionSection() {
           }}
         >
           {visibleEvents.map((event) => (
-            <Grid item xs={12} sm={6} md={4} key={event._id}>
+            <Grid item xs={6} sm={6} md={3} key={event._id}>
               <Card
                 sx={styles.card}
                 onClick={() => handleEventClick(event._id)}

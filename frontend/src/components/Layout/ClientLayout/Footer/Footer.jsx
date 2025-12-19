@@ -80,17 +80,17 @@ const styles = {
 const footerLinks = {
   // Cột "Về chúng tôi"
   about: [
-    { label: 'Giới thiệu', path: '/about' },
-    { label: 'Hệ thống rạp', path: '/cinemas' },
-    { label: 'Liên hệ', path: '/contact' },
-    { label: 'Tuyển dụng', path: '/careers' }
+    { label: 'Giới thiệu', path: '/gioi-thieu' },
+    { label: 'Hệ thống rạp', path: '/he-thong-rap' },
+    { label: 'Liên hệ', path: '/lien-he' },
+    { label: 'Tuyển dụng', path: '/tuyen-dung' }
   ],
   // Cột "Hỗ trợ"
   support: [
-    { label: 'Câu hỏi thường gặp', path: '/faq' },
-    { label: 'Điều khoản sử dụng', path: '/terms' },
-    { label: 'Chính sách bảo mật', path: '/privacy' },
-    { label: 'Góp ý khiếu nại', path: '/feedback' }
+    { label: 'Câu hỏi thường gặp', path: '/cau-hoi-thuong-gap' },
+    { label: 'Điều khoản sử dụng', path: '/dieu-khoan-su-dung' },
+    { label: 'Chính sách bảo mật', path: '/chinh-sach-bao-mat' },
+    { label: 'Góp ý khiếu nại', path: '/gop-y-khieu-nai' }
   ]
 };
 

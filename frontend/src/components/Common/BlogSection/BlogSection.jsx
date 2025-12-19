@@ -1,9 +1,3 @@
-/**
- * BLOG SECTION - Góc điện ảnh (Galaxy Cinema Style)
- * Layout: 1 bài viết lớn bên trái + 3 bài viết nhỏ bên phải
- * Tỷ lệ ảnh chuẩn 16:9 để không bị cắt xén
- */
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -191,7 +185,7 @@ function BlogSection() {
   };
 
   const handleBlogClick = (blogId) => {
-    navigate(`/blog/${blogId}`);
+    navigate(`/goc-dien-anh/${blogId}`);
   };
 
   const featuredBlog = blogs[0];
@@ -309,7 +303,7 @@ function BlogSection() {
             variant="outlined"
             endIcon={<ArrowIcon />}
             sx={styles.viewMoreButton}
-            onClick={() => navigate('/blog')}
+            onClick={() => navigate('/goc-dien-anh')}
           >
             Xem thêm
           </Button>
