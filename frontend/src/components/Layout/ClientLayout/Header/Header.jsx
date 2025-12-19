@@ -205,7 +205,7 @@ const styles = {
     transition: 'opacity 0.3s'
   },
   buyTicketBtn: {
-    backgroundColor: '#FCF54C',
+    backgroundColor: '#F9A825',
     color: '#0e0f11ff',
     fontWeight: 600,
     fontSize: '0.75rem',
@@ -214,7 +214,7 @@ const styles = {
     py: 0.75,
     borderRadius: 1,
     '&:hover': {
-      backgroundColor: '#F9F400'
+      backgroundColor: '#AE7519'
     }
   },
   trailerBtn: {

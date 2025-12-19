@@ -44,7 +44,7 @@ const styles = {
   image: {
     width: '100%',
     height: 'auto',
-    aspectRatio: '21/9',
+    // aspectRatio: '21/9',
     objectFit: 'cover',
     display: 'block',
     backgroundColor: 'white',

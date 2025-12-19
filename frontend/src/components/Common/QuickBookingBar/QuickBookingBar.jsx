@@ -38,9 +38,7 @@ const StyledSelect = styled(Select)(({ theme }) => ({
   }
 }));
 
-// ============================================================================
 // STYLES
-// ============================================================================
 const styles = {
   wrapper: {
     backgroundColor: '#fff',
@@ -84,7 +82,7 @@ const styles = {
     alignItems: 'center'
   },
   buyButton: {
-    backgroundColor: '#FCF54C',
+    backgroundColor: '#F9A825',
     color: '#184785',
     fontWeight: 600,
     fontSize: '1rem',
@@ -93,10 +91,10 @@ const styles = {
     px: 4,
     height: '100%',
     '&:hover': {
-      backgroundColor: '#F9F400'
+      backgroundColor: '#AE7519'
     },
     '&:disabled': {
-      backgroundColor: '#fffa37',
+      backgroundColor: '#F9A825',
       color: '#184785'
     }
   },
@@ -109,9 +107,7 @@ const styles = {
   }
 };
 
-// ============================================================================
 // MOCK DATA - Cinemas, Dates, Showtimes (sẽ thay bằng API)
-// ============================================================================
 const mockCinemas = [
   { id: 'c1', name: 'NMN Cinema Hà Nội' },
   { id: 'c2', name: 'NMN Cinema Hồ Chí Minh' },
@@ -143,9 +139,7 @@ const mockShowtimes = [
   { id: 's6', time: '21:30', type: '2D' }
 ];
 
-// ============================================================================
 // QUICK BOOKING BAR COMPONENT
-// ============================================================================
 function QuickBookingBar() {
   const navigate = useNavigate();
 
@@ -211,9 +205,7 @@ function QuickBookingBar() {
   // Check if can buy
   const canBuy = selectedMovie && selectedCinema && selectedDate && selectedShowtime;
 
-  // --------------------------------------------------------------------------
   // RENDER
-  // --------------------------------------------------------------------------
   return (
     <Box sx={styles.wrapper}>
       <Container maxWidth="lg" disableGutters>

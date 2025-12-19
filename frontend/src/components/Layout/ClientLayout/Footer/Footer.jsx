@@ -123,13 +123,7 @@ function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                sx={{
-                  ...styles.socialIcon,
-                  "&:hover": {
-                    backgroundColor: "#1877F2",
-                    color: "#fff",
-                  },
-                }}
+                sx={{ ...styles.socialIcon, "&:hover": { color: "#1877F2", }, }}
               >
                 <FacebookIcon />
               </IconButton>
@@ -141,7 +135,7 @@ function Footer() {
                 aria-label="GitHub"
                 sx={{
                   ...styles.socialIcon,
-                  "&:hover": { backgroundColor: "#24292F", color: "#fff" },
+                  "&:hover": { color: "#24292F" },
                 }}
               >
                 <GitHubIcon />
@@ -154,7 +148,7 @@ function Footer() {
                 aria-label="Instagram"
                 sx={{
                   ...styles.socialIcon,
-                  "&:hover": { backgroundColor: "#CD486B", color: "#fff" },
+                  "&:hover": { color: "#CD486B" },
                 }}
               >
                 <InstagramIcon />

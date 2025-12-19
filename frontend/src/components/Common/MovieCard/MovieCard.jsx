@@ -22,7 +22,7 @@ const styles = {
   card: {
     width: '100%',
     position: 'relative',
-    borderRadius: 1.3,
+    borderRadius: 1,
     overflow: 'hidden',
     cursor: 'pointer',
     transition: 'transform 0.3s, box-shadow 0.3s',
@@ -36,13 +36,15 @@ const styles = {
   mediaContainer: {
     position: 'relative',
     overflow: 'hidden',
+    aspectRatio: '2/3', // Tỷ lệ poster chuẩn - ảnh sẽ hiển thị đẹp không bị cắt nhiều
     '&:hover .overlay': {
       opacity: 1
     }
   },
   // Poster phim
   media: {
-    height: 470,
+    width: '100%',
+    height: '100%',
     objectFit: 'cover',
     userSelect: 'none',
     pointerEvents: 'none'  // Ngăn kéo thả ảnh
@@ -84,7 +86,7 @@ const styles = {
   },
   // Tên phim
   title: {
-    fontWeight: 600,
+    fontWeight: 800,
     fontSize: '1rem',
     mb: 2,
     fontFamily: '"Space Grotesk", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif', fontFamily: 'Space Grotesk',

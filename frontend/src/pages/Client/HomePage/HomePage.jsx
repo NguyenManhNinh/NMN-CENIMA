@@ -13,7 +13,8 @@ import {
 import { Movie as MovieIcon } from '@mui/icons-material';
 
 // Components
-import { BannerSlider, MovieCard, TrailerModal, QuickBookingBar } from '../../../components/Common';
+import { BannerSlider, MovieCard, TrailerModal, QuickBookingBar, BlogSection } from '../../../components/Common';
+// import { PromotionSection } from '../../../components/Common'; // Tạm thời ẩn
 
 // Mock data (sẽ thay bằng API sau)
 import { mockMovies, getNowShowingMovies, getComingSoonMovies } from '../../../mocks/mockMovies';
@@ -255,6 +256,12 @@ function HomePage() {
           {loading ? renderSkeletons() : renderMovieGrid()}
         </Container>
       </Box>
+
+      {/* PROMOTION SECTION - Tạm thời ẩn */}
+      {/* <PromotionSection /> */}
+
+      {/* BLOG SECTION - Góc điện ảnh */}
+      <BlogSection />
 
       {/* TRAILER MODAL */}
       <TrailerModal
