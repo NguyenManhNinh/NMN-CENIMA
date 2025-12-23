@@ -2,13 +2,40 @@ const Movie = require('../models/Movie');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
-// Lấy danh sách phim (có thể lọc, phân trang sau này)
+// Lấy danh sách phim (có thể lọc, phân trang)
 exports.getAllMovies = catchAsync(async (req, res, next) => {
-  const movies = await Movie.find();
+  const { status, genre, limit = 50, page = 1 } = req.query;
+
+  // Build filter query
+  const query = {};
+
+  // Filter by status (NOW, COMING, STOP)
+  if (status) {
+    query.status = status.toUpperCase();
+  }
+
+  // Filter by genre
+  if (genre) {
+    query.genres = genre;
+  }
+
+  // Execute query with pagination
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const movies = await Movie.find(query)
+    .populate('director', 'name photoUrl')
+    .populate('actors', 'name photoUrl')
+    .populate('genres', 'name slug')
+    .limit(parseInt(limit))
+    .skip(skip)
+    .sort({ releaseDate: -1 });
+
+  const total = await Movie.countDocuments(query);
 
   res.status(200).json({
     status: 'success',
     results: movies.length,
+    total,
     data: {
       movies
     }
