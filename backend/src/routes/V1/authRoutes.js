@@ -172,36 +172,6 @@ router.get('/google', authController.googleAuth);
  */
 router.get('/google/callback', authController.googleCallback);
 
-// ===================== FACEBOOK OAUTH =====================
-/**
- * @swagger
- * /auth/facebook:
- *   get:
- *     summary: Login with Facebook
- *     tags: [Auth]
- *     responses:
- *       302:
- *         description: Redirect to Facebook OAuth
- */
-router.get('/facebook', authController.facebookAuth);
-
-/**
- * @swagger
- * /auth/facebook/callback:
- *   get:
- *     summary: Facebook OAuth callback
- *     tags: [Auth]
- *     parameters:
- *       - in: query
- *         name: code
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Login success
- */
-router.get('/facebook/callback', authController.facebookCallback);
-
 // Các route bên dưới yêu cầu phải đăng nhập
 router.use(authMiddleware.protect);
 
