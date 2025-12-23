@@ -38,6 +38,7 @@ const styles = {
     position: 'relative',
     overflow: 'hidden',
     aspectRatio: '2/3', // Tỷ lệ poster chuẩn - ảnh sẽ hiển thị đẹp không bị cắt nhiều
+    backgroundColor: '#1a3a5c', // Background tối để tránh flash trắng
     '&:hover .overlay': {
       opacity: 1
     }
@@ -101,9 +102,9 @@ const styles = {
 const getAgeRatingColor = (rating) => {
   const colors = {
     'P': 'success',    // Phổ biến - xanh lá
-    'T13': 'info',     // 13+ - xanh dương
-    'T16': 'warning',  // 16+ - cam
-    'T18': 'error'     // 18+ - đỏ
+    'C13': 'info',     // 13+ - xanh dương
+    'C16': 'warning',  // 16+ - cam
+    'C18': 'error'     // 18+ - đỏ
   };
   return colors[rating] || 'default';
 };
@@ -147,9 +148,13 @@ function MovieCard({ movie, onTrailerClick }) {
         {/* Poster */}
         <CardMedia
           component="img"
-          image={movie.posterUrl || '/images/default-poster.jpg'}
+          image={movie.posterUrl || 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image'}
           alt={movie.title}
           sx={styles.media}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image';
+          }}
         />
 
         {/* Nhãn độ tuổi */}

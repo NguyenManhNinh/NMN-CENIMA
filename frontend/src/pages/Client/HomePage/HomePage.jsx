@@ -14,11 +14,14 @@ import { Movie as MovieIcon } from '@mui/icons-material';
 
 // Components
 import { BannerSlider, MovieCard, TrailerModal, QuickBookingBar, BlogSection } from '../../../components/Common';
-import { PromotionSection } from '../../../components/Common'; // Tạm thời ẩn
+import { PromotionSection } from '../../../components/Common';
 import { Link } from 'react-router-dom';
 
-// Mock data (sẽ thay bằng API sau)
-import { mockMovies, getNowShowingMovies, getComingSoonMovies } from '../../../mocks/mockMovies';
+// API
+import { getNowShowingMoviesAPI, getComingSoonMoviesAPI } from '../../../apis/movieApi';
+import { getAllBannersAPI } from '../../../apis/cmsApi';
+
+// Mock data fallback
 import mockBanners from '../../../mocks/mockBanners';
 
 // Background image
@@ -116,9 +119,10 @@ function HomePage() {
   // STATE
   const [activeTab, setActiveTab] = useState(TAB_NOW_SHOWING);
   const [visibleCount, setVisibleCount] = useState(MOVIES_PER_PAGE);
-  const [loading, setLoading] = useState(false);  // Không loading vì dùng mock data
-  const [movies, setMovies] = useState(getNowShowingMovies());  // Init với data
-  const [banners, setBanners] = useState(mockBanners);  // Init với data
+  const [loading, setLoading] = useState(true);  // Loading từ API (chỉ dùng lần đầu)
+  const [tabLoading, setTabLoading] = useState(false);  // Loading khi đổi tab (không hiện skeleton)
+  const [movies, setMovies] = useState([]);  // Init rỗng, sẽ load từ API
+  const [banners, setBanners] = useState([]);  // Init rỗng, sẽ load từ API
 
   // State cho trailer modal
   const [trailerOpen, setTrailerOpen] = useState(false);
@@ -140,30 +144,59 @@ function HomePage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // TODO: Thay bằng API call thực tế
-      // const [moviesRes, bannersRes] = await Promise.all([
-      //   movieApi.getNowShowing(),
-      //   cmsApi.getBanners()
-      // ]);
+      // Gọi API thực
+      const [moviesRes, bannersRes] = await Promise.all([
+        getNowShowingMoviesAPI(8),
+        getAllBannersAPI().catch(() => ({ data: { banners: mockBanners } }))
+      ]);
 
-      // Sử dụng mock data
-      setBanners(mockBanners);
-      setMovies(getNowShowingMovies());
+      // Set movies từ API
+      if (moviesRes?.data?.movies) {
+        setMovies(moviesRes.data.movies);
+      } else if (moviesRes?.data) {
+        setMovies(Array.isArray(moviesRes.data) ? moviesRes.data : []);
+      }
+
+      // Set banners từ API hoặc fallback mock
+      if (bannersRes?.data?.banners) {
+        setBanners(bannersRes.data.banners);
+      } else {
+        setBanners(mockBanners);
+      }
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu:', error);
+      // Fallback to empty arrays
+      setMovies([]);
+      setBanners(mockBanners);
     } finally {
       setLoading(false);
     }
   };
 
-  // Load phim theo tab
-  const loadMoviesByTab = () => {
+  // Load phim theo tab (không hiện skeleton, chỉ cập nhật data)
+  const loadMoviesByTab = async () => {
+    // Không set loading để tránh flash
+    setTabLoading(true);
     setVisibleCount(MOVIES_PER_PAGE); // Reset số lượng hiển thị
 
-    if (activeTab === TAB_NOW_SHOWING) {
-      setMovies(getNowShowingMovies());
-    } else {
-      setMovies(getComingSoonMovies());
+    try {
+      let response;
+      if (activeTab === TAB_NOW_SHOWING) {
+        response = await getNowShowingMoviesAPI(8);
+      } else {
+        response = await getComingSoonMoviesAPI(8);
+      }
+
+      if (response?.data?.movies) {
+        setMovies(response.data.movies);
+      } else if (response?.data) {
+        setMovies(Array.isArray(response.data) ? response.data : []);
+      }
+    } catch (error) {
+      console.error('Lỗi khi tải phim:', error);
+      setMovies([]);
+    } finally {
+      setTabLoading(false);
     }
   };
 
@@ -205,8 +238,22 @@ function HomePage() {
 
   // RENDER - Danh sách phim
   const renderMovieGrid = () => {
+    // Nếu không có phim, hiển thị thông báo
+    if (!movies || movies.length === 0) {
+      return (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <MovieIcon sx={{ fontSize: 80, color: 'rgba(255,255,255,0.3)', mb: 2 }} />
+          <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+            Hiện chưa có phim {activeTab === TAB_NOW_SHOWING ? 'đang chiếu' : 'sắp chiếu'}
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', mt: 1 }}>
+            Vui lòng quay lại sau
+          </Typography>
+        </Box>
+      );
+    }
+
     const visibleMovies = movies.slice(0, visibleCount);
-    const hasMore = visibleCount < movies.length;
 
     return (
       <>

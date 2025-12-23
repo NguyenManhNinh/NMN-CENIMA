@@ -115,9 +115,33 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
     setCurrentIndex(index);
   };
 
-  if (!banners.length) return null;
+  // Nếu không có banner, hiển thị placeholder full width
+  if (!banners || banners.length === 0) {
+    return (
+      <Box
+        sx={{
+          width: '100%',
+          height: { xs: 200, sm: 300, md: 400 },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #1a3a5c 0%, #0d1b2a 100%)',
+          overflow: 'hidden'
+        }}
+      >
+        <Box sx={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
+          <Box
+            component="img"
+            src="/images/NMN_CENIMA_LOGO.png"
+            alt="NMN Cinema"
+            sx={{ width: 120, height: 'auto', opacity: 0.5, mb: 2 }}
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        </Box>
+      </Box>
+    );
+  }
 
-  // Full width mode - show one banner at a time
   const translateX = -currentIndex * 100;
 
   return (

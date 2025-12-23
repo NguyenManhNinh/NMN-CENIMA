@@ -10,11 +10,13 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     minHeight: '100vh',
-    backgroundColor: '#f5f5f5'
+    backgroundColor: '#f5f5f5',
+    overflowX: 'hidden' // Ngăn scroll ngang và khoảng trắng
   },
   // Nội dung chính (flex-grow để đẩy Footer xuống)
   main: {
-    flexGrow: 1
+    flexGrow: 1,
+    overflowX: 'hidden' // Ngăn overflow từ children
   }
 };
 

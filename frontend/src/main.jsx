@@ -4,7 +4,7 @@ import App from './App.jsx';
 import { AuthProvider } from './contexts/AuthContext';
 
 // Global CSS
-import './index.css';
+// import './index.css';
 
 // Note: Slider sử dụng CSS thuần, không cần import slick-carousel
 
