@@ -800,13 +800,13 @@ function Header() {
       onClose={handleAccountMenuClose}
       PaperProps={{ sx: { mt: 1, minWidth: 180 } }}
     >
-      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/profile'); }}>
+      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/tai-khoan'); }}>
         <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
-        Hồ sơ cá nhân
+        Tài khoản
       </MenuItem>
-      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/tickets'); }}>
+      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/lich-su'); }}>
         <ListItemIcon><HistoryIcon fontSize="small" /></ListItemIcon>
-        Lịch sử đặt vé
+        Lịch sử
       </MenuItem>
       <Divider />
       <MenuItem onClick={handleLogout}>
