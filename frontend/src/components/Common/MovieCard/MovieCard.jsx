@@ -209,9 +209,9 @@ function MovieCard({ movie, onTrailerClick }) {
           {movie.title}
         </Typography>
 
-        {/* Rating (nếu có) */}
+        {/* Rating */}
         <Rating
-          value={4}
+          value={movie.rating ? movie.rating / 2 : 0}
           size="small"
           readOnly
           precision={0.5}
