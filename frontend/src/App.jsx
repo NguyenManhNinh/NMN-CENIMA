@@ -11,6 +11,7 @@ import ClientLayout from './components/Layout/ClientLayout';
 
 // Pages - Client
 import HomePage from './pages/Client/HomePage';
+import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 
 function App() {
   return (
@@ -21,6 +22,9 @@ function App() {
       {/* Router với future flags để tắt cảnh báo v7 */}
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
+          {/* OAuth Callback - không cần layout */}
+          <Route path="/oauth-callback" element={<OAuthCallback />} />
+
           {/* CLIENT ROUTES*/}
           <Route path="/" element={<ClientLayout />}>
             {/* Trang chủ */}

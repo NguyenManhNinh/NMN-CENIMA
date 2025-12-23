@@ -31,7 +31,21 @@ const styles = {
       maxWidth: 420,
       width: '100%',
       margin: 2,
-      overflow: 'visible'
+      overflow: 'visible',
+      maxHeight: '90vh',
+      '&::-webkit-scrollbar': {
+        display: 'none'
+      },
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none'
+    },
+    '& .MuiDialogContent-root': {
+      overflowY: 'auto',
+      '&::-webkit-scrollbar': {
+        display: 'none'
+      },
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none'
     }
   },
   closeButton: {
@@ -93,11 +107,9 @@ const styles = {
       '&.Mui-focused': {
         backgroundColor: 'white',
         '& .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#1a3a5c'
+          borderColor: '#1a3a5c',
+          borderWidth: 1
         }
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderWidth: 1
       }
     }
   },
@@ -140,16 +152,20 @@ const styles = {
         fontSize: '1.5rem',
         fontWeight: 700,
         padding: '12px'
+      },
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#1a3a5c',
+        borderWidth: 1
       }
     }
   },
   resendLink: {
-    color: '#F26B38',
+    color: '#1a3a5c',
     fontWeight: 600,
     cursor: 'pointer',
     textDecoration: 'underline',
     '&:hover': {
-      color: '#e55a2b'
+      color: '#1a3a5c'
     },
     '&:focus': {
       outline: 'none'
