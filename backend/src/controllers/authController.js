@@ -331,7 +331,7 @@ exports.getMe = catchAsync(async (req, res, next) => {
   });
 });
 
-// ===================== GOOGLE OAUTH =====================
+//  GOOGLE OAUTH
 const googleAuthService = require('../services/googleAuthService');
 
 // Redirect đến Google Login
@@ -343,9 +343,10 @@ exports.googleAuth = catchAsync(async (req, res, next) => {
 // Xử lý callback từ Google
 exports.googleCallback = catchAsync(async (req, res, next) => {
   const { code } = req.query;
+  const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
   if (!code) {
-    return next(new AppError('Authorization code is required!', 400));
+    return res.redirect(`${FRONTEND_URL}?error=no_code`);
   }
 
   try {
@@ -380,15 +381,48 @@ exports.googleCallback = catchAsync(async (req, res, next) => {
       });
     }
 
-    // Tạo và gửi token
-    await createSendToken(user, 200, res);
+    // Tạo Access Token
+    const accessToken = signToken(user._id);
+
+    // Tạo Refresh Token
+    const refreshToken = new RefreshToken({
+      user: user._id,
+      token: crypto.randomBytes(40).toString('hex'),
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      createdByIp: req.ip
+    });
+    await refreshToken.save();
+
+    // Set refresh token cookie
+    res.cookie('refreshToken', refreshToken.token, {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
+    });
+
+    // Ẩn fields nhạy cảm
+    user.password = undefined;
+    user.otpCode = undefined;
+    user.otpExpires = undefined;
+
+    // Encode user data để truyền qua URL
+    const userData = encodeURIComponent(JSON.stringify({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar
+    }));
+
+    // Redirect về frontend với token
+    res.redirect(`${FRONTEND_URL}/oauth-callback?token=${accessToken}&user=${userData}`);
   } catch (err) {
     console.error('Google OAuth Error:', err);
-    return next(new AppError('Failed to authenticate with Google', 500));
+    res.redirect(`${FRONTEND_URL}?error=google_auth_failed`);
   }
 });
 
-// ===================== FACEBOOK OAUTH =====================
+// FACEBOOK OAUTH
 const facebookAuthService = require('../services/facebookAuthService');
 
 // Redirect đến Facebook Login

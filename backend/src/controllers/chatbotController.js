@@ -57,7 +57,7 @@ exports.sendMessage = catchAsync(async (req, res, next) => {
     message: msg.message
   }));
 
-  // ============ LẤY CONTEXT THỰC TỪ DATABASE ============
+  // LẤY CONTEXT THỰC TỪ DATABASE
   const Cinema = require('../models/Cinema');
   const Event = require('../models/Event');
 

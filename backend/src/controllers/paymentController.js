@@ -11,7 +11,7 @@ const {
   VVIP_THRESHOLD
 } = require('../config/constants');
 
-// --- 1. HÀM SẮP XẾP & MÃ HÓA ---
+// 1. HÀM SẮP XẾP & MÃ HÓA
 function sortObject(obj) {
   let sorted = {};
   let str = [];
@@ -124,7 +124,7 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
         rawPayload: req.query
       });
 
-      // --- LOYALTY LOGIC ---
+      // LOYALTY LOGIC
       try {
         const User = require('../models/User');
         const user = await User.findById(order.userId);
@@ -143,8 +143,7 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
       } catch (err) {
         console.error('Loyalty Error:', err);
       }
-      // ---------------------
-
+      
       return res.status(200).json({ RspCode: '00', Message: 'Success' });
     } else {
       order.status = 'FAILED';

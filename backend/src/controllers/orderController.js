@@ -112,7 +112,7 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   const subTotal = totalAmount; // Chưa tính discount
   let discount = 0;
 
-  // --- VOUCHER LOGIC ---
+  // VOUCHER LOGIC
   if (voucherCode) {
     const Voucher = require('../models/Voucher');
     const voucher = await Voucher.findOne({ code: voucherCode.toUpperCase() });

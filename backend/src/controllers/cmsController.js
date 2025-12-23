@@ -5,7 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const APIFeatures = require('../utils/apiFeatures');
 
-// --- BANNERS ---
+//  BANNERS
 exports.getAllBanners = catchAsync(async (req, res, next) => {
   // Public: chỉ lấy ACTIVE, Admin: lấy hết
   const filter = req.user && ['admin', 'manager'].includes(req.user.role) ? {} : { status: 'ACTIVE' };
@@ -48,7 +48,7 @@ exports.deleteBanner = catchAsync(async (req, res, next) => {
   });
 });
 
-// --- ARTICLES (News/Reviews) ---
+//  ARTICLES (News/Reviews)
 exports.getAllArticles = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Article.find(), req.query)
     .filter()
@@ -104,7 +104,7 @@ exports.deleteArticle = catchAsync(async (req, res, next) => {
   });
 });
 
-// --- EVENTS ---
+//  EVENTS
 exports.getAllEvents = catchAsync(async (req, res, next) => {
   const filter = {};
   // Nếu là public user, chỉ hiện sự kiện chưa kết thúc (tùy logic)
