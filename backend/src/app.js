@@ -32,9 +32,30 @@ const app = express();
 // Correlation ID - Quan trọng: Phải đặt trước tất cả middleware khác
 app.use(correlationMiddleware);
 
-// Implement CORS
-app.use(cors());
-app.options('*', cors());
+// Implement CORS - Cấu hình cho credentials
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Cho phép requests không có origin (mobile apps, Postman, etc.)
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5173',
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Tạm thời cho phép tất cả trong dev
+    }
+  },
+  credentials: true, // Cho phép cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-Id']
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Set security HTTP headers
 app.use(helmet());

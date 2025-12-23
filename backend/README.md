@@ -46,9 +46,10 @@
 
 | Hạng mục | Công nghệ | Phiên bản |
 |----------|-----------|-----------|
-| Runtime | Node.js | v24.11.0 |
+| Runtime | Node.js | 24.11.0 |
 | Framework | Express.js | ^4.21.4 |
 | Database | MongoDB | ^7.6.0 |
+| Cache | Redis | ^7.2.2 |
 | ODM | Mongoose | ^8.8.0 |
 | Auth | JWT + bcrypt | jsonwebtoken ^9.0.2 |
 | Realtime | Socket.io | ^4.8.1 |
@@ -57,7 +58,8 @@
 | Email | Nodemailer | ^6.9.5 |
 | Docs | Swagger | swagger-jsdoc ^6.1.0 |
 | Logging | Winston | ^3.10.0 |
-| Security | helmet, cors, xss-clean | latest |
+| Security | helmet, cors, xss-clean, hpp | latest |
+| Compression | compression | ^1.7.4 |
 | Validation | Joi | ^17.10.1 |
 
 ---
@@ -74,8 +76,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/your-repo/datn-cinema.git
-cd datn-cinema/backend
+git clone https://github.com/NguyenManhNinh/NMN-CENIMA.git
+cd DATN-Cinema/backend
 
 # Cài đặt dependencies
 npm install
@@ -180,7 +182,8 @@ docker-compose down; docker-compose build --no-cache backend; docker-compose up 
 | Service | Port | Mô tả |
 |---------|------|-------|
 | backend | 5000 | Node.js API |
-| mongo | 27017 | MongoDB Database |
+| mongo | 27018 | MongoDB Database |
+| redis | 6379 | Redis Cache & Rate Limiting |
 
 ### Database Commands
 
@@ -275,30 +278,8 @@ node scripts/seed.js
 # Chạy trong Docker
 docker exec nmn-cinema-backend node scripts/seed.js
 ```
-
-### Tài khoản mẫu
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | manhninhadmin@nmncinema.com | ninh@123 |
-| Manager | manhninhmanager@nmncinema.com | ninh@1234 |
-| Staff | manhninhstaff@nmncinema.com | ninh@12345 |
-| User | manhninhuser@nmncinema.com | ninh@123456 |
-
-### Dữ liệu được tạo
-- 6 Users (đủ 4 roles)
-- 1 Cinema + 3 Rooms
-- 10 Movies (5 đang chiếu, 5 sắp chiếu)
-- 84 Showtimes (7 ngày tới)
-- 5 Combos + 3 Vouchers
-- 3 Banners + 3 Articles + 3 Events
-
----
-
 ## 💾 Database Backup
-
 ### Sao lưu dữ liệu
-
 ```bash
 # Windows
 scripts\backup.bat
@@ -306,14 +287,12 @@ scripts\backup.bat
 # Linux/Mac
 ./scripts/backup.sh
 ```
-
 ### Khôi phục dữ liệu
 
 ```bash
 # Windows
 scripts\restore.bat nmn_cinema_20251208_093000
 ```
-
 > ⚠️ **Lưu ý:** Lệnh restore sẽ **XÓA** toàn bộ dữ liệu hiện tại trước khi khôi phục.
 
 ---
@@ -327,9 +306,7 @@ npm test
 # Chạy với watch mode
 npm run test:watch
 ```
-
 ---
-
 ## 📁 Cấu trúc thư mục
 
 ```
@@ -339,7 +316,7 @@ backend/
 │   │   ├── db.js            # Kết nối MongoDB
 │   │   ├── constants.js     # Hằng số hệ thống
 │   │   └── swagger.js       # Swagger configuration
-│   ├── controllers/         # 18 controllers xử lý request
+│   ├── controllers/         # 20 controllers xử lý request
 │   │   ├── authController.js
 │   │   ├── movieController.js
 │   │   ├── orderController.js
@@ -350,7 +327,7 @@ backend/
 │   │   ├── errorMiddleware.js    # Global error handler
 │   │   ├── loggerMiddleware.js   # Correlation ID
 │   │   └── validateMiddleware.js # Input validation
-│   ├── models/              # 19 Mongoose schemas
+│   ├── models/              # 21 Mongoose schemas
 │   │   ├── User.js
 │   │   ├── Movie.js
 │   │   ├── Showtime.js
@@ -358,7 +335,7 @@ backend/
 │   │   ├── Order.js
 │   │   ├── Ticket.js
 │   │   └── ...
-│   ├── routes/V1/           # 19 route files với Swagger docs
+│   ├── routes/V1/           # 21 route files với Swagger docs
 │   │   ├── index.js         # Route aggregator
 │   │   ├── authRoutes.js
 │   │   ├── movieRoutes.js
@@ -404,11 +381,14 @@ backend/
 |-----------|------------|
 | Password Hashing | bcrypt (salt rounds = 12) |
 | JWT Token | Access (15m) + Refresh (7d) |
-| Rate Limiting | 100 req/phút/IP |
+| Rate Limiting | Redis-backed, 100 req/phút/IP |
+| Response Caching | Redis, TTL 5 phút |
 | Security Headers | helmet |
 | CORS | cors with whitelist |
 | XSS Protection | xss-clean |
+| HPP Protection | hpp |
 | NoSQL Injection | express-mongo-sanitize |
+| Response Compression | gzip |
 | Input Validation | Joi |
 
 ---

@@ -136,19 +136,41 @@ exports.verifyAccount = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  // 1) Kiểm tra xem user có tồn tại và mật khẩu có đúng không
-  const user = await User.findOne({ email }).select('+password +isActive');
+  // 1) Tìm user và lấy các trường cần thiết cho bảo mật
+  const user = await User.findOne({ email }).select('+password +isActive +loginAttempts +lockUntil');
 
+  // 2) Kiểm tra tài khoản có bị khóa không
+  if (user && user.lockUntil && user.lockUntil > Date.now()) {
+    const remainingTime = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
+    return next(new AppError(`Tài khoản đã bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau ${remainingTime} phút.`, 423));
+  }
+
+  // 3) Kiểm tra user tồn tại và mật khẩu đúng
   if (!user || !(await user.correctPassword(password, user.password))) {
+    // Tăng số lần đăng nhập sai nếu user tồn tại
+    if (user) {
+      await user.incLoginAttempts();
+
+      // Kiểm tra nếu vừa bị khóa
+      const updatedUser = await User.findById(user._id).select('+loginAttempts +lockUntil');
+      if (updatedUser.lockUntil && updatedUser.lockUntil > Date.now()) {
+        return next(new AppError('Tài khoản đã bị khóa do đăng nhập sai quá 5 lần. Vui lòng thử lại sau 30 phút.', 423));
+      }
+    }
     return next(new AppError('Email hoặc mật khẩu không chính xác!', 401));
   }
 
-  // 2) Kiểm tra xem tài khoản đã kích hoạt chưa
+  // 4) Kiểm tra tài khoản đã kích hoạt chưa
   if (!user.isActive) {
     return next(new AppError('Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để xác thực.', 401));
   }
 
-  // 3) Gửi token cho client
+  // 5) Reset số lần đăng nhập sai khi login thành công
+  if (user.loginAttempts > 0) {
+    await user.resetLoginAttempts();
+  }
+
+  // 6) Gửi token cho client
   await createSendToken(user, 200, res);
 });
 

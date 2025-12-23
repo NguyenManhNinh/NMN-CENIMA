@@ -26,6 +26,14 @@ const defaultRoutes = [
     route: require('./movieRoutes')
   },
   {
+    path: '/genres',
+    route: require('../genreRoutes')
+  },
+  {
+    path: '/persons',
+    route: require('../personRoutes')
+  },
+  {
     path: '/showtimes',
     route: require('./showtimeRoutes')
   },

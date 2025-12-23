@@ -87,6 +87,16 @@ const userSchema = new mongoose.Schema(
     birthday: {
       type: Date
     },
+    // Brute force protection
+    loginAttempts: {
+      type: Number,
+      default: 0,
+      select: false
+    },
+    lockUntil: {
+      type: Date,
+      select: false
+    },
     passwordChangedAt: Date
   },
   {
@@ -134,6 +144,44 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
   // False nghĩa là không thay đổi
   return false;
+};
+
+// Virtual: Kiểm tra tài khoản có bị khóa không
+userSchema.virtual('isLocked').get(function () {
+  // Kiểm tra lockUntil có tồn tại và còn trong thời gian khóa không
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
+// Phương thức: Tăng số lần đăng nhập sai
+userSchema.methods.incLoginAttempts = async function () {
+  const MAX_LOGIN_ATTEMPTS = 5;
+  const LOCK_TIME = 30 * 60 * 1000; // Khóa 30 phút
+
+  // Nếu đã hết thời gian khóa, reset attempts
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return await this.updateOne({
+      $set: { loginAttempts: 1 },
+      $unset: { lockUntil: 1 }
+    });
+  }
+
+  // Tăng số lần thử
+  const updates = { $inc: { loginAttempts: 1 } };
+
+  // Khóa tài khoản nếu vượt quá giới hạn
+  if (this.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
+    updates.$set = { lockUntil: Date.now() + LOCK_TIME };
+  }
+
+  return await this.updateOne(updates);
+};
+
+// Phương thức: Reset số lần đăng nhập sai (khi login thành công)
+userSchema.methods.resetLoginAttempts = async function () {
+  return await this.updateOne({
+    $set: { loginAttempts: 0 },
+    $unset: { lockUntil: 1 }
+  });
 };
 
 const User = mongoose.model('User', userSchema);
