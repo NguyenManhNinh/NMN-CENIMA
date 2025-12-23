@@ -5,11 +5,12 @@ import {
   Container,
   Typography,
   Grid,
-  Card
+  Card,
+  Skeleton
 } from '@mui/material';
 
-// Mock data - sẽ thay bằng API
-import { getOngoingEvents } from '../../../mocks/mockEvents';
+// API
+import { getAllEventsAPI } from '../../../apis/cmsApi';
 
 // Background image
 import filmBackground from '../../../assets/images/background-uudai.png';
@@ -76,7 +77,8 @@ const styles = {
     height: CARD_HEIGHT,
     borderRadius: 1,
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    position: 'relative'
+    position: 'relative',
+    backgroundColor: '#e0e0e0' // Placeholder color
   },
   image: {
     width: '100%',
@@ -101,6 +103,11 @@ const styles = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     minHeight: '2.8em'
+  },
+  emptyState: {
+    textAlign: 'center',
+    py: 5,
+    color: '#666'
   }
 };
 
@@ -110,11 +117,34 @@ function PromotionSection() {
   const [allEvents, setAllEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load events
+  // Load events từ API
   useEffect(() => {
-    const ongoingEvents = getOngoingEvents();
-    setAllEvents(ongoingEvents);
+    const loadEvents = async () => {
+      setLoading(true);
+      try {
+        const response = await getAllEventsAPI();
+        if (response?.data?.events) {
+          // Lọc chỉ lấy events đang diễn ra hoặc sắp diễn ra
+          const now = new Date();
+          const activeEvents = response.data.events.filter(event => {
+            const endDate = new Date(event.endAt);
+            return endDate >= now || event.status !== 'ENDED';
+          });
+          setAllEvents(activeEvents);
+        } else {
+          setAllEvents([]);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách ưu đãi:', error);
+        setAllEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvents();
   }, []);
 
   // Tính số trang (mỗi trang 4 events)
@@ -161,6 +191,29 @@ function PromotionSection() {
     navigate(`/khuyen-mai/${eventId}`);
   };
 
+  // Render skeleton khi loading
+  const renderSkeletons = () => (
+    <Grid container spacing={3}>
+      {[...Array(4)].map((_, index) => (
+        <Grid item xs={6} sm={6} md={3} key={index}>
+          <Skeleton
+            variant="rectangular"
+            width={CARD_WIDTH}
+            height={CARD_HEIGHT}
+            sx={{ borderRadius: 1 }}
+          />
+          <Skeleton width="80%" sx={{ mt: 1.5 }} />
+          <Skeleton width="60%" />
+        </Grid>
+      ))}
+    </Grid>
+  );
+
+  // Không hiển thị section nếu không có events và không loading
+  if (!loading && allEvents.length === 0) {
+    return null; // Ẩn section khi không có ưu đãi
+  }
+
   return (
     <Box sx={styles.section}>
       <Container maxWidth="lg">
@@ -202,45 +255,50 @@ function PromotionSection() {
           )}
         </Box>
 
-        {/* Grid 4 cards với fade animation */}
-        <Grid
-          container
-          spacing={3}
-          sx={{
-            ...styles.gridContainer,
-            opacity: isAnimating ? 0 : 1
-          }}
-        >
-          {visibleEvents.map((event) => (
-            <Grid item xs={6} sm={6} md={3} key={event._id}>
-              <Card
-                sx={styles.card}
-                onClick={() => handleEventClick(event._id)}
-              >
-                {/* Image */}
-                <Box sx={styles.imageContainer}>
-                  <Box
-                    component="img"
-                    src={event.bannerUrl}
-                    alt={event.title}
-                    className="event-image"
-                    sx={styles.image}
-                    draggable={false}
-                  />
-                </Box>
+        {/* Loading skeleton hoặc Grid events */}
+        {loading ? renderSkeletons() : (
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              ...styles.gridContainer,
+              opacity: isAnimating ? 0 : 1
+            }}
+          >
+            {visibleEvents.map((event) => (
+              <Grid item xs={6} sm={6} md={3} key={event._id}>
+                <Card
+                  sx={styles.card}
+                  onClick={() => handleEventClick(event._id)}
+                >
+                  {/* Image */}
+                  <Box sx={styles.imageContainer}>
+                    <Box
+                      component="img"
+                      src={event.bannerUrl || 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image'}
+                      alt={event.title}
+                      className="event-image"
+                      sx={styles.image}
+                      draggable={false}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image';
+                      }}
+                    />
+                  </Box>
 
-                {/* Title */}
-                <Typography sx={styles.title}>
-                  {event.title}
-                </Typography>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                  {/* Title */}
+                  <Typography sx={styles.title}>
+                    {event.title}
+                  </Typography>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Container>
     </Box>
   );
 }
 
 export default PromotionSection;
-

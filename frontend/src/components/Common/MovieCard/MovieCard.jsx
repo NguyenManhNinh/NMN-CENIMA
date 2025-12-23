@@ -203,7 +203,7 @@ function MovieCard({ movie, onTrailerClick }) {
         </Fade>
       </Box>
 
-      {/* === NỘI DUNG: Tên phim, đánh giá === */}
+      {/*NỘI DUNG: Tên phim, đánh giá*/}
       <CardContent sx={styles.content}>
         <Typography sx={styles.title} title={movie.title}>
           {movie.title}
