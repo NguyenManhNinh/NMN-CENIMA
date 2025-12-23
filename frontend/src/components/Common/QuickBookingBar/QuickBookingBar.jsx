@@ -42,7 +42,7 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 const styles = {
   wrapper: {
     backgroundColor: '#fff',
-    borderBottom: '3px solid #FFD700',
+    borderBottom: '3px solid #FF6A6A',
     py: 0,
     p: 1.5
   },
@@ -82,20 +82,19 @@ const styles = {
     alignItems: 'center'
   },
   buyButton: {
-    backgroundColor: '#F9F400',
-    color: '#184785',
+    backgroundColor: '#F4A460',
+    color: '#828282',
     fontWeight: 600,
     fontSize: '1rem',
     textTransform: 'none',
-    borderRadius: 1.5,
     px: 4,
     height: '100%',
     '&:hover': {
-      backgroundColor: '#F9F400'
+      backgroundColor: '#F4A460'
     },
     '&:disabled': {
-      backgroundColor: '#F9F400',
-      color: '#184785'
+      backgroundColor: '#F4A460',
+      color: '#828282'
     }
   },
   menuItem: {
@@ -103,7 +102,7 @@ const styles = {
     py: 1.5
   },
   placeholder: {
-    color: '#C82E31',
+    color: '#1C1C1C',
     fontSize: '0.9rem'
   }
 };

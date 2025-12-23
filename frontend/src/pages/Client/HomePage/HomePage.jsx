@@ -44,11 +44,11 @@ const styles = {
   },
   sectionTitle: {
     fontWeight: 700,
-    fontSize: { xs: '1.25rem', md: '1.5rem' },
-    color: '#F9F400',
+    fontSize: { xs: '1.5rem', md: '1.3rem' },
+    color: '#F3C246',
     textTransform: 'uppercase',
     pl: 2,
-    borderLeft: '4px solid #F9F400',
+    borderLeft: '4px solid #00405d',
     letterSpacing: 1
   },
   // Tabs inline với title
@@ -56,12 +56,15 @@ const styles = {
     minHeight: 'auto',
     '& .MuiTab-root': {
       fontWeight: 600,
-      fontSize: '1.34rem',
+      fontSize: '1rem',
       textTransform: 'none',
       color: '#858e8fff',
       minHeight: 'auto',
       py: 0.5,
       px: 2,
+      '&:hover': {
+        backgroundColor: 'transparent'
+      },
       '&:focus': {
         outline: 'none'
       },
@@ -70,7 +73,7 @@ const styles = {
       }
     },
     '& .Mui-selected': {
-      color: '#6EC3C9 !important'
+      color: '#F9F400 !important'
     },
     '& .MuiTabs-indicator': {
       display: 'none'
@@ -259,8 +262,8 @@ function HomePage() {
               onChange={handleTabChange}
               sx={styles.tabsInline}
             >
-              <Tab label="Đang chiếu" id="tab-now" />
-              <Tab label="Sắp chiếu" id="tab-coming" />
+              <Tab label="Đang chiếu" id="tab-now" disableRipple disableFocusRipple />
+              <Tab label="Sắp chiếu" id="tab-coming" disableRipple disableFocusRipple />
             </Tabs>
           </Box>
 

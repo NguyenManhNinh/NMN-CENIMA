@@ -93,19 +93,20 @@ const styles = {
   },
   navButton: {
     color: COLORS.text,
-    fontWeight: 700,
+    fontWeight: 500,
     fontSize: '1rem',
-    fontFamily: ' DM Sans", system-ui, sans-serif',
+    fontFamily: 'DM Sans, system-ui, sans-serif',
     textTransform: 'none',
     px: 1.5,
     py: 1,
     border: 0,
     outline: 0,
     '&:hover': {
-      backgroundColor: COLORS.hover,
-      color: COLORS.primary,
+      backgroundColor: 'transparent',
+      color: '#00AE72',
       border: 0
     },
+
     '&:focus': {
       outline: 0,
       boxShadow: 'none',
@@ -128,7 +129,7 @@ const styles = {
     }
   },
   navButtonActive: {
-    color: COLORS.primary
+    color: '#00AE72'
   },
   rightSection: {
     display: 'flex',
@@ -137,18 +138,22 @@ const styles = {
   },
   searchIcon: {
     color: COLORS.textLight,
-    '&:hover': { color: COLORS.primary },
+    '&:hover': {
+      backgroundColor: 'transparent',
+      color: '#00AE72',
+      border: 0
+    },
     '&:focus': { outline: 'none' },
     '&.Mui-focusVisible': { outline: 'none' }
   },
   loginBtn: {
-    color: COLORS.text,
+    color: '#696969',
     fontWeight: 500,
     fontSize: '0.9rem',
     textTransform: 'none',
     '&:hover': {
       backgroundColor: 'transparent',
-      color: COLORS.primary
+      color: '#00AE72'
     },
     '&:focus': { outline: 'none' },
     '&.Mui-focusVisible': { outline: 'none' }
@@ -190,7 +195,11 @@ const styles = {
     fontSize: '0.85rem',
     mb: 1.5,
     pl: 0.5,
-    borderLeft: `3px solid ${COLORS.primary}`
+    borderLeft: `3px solid ${COLORS.primary}`,
+    '&:hover': {
+      backgroundColor: 'transparent',
+      color: '#00AE72'
+    },
   },
   movieGrid: {
     display: 'grid',
@@ -650,7 +659,7 @@ function Header() {
                   transition: 'all 0.2s',
                   '&:hover': {
                     backgroundColor: 'transparent',
-                    color: COLORS.primary
+                    color: '#00AE72'
                   }
                 }}
               >
@@ -703,7 +712,7 @@ function Header() {
                   transition: 'all 0.2s',
                   '&:hover': {
                     backgroundColor: 'transparent',
-                    color: COLORS.primary
+                    color: '#00AE72'
                   }
                 }}
               >

@@ -221,7 +221,74 @@ export const mockMovies = [
     status: 'COMING',
     rating: 4.5
   },
-
+  {
+    _id: 'Ninh đẹp trai',
+    title: 'Ninh đẹp trai',
+    slug: 'avengers-endgame',
+    description: 'Sau sự kiện tàn khốc của Avengers: Infinity War, vũ trụ đang trong cảnh đổ nát. Với sự giúp đỡ của các đồng minh còn lại, các Avengers tập hợp một lần nữa để đảo ngược hành động của Thanos và khôi phục sự cân bằng cho vũ trụ.',
+    director: 'Anthony Russo, Joe Russo',
+    actors: ['Robert Downey Jr.', 'Chris Evans', 'Mark Ruffalo', 'Chris Hemsworth', 'Scarlett Johansson'],
+    duration: 181,
+    ageRating: 'T13',
+    genres: ['Action', 'Sci-Fi', 'Adventure'],
+    posterUrl: 'https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
+    bannerUrl: 'https://image.tmdb.org/t/p/original/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+    trailerUrl: 'https://www.youtube.com/embed/TcMBFSGVi1c',
+    releaseDate: '2024-12-01',
+    status: 'NOW',
+    rating: 4.8
+  },
+  {
+    _id: 'Avengers: Endgamee',
+    title: 'Biệt đội siêu anh hùng',
+    slug: 'avengers-endgame',
+    description: 'Sau sự kiện tàn khốc của Avengers: Infinity War, vũ trụ đang trong cảnh đổ nát. Với sự giúp đỡ của các đồng minh còn lại, các Avengers tập hợp một lần nữa để đảo ngược hành động của Thanos và khôi phục sự cân bằng cho vũ trụ.',
+    director: 'Anthony Russo, Joe Russo',
+    actors: ['Robert Downey Jr.', 'Chris Evans', 'Mark Ruffalo', 'Chris Hemsworth', 'Scarlett Johansson'],
+    duration: 181,
+    ageRating: 'T13',
+    genres: ['Action', 'Sci-Fi', 'Adventure'],
+    posterUrl: 'https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
+    bannerUrl: 'https://image.tmdb.org/t/p/original/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+    trailerUrl: 'https://www.youtube.com/embed/TcMBFSGVi1c',
+    releaseDate: '2024-12-01',
+    status: 'NOW',
+    rating: 4.8
+  },
+  {
+    _id: 'Avengers: Endgameee',
+    title: 'One Piece',
+    slug: 'avengers-endgame',
+    description: 'Sau sự kiện tàn khốc của Avengers: Infinity War, vũ trụ đang trong cảnh đổ nát. Với sự giúp đỡ của các đồng minh còn lại, các Avengers tập hợp một lần nữa để đảo ngược hành động của Thanos và khôi phục sự cân bằng cho vũ trụ.',
+    director: 'Anthony Russo, Joe Russo',
+    actors: ['Robert Downey Jr.', 'Chris Evans', 'Mark Ruffalo', 'Chris Hemsworth', 'Scarlett Johansson'],
+    duration: 181,
+    ageRating: 'T13',
+    genres: ['Action', 'Sci-Fi', 'Adventure'],
+    posterUrl: 'https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
+    bannerUrl: 'https://image.tmdb.org/t/p/original/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+    trailerUrl: 'https://www.youtube.com/embed/TcMBFSGVi1c',
+    releaseDate: '2024-12-01',
+    status: 'NOW',
+    rating: 4.8
+  },
+  {
+    _id: 'Avengers: Endgameg',
+    title: 'Dragon Ball Super',
+    slug: 'avengers-endgame',
+    description: 'Sau sự kiện tàn khốc của Avengers: Infinity War, vũ trụ đang trong cảnh đổ nát. Với sự giúp đỡ của các đồng minh còn lại, các Avengers tập hợp một lần nữa để đảo ngược hành động của Thanos và khôi phục sự cân bằng cho vũ trụ.',
+    director: 'Anthony Russo, Joe Russo',
+    actors: ['Robert Downey Jr.', 'Chris Evans', 'Mark Ruffalo', 'Chris Hemsworth', 'Scarlett Johansson'],
+    duration: 181,
+    ageRating: 'T13',
+    genres: ['Action', 'Sci-Fi', 'Adventure'],
+    posterUrl: 'https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
+    bannerUrl: 'https://image.tmdb.org/t/p/original/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+    trailerUrl: 'https://www.youtube.com/embed/TcMBFSGVi1c',
+    releaseDate: '2024-12-01',
+    status: 'NOW',
+    rating: 4.8
+  }
 ];
 
 // Lấy phim đang chiếu
