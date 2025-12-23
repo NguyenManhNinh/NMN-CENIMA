@@ -7,13 +7,14 @@ import {
   Select,
   MenuItem,
   Button,
-  Typography,
-  InputBase
+  CircularProgress
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-// Mock data - sẽ thay bằng API
-import { getNowShowingMovies } from '../../../mocks/mockMovies';
+// API imports
+import { getNowShowingMoviesAPI } from '../../../apis/movieApi';
+import { getAllCinemasAPI } from '../../../apis/cinemaApi';
+import { getShowtimesByFilterAPI } from '../../../apis/showtimeApi';
 
 // STYLED COMPONENTS
 
@@ -97,6 +98,13 @@ const styles = {
       color: '#828282'
     }
   },
+  buyButtonActive: {
+    backgroundColor: '#FF8C00',
+    color: '#fff',
+    '&:hover': {
+      backgroundColor: '#FF7000'
+    }
+  },
   menuItem: {
     fontSize: '1rem',
     py: 1.5
@@ -104,15 +112,14 @@ const styles = {
   placeholder: {
     color: '#1C1C1C',
     fontSize: '0.9rem'
+  },
+  loading: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    px: 2
   }
 };
-
-// MOCK DATA - Cinemas, Dates, Showtimes (sẽ thay bằng API)
-const mockCinemas = [
-  { id: 'c1', name: 'NMN Cinema Hà Nội' },
-  { id: 'c2', name: 'NMN Cinema Hồ Chí Minh' },
-  { id: 'c3', name: 'NMN Cinema Đà Nẵng' }
-];
 
 // Generate next 7 days
 const generateDates = () => {
@@ -130,50 +137,82 @@ const generateDates = () => {
   return dates;
 };
 
-const mockShowtimes = [
-  { id: 's1', time: '09:00', type: '2D' },
-  { id: 's2', time: '11:30', type: '2D' },
-  { id: 's3', time: '14:00', type: '3D' },
-  { id: 's4', time: '16:30', type: '2D' },
-  { id: 's5', time: '19:00', type: '3D' },
-  { id: 's6', time: '21:30', type: '2D' }
-];
-
 // QUICK BOOKING BAR COMPONENT
 function QuickBookingBar() {
   const navigate = useNavigate();
 
-  // State
+  // State for data
   const [movies, setMovies] = useState([]);
   const [cinemas, setCinemas] = useState([]);
   const [dates, setDates] = useState([]);
   const [showtimes, setShowtimes] = useState([]);
 
+  // State for selections
   const [selectedMovie, setSelectedMovie] = useState('');
   const [selectedCinema, setSelectedCinema] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedShowtime, setSelectedShowtime] = useState('');
 
-  // Load initial data
-  useEffect(() => {
-    // Load movies
-    const nowShowing = getNowShowingMovies();
-    setMovies(nowShowing);
+  // Loading states
+  const [loadingMovies, setLoadingMovies] = useState(false);
+  const [loadingCinemas, setLoadingCinemas] = useState(false);
+  const [loadingShowtimes, setLoadingShowtimes] = useState(false);
 
+  // Load initial data - Movies
+  useEffect(() => {
+    const loadMovies = async () => {
+      setLoadingMovies(true);
+      try {
+        const response = await getNowShowingMoviesAPI(50);
+        if (response?.data?.movies) {
+          setMovies(response.data.movies);
+        } else if (Array.isArray(response?.data)) {
+          setMovies(response.data);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách phim:', error);
+        setMovies([]);
+      } finally {
+        setLoadingMovies(false);
+      }
+    };
+
+    loadMovies();
     // Generate dates
     setDates(generateDates());
   }, []);
 
-  // Cascading logic: When movie changes, load cinemas
+  // When movie changes, load cinemas
   useEffect(() => {
-    if (selectedMovie) {
-      // TODO: API call to get cinemas showing this movie
-      setCinemas(mockCinemas);
+    const loadCinemas = async () => {
+      if (!selectedMovie) {
+        setCinemas([]);
+        return;
+      }
+
+      setLoadingCinemas(true);
       setSelectedCinema('');
       setSelectedDate('');
       setSelectedShowtime('');
       setShowtimes([]);
-    }
+
+      try {
+        // Load all cinemas (có thể filter theo movie nếu API hỗ trợ)
+        const response = await getAllCinemasAPI();
+        if (response?.data?.cinemas) {
+          setCinemas(response.data.cinemas);
+        } else if (Array.isArray(response?.data)) {
+          setCinemas(response.data);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách rạp:', error);
+        setCinemas([]);
+      } finally {
+        setLoadingCinemas(false);
+      }
+    };
+
+    loadCinemas();
   }, [selectedMovie]);
 
   // When cinema changes, reset date and showtime
@@ -187,18 +226,45 @@ function QuickBookingBar() {
 
   // When date changes, load showtimes
   useEffect(() => {
-    if (selectedDate) {
-      // TODO: API call to get showtimes for movie, cinema, date
-      setShowtimes(mockShowtimes);
+    const loadShowtimes = async () => {
+      if (!selectedMovie || !selectedCinema || !selectedDate) {
+        setShowtimes([]);
+        return;
+      }
+
+      setLoadingShowtimes(true);
       setSelectedShowtime('');
-    }
-  }, [selectedDate]);
+
+      try {
+        const response = await getShowtimesByFilterAPI(selectedMovie, selectedCinema, selectedDate);
+        if (response?.data?.showtimes) {
+          // Format showtimes với thông tin time và format
+          const formattedShowtimes = response.data.showtimes.map(s => ({
+            _id: s._id,
+            time: new Date(s.startAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+            format: s.format || '2D',
+            roomName: s.roomId?.name || ''
+          }));
+          setShowtimes(formattedShowtimes);
+        } else {
+          setShowtimes([]);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải lịch chiếu:', error);
+        setShowtimes([]);
+      } finally {
+        setLoadingShowtimes(false);
+      }
+    };
+
+    loadShowtimes();
+  }, [selectedMovie, selectedCinema, selectedDate]);
 
   // Handle buy ticket
   const handleBuyTicket = () => {
     if (selectedMovie && selectedCinema && selectedDate && selectedShowtime) {
-      // Navigate to seat selection page
-      navigate(`/dat-ve/?phim=${selectedMovie}&rap=${selectedCinema}&ngay=${selectedDate}&gio=${selectedShowtime}`);
+      // Navigate to seat selection page with showtime ID
+      navigate(`/dat-ve/${selectedShowtime}`);
     }
   };
 
@@ -215,22 +281,26 @@ function QuickBookingBar() {
           <Box sx={styles.stepBox}>
             <Box sx={styles.stepNumber}>1</Box>
             <FormControl sx={styles.selectWrapper} size="small">
-              <StyledSelect
-                value={selectedMovie}
-                onChange={(e) => setSelectedMovie(e.target.value)}
-                displayEmpty
-                renderValue={(value) => {
-                  if (!value) return <span style={styles.placeholder}>Chọn Phim</span>;
-                  const movie = movies.find(m => m._id === value);
-                  return movie?.title || value;
-                }}
-              >
-                {movies.map((movie) => (
-                  <MenuItem key={movie._id} value={movie._id} sx={styles.menuItem}>
-                    {movie.title}
-                  </MenuItem>
-                ))}
-              </StyledSelect>
+              {loadingMovies ? (
+                <Box sx={styles.loading}><CircularProgress size={20} /></Box>
+              ) : (
+                <StyledSelect
+                  value={selectedMovie}
+                  onChange={(e) => setSelectedMovie(e.target.value)}
+                  displayEmpty
+                  renderValue={(value) => {
+                    if (!value) return <span style={styles.placeholder}>Chọn Phim</span>;
+                    const movie = movies.find(m => m._id === value);
+                    return movie?.title || value;
+                  }}
+                >
+                  {movies.map((movie) => (
+                    <MenuItem key={movie._id} value={movie._id} sx={styles.menuItem}>
+                      {movie.title}
+                    </MenuItem>
+                  ))}
+                </StyledSelect>
+              )}
             </FormControl>
           </Box>
 
@@ -238,23 +308,27 @@ function QuickBookingBar() {
           <Box sx={styles.stepBox}>
             <Box sx={styles.stepNumber}>2</Box>
             <FormControl sx={styles.selectWrapper} size="small">
-              <StyledSelect
-                value={selectedCinema}
-                onChange={(e) => setSelectedCinema(e.target.value)}
-                displayEmpty
-                disabled={!selectedMovie}
-                renderValue={(value) => {
-                  if (!value) return <span style={styles.placeholder}>Chọn Rạp</span>;
-                  const cinema = cinemas.find(c => c.id === value);
-                  return cinema?.name || value;
-                }}
-              >
-                {cinemas.map((cinema) => (
-                  <MenuItem key={cinema.id} value={cinema.id} sx={styles.menuItem}>
-                    {cinema.name}
-                  </MenuItem>
-                ))}
-              </StyledSelect>
+              {loadingCinemas ? (
+                <Box sx={styles.loading}><CircularProgress size={20} /></Box>
+              ) : (
+                <StyledSelect
+                  value={selectedCinema}
+                  onChange={(e) => setSelectedCinema(e.target.value)}
+                  displayEmpty
+                  disabled={!selectedMovie}
+                  renderValue={(value) => {
+                    if (!value) return <span style={styles.placeholder}>Chọn Rạp</span>;
+                    const cinema = cinemas.find(c => c._id === value);
+                    return cinema?.name || value;
+                  }}
+                >
+                  {cinemas.map((cinema) => (
+                    <MenuItem key={cinema._id} value={cinema._id} sx={styles.menuItem}>
+                      {cinema.name}
+                    </MenuItem>
+                  ))}
+                </StyledSelect>
+              )}
             </FormControl>
           </Box>
 
@@ -286,30 +360,43 @@ function QuickBookingBar() {
           <Box sx={styles.stepBox}>
             <Box sx={styles.stepNumber}>4</Box>
             <FormControl sx={styles.selectWrapper} size="small">
-              <StyledSelect
-                value={selectedShowtime}
-                onChange={(e) => setSelectedShowtime(e.target.value)}
-                displayEmpty
-                disabled={!selectedDate}
-                renderValue={(value) => {
-                  if (!value) return <span style={styles.placeholder}>Chọn Suất</span>;
-                  const showtime = showtimes.find(s => s.id === value);
-                  return showtime ? `${showtime.time} - ${showtime.type}` : value;
-                }}
-              >
-                {showtimes.map((showtime) => (
-                  <MenuItem key={showtime.id} value={showtime.id} sx={styles.menuItem}>
-                    {showtime.time} - {showtime.type}
-                  </MenuItem>
-                ))}
-              </StyledSelect>
+              {loadingShowtimes ? (
+                <Box sx={styles.loading}><CircularProgress size={20} /></Box>
+              ) : (
+                <StyledSelect
+                  value={selectedShowtime}
+                  onChange={(e) => setSelectedShowtime(e.target.value)}
+                  displayEmpty
+                  disabled={!selectedDate || showtimes.length === 0}
+                  renderValue={(value) => {
+                    if (!value) return <span style={styles.placeholder}>Chọn Suất</span>;
+                    const showtime = showtimes.find(s => s._id === value);
+                    return showtime ? `${showtime.time} - ${showtime.format}` : value;
+                  }}
+                >
+                  {showtimes.length === 0 && selectedDate ? (
+                    <MenuItem disabled sx={styles.menuItem}>
+                      Không có suất chiếu
+                    </MenuItem>
+                  ) : (
+                    showtimes.map((showtime) => (
+                      <MenuItem key={showtime._id} value={showtime._id} sx={styles.menuItem}>
+                        {showtime.time} - {showtime.format} {showtime.roomName && `(${showtime.roomName})`}
+                      </MenuItem>
+                    ))
+                  )}
+                </StyledSelect>
+              )}
             </FormControl>
           </Box>
 
           {/* Buy Button */}
           <Button
             variant="contained"
-            sx={styles.buyButton}
+            sx={{
+              ...styles.buyButton,
+              ...(canBuy ? styles.buyButtonActive : {})
+            }}
             onClick={handleBuyTicket}
             disabled={!canBuy}
           >
