@@ -119,11 +119,4 @@ export const getGoogleAuthURL = () => {
   return `${API_URL}/auth/google`;
 };
 
-/**
- * Get Facebook OAuth URL
- */
-export const getFacebookAuthURL = () => {
-  return `${API_URL}/auth/facebook`;
-};
-
 export default api;

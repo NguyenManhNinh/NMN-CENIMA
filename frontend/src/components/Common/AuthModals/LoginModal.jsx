@@ -19,7 +19,7 @@ import {
   VisibilityOff
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
-import { getGoogleAuthURL, getFacebookAuthURL } from '../../../apis/authApi';
+import { getGoogleAuthURL } from '../../../apis/authApi';
 
 // Mascot image (Galaxy Cinema style)
 import mascotImage from '../../../assets/images/NMN_CENIMA_LOGO.png';
@@ -354,11 +354,11 @@ function LoginModal({ open, onClose, onSwitchToRegister, onForgotPassword }) {
         {/* Social Login */}
         <Divider sx={styles.socialDivider}>hoặc đăng nhập với</Divider>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Button
             variant="outlined"
             onClick={handleGoogleLogin}
-            sx={{ ...styles.socialButton, ...styles.googleButton }}
+            sx={{ ...styles.socialButton, ...styles.googleButton, flex: 1, maxWidth: 300 }}
             startIcon={
               <Box
                 component="img"
@@ -369,21 +369,6 @@ function LoginModal({ open, onClose, onSwitchToRegister, onForgotPassword }) {
             }
           >
             Google
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleFacebookLogin}
-            sx={{ ...styles.socialButton, ...styles.facebookButton }}
-            startIcon={
-              <Box
-                component="img"
-                src="https://www.facebook.com/favicon.ico"
-                alt="Facebook"
-                sx={{ width: 20, height: 20 }}
-              />
-            }
-          >
-            Facebook
           </Button>
         </Box>
 
