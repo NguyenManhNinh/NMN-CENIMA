@@ -86,15 +86,20 @@ const styles = {
     textAlign: 'left',
     py: 0.5,
   },
-  // Tên phim
+  // Tên phim - cho phép 2 dòng
   title: {
     fontWeight: 800,
-    fontSize: '1rem',
-    mb: 2,
-    fontFamily: '"Space Grotesk", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif', fontFamily: 'Space Grotesk',
+    fontSize: { xs: '0.9rem', sm: '1rem' },
+    mb: 1,
+    fontFamily: '"Space Grotesk", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+    // Hiển thị tối đa 2 dòng
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap'
+    lineHeight: 1.3,
+    minHeight: '2.6em' // 2 dòng x 1.3 line-height
   }
 };
 

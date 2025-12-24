@@ -28,8 +28,9 @@ const styles = {
   },
   sectionHeader: {
     display: 'flex',
-    alignItems: 'center',
-    gap: 3,
+    alignItems: { xs: 'flex-start', md: 'center' },
+    flexDirection: { xs: 'column', md: 'row' },
+    gap: { xs: 2, md: 3 },
     mb: 3
   },
   sectionTitle: {

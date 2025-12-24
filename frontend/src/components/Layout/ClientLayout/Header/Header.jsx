@@ -164,11 +164,20 @@ const styles = {
     backgroundColor: '#f5f5f5',
     borderRadius: 1,
     px: 1.5,
-    py: 0.5
+    py: 0.5,
+    // Mobile: full width overlay
+    position: { xs: 'absolute', md: 'relative' },
+    left: { xs: 0, md: 'auto' },
+    right: { xs: 0, md: 'auto' },
+    top: { xs: '50%', md: 'auto' },
+    transform: { xs: 'translateY(-50%)', md: 'none' },
+    mx: { xs: 2, md: 0 },
+    zIndex: 10
   },
   searchInput: {
     fontSize: '0.9rem',
-    width: 200
+    width: { xs: '100%', md: 200 },
+    flex: { xs: 1, md: 'none' }
   },
   // Mega Menu styles
   megaMenu: {
@@ -725,18 +734,31 @@ function Header() {
     </Popper>
   );
 
-  // RENDER - Mobile Menu
+  // RENDER - Mobile Menu với Accordion
+  const [mobileMenuExpanded, setMobileMenuExpanded] = useState({
+    phim: false,
+    blog: false,
+    event: false
+  });
+
+  const toggleMobileSubMenu = (menu) => {
+    setMobileMenuExpanded(prev => ({
+      ...prev,
+      [menu]: !prev[menu]
+    }));
+  };
+
   const renderMobileMenu = () => (
     <Drawer
       anchor="left"
       open={mobileMenuOpen}
       onClose={toggleMobileMenu}
       PaperProps={{
-        sx: { width: 280, backgroundColor: COLORS.white }
+        sx: { width: 300, backgroundColor: COLORS.white }
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
-        <Box component="img" src={LogoNMNCinema} alt="NMN Cinema" sx={{ height: 35 }} />
+        <Box component="img" src={LogoNMNCinema} alt="NMN Cinema" sx={{ height: 50 }} />
         <IconButton onClick={toggleMobileMenu}>
           <CloseIcon />
         </IconButton>
@@ -744,50 +766,170 @@ function Header() {
 
       <Divider />
 
-      <List>
-        {/* Phim menu items */}
+      <List sx={{ pt: 0 }}>
+        {/* === PHIM === */}
         <ListItem
-          component={Link}
-          to="/movies?status=now"
-          onClick={toggleMobileMenu}
-          sx={{ color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+          onClick={() => toggleMobileSubMenu('phim')}
+          sx={{
+            color: COLORS.text,
+            cursor: 'pointer',
+            backgroundColor: mobileMenuExpanded.phim ? '#f5f5f5' : 'transparent',
+            '&:hover': { backgroundColor: COLORS.hover }
+          }}
         >
           <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
             <MovieIcon />
           </ListItemIcon>
-          <ListItemText primary="Phim đang chiếu" />
-        </ListItem>
-        <ListItem
-          component={Link}
-          to="/movies?status=coming"
-          onClick={toggleMobileMenu}
-          sx={{ color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
-        >
-          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
-            <MovieIcon />
-          </ListItemIcon>
-          <ListItemText primary="Phim sắp chiếu" />
+          <ListItemText
+            primary="Phim"
+            primaryTypographyProps={{ fontWeight: 600 }}
+          />
+          <ArrowDownIcon sx={{
+            transform: mobileMenuExpanded.phim ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.3s'
+          }} />
         </ListItem>
 
-        <Divider sx={{ my: 1 }} />
-
-        {menuItems.map((item) => (
+        {/* Phim sub-items */}
+        <Box sx={{
+          maxHeight: mobileMenuExpanded.phim ? '200px' : '0px',
+          overflow: 'hidden',
+          transition: 'max-height 0.3s ease-in-out',
+          backgroundColor: '#fafafa'
+        }}>
           <ListItem
-            key={item.path}
             component={Link}
-            to={item.path}
+            to="/movies?status=now"
             onClick={toggleMobileMenu}
-            sx={{
-              color: COLORS.text,
-              '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary }
-            }}
+            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
           >
-            <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText primary={item.label} />
+            <ListItemText primary="Phim đang chiếu" />
           </ListItem>
-        ))}
+          <ListItem
+            component={Link}
+            to="/movies?status=coming"
+            onClick={toggleMobileMenu}
+            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+          >
+            <ListItemText primary="Phim sắp chiếu" />
+          </ListItem>
+        </Box>
+
+        <Divider />
+
+        {/* === GÓC ĐIỆN ẢNH === */}
+        <ListItem
+          onClick={() => toggleMobileSubMenu('blog')}
+          sx={{
+            color: COLORS.text,
+            cursor: 'pointer',
+            backgroundColor: mobileMenuExpanded.blog ? '#f5f5f5' : 'transparent',
+            '&:hover': { backgroundColor: COLORS.hover }
+          }}
+        >
+          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+            <ArticleIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Góc điện ảnh"
+            primaryTypographyProps={{ fontWeight: 600 }}
+          />
+          <ArrowDownIcon sx={{
+            transform: mobileMenuExpanded.blog ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.3s'
+          }} />
+        </ListItem>
+
+        {/* Blog sub-items */}
+        <Box sx={{
+          maxHeight: mobileMenuExpanded.blog ? '200px' : '0px',
+          overflow: 'hidden',
+          transition: 'max-height 0.3s ease-in-out',
+          backgroundColor: '#fafafa'
+        }}>
+          <ListItem
+            component={Link}
+            to="/the-loai-phim"
+            onClick={toggleMobileMenu}
+            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+          >
+            <ListItemText primary="Thể loại phim" />
+          </ListItem>
+          <ListItem
+            component={Link}
+            to="/dien-vien"
+            onClick={toggleMobileMenu}
+            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+          >
+            <ListItemText primary="Diễn viên" />
+          </ListItem>
+          <ListItem
+            component={Link}
+            to="/dao-dien"
+            onClick={toggleMobileMenu}
+            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+          >
+            <ListItemText primary="Đạo diễn" />
+          </ListItem>
+        </Box>
+
+        <Divider />
+
+        {/* === SỰ KIỆN === */}
+        <ListItem
+          onClick={() => toggleMobileSubMenu('event')}
+          sx={{
+            color: COLORS.text,
+            cursor: 'pointer',
+            backgroundColor: mobileMenuExpanded.event ? '#f5f5f5' : 'transparent',
+            '&:hover': { backgroundColor: COLORS.hover }
+          }}
+        >
+          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+            <EventIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Sự kiện"
+            primaryTypographyProps={{ fontWeight: 600 }}
+          />
+          <ArrowDownIcon sx={{
+            transform: mobileMenuExpanded.event ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.3s'
+          }} />
+        </ListItem>
+
+        {/* Event sub-items */}
+        <Box sx={{
+          maxHeight: mobileMenuExpanded.event ? '200px' : '0px',
+          overflow: 'hidden',
+          transition: 'max-height 0.3s ease-in-out',
+          backgroundColor: '#fafafa'
+        }}>
+          <ListItem
+            component={Link}
+            to="/khuyen-mai"
+            onClick={toggleMobileMenu}
+            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+          >
+            <ListItemText primary="Khuyến mãi" />
+          </ListItem>
+          <ListItem
+            component={Link}
+            to="/uu-dai-thanh-vien"
+            onClick={toggleMobileMenu}
+            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+          >
+            <ListItemText primary="Ưu đãi thành viên" />
+          </ListItem>
+          <ListItem
+            component={Link}
+            to="/su-kien-dac-biet"
+            onClick={toggleMobileMenu}
+            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
+          >
+            <ListItemText primary="Sự kiện đặc biệt" />
+          </ListItem>
+        </Box>
       </List>
     </Drawer>
   );
@@ -828,8 +970,13 @@ function Header() {
       <Container maxWidth="xl">
         <Toolbar sx={styles.toolbar} disableGutters>
 
-          {/*PHẦN TRÁI: Menu mobile + Logo*/}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/*PHẦN TRÁI: Menu mobile + Logo - ẩn khi search mở trên mobile*/}
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            visibility: { xs: searchOpen ? 'hidden' : 'visible', md: 'visible' }
+          }}>
             {isMobile && (
               <IconButton onClick={toggleMobileMenu} sx={{ color: COLORS.text }}>
                 <MenuIcon />
@@ -941,22 +1088,29 @@ function Header() {
               </IconButton>
             )}
 
-            {isAuthenticated ? (
-              <>
-                <IconButton onClick={handleAccountMenuOpen}>
-                  <Avatar src={user?.avatar} alt={user?.name} sx={{ width: 32, height: 32 }} />
-                </IconButton>
-                {renderAccountMenu()}
-              </>
-            ) : (
-              <Button
-                onClick={() => setLoginModalOpen(true)}
-                sx={styles.loginBtn}
-                startIcon={<PersonIcon />}
-              >
-                Đăng Nhập
-              </Button>
-            )}
+            {/* User section - ẩn trên mobile khi search mở */}
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              visibility: { xs: searchOpen ? 'hidden' : 'visible', md: 'visible' }
+            }}>
+              {isAuthenticated ? (
+                <>
+                  <IconButton onClick={handleAccountMenuOpen}>
+                    <Avatar src={user?.avatar} alt={user?.name} sx={{ width: 32, height: 32 }} />
+                  </IconButton>
+                  {renderAccountMenu()}
+                </>
+              ) : (
+                <Button
+                  onClick={() => setLoginModalOpen(true)}
+                  sx={styles.loginBtn}
+                  startIcon={<PersonIcon />}
+                >
+                  Đăng Nhập
+                </Button>
+              )}
+            </Box>
           </Box>
 
         </Toolbar>

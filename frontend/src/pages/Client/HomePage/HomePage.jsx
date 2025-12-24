@@ -41,8 +41,9 @@ const styles = {
   // Header của section - Galaxy style
   sectionHeader: {
     display: 'flex',
-    alignItems: 'center',
-    gap: 4,
+    alignItems: { xs: 'flex-start', md: 'center' },
+    flexDirection: { xs: 'column', md: 'row' },
+    gap: { xs: 2, md: 4 },
     mb: 3
   },
   sectionTitle: {

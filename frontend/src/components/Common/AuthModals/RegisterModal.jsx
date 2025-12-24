@@ -67,12 +67,12 @@ const styles = {
   mascotContainer: {
     display: 'flex',
     justifyContent: 'center',
-    mt: -6,
+    mt: { xs: -4, sm: -6 },
     mb: 2
   },
   mascot: {
-    width: 180,
-    height: 130,
+    width: { xs: 140, sm: 180 },
+    height: { xs: 100, sm: 130 },
     objectFit: 'contain'
   },
   title: {

@@ -45,12 +45,20 @@ const styles = {
     backgroundColor: '#fff',
     borderBottom: '3px solid #FF6A6A',
     py: 0,
-    p: 1.5
+    p: 1.5,
+    // Mobile: cho phép scroll ngang
+    overflowX: { xs: 'auto', md: 'visible' },
+    '&::-webkit-scrollbar': {
+      display: 'none'
+    },
+    scrollbarWidth: 'none'
   },
   container: {
     display: 'flex',
     alignItems: 'stretch',
-    height: 50
+    height: 50,
+    // Mobile: đảm bảo không bị co lại
+    minWidth: { xs: 'max-content', md: 'auto' }
   },
   stepBox: {
     display: 'flex',
