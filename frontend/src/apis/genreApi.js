@@ -1,23 +1,43 @@
-import axiosClient from './axiosClient';
+import axios from 'axios';
 
-const genreApi = {
-  // Lấy danh sách thể loại
-  getAll: (params) => {
-    const url = '/genres';
-    return axiosClient.get(url, { params });
-  },
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
 
-  // Lấy chi tiết thể loại theo slug
-  getBySlug: (slug) => {
-    const url = `/genres/${slug}`;
-    return axiosClient.get(url);
-  },
-
-  // Lấy phim theo thể loại
-  getMoviesByGenre: (slug, params) => {
-    const url = `/genres/${slug}/movies`;
-    return axiosClient.get(url, { params });
+// Create axios instance
+const api = axios.create({
+  baseURL: `${API_URL}/genres`,
+  headers: {
+    'Content-Type': 'application/json'
   }
+});
+
+// ==================== GENRE API ====================
+
+/**
+ * Get all genres
+ * @param {Object} params - { isActive }
+ */
+export const getAllGenresAPI = async (params = {}) => {
+  const response = await api.get('/', { params });
+  return response.data;
 };
 
-export default genreApi;
+/**
+ * Get genre by slug
+ * @param {string} slug - Genre slug
+ */
+export const getGenreBySlugAPI = async (slug) => {
+  const response = await api.get(`/${slug}`);
+  return response.data;
+};
+
+/**
+ * Get movies by genre slug
+ * @param {string} slug - Genre slug
+ * @param {Object} params - { page, limit, status }
+ */
+export const getMoviesByGenreAPI = async (slug, params = {}) => {
+  const response = await api.get(`/${slug}/movies`, { params });
+  return response.data;
+};
+
+export default api;

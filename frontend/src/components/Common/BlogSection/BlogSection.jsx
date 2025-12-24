@@ -8,16 +8,17 @@ import {
   Tabs,
   Tab,
   Button,
-  Chip
+  Chip,
+  Skeleton
 } from '@mui/material';
 import {
   ThumbUp as ThumbUpIcon,
-  Visibility as ViewIcon,
-  ArrowForward as ArrowIcon
+  Visibility as ViewIcon
 } from '@mui/icons-material';
 
-// Mock data
-import { mockBlogs, getBlogsByCategory } from '../../../mocks/mockBlogs';
+// APIs
+import { getAllGenresAPI } from '../../../apis/genreApi';
+import { getActorsAPI, getDirectorsAPI } from '../../../apis/personApi';
 
 // STYLES
 const styles = {
@@ -76,7 +77,8 @@ const styles = {
   featuredImageContainer: {
     overflow: 'hidden',
     borderRadius: 1,
-    aspectRatio: '16/9'
+    aspectRatio: '16/9',
+    backgroundColor: '#e0e0e0'
   },
   featuredImage: {
     width: '100%',
@@ -107,7 +109,8 @@ const styles = {
     width: 140,
     overflow: 'hidden',
     borderRadius: 1,
-    aspectRatio: '16/9'
+    aspectRatio: '16/9',
+    backgroundColor: '#e0e0e0'
   },
   smallImage: {
     width: '100%',
@@ -167,29 +170,165 @@ const styles = {
   }
 };
 
+// Tab constants
+const TAB_GENRES = 0;
+const TAB_ACTORS = 1;
+const TAB_DIRECTORS = 2;
+
 // BLOG SECTION COMPONENT
 function BlogSection() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(0);
-  const [blogs, setBlogs] = useState([]);
+  const [activeTab, setActiveTab] = useState(TAB_GENRES);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = ['Thể loại phim', 'Diễn viên, Đạo diễn'];
+  const categories = ['Thể loại phim', 'Diễn viên', 'Đạo diễn'];
 
+  // Load data theo tab
   useEffect(() => {
-    const categoryBlogs = getBlogsByCategory(categories[activeTab]);
-    setBlogs(categoryBlogs);
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        let response;
+
+        switch (activeTab) {
+          case TAB_GENRES:
+            response = await getAllGenresAPI();
+            // Backend trả về { success: true, data: [...] }
+            const genresData = response?.data;
+            if (Array.isArray(genresData) && genresData.length > 0) {
+              setItems(genresData.map(g => ({
+                _id: g._id,
+                slug: g.slug,
+                title: g.name,
+                imageUrl: g.imageUrl,
+                viewCount: g.viewCount || 0
+              })));
+            } else {
+              setItems([]);
+            }
+            break;
+
+          case TAB_ACTORS:
+            response = await getActorsAPI({ limit: 4 });
+            // Backend trả về { success: true, data: [...] }
+            const actorsData = response?.data;
+            if (Array.isArray(actorsData) && actorsData.length > 0) {
+              setItems(actorsData.map(p => ({
+                _id: p._id,
+                slug: p.slug,
+                title: p.name,
+                imageUrl: p.photoUrl,
+                viewCount: p.viewCount || 0
+              })));
+            } else {
+              setItems([]);
+            }
+            break;
+
+          case TAB_DIRECTORS:
+            response = await getDirectorsAPI({ limit: 4 });
+            // Backend trả về { success: true, data: [...] }
+            const directorsData = response?.data;
+            if (Array.isArray(directorsData) && directorsData.length > 0) {
+              setItems(directorsData.map(p => ({
+                _id: p._id,
+                slug: p.slug,
+                title: p.name,
+                imageUrl: p.photoUrl,
+                viewCount: p.viewCount || 0
+              })));
+            } else {
+              setItems([]);
+            }
+            break;
+
+          default:
+            setItems([]);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải dữ liệu:', error);
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [activeTab]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
 
-  const handleBlogClick = (blogId) => {
-    navigate(`/goc-dien-anh/${blogId}`);
+  const handleItemClick = (item) => {
+    switch (activeTab) {
+      case TAB_GENRES:
+        navigate(`/the-loai/${item.slug}`);
+        break;
+      case TAB_ACTORS:
+      case TAB_DIRECTORS:
+        navigate(`/nghe-si/${item.slug}`);
+        break;
+      default:
+        break;
+    }
   };
 
-  const featuredBlog = blogs[0];
-  const smallBlogs = blogs.slice(1, 4);
+  const getViewMoreUrl = () => {
+    switch (activeTab) {
+      case TAB_GENRES:
+        return '/the-loai';
+      case TAB_ACTORS:
+        return '/nghe-si?role=actor';
+      case TAB_DIRECTORS:
+        return '/nghe-si?role=director';
+      default:
+        return '/goc-dien-anh';
+    }
+  };
+
+  const getPlaceholderImage = () => {
+    switch (activeTab) {
+      case TAB_GENRES:
+        return 'https://placehold.co/800x450/1a3a5c/ffffff?text=Genre';
+      case TAB_ACTORS:
+      case TAB_DIRECTORS:
+        return 'https://placehold.co/800x450/1a3a5c/ffffff?text=Person';
+      default:
+        return 'https://placehold.co/800x450/1a3a5c/ffffff?text=No+Image';
+    }
+  };
+
+  const featuredItem = items[0];
+  const smallItems = items.slice(1, 4);
+
+  // Render skeleton loading
+  const renderSkeletons = () => (
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={7}>
+        <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 1 }} />
+        <Skeleton width="80%" sx={{ mt: 2 }} />
+        <Skeleton width="40%" />
+      </Grid>
+      <Grid item xs={12} md={5}>
+        {[1, 2, 3].map((_, index) => (
+          <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <Skeleton variant="rectangular" width={140} height={80} sx={{ borderRadius: 1 }} />
+            <Box sx={{ flex: 1 }}>
+              <Skeleton width="100%" />
+              <Skeleton width="60%" />
+            </Box>
+          </Box>
+        ))}
+      </Grid>
+    </Grid>
+  );
+
+  // Không hiển thị section nếu không có data
+  if (!loading && items.length === 0) {
+    return null;
+  }
 
   return (
     <Box sx={styles.section}>
@@ -202,114 +341,120 @@ function BlogSection() {
 
           <Tabs value={activeTab} onChange={handleTabChange} sx={styles.tabs}>
             {categories.map((cat, idx) => (
-              <Tab key={idx} label={cat} />
+              <Tab key={idx} label={cat} disableRipple disableFocusRipple />
             ))}
           </Tabs>
         </Box>
 
-        {/* Content Grid */}
-        <Grid container spacing={3}>
-          {/* Featured Article - Left */}
-          <Grid item xs={12} md={7}>
-            {featuredBlog && (
-              <Box
-                sx={styles.featuredCard}
-                onClick={() => handleBlogClick(featuredBlog._id)}
-              >
-                <Box sx={styles.featuredImageContainer}>
-                  <Box
-                    component="img"
-                    src={featuredBlog.imageUrl}
-                    alt={featuredBlog.title}
-                    className="featured-image"
-                    sx={styles.featuredImage}
-                    draggable={false}
-                    onError={(e) => {
-                      e.target.src = '/images/default-blog.jpg';
-                    }}
-                  />
-                </Box>
-
-                <Typography sx={styles.featuredTitle}>
-                  {featuredBlog.title}
-                </Typography>
-
-                <Box sx={styles.stats}>
-                  <Chip
-                    icon={<ThumbUpIcon sx={{ fontSize: '0.9rem !important' }} />}
-                    label="Thích"
-                    size="small"
-                    sx={styles.likeButton}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <Box sx={styles.statItem}>
-                    <ViewIcon sx={styles.statIcon} />
-                    <span>{featuredBlog.views}</span>
+        {/* Loading hoặc Content */}
+        {loading ? renderSkeletons() : (
+          <Grid container spacing={3}>
+            {/* Featured Item - Left */}
+            <Grid item xs={12} md={7}>
+              {featuredItem && (
+                <Box
+                  sx={styles.featuredCard}
+                  onClick={() => handleItemClick(featuredItem)}
+                >
+                  <Box sx={styles.featuredImageContainer}>
+                    <Box
+                      component="img"
+                      src={featuredItem.imageUrl || getPlaceholderImage()}
+                      alt={featuredItem.title}
+                      className="featured-image"
+                      sx={styles.featuredImage}
+                      draggable={false}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = getPlaceholderImage();
+                      }}
+                    />
                   </Box>
-                </Box>
-              </Box>
-            )}
-          </Grid>
 
-          {/* Small Articles - Right */}
-          <Grid item xs={12} md={5}>
-            {smallBlogs.map((blog) => (
-              <Box
-                key={blog._id}
-                sx={styles.smallCard}
-                onClick={() => handleBlogClick(blog._id)}
-              >
-                <Box sx={styles.smallImageContainer}>
-                  <Box
-                    component="img"
-                    src={blog.imageUrl}
-                    alt={blog.title}
-                    className="small-image"
-                    sx={styles.smallImage}
-                    draggable={false}
-                    onError={(e) => {
-                      e.target.src = '/images/default-blog.jpg';
-                    }}
-                  />
-                </Box>
-
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={styles.smallTitle}>
-                    {blog.title}
+                  <Typography sx={styles.featuredTitle}>
+                    {featuredItem.title}
                   </Typography>
 
                   <Box sx={styles.stats}>
                     <Chip
-                      icon={<ThumbUpIcon sx={{ fontSize: '0.8rem !important' }} />}
+                      icon={<ThumbUpIcon sx={{ fontSize: '0.9rem !important' }} />}
                       label="Thích"
                       size="small"
-                      sx={{ ...styles.likeButton, height: 24 }}
+                      sx={styles.likeButton}
                       onClick={(e) => e.stopPropagation()}
                     />
                     <Box sx={styles.statItem}>
                       <ViewIcon sx={styles.statIcon} />
-                      <span>{blog.views}</span>
+                      <span>{featuredItem.viewCount || 0}</span>
                     </Box>
                   </Box>
                 </Box>
-              </Box>
-            ))}
+              )}
+            </Grid>
+
+            {/* Small Items - Right */}
+            <Grid item xs={12} md={5}>
+              {smallItems.map((item) => (
+                <Box
+                  key={item._id}
+                  sx={styles.smallCard}
+                  onClick={() => handleItemClick(item)}
+                >
+                  <Box sx={styles.smallImageContainer}>
+                    <Box
+                      component="img"
+                      src={item.imageUrl || getPlaceholderImage()}
+                      alt={item.title}
+                      className="small-image"
+                      sx={styles.smallImage}
+                      draggable={false}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = getPlaceholderImage();
+                      }}
+                    />
+                  </Box>
+
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={styles.smallTitle}>
+                      {item.title}
+                    </Typography>
+
+                    <Box sx={styles.stats}>
+                      <Chip
+                        icon={<ThumbUpIcon sx={{ fontSize: '0.8rem !important' }} />}
+                        label="Thích"
+                        size="small"
+                        sx={{ ...styles.likeButton, height: 24 }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <Box sx={styles.statItem}>
+                        <ViewIcon sx={styles.statIcon} />
+                        <span>{item.viewCount || 0}</span>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+              ))}
+            </Grid>
           </Grid>
-        </Grid>
+        )}
 
         {/* View More Button */}
-        <Box sx={{ textAlign: 'center' }}>
-          <Button
-            variant="outlined"
-            sx={{
-              ...styles.viewMoreButton,
-              fontSize: '1rem',
-            }}
-            onClick={() => navigate('/goc-dien-anh')}
-          >
-            Xem thêm
-          </Button>
-        </Box>
+        {items.length > 0 && (
+          <Box sx={{ textAlign: 'center' }}>
+            <Button
+              variant="outlined"
+              sx={{
+                ...styles.viewMoreButton,
+                fontSize: '1rem',
+              }}
+              onClick={() => navigate(getViewMoreUrl())}
+            >
+              Xem thêm
+            </Button>
+          </Box>
+        )}
       </Container>
     </Box>
   );

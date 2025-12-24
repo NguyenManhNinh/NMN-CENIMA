@@ -144,29 +144,36 @@ function HomePage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Gọi API thực
-      const [moviesRes, bannersRes] = await Promise.all([
+      // Gọi API - dùng Promise.allSettled để không fail toàn bộ nếu 1 API lỗi
+      const [moviesResult, bannersResult] = await Promise.allSettled([
         getNowShowingMoviesAPI(8),
-        getAllBannersAPI().catch(() => ({ data: { banners: mockBanners } }))
+        getAllBannersAPI()
       ]);
 
       // Set movies từ API
-      if (moviesRes?.data?.movies) {
-        setMovies(moviesRes.data.movies);
-      } else if (moviesRes?.data) {
-        setMovies(Array.isArray(moviesRes.data) ? moviesRes.data : []);
+      if (moviesResult.status === 'fulfilled') {
+        const moviesData = moviesResult.value?.data?.movies || moviesResult.value?.data;
+        if (Array.isArray(moviesData)) {
+          setMovies(moviesData);
+        }
+      } else {
+        console.error('Lỗi tải phim:', moviesResult.reason);
       }
 
       // Set banners từ API hoặc fallback mock
-      if (bannersRes?.data?.banners) {
-        setBanners(bannersRes.data.banners);
+      if (bannersResult.status === 'fulfilled') {
+        const bannersData = bannersResult.value?.data?.banners || bannersResult.value?.data;
+        if (Array.isArray(bannersData) && bannersData.length > 0) {
+          setBanners(bannersData);
+        } else {
+          setBanners(mockBanners);
+        }
       } else {
+        console.error('Lỗi tải banners:', bannersResult.reason);
         setBanners(mockBanners);
       }
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu:', error);
-      // Fallback to empty arrays
-      setMovies([]);
       setBanners(mockBanners);
     } finally {
       setLoading(false);
@@ -187,14 +194,18 @@ function HomePage() {
         response = await getComingSoonMoviesAPI(8);
       }
 
-      if (response?.data?.movies) {
-        setMovies(response.data.movies);
-      } else if (response?.data) {
-        setMovies(Array.isArray(response.data) ? response.data : []);
+      // Xử lý response - check nhiều format có thể
+      const moviesData = response?.data?.movies || response?.data;
+      if (Array.isArray(moviesData) && moviesData.length > 0) {
+        setMovies(moviesData);
+      } else if (Array.isArray(moviesData)) {
+        // API trả về mảng rỗng - hiển thị empty state
+        setMovies([]);
       }
+      // Nếu không có data hợp lệ, giữ nguyên movies cũ
     } catch (error) {
       console.error('Lỗi khi tải phim:', error);
-      setMovies([]);
+      // Giữ nguyên data cũ khi có lỗi, không reset về []
     } finally {
       setTabLoading(false);
     }
