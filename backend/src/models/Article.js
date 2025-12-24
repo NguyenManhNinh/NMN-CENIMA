@@ -32,6 +32,14 @@ const articleSchema = new mongoose.Schema({
   authorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  viewCount: {
+    type: Number,
+    default: 0
+  },
+  likeCount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

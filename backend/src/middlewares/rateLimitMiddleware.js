@@ -28,6 +28,8 @@ const createRateLimiter = (options = {}) => {
     standardHeaders: true, // `RateLimit-*` headers
     legacyHeaders: false,  // Disable `X-RateLimit-*` headers
     skip: (req) => {
+      // Skip rate limit trong development
+      if (process.env.NODE_ENV === 'development') return true;
       // Skip rate limit cho health check
       if (req.path === '/api/v1/health') return true;
       return false;

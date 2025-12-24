@@ -9,10 +9,11 @@ const AppError = require('../utils/AppError');
  * @access  Public
  */
 const getGenres = catchAsync(async (req, res) => {
-  const { isActive = true } = req.query;
+  const { isActive } = req.query;
 
   const filter = {};
-  if (isActive !== 'all') {
+  // Chỉ filter khi có query param và không phải 'all'
+  if (isActive && isActive !== 'all') {
     filter.isActive = isActive === 'true';
   }
 
@@ -24,7 +25,7 @@ const getGenres = catchAsync(async (req, res) => {
   const genresWithCount = await Promise.all(
     genres.map(async (genre) => {
       const movieCount = await Movie.countDocuments({
-        genres: genre.name,
+        genres: genre._id,
         status: { $in: ['NOW', 'COMING'] }
       });
       return { ...genre, movieCount };
@@ -52,7 +53,7 @@ const getGenreBySlug = catchAsync(async (req, res, next) => {
 
   // Đếm số phim
   const movieCount = await Movie.countDocuments({
-    genres: genre.name,
+    genres: genre._id,
     status: { $in: ['NOW', 'COMING'] }
   });
 
@@ -76,7 +77,7 @@ const getMoviesByGenre = catchAsync(async (req, res, next) => {
   }
 
   // Build filter
-  const filter = { genres: genre.name };
+  const filter = { genres: genre._id };
   if (status) {
     filter.status = status;
   }
