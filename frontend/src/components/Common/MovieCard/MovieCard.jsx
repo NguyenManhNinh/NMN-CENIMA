@@ -124,7 +124,7 @@ function MovieCard({ movie, onTrailerClick }) {
   // Click nút Mua vé
   const handleBuyTicket = (e) => {
     e.stopPropagation(); // Ngăn trigger click card
-    navigate(`/dat-ve/${movie._id}/lich-chieu-phim`);
+    navigate(`/dat-ve/${movie._id}`);
   };
 
   // Click nút Xem trailer

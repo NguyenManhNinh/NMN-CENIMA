@@ -43,14 +43,14 @@ import {
 // Logo
 import LogoNMNCinema from '../../../../assets/images/NMN_CENIMA_LOGO.png';
 
-// Mock data cho Mega Menu
-import { getNowShowingMovies, getComingSoonMovies } from '../../../../mocks/mockMovies';
+// API cho Mega Menu
+import { getNowShowingMoviesAPI, getComingSoonMoviesAPI } from '../../../../apis/movieApi';
 
 // Auth Context and Modals
 import { useAuth } from '../../../../contexts/AuthContext';
 import { LoginModal, RegisterModal, ForgotPasswordModal } from '../../../Common';
 
-// COLORS - Màu sắc theo Galaxy Cinema
+// COLORS - Màu sắc
 const COLORS = {
   primary: '#00405d',      // Cam chủ đạo
   text: '#333333',         // Chữ đen
@@ -217,8 +217,10 @@ const styles = {
   },
   movieCard: {
     textDecoration: 'none',
-    display: 'block',
+    display: 'flex',
+    flexDirection: 'column',
     position: 'relative',
+    height: '100%',
     '&:hover .movie-poster': {
       filter: 'brightness(0.5)'
     },
@@ -229,11 +231,13 @@ const styles = {
   moviePosterWrapper: {
     position: 'relative',
     overflow: 'hidden',
-    borderRadius: 1
+    borderRadius: 1,
+    height: 220,  // Fixed height để đồng bộ
+    flexShrink: 0
   },
   moviePoster: {
     width: '100%',
-    aspectRatio: '2/3',
+    height: '100%',
     objectFit: 'cover',
     display: 'block',
     transition: 'filter 0.3s',
@@ -282,13 +286,17 @@ const styles = {
     }
   },
   movieTitle: {
-    fontSize: '1rem',
-    fontWeight: 500,
+    fontSize: '0.9rem',
+    fontWeight: 600,
     color: COLORS.text,
-    mt: 0.5,
+    mt: 1,
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap'
+    lineHeight: 1.3,
+    minHeight: '2.6em'  // 2 dòng x lineHeight 1.3
   },
   viewAllBtn: {
     mt: 1.5,
@@ -357,10 +365,29 @@ function Header() {
   // Auth from Context
   const { user, isAuthenticated, logout } = useAuth();
 
-  // Load movies cho Mega Menu
+  // Load movies cho Mega Menu từ API
   useEffect(() => {
-    setNowShowingMovies(getNowShowingMovies().slice(0, 4));
-    setComingSoonMovies(getComingSoonMovies().slice(0, 4));
+    const loadMoviesForMegaMenu = async () => {
+      try {
+        const [nowShowingRes, comingSoonRes] = await Promise.all([
+          getNowShowingMoviesAPI(4),
+          getComingSoonMoviesAPI(4)
+        ]);
+
+        // Parse response
+        const nowShowing = nowShowingRes?.movies || nowShowingRes?.data?.movies || [];
+        const comingSoon = comingSoonRes?.movies || comingSoonRes?.data?.movies || [];
+
+        setNowShowingMovies(nowShowing.slice(0, 4));
+        setComingSoonMovies(comingSoon.slice(0, 4));
+      } catch (error) {
+        console.error('Error loading movies for mega menu:', error);
+        setNowShowingMovies([]);
+        setComingSoonMovies([]);
+      }
+    };
+
+    loadMoviesForMegaMenu();
   }, []);
 
   // Hide on scroll effect
@@ -489,7 +516,7 @@ function Header() {
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-      navigate(`/movies?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/tim-kiem?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
       setSearchOpen(false);
     }
@@ -628,7 +655,7 @@ function Header() {
     </Popper>
   );
 
-  // RENDER - Dropdown Menu cho Góc điện ảnh (Galaxy Cinema style)
+  // RENDER - Dropdown Menu cho Góc điện ảnh
   const renderBlogMenu = () => (
     <Popper
       open={blogMenuOpen}
@@ -681,7 +708,7 @@ function Header() {
     </Popper>
   );
 
-  // RENDER - Dropdown Menu cho Sự kiện (Galaxy Cinema style)
+  // RENDER - Dropdown Menu cho Sự kiện
   const renderEventMenu = () => (
     <Popper
       open={eventMenuOpen}

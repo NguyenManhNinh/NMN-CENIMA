@@ -11,6 +11,7 @@ import ClientLayout from './components/Layout/ClientLayout';
 
 // Pages - Client
 import HomePage from './pages/Client/HomePage';
+import BookingPage from './pages/Client/Booking';
 import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 
 function App() {
@@ -29,6 +30,8 @@ function App() {
           <Route path="/" element={<ClientLayout />}>
             {/* Trang chủ */}
             <Route index element={<HomePage />} />
+            {/* Đặt vé */}
+            <Route path="dat-ve/:movieId" element={<BookingPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
@@ -50,3 +53,4 @@ function App() {
 }
 
 export default App;
+

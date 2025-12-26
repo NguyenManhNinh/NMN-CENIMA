@@ -299,6 +299,58 @@ function HomePage() {
   };
 
   // RENDER CHÍNH
+  // Loading screen - fullscreen
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          bgcolor: '#1a1a2e',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}
+      >
+        {/* Logo */}
+        <Box
+          component="img"
+          src="/NMN_CENIMA_LOGO.png"
+          alt="NMN Cinema"
+          sx={{ width: 200, height: 200, mb: 1.5, objectFit: 'contain' }}
+        />
+
+        {/* Spinning Loader */}
+        <CircularProgress
+          size={40}
+          thickness={2}
+          sx={{
+            color: '#F5A623',
+            mb: 2
+          }}
+        />
+
+        {/* Loading Text */}
+        <Typography
+          sx={{
+            color: '#FFA500',
+            fontSize: '1.2rem',
+            fontWeight: 600,
+            fontFamily: '"Montserrat","Poppins", "Google Sans", sans-serif',
+            letterSpacing: '0.5px'
+          }}
+        >
+          Chờ tôi xíu nhé
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box>
       {/* BANNER SLIDER */}
@@ -327,7 +379,7 @@ function HomePage() {
           </Box>
 
           {/* Danh sách phim */}
-          {loading ? renderSkeletons() : renderMovieGrid()}
+          {renderMovieGrid()}
         </Container>
       </Box>
 
