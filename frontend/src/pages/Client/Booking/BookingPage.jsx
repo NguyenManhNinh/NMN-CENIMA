@@ -231,21 +231,21 @@ function BookingPage() {
             {/* ===== LEFT COLUMN (8 cols): Poster + Info + Nội dung + Lịch chiếu ===== */}
             <Grid item xs={12} md={8}>
               {/* Inner Grid for Poster + Movie Details */}
-              <Grid container spacing={3}>
+              <Grid container spacing={{ xs: 2, md: 3 }}>
                 {/* Poster */}
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={5} sm={4}>
                   <Box
                     component="img"
                     src={movie.posterUrl}
                     alt={movie.title}
                     sx={{
                       width: '100%',
-                      maxWidth: 240,
-                      height: { xs: 280, md: 360 },
+                      maxWidth: { xs: 160, sm: 200, md: 240 },
+                      height: { xs: 220, sm: 280, md: 360 },
                       objectFit: 'cover',
                       borderRadius: 2,
                       boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                      mt: { xs: 0, md: -10 },
+                      mt: { xs: -5, md: -10 },
                       position: 'relative',
                       zIndex: 10,
                       border: '1px solid white'
@@ -254,24 +254,24 @@ function BookingPage() {
                 </Grid>
 
                 {/* Movie Details */}
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={7} sm={8}>
                   {/* Title + Badges */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: { xs: '1.3rem', md: '1.6rem' }, color: COLORS.dark }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1, md: 2 }, flexWrap: 'wrap' }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.3rem', md: '1.6rem' }, color: COLORS.dark }}>
                       {movie.title}
                     </Typography>
-                    <Chip label={movie.ageRating} size="small" sx={{ bgcolor: COLORS.orange, color: '#000', fontWeight: 700 }} />
+                    <Chip label={movie.ageRating} size="small" sx={{ bgcolor: COLORS.orange, color: '#000', fontWeight: 700, fontSize: { xs: '10px', md: '12px' }, height: { xs: 20, md: 24 } }} />
                   </Box>
 
                   {/* Meta Row */}
-                  <Box sx={{ display: 'flex', gap: 2, mb: 2.5, flexWrap: 'wrap', color: COLORS.textLight }}>
+                  <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 }, mb: { xs: 1.5, md: 2.5 }, flexWrap: 'wrap', color: COLORS.textLight }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <TimeIcon fontSize="small" />
-                      <Typography variant="body2">{movie.duration} Phút</Typography>
+                      <TimeIcon sx={{ fontSize: { xs: 14, md: 20 } }} />
+                      <Typography sx={{ fontSize: { xs: '11px', md: '14px' } }}>{movie.duration} Phút</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <CalendarIcon fontSize="small" />
-                      <Typography variant="body2">{movie.releaseDate}</Typography>
+                      <CalendarIcon sx={{ fontSize: { xs: 14, md: 20 } }} />
+                      <Typography sx={{ fontSize: { xs: '11px', md: '14px' } }}>{movie.releaseDate}</Typography>
                     </Box>
                     <Box
                       onClick={() => setOpenRatingModal(true)}
@@ -288,47 +288,51 @@ function BookingPage() {
                         }
                       }}
                     >
-                      <StarIcon fontSize="small"
-                        sx={{
-                          color: COLORS.orange,
-                          transition: 'color 0.2s'
-                        }} />
-                      <Typography variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          transition: 'color 0.2s'
-                        }}>
+                      <StarIcon sx={{ fontSize: { xs: 14, md: 20 }, color: COLORS.orange, transition: 'color 0.2s' }} />
+                      <Typography sx={{ fontSize: { xs: '11px', md: '14px' }, fontWeight: 600, transition: 'color 0.2s' }}>
                         {movie.rating}
                       </Typography>
-                      <Typography variant="body2"
-                        sx={{
-                          color: COLORS.textMuted,
-                          transition: 'color 0.2s'
-                        }}>(64 votes)
+                      <Typography sx={{ fontSize: { xs: '11px', md: '14px' }, color: COLORS.textMuted, transition: 'color 0.2s' }}>
+                        (64 votes)
+                      </Typography>
+                    </Box>
+                    {/* Quốc gia - Mobile only */}
+                    <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1 }}>
+                      <Typography sx={{
+                        fontSize: '11px',
+                        color: '#4A4A4A',
+                        '&:hover': { color: '#FFD700' }
+                      }}>
+                        Quốc gia:
+                      </Typography>
+                      <Typography sx={{
+                        fontSize: '11px',
+                        color: COLORS.text,
+                        fontWeight: 500,
+                        '&:hover': {
+                          color: 'red'
+                        },
+                      }}>
+                        Việt Nam
                       </Typography>
                     </Box>
                   </Box>
 
-                  {/* Details Grid*/}
+                  {/* Details Grid - Desktop only (sm and up) */}
                   <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: '120px 1fr' },
-                    gap: 1.5,
-                    fontSize: '0.9rem',
+                    display: { xs: 'none', sm: 'grid' },
+                    gridTemplateColumns: '110px 1fr',
+                    gap: 1,
+                    fontSize: '0.85rem',
                     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                   }}>
-                    <Typography sx={{ color: COLORS.textMuted }}>Quốc gia:</Typography>
-                    <Typography sx={{
-                      color: COLORS.text,
-                      '&:hover': { color: 'red' }
-                    }}>
-                      Việt Nam
-                    </Typography>
+                    <Typography sx={{ color: '#4A4A4A', '&:hover': { color: '#FFD700' } }}>Quốc gia:</Typography>
+                    <Typography sx={{ color: '#333333', ':hover': { color: 'red' } }}>Việt Nam</Typography>
 
-                    <Typography sx={{ color: COLORS.textMuted }}>Nhà sản xuất:</Typography>
-                    <Typography sx={{ color: COLORS.text }}>NMN Studio</Typography>
+                    <Typography sx={{ color: '#4A4A4A' }}>Nhà sản xuất:</Typography>
+                    <Typography sx={{ color: '#333333' }}>NMN Studio</Typography>
 
-                    <Typography sx={{ color: COLORS.textMuted }}>Thể loại:</Typography>
+                    <Typography sx={{ color: '#4A4A4A' }}>Thể loại:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                       {movie.genres?.map((genre, idx) => (
                         <Chip
@@ -356,7 +360,7 @@ function BookingPage() {
                       ))}
                     </Box>
 
-                    <Typography sx={{ color: COLORS.textMuted }}>Đạo diễn:</Typography>
+                    <Typography sx={{ color: '#4A4A4A' }}>Đạo diễn:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                       {movie.director?.split(',').map((director, idx) => (
                         <Chip
@@ -385,7 +389,7 @@ function BookingPage() {
                       ))}
                     </Box>
 
-                    <Typography sx={{ color: COLORS.textMuted }}>Diễn viên:</Typography>
+                    <Typography sx={{ color: '#4A4A4A' }}>Diễn viên:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                       {movie.actors?.slice(0, 3).map((actor, idx) => (
                         <Chip
@@ -416,6 +420,105 @@ function BookingPage() {
                   </Box>
                 </Grid>
               </Grid>
+
+              {/* ===== Extended Details - Mobile only (xs) - Full width aligned with poster ===== */}
+              <Box sx={{
+                display: { xs: 'grid', sm: 'none' },
+                gridTemplateColumns: '101px 1fr',
+                gap: 0.5,
+                fontSize: '11px',
+                fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                mt: 2
+              }}>
+                <Typography sx={{ color: '#4A4A4A' }}>Nhà sản xuất:</Typography>
+                <Typography sx={{ color: '#333333' }}>NMN Studio</Typography>
+
+                <Typography sx={{ color: '#4A4A4A' }}>Thể loại:</Typography>
+                <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
+                  {movie.genres?.map((genre, idx) => (
+                    <Chip
+                      key={idx}
+                      label={genre}
+                      size="small"
+                      variant="outlined"
+                      onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genre.toLowerCase())}`)}
+                      sx={{
+                        fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                        height: { xs: 22, sm: 28 },
+                        borderRadius: '7px',
+                        border: '1px solid #333',
+                        color: '#333',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          borderColor: '#1a3a5c',
+                          color: '#1a3a5c',
+                          bgcolor: 'rgba(26, 58, 92, 0.05)'
+                        }
+                      }}
+                    />
+                  ))}
+                </Box>
+
+                <Typography sx={{ color: '#4A4A4A' }}>Đạo diễn:</Typography>
+                <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
+                  {movie.director?.split(',').map((director, idx) => (
+                    <Chip
+                      key={idx}
+                      label={director.trim()}
+                      size="small"
+                      variant="outlined"
+                      onClick={() => navigate(`/goc-dien-anh/dao-dien/${encodeURIComponent(director.trim().toLowerCase())}`)}
+                      sx={{
+                        fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                        height: { xs: 22, sm: 28 },
+                        borderRadius: '7px',
+                        border: '1px solid #333',
+                        color: '#333',
+                        fontWeight: 500,
+                        bgcolor: 'transparent',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          borderColor: '#1a3a5c',
+                          color: '#1a3a5c',
+                          bgcolor: 'rgba(26, 58, 92, 0.05)'
+                        }
+                      }}
+                    />
+                  ))}
+                </Box>
+
+                <Typography sx={{ color: '#4A4A4A' }}>Diễn viên:</Typography>
+                <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
+                  {movie.actors?.slice(0, 3).map((actor, idx) => (
+                    <Chip
+                      key={idx}
+                      label={actor}
+                      size="small"
+                      variant="outlined"
+                      onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actor.toLowerCase())}`)}
+                      sx={{
+                        fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                        height: { xs: 22, sm: 28 },
+                        borderRadius: '7px',
+                        border: '1px solid #333',
+                        color: '#333',
+                        fontWeight: 500,
+                        bgcolor: 'transparent',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          borderColor: '#1a3a5c',
+                          color: '#1a3a5c',
+                          bgcolor: 'rgba(26, 58, 92, 0.05)'
+                        }
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Box>
 
               {/* ===== Nội dung + Lịch chiếu (Full width of left column) ===== */}
               {/* 2. NỘI DUNG PHIM */}
@@ -598,7 +701,7 @@ function BookingPage() {
                           }}>
                           <Typography sx={{
                             minWidth: 100,
-                            fontWeight: 500,
+                            fontWeight: 600,
                             fontSize: '13px',
                             color: '#333333',
                             fontFamily: '"Nunito Sans", sans-serif'
@@ -612,10 +715,19 @@ function BookingPage() {
                                 variant="outlined"
                                 onClick={() => handleShowtimeClick(st)}
                                 sx={{
-                                  minWidth: 60, py: 0.5, px: 1, fontSize: '13px',
-                                  color: '#333333', borderColor: '#333333', borderRadius: '6px',
+                                  minWidth: 60,
+                                  py: 0.5,
+                                  px: 1,
+                                  fontSize: '13px',
+                                  color: '#333333',
+                                  borderColor: '#333333',
+                                  borderRadius: '6px',
                                   fontFamily: '"Nunito Sans", sans-serif',
-                                  '&:hover': { bgcolor: COLORS.primary, color: COLORS.white, borderColor: COLORS.primary }
+                                  '&:hover': {
+                                    bgcolor: COLORS.primary,
+                                    color: COLORS.white,
+                                    borderColor: COLORS.primary
+                                  }
                                 }}
                               >
                                 {formatTime(st.startAt)}
