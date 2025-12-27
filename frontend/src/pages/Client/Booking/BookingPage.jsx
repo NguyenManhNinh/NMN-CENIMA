@@ -65,6 +65,7 @@ function BookingPage() {
   const [openRatingModal, setOpenRatingModal] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [openTrailerModal, setOpenTrailerModal] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(true);
 
   // Load movie data
   useEffect(() => {
@@ -189,17 +190,22 @@ function BookingPage() {
       {/* ==================== BANNER TRAILER SECTION ==================== */}
       <Box
         sx={{
-          position: 'relative',
-          width: '100%',
+          position: "relative",
+          width: "100%",
           maxWidth: 1585.6,
-          height: { xs: 280, md: 850 },
-          mx: 'auto',
-          background: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url(${movie.bannerUrl || movie.posterUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
+          mx: "auto",
+          overflow: "hidden",
+
+          // khóa tỉ lệ thay vì height
+          aspectRatio: { xs: "16 / 9", md: "21 / 9" },
+          minHeight: { xs: 220, md: 360 },
+
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.55)), url(${movie.bannerUrl || movie.posterUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "50% 25%", // thường kéo lên chút để thấy mặt
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         {/* Play Button*/}
@@ -242,7 +248,7 @@ function BookingPage() {
                       mt: { xs: 0, md: -10 },
                       position: 'relative',
                       zIndex: 10,
-                      border: '4px solid white'
+                      border: '1px solid white'
                     }}
                   />
                 </Grid>
@@ -312,10 +318,15 @@ function BookingPage() {
                     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                   }}>
                     <Typography sx={{ color: COLORS.textMuted }}>Quốc gia:</Typography>
-                    <Typography sx={{ color: COLORS.text }}>Việt Nam</Typography>
+                    <Typography sx={{
+                      color: COLORS.text,
+                      '&:hover': { color: 'red' }
+                    }}>
+                      Việt Nam
+                    </Typography>
 
                     <Typography sx={{ color: COLORS.textMuted }}>Nhà sản xuất:</Typography>
-                    <Typography sx={{ color: COLORS.text }}>Galaxy Studio</Typography>
+                    <Typography sx={{ color: COLORS.text }}>NMN Studio</Typography>
 
                     <Typography sx={{ color: COLORS.textMuted }}>Thể loại:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
@@ -447,10 +458,10 @@ function BookingPage() {
                 {/* Date Selector */}
                 <Box sx={{
                   display: 'flex',
-                  gap: 1,
+                  gap: 3.7,
                   overflowX: 'auto',
-                  pb: 2,
-                  mb: 3,
+                  pb: 3,
+                  mb: 2,
                   '&::-webkit-scrollbar': { display: 'none' }
                 }}>
                   {availableDates.map((dateObj, idx) => (
@@ -507,7 +518,17 @@ function BookingPage() {
                     <Select value={selectedArea} onChange={(e) => setSelectedArea(e.target.value)} displayEmpty
                       sx={{
                         fontSize: '14px',
-                        fontFamily: '"Nunito Sans", sans-serif'
+                        fontFamily: '"Nunito Sans", sans-serif',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: COLORS.border
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: COLORS.border
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: COLORS.border,
+                          borderWidth: '1px'
+                        }
                       }}>
                       <MenuItem value="all">Toàn quốc</MenuItem>
                       <MenuItem value="hanoi">Hà Nội</MenuItem>
@@ -518,7 +539,17 @@ function BookingPage() {
                     <Select value={selectedCinema} onChange={(e) => setSelectedCinema(e.target.value)} displayEmpty
                       sx={{
                         fontSize: '14px',
-                        fontFamily: '"Nunito Sans", sans-serif'
+                        fontFamily: '"Nunito Sans", sans-serif',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: COLORS.border
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: COLORS.border
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: COLORS.border,
+                          borderWidth: '1px'
+                        }
                       }}>
                       <MenuItem value="all">Tất cả rạp</MenuItem>
                       {mockCinemas.map(c => (
@@ -534,14 +565,11 @@ function BookingPage() {
                     <Paper key={cinema._id}
                       sx={{
                         mb: 2,
-                        borderRadius: 2,
-                        overflow: 'hidden',
-                        border: `1px solid ${COLORS.border}`
+                        overflow: 'hidden'
                       }} elevation={0}>
                       <Box sx={{
                         p: 1.5,
-                        borderBottom: `1px solid ${COLORS.border}`,
-                        bgcolor: '#FAFAFA'
+                        margin: 0,
                       }}>
                         <Typography
                           sx={{
@@ -565,8 +593,8 @@ function BookingPage() {
                             flexDirection: { xs: 'column', sm: 'row' },
                             alignItems: { xs: 'flex-start', sm: 'center' },
                             gap: 1.5,
-                            borderBottom: `1px solid ${COLORS.border}`,
-                            '&:last-child': { borderBottom: 'none' }
+                            // borderBottom: `1px solid ${COLORS.border}`,
+                            // '&:last-child': { borderBottom: 'none' }
                           }}>
                           <Typography sx={{
                             minWidth: 100,
@@ -601,7 +629,7 @@ function BookingPage() {
                 ) : (
                   <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2 }} elevation={0}>
                     <CalendarIcon sx={{ fontSize: 40, color: '#ddd', mb: 1 }} />
-                    <Typography color="text.secondary" fontSize="14px">Không có suất chiếu trong ngày này</Typography>
+                    <Typography color="text.secondary" fontSize="14px">Không có suất chiếu trong ngày hôm nay</Typography>
                   </Paper>
                 )}
               </Box>
@@ -611,11 +639,9 @@ function BookingPage() {
             <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
               <Paper
                 sx={{
-                  p: 2,
-                  borderRadius: 2,
+                  p: 1,
                   position: 'sticky',
-                  top: 20,
-                  border: `1px solid ${COLORS.border}`
+                  top: 10,
                 }} elevation={0}>
                 {/* Title */}
                 <Typography sx={{
@@ -646,20 +672,25 @@ function BookingPage() {
                     >
                       {/* Poster Container with Overlay */}
                       <Box sx={{
-                        position: 'relative',
-                        overflow: 'hidden',
-                        aspectRatio: '16/9',
-                        borderRadius: 1
+                        position: "relative",
+                        overflow: "hidden",
+                        aspectRatio: "16/9",
+                        borderRadius: 1,
+                        bgcolor: "#f7f7f9ff",
                       }}>
                         {/* Poster Image */}
                         <Box
                           component="img"
                           src={otherMovie.bannerUrl || otherMovie.posterUrl}
                           alt={otherMovie.title}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                          }}
                           sx={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover'
+                            objectFit: 'cover',
+                            bgcolor: '#f7f7f9ff'
                           }}
                         />
 
@@ -775,19 +806,17 @@ function BookingPage() {
                   component={Link}
                   to="/phim-dang-chieu"
                   fullWidth
+                  disableRipple
                   sx={{
                     mt: 2,
-                    py: 0.75,
+                    py: 1,
                     color: COLORS.primary,
                     fontWeight: 600,
                     fontSize: '13px',
                     fontFamily: '"Nunito Sans", sans-serif',
                     textTransform: 'none',
-                    border: `1px solid ${COLORS.border}`,
-                    borderRadius: '6px',
                     '&:hover': {
-                      bgcolor: 'rgba(3, 78, 162, 0.05)',
-                      borderColor: COLORS.primary
+                      bgcolor: 'transparent'
                     }
                   }}
                   endIcon={<ArrowIcon sx={{ fontSize: 12 }} />}
@@ -944,7 +973,7 @@ function BookingPage() {
           )}
         </DialogContent>
       </Dialog>
-    </Box>
+    </Box >
   );
 }
 

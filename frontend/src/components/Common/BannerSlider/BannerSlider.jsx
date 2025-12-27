@@ -6,7 +6,7 @@ import {
   ChevronRight as ChevronRightIcon
 } from '@mui/icons-material';
 
-// STYLES - Galaxy Cinema Style đơn giản, ổn định
+// STYLES - Style đơn giản, ổn định
 const styles = {
   container: {
     position: 'relative',

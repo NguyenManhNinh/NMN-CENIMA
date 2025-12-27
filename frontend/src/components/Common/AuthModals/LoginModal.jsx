@@ -21,7 +21,7 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import { getGoogleAuthURL } from '../../../apis/authApi';
 
-// Mascot image (Galaxy Cinema style)
+// // Mascot image
 import mascotImage from '../../../assets/images/NMN_CENIMA_LOGO.png';
 
 // STYLES
@@ -186,13 +186,6 @@ const styles = {
     '&:hover': {
       backgroundColor: '#f5f5f5',
       border: '1px solid #ccc'
-    }
-  },
-  facebookButton: {
-    backgroundColor: '#1877F2',
-    color: 'white',
-    '&:hover': {
-      backgroundColor: '#166fe5'
     }
   }
 };

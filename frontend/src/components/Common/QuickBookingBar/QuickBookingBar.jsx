@@ -18,7 +18,7 @@ import { getShowtimesByFilterAPI } from '../../../apis/showtimeApi';
 
 // STYLED COMPONENTS
 
-// Custom Select với style Galaxy Cinema
+// Custom Select 
 const StyledSelect = styled(Select)(({ theme }) => ({
   backgroundColor: '#fff',
   borderRadius: 0,

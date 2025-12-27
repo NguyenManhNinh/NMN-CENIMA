@@ -38,7 +38,7 @@ const styles = {
     backgroundRepeat: 'no-repeat',
     backgroundAttachment: 'fixed'
   },
-  // Header của section - Galaxy style
+  // Header của section -
   sectionHeader: {
     display: 'flex',
     alignItems: { xs: 'flex-start', md: 'center' },
@@ -362,7 +362,7 @@ function HomePage() {
       {/* MOVIE SECTION */}
       <Box sx={styles.movieSection}>
         <Container maxWidth="lg">
-          {/* Header + Tabs inline - Galaxy style */}
+          {/* Header + Tabs inline - */}
           <Box sx={styles.sectionHeader}>
             <Typography variant="h5" component="h2" sx={styles.sectionTitle}>
               PHIM
