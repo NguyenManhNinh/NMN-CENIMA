@@ -5,7 +5,6 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon
 } from '@mui/icons-material';
-
 // STYLES - Style đơn giản, ổn định
 const styles = {
   container: {
@@ -130,13 +129,13 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
         }}
       >
         <Box sx={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
-          <Box
+          {/* <Box
             component="img"
-            src="/images/NMN_CENIMA_LOGO.png"
+            src={LogoNMNCinema}
             alt="NMN Cinema"
             sx={{ width: 120, height: 'auto', opacity: 0.5, mb: 2 }}
             onError={(e) => { e.target.style.display = 'none'; }}
-          />
+          /> */}
         </Box>
       </Box>
     );

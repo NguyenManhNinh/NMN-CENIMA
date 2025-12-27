@@ -51,4 +51,12 @@ export const getCinemasByMovieAPI = async (movieId) => {
   return response.data;
 };
 
+/**
+ * Get list of cities that have cinemas
+ */
+export const getCitiesAPI = async () => {
+  const response = await api.get('/cities');
+  return response.data;
+};
+
 export default api;

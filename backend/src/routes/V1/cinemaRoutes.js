@@ -49,6 +49,18 @@ router.use('/:cinemaId/rooms', roomRouter);
  *       201:
  *         description: Tạo rạp thành công
  */
+/**
+ * @swagger
+ * /cinemas/cities:
+ *   get:
+ *     summary: Lấy danh sách thành phố có rạp
+ *     tags: [Cinemas]
+ *     responses:
+ *       200:
+ *         description: Danh sách thành phố
+ */
+router.get('/cities', cinemaController.getCities);
+
 router
   .route('/')
   .get(cinemaController.getAllCinemas)

@@ -44,8 +44,10 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
 
 // Lấy chi tiết phim (theo ID hoặc Slug)
 exports.getMovie = catchAsync(async (req, res, next) => {
-  const movie = await Movie.findById(req.params.id);
-  // Hoặc tìm theo slug nếu params là slug: const movie = await Movie.findOne({ slug: req.params.slug });
+  const movie = await Movie.findById(req.params.id)
+    .populate('director', 'name photoUrl slug')
+    .populate('actors', 'name photoUrl slug')
+    .populate('genres', 'name slug');
 
   if (!movie) {
     return next(new AppError('Không tìm thấy phim với ID này!', 404));
@@ -111,5 +113,47 @@ exports.deleteMovie = catchAsync(async (req, res, next) => {
   res.status(204).json({
     status: 'success',
     data: null
+  });
+});
+
+// Đánh giá phim (User)
+exports.rateMovie = catchAsync(async (req, res, next) => {
+  const { rating } = req.body;
+
+  // Validate rating
+  if (!rating || rating < 1 || rating > 10) {
+    return next(new AppError('Vui lòng đánh giá từ 1 đến 10!', 400));
+  }
+
+  const movie = await Movie.findById(req.params.id);
+
+  if (!movie) {
+    return next(new AppError('Không tìm thấy phim với ID này!', 404));
+  }
+
+  // Calculate new average rating
+  // newAvg = (oldAvg * oldCount + newRating) / (oldCount + 1)
+  const oldRating = movie.rating || 0;
+  const oldCount = movie.ratingCount || 0;
+  const newCount = oldCount + 1;
+  const newRating = ((oldRating * oldCount) + rating) / newCount;
+
+  // Update movie with new rating
+  const updatedMovie = await Movie.findByIdAndUpdate(
+    req.params.id,
+    {
+      rating: Math.round(newRating * 10) / 10, // Round to 1 decimal
+      ratingCount: newCount
+    },
+    { new: true, runValidators: true }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Đánh giá thành công!',
+    data: {
+      rating: updatedMovie.rating,
+      ratingCount: updatedMovie.ratingCount
+    }
   });
 });

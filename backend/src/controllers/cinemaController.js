@@ -75,3 +75,16 @@ exports.deleteCinema = catchAsync(async (req, res, next) => {
     data: null
   });
 });
+
+// Lấy danh sách thành phố (khu vực) có rạp
+exports.getCities = catchAsync(async (req, res, next) => {
+  const cities = await Cinema.distinct('city');
+
+  res.status(200).json({
+    status: 'success',
+    results: cities.length,
+    data: {
+      cities
+    }
+  });
+});

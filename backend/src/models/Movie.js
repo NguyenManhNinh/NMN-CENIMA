@@ -26,6 +26,12 @@ const movieSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    // Quốc gia
+    country: {
+      type: String,
+      trim: true,
+      default: 'Việt Nam'
+    },
     // Diễn viên - Reference đến Person
     actors: [{
       type: mongoose.Schema.Types.ObjectId,

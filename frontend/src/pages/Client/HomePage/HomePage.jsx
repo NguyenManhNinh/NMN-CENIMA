@@ -299,7 +299,7 @@ function HomePage() {
   };
 
   // RENDER CHÍNH
-  // Loading screen - fullscreen
+  // Loading screen - fullscreen khi F5/first load
   if (loading) {
     return (
       <Box

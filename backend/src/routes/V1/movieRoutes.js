@@ -139,6 +139,40 @@ router
     authMiddleware.restrictTo('admin'),
     movieController.deleteMovie
   );
+/**
+ * @swagger
+ * /movies/{id}/rate:
+ *   post:
+ *     summary: Đánh giá phim
+ *     tags: [Movies]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rating:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 10
+ *     responses:
+ *       200:
+ *         description: Đánh giá thành công
+ */
+router.post(
+  '/:id/rate',
+  authMiddleware.protect,
+  movieController.rateMovie
+);
 
 module.exports = router;
 

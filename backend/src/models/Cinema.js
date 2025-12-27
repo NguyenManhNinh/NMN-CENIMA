@@ -13,6 +13,12 @@ const cinemaSchema = new mongoose.Schema(
       required: [true, 'Vui lòng nhập địa chỉ rạp!'],
       trim: true
     },
+    city: {
+      type: String,
+      required: [true, 'Vui lòng nhập thành phố!'],
+      trim: true,
+      default: 'Hà Nội'
+    },
     phone: {
       type: String,
       required: [true, 'Vui lòng nhập số điện thoại hotline!'],

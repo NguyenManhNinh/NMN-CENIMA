@@ -30,10 +30,11 @@ import {
   ConfirmationNumber as TicketIcon
 } from '@mui/icons-material';
 
-// Mock Data
-import { mockMovies, getNowShowingMovies, getMovieById } from '../../../mocks/mockMovies';
-import { mockCinemas } from '../../../mocks/mockCinemas';
-import { mockShowtimes, availableDates } from '../../../mocks/mockShowtimes';
+// API calls
+import { getMovieAPI, getNowShowingMoviesAPI, rateMovieAPI } from '../../../apis/movieApi';
+import { getAllShowtimesAPI } from '../../../apis/showtimeApi';
+import { getAllCinemasAPI, getCitiesAPI } from '../../../apis/cinemaApi';
+import { useAuth } from '../../../contexts/AuthContext';
 
 
 // ==================== COLORS ====================
@@ -50,16 +51,48 @@ const COLORS = {
   bgCard: '#FFFFFF'
 };
 
+// Helper: Generate next 7 days with formatted info
+const getNextDays = (count = 7) => {
+  const days = [];
+  const today = new Date();
+  const dayNames = ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'];
+
+  for (let i = 0; i < count; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+
+    // Format as YYYY-MM-DD using LOCAL timezone (not UTC)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+
+    days.push({
+      date: dateString,
+      dayOfWeek: dayNames[date.getDay()],
+      dayNumber: date.getDate(),
+      month: date.getMonth() + 1
+    });
+  }
+  return days;
+};
+
 // ==================== BOOKING PAGE COMPONENT ====================
 function BookingPage() {
   const { movieId } = useParams();
   const navigate = useNavigate();
+
+  // Available dates (next 7 days)
+  const availableDates = useMemo(() => getNextDays(7), []);
 
   // States
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(availableDates[0]?.date || '');
   const [otherMovies, setOtherMovies] = useState([]);
+  const [showtimes, setShowtimes] = useState([]);
+  const [cinemas, setCinemas] = useState([]);
+  const [cities, setCities] = useState([]);
   const [selectedCinema, setSelectedCinema] = useState('all');
   const [selectedArea, setSelectedArea] = useState('all');
   const [openRatingModal, setOpenRatingModal] = useState(false);
@@ -67,50 +100,107 @@ function BookingPage() {
   const [openTrailerModal, setOpenTrailerModal] = useState(false);
   const [isLandscape, setIsLandscape] = useState(true);
 
-  // Load movie data
+  // Load movie data from API
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      const foundMovie = getMovieById(movieId);
-      setMovie(foundMovie || mockMovies[0]);
-      const nowShowing = getNowShowingMovies().filter(m => m._id !== movieId).slice(0, 4);
-      setOtherMovies(nowShowing);
-      setLoading(false);
-    }, 300);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // 1. Get movie details
+        const movieRes = await getMovieAPI(movieId);
+        const movieData = movieRes?.data?.movie;
+        setMovie(movieData);
+
+        // 2. Get other now showing movies
+        const nowShowingRes = await getNowShowingMoviesAPI(5);
+        const nowShowingMovies = nowShowingRes?.data?.movies || [];
+        setOtherMovies(nowShowingMovies.filter(m => m._id !== movieId).slice(0, 4));
+
+        // 3. Get all cinemas
+        const cinemasRes = await getAllCinemasAPI();
+        setCinemas(cinemasRes?.data?.cinemas || []);
+
+        // 4. Get all cities for area filter
+        const citiesRes = await getCitiesAPI();
+        setCities(citiesRes?.data?.cities || []);
+
+      } catch (error) {
+        console.error('Error fetching movie data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [movieId]);
 
-  // Filter showtimes
+  // Load showtimes when date changes
+  useEffect(() => {
+    const fetchShowtimes = async () => {
+      if (!movieId || !selectedDate) return;
+      try {
+        const res = await getAllShowtimesAPI({ movieId, date: selectedDate });
+        setShowtimes(res?.data?.showtimes || []);
+      } catch (error) {
+        console.error('Error fetching showtimes:', error);
+        setShowtimes([]);
+      }
+    };
+
+    fetchShowtimes();
+  }, [movieId, selectedDate]);
+
+  // Filter showtimes - use showtimes from API state
   const filteredShowtimes = useMemo(() => {
-    if (!movie) return [];
-    return mockShowtimes.filter(st => {
-      const stDate = st.startAt.split('T')[0];
-      return stDate === selectedDate;
-    });
-  }, [selectedDate, movie]);
+    if (!movie || !showtimes.length) return [];
+    return showtimes; // Already filtered by date from API
+  }, [showtimes, movie]);
 
   // Group showtimes by cinema and format
   const groupedShowtimes = useMemo(() => {
     const grouped = {};
-    mockCinemas.forEach(cinema => {
-      if (selectedCinema !== 'all' && cinema._id !== selectedCinema) return;
 
-      const cinemaShowtimes = filteredShowtimes.filter(st => st.cinemaId === cinema._id);
+    // Get unique cinema IDs from showtimes
+    const cinemaIds = [...new Set(filteredShowtimes.map(st => st.cinemaId?._id || st.cinemaId))];
+
+    cinemaIds.forEach(cinemaId => {
+      if (selectedCinema !== 'all' && cinemaId !== selectedCinema) return;
+
+      // Find cinema info - from populated data in showtime or from cinemas state
+      const cinemaShowtimes = filteredShowtimes.filter(st =>
+        (st.cinemaId?._id || st.cinemaId) === cinemaId
+      );
+
       if (cinemaShowtimes.length > 0) {
+        // Get cinema info from first showtime or from cinemas state
+        const cinemaInfo = cinemaShowtimes[0]?.cinemaId ||
+          cinemas.find(c => c._id === cinemaId) ||
+          { _id: cinemaId, name: 'NMN Cinema' };
+
         const byFormat = {};
         cinemaShowtimes.forEach(st => {
-          const key = `${st.format} ${st.language}`;
+          const format = st.format || '2D';
+          const language = st.language || 'Phụ đề';
+          const key = `${format} ${language}`;
           if (!byFormat[key]) byFormat[key] = [];
           byFormat[key].push(st);
         });
-        grouped[cinema._id] = { cinema, formats: byFormat };
+        grouped[cinemaId] = { cinema: cinemaInfo, formats: byFormat };
       }
     });
     return grouped;
-  }, [filteredShowtimes, selectedCinema]);
+  }, [filteredShowtimes, selectedCinema, cinemas]);
+
 
   const formatTime = (isoString) => {
     const date = new Date(isoString);
     return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Format date to dd/mm/yyyy
+  const formatDate = (dateInput) => {
+    if (!dateInput) return '';
+    const date = new Date(dateInput);
+    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   const handleShowtimeClick = (showtime) => {
@@ -176,10 +266,139 @@ function BookingPage() {
 
   if (!movie) {
     return (
-      <Box sx={{ textAlign: 'center', py: 10, bgcolor: COLORS.bgLight, minHeight: '100vh' }}>
-        <MovieIcon sx={{ fontSize: 80, color: '#ccc', mb: 2 }} />
-        <Typography variant="h5" color="text.secondary">Không tìm thấy phim</Typography>
-        <Button component={Link} to="/" variant="contained" sx={{ mt: 3 }}>Về trang chủ</Button>
+      <Box sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 3
+      }}>
+        {/* Animated Film Reel Icon */}
+        <Box sx={{
+          mb: 4,
+          animation: 'pulse 2s infinite',
+          '@keyframes pulse': {
+            '0%': { transform: 'scale(1)', opacity: 1 },
+            '50%': { transform: 'scale(1.05)', opacity: 0.8 },
+            '100%': { transform: 'scale(1)', opacity: 1 }
+          }
+        }}>
+        </Box>
+
+        {/* Error Code */}
+        <Typography sx={{
+          fontSize: { xs: '4rem', md: '6rem' },
+          fontWeight: 800,
+          color: 'transparent',
+          background: 'linear-gradient(90deg, #F5A623, #FF6B6B)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          fontFamily: '"Montserrat", sans-serif',
+          lineHeight: 1,
+          mb: 2
+        }}>
+          404
+        </Typography>
+
+        {/* Title */}
+        <Typography sx={{
+          fontSize: { xs: '1.5rem', md: '2rem' },
+          fontWeight: 700,
+          color: '#fff',
+          fontFamily: '"Nunito Sans", sans-serif',
+          mb: 1.5,
+          textAlign: 'center'
+        }}>
+          Không tìm thấy phim
+        </Typography>
+
+        {/* Description */}
+        <Typography sx={{
+          fontSize: '1rem',
+          color: 'rgba(255,255,255,0.6)',
+          fontFamily: '"Nunito Sans", sans-serif',
+          mb: 4,
+          textAlign: 'center',
+          maxWidth: 400
+        }}>
+          Phim bạn đang tìm kiếm không tồn tại hoặc đã bị xóa khỏi hệ thống.
+        </Typography>
+
+        {/* Action Buttons */}
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Button
+            component={Link}
+            to="/"
+            variant="contained"
+            sx={{
+              px: 4,
+              py: 1.5,
+              borderRadius: '50px',
+              background: 'linear-gradient(90deg, #F5A623, #FF6B6B)',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              fontFamily: '"Nunito Sans", sans-serif',
+              textTransform: 'none',
+              boxShadow: '0 4px 15px rgba(245, 166, 35, 0.4)',
+              '&:hover': {
+                background: 'linear-gradient(90deg, #e09520, #e55656)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 20px rgba(245, 166, 35, 0.5)'
+              },
+              transition: 'all 0.3s'
+            }}
+          >
+            Về trang chủ
+          </Button>
+          <Button
+            component={Link}
+            to="/phim-dang-chieu"
+            variant="outlined"
+            sx={{
+              px: 4,
+              py: 1.5,
+              borderRadius: '50px',
+              borderColor: 'rgba(255,255,255,0.3)',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              fontFamily: '"Nunito Sans", sans-serif',
+              textTransform: 'none',
+              '&:hover': {
+                borderColor: '#F5A623',
+                bgcolor: 'rgba(245, 166, 35, 0.1)',
+                transform: 'translateY(-2px)'
+              },
+              transition: 'all 0.3s'
+            }}
+          >
+            Xem phim đang chiếu
+          </Button>
+        </Box>
+
+        {/* Decorative Elements */}
+        <Box sx={{
+          position: 'absolute',
+          top: '10%',
+          left: '5%',
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(245,166,35,0.1) 0%, transparent 70%)',
+          filter: 'blur(40px)'
+        }} />
+        <Box sx={{
+          position: 'absolute',
+          bottom: '15%',
+          right: '10%',
+          width: 150,
+          height: 150,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,107,107,0.1) 0%, transparent 70%)',
+          filter: 'blur(50px)'
+        }} />
       </Box>
     );
   }
@@ -188,26 +407,19 @@ function BookingPage() {
     <Box className="booking-page" sx={{ bgcolor: COLORS.bgLight, minHeight: '100vh' }}>
 
       {/* ==================== BANNER TRAILER SECTION ==================== */}
-      <Box
-        sx={{
-          position: "relative",
-          width: "100%",
-          maxWidth: 1585.6,
-          mx: "auto",
-          overflow: "hidden",
-
-          // khóa tỉ lệ thay vì height
-          aspectRatio: { xs: "16 / 9", md: "21 / 9" },
-          minHeight: { xs: 220, md: 360 },
-
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.55)), url(${movie.bannerUrl || movie.posterUrl})`,
-          backgroundSize: "cover",
-          backgroundPosition: "50% 25%", // thường kéo lên chút để thấy mặt
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      <Box sx={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: 1585.6,
+        height: { xs: 280, md: 850 },
+        mx: 'auto',
+        background: `linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url(${movie.bannerUrl || movie.posterUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         {/* Play Button*/}
         <IconButton
           onClick={() => movie?.trailerUrl && setOpenTrailerModal(true)}
@@ -271,7 +483,7 @@ function BookingPage() {
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <CalendarIcon sx={{ fontSize: { xs: 14, md: 20 } }} />
-                      <Typography sx={{ fontSize: { xs: '11px', md: '14px' } }}>{movie.releaseDate}</Typography>
+                      <Typography sx={{ fontSize: { xs: '11px', md: '14px' } }}>{formatDate(movie.releaseDate)}</Typography>
                     </Box>
                     <Box
                       onClick={() => setOpenRatingModal(true)}
@@ -293,7 +505,7 @@ function BookingPage() {
                         {movie.rating}
                       </Typography>
                       <Typography sx={{ fontSize: { xs: '11px', md: '14px' }, color: COLORS.textMuted, transition: 'color 0.2s' }}>
-                        (64 votes)
+                        ({movie.ratingCount || 0} đánh giá)
                       </Typography>
                     </Box>
                     {/* Quốc gia - Mobile only */}
@@ -326,96 +538,133 @@ function BookingPage() {
                     fontSize: '0.85rem',
                     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                   }}>
-                    <Typography sx={{ color: '#4A4A4A', '&:hover': { color: '#FFD700' } }}>Quốc gia:</Typography>
-                    <Typography sx={{ color: '#333333', ':hover': { color: 'red' } }}>Việt Nam</Typography>
+                    <Typography sx={{ color: '#4A4A4A', cursor: 'default', transition: 'color 0.2s' }}>Quốc gia:</Typography>
+                    <Typography sx={{
+                      color: '#333333',
+                      cursor: 'default',
+                      transition: 'color 0.2s',
+                      '&:hover': {
+                        color: (movie.country || 'Việt Nam') === 'Việt Nam' ? '#e53935' : '#333333'
+                      },
+
+                    }}>
+                      {movie.country || 'Việt Nam'}
+                    </Typography>
 
                     <Typography sx={{ color: '#4A4A4A' }}>Nhà sản xuất:</Typography>
-                    <Typography sx={{ color: '#333333' }}>NMN Studio</Typography>
+                    <Typography sx={{ color: '#333333' }}>{movie.studio || 'NMN Studio'}</Typography>
 
                     <Typography sx={{ color: '#4A4A4A' }}>Thể loại:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                      {movie.genres?.map((genre, idx) => (
-                        <Chip
-                          key={idx}
-                          label={genre}
-                          size="small"
-                          variant="outlined"
-                          onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genre.toLowerCase())}`)}
-                          sx={{
-                            fontSize: '0.85rem',
-                            height: 28,
-                            borderRadius: '7px',
-                            border: '1px solid #333',
-                            color: '#333',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              borderColor: '#1a3a5c',
-                              color: '#1a3a5c',
-                              bgcolor: 'rgba(26, 58, 92, 0.05)'
-                            }
-                          }}
-                        />
-                      ))}
+                      {(!movie.genres || movie.genres.length === 0) ? (
+                        <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
+                      ) : (
+                        movie.genres.map((genre, idx) => {
+                          const genreName = typeof genre === 'string' ? genre : genre?.name || '';
+                          return (
+                            <Chip
+                              key={idx}
+                              label={genreName}
+                              size="small"
+                              variant="outlined"
+                              onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genreName.toLowerCase())}`)}
+                              sx={{
+                                fontSize: '0.85rem',
+                                height: 28,
+                                borderRadius: '7px',
+                                border: '1px solid #333',
+                                color: '#333',
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                '&:hover': {
+                                  borderColor: '#1a3a5c',
+                                  color: '#1a3a5c',
+                                  bgcolor: 'rgba(26, 58, 92, 0.05)'
+                                }
+                              }}
+                            />
+                          );
+                        })
+                      )}
                     </Box>
 
                     <Typography sx={{ color: '#4A4A4A' }}>Đạo diễn:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                      {movie.director?.split(',').map((director, idx) => (
-                        <Chip
-                          key={idx}
-                          label={director.trim()}
-                          size="small"
-                          variant="outlined"
-                          onClick={() => navigate(`/goc-dien-anh/dao-dien/${encodeURIComponent(director.trim().toLowerCase())}`)}
-                          sx={{
-                            fontSize: '0.85rem',
-                            height: 28,
-                            borderRadius: '7px',
-                            border: '1px solid #333',
-                            color: '#333',
-                            fontWeight: 500,
-                            bgcolor: 'transparent',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              borderColor: '#1a3a5c',
-                              color: '#1a3a5c',
-                              bgcolor: 'rgba(26, 58, 92, 0.05)'
-                            }
-                          }}
-                        />
-                      ))}
+                      {(() => {
+                        // Handle both API (object) and mock (string) formats
+                        const directors = typeof movie.director === 'string'
+                          ? movie.director.split(',').map(d => d.trim())
+                          : movie.director?.name
+                            ? [movie.director.name]
+                            : [];
+
+                        if (directors.length === 0) {
+                          return <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>;
+                        }
+
+                        return directors.map((directorName, idx) => (
+                          <Chip
+                            key={idx}
+                            label={directorName}
+                            size="small"
+                            variant="outlined"
+                            onClick={() => navigate(`/goc-dien-anh/dao-dien/${encodeURIComponent(directorName.toLowerCase())}`)}
+                            sx={{
+                              fontSize: '0.85rem',
+                              height: 28,
+                              borderRadius: '7px',
+                              border: '1px solid #333',
+                              color: '#333',
+                              fontWeight: 500,
+                              bgcolor: 'transparent',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              '&:hover': {
+                                borderColor: '#1a3a5c',
+                                color: '#1a3a5c',
+                                bgcolor: 'rgba(26, 58, 92, 0.05)'
+                              }
+                            }}
+                          />
+                        ));
+                      })()}
                     </Box>
 
                     <Typography sx={{ color: '#4A4A4A' }}>Diễn viên:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                      {movie.actors?.slice(0, 3).map((actor, idx) => (
-                        <Chip
-                          key={idx}
-                          label={actor}
-                          size="small"
-                          variant="outlined"
-                          onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actor.toLowerCase())}`)}
-                          sx={{
-                            fontSize: '0.85rem',
-                            height: 28,
-                            borderRadius: '7px',
-                            border: '1px solid #333',
-                            color: '#333',
-                            fontWeight: 500,
-                            bgcolor: 'transparent',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              borderColor: '#1a3a5c',
-                              color: '#1a3a5c',
-                              bgcolor: 'rgba(26, 58, 92, 0.05)'
-                            }
-                          }}
-                        />
-                      ))}
+                      {(!movie.actors || movie.actors.length === 0) ? (
+                        <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
+                      ) : (
+                        movie.actors.slice(0, 3).map((actor, idx) => {
+                          const actorName = typeof actor === 'string' ? actor : actor?.name || '';
+                          return (
+                            <Chip
+                              key={idx}
+                              label={actorName}
+                              size="small"
+                              variant="outlined"
+                              onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actorName.toLowerCase())}`)}
+                              sx={{
+                                fontSize: '0.85rem',
+                                height: 28,
+                                borderRadius: '7px',
+                                border: '1px solid #333',
+                                color: '#333',
+                                fontWeight: 500,
+                                bgcolor: 'transparent',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                '&:hover': {
+                                  borderColor: '#1a3a5c',
+                                  color: '#1a3a5c',
+                                  bgcolor: 'rgba(26, 58, 92, 0.05)'
+                                }
+                              }}
+                            />
+                          );
+                        })
+                      )}
                     </Box>
                   </Box>
                 </Grid>
@@ -435,88 +684,101 @@ function BookingPage() {
 
                 <Typography sx={{ color: '#4A4A4A' }}>Thể loại:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
-                  {movie.genres?.map((genre, idx) => (
-                    <Chip
-                      key={idx}
-                      label={genre}
-                      size="small"
-                      variant="outlined"
-                      onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genre.toLowerCase())}`)}
-                      sx={{
-                        fontSize: { xs: '0.7rem', sm: '0.85rem' },
-                        height: { xs: 22, sm: 28 },
-                        borderRadius: '7px',
-                        border: '1px solid #333',
-                        color: '#333',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          borderColor: '#1a3a5c',
-                          color: '#1a3a5c',
-                          bgcolor: 'rgba(26, 58, 92, 0.05)'
-                        }
-                      }}
-                    />
-                  ))}
+                  {movie.genres?.map((genre, idx) => {
+                    const genreName = typeof genre === 'string' ? genre : genre?.name || '';
+                    return (
+                      <Chip
+                        key={idx}
+                        label={genreName}
+                        size="small"
+                        variant="outlined"
+                        onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genreName.toLowerCase())}`)}
+                        sx={{
+                          fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                          height: { xs: 22, sm: 28 },
+                          borderRadius: '7px',
+                          border: '1px solid #333',
+                          color: '#333',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            borderColor: '#1a3a5c',
+                            color: '#1a3a5c',
+                            bgcolor: 'rgba(26, 58, 92, 0.05)'
+                          }
+                        }}
+                      />
+                    );
+                  })}
                 </Box>
 
                 <Typography sx={{ color: '#4A4A4A' }}>Đạo diễn:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
-                  {movie.director?.split(',').map((director, idx) => (
-                    <Chip
-                      key={idx}
-                      label={director.trim()}
-                      size="small"
-                      variant="outlined"
-                      onClick={() => navigate(`/goc-dien-anh/dao-dien/${encodeURIComponent(director.trim().toLowerCase())}`)}
-                      sx={{
-                        fontSize: { xs: '0.7rem', sm: '0.85rem' },
-                        height: { xs: 22, sm: 28 },
-                        borderRadius: '7px',
-                        border: '1px solid #333',
-                        color: '#333',
-                        fontWeight: 500,
-                        bgcolor: 'transparent',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          borderColor: '#1a3a5c',
-                          color: '#1a3a5c',
-                          bgcolor: 'rgba(26, 58, 92, 0.05)'
-                        }
-                      }}
-                    />
-                  ))}
+                  {(() => {
+                    const directors = typeof movie.director === 'string'
+                      ? movie.director.split(',').map(d => d.trim())
+                      : movie.director?.name
+                        ? [movie.director.name]
+                        : [];
+                    return directors.map((directorName, idx) => (
+                      <Chip
+                        key={idx}
+                        label={directorName}
+                        size="small"
+                        variant="outlined"
+                        onClick={() => navigate(`/goc-dien-anh/dao-dien/${encodeURIComponent(directorName.toLowerCase())}`)}
+                        sx={{
+                          fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                          height: { xs: 22, sm: 28 },
+                          borderRadius: '7px',
+                          border: '1px solid #333',
+                          color: '#333',
+                          fontWeight: 500,
+                          bgcolor: 'transparent',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            borderColor: '#1a3a5c',
+                            color: '#1a3a5c',
+                            bgcolor: 'rgba(26, 58, 92, 0.05)'
+                          }
+                        }}
+                      />
+                    ));
+                  })()}
                 </Box>
 
                 <Typography sx={{ color: '#4A4A4A' }}>Diễn viên:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
-                  {movie.actors?.slice(0, 3).map((actor, idx) => (
-                    <Chip
-                      key={idx}
-                      label={actor}
-                      size="small"
-                      variant="outlined"
-                      onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actor.toLowerCase())}`)}
-                      sx={{
-                        fontSize: { xs: '0.7rem', sm: '0.85rem' },
-                        height: { xs: 22, sm: 28 },
-                        borderRadius: '7px',
-                        border: '1px solid #333',
-                        color: '#333',
-                        fontWeight: 500,
-                        bgcolor: 'transparent',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          borderColor: '#1a3a5c',
-                          color: '#1a3a5c',
-                          bgcolor: 'rgba(26, 58, 92, 0.05)'
-                        }
-                      }}
-                    />
-                  ))}
+                  {movie.actors?.slice(0, 3).map((actor, idx) => {
+                    const actorName = typeof actor === 'string' ? actor : actor?.name || '';
+                    return (
+                      <Chip
+                        key={idx}
+                        label={actorName}
+                        size="small"
+                        variant="outlined"
+                        onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actorName.toLowerCase())}`)}
+                        sx={{
+                          fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                          height: { xs: 22, sm: 28 },
+                          borderRadius: '7px',
+                          border: '1px solid #333',
+                          color: '#333',
+                          fontWeight: 500,
+                          bgcolor: 'transparent',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            borderColor: '#1a3a5c',
+                            color: '#1a3a5c',
+                            bgcolor: 'rgba(26, 58, 92, 0.05)'
+                          }
+                        }}
+                      />
+                    );
+                  })}
                 </Box>
               </Box>
 
@@ -634,8 +896,9 @@ function BookingPage() {
                         }
                       }}>
                       <MenuItem value="all">Toàn quốc</MenuItem>
-                      <MenuItem value="hanoi">Hà Nội</MenuItem>
-                      <MenuItem value="danang">Đà Nẵng</MenuItem>
+                      {cities.map((city, idx) => (
+                        <MenuItem key={idx} value={city}>{city}</MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                   <FormControl size="small" sx={{ minWidth: 160, maxWidth: 200 }}>
@@ -655,9 +918,11 @@ function BookingPage() {
                         }
                       }}>
                       <MenuItem value="all">Tất cả rạp</MenuItem>
-                      {mockCinemas.map(c => (
-                        <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>
-                      ))}
+                      {cinemas
+                        .filter(c => selectedArea === 'all' || c.city === selectedArea)
+                        .map(c => (
+                          <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>
+                        ))}
                     </Select>
                   </FormControl>
                 </Box>
@@ -786,7 +1051,7 @@ function BookingPage() {
                       <Box sx={{
                         position: "relative",
                         overflow: "hidden",
-                        aspectRatio: "16/9",
+                        aspectRatio: "3/4",
                         borderRadius: 1,
                         bgcolor: "#f7f7f9ff",
                       }}>
@@ -1002,7 +1267,7 @@ function BookingPage() {
               {movie?.rating}
             </Typography>
             <Typography sx={{ fontSize: '0.9rem', color: COLORS.textMuted }}>
-              (55 đánh giá)
+              ({movie?.ratingCount || 0} đánh giá)
             </Typography>
           </Box>
 
@@ -1038,9 +1303,43 @@ function BookingPage() {
             <Button
               fullWidth
               variant="contained"
-              onClick={() => {
-                // TODO: Submit rating to API
-                setOpenRatingModal(false);
+              onClick={async () => {
+                if (!userRating) {
+                  alert('Vui lòng chọn số sao để đánh giá!');
+                  return;
+                }
+
+                // Check if user is logged in
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                  alert('Vui lòng đăng nhập để đánh giá!');
+                  return;
+                }
+
+                try {
+                  // Token is automatically added by interceptor
+                  const result = await rateMovieAPI(movie._id, userRating);
+                  // Update local movie state with new rating
+                  setMovie(prev => ({
+                    ...prev,
+                    rating: result.data.rating,
+                    ratingCount: result.data.ratingCount
+                  }));
+                  setOpenRatingModal(false);
+                  alert('Đánh giá thành công!');
+                } catch (error) {
+                  console.error('Rating error:', error);
+                  const errorMsg = error.response?.data?.message || 'Đánh giá thất bại!';
+
+                  // Handle expired token
+                  if (errorMsg.includes('expired') || errorMsg.includes('jwt')) {
+                    localStorage.removeItem('accessToken');
+                    alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+                    window.location.reload();
+                  } else {
+                    alert(errorMsg);
+                  }
+                }
               }}
               sx={{
                 py: 1.5,
