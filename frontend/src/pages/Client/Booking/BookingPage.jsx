@@ -512,8 +512,7 @@ function BookingPage() {
                     <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1 }}>
                       <Typography sx={{
                         fontSize: '11px',
-                        color: '#4A4A4A',
-                        '&:hover': { color: '#FFD700' }
+                        color: '#4A4A4A'
                       }}>
                         Quốc gia:
                       </Typography>
@@ -521,11 +520,12 @@ function BookingPage() {
                         fontSize: '11px',
                         color: COLORS.text,
                         fontWeight: 500,
+                        transition: 'color 0.2s',
                         '&:hover': {
-                          color: 'red'
+                          color: (movie.country || 'Việt Nam') === 'Việt Nam' ? '#e53935' : COLORS.text
                         },
                       }}>
-                        Việt Nam
+                        {movie.country || 'Việt Nam'}
                       </Typography>
                     </Box>
                   </Box>
@@ -680,37 +680,41 @@ function BookingPage() {
                 mt: 2
               }}>
                 <Typography sx={{ color: '#4A4A4A' }}>Nhà sản xuất:</Typography>
-                <Typography sx={{ color: '#333333' }}>NMN Studio</Typography>
+                <Typography sx={{ color: '#333333' }}>{movie.studio || 'NMN Studio'}</Typography>
 
                 <Typography sx={{ color: '#4A4A4A' }}>Thể loại:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
-                  {movie.genres?.map((genre, idx) => {
-                    const genreName = typeof genre === 'string' ? genre : genre?.name || '';
-                    return (
-                      <Chip
-                        key={idx}
-                        label={genreName}
-                        size="small"
-                        variant="outlined"
-                        onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genreName.toLowerCase())}`)}
-                        sx={{
-                          fontSize: { xs: '0.7rem', sm: '0.85rem' },
-                          height: { xs: 22, sm: 28 },
-                          borderRadius: '7px',
-                          border: '1px solid #333',
-                          color: '#333',
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            borderColor: '#1a3a5c',
-                            color: '#1a3a5c',
-                            bgcolor: 'rgba(26, 58, 92, 0.05)'
-                          }
-                        }}
-                      />
-                    );
-                  })}
+                  {(!movie.genres || movie.genres.length === 0) ? (
+                    <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
+                  ) : (
+                    movie.genres.map((genre, idx) => {
+                      const genreName = typeof genre === 'string' ? genre : genre?.name || '';
+                      return (
+                        <Chip
+                          key={idx}
+                          label={genreName}
+                          size="small"
+                          variant="outlined"
+                          onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genreName.toLowerCase())}`)}
+                          sx={{
+                            fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                            height: { xs: 22, sm: 28 },
+                            borderRadius: '7px',
+                            border: '1px solid #333',
+                            color: '#333',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                              borderColor: '#1a3a5c',
+                              color: '#1a3a5c',
+                              bgcolor: 'rgba(26, 58, 92, 0.05)'
+                            }
+                          }}
+                        />
+                      );
+                    })
+                  )}
                 </Box>
 
                 <Typography sx={{ color: '#4A4A4A' }}>Đạo diễn:</Typography>
@@ -721,6 +725,11 @@ function BookingPage() {
                       : movie.director?.name
                         ? [movie.director.name]
                         : [];
+
+                    if (directors.length === 0) {
+                      return <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>;
+                    }
+
                     return directors.map((directorName, idx) => (
                       <Chip
                         key={idx}
@@ -751,34 +760,38 @@ function BookingPage() {
 
                 <Typography sx={{ color: '#4A4A4A' }}>Diễn viên:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
-                  {movie.actors?.slice(0, 3).map((actor, idx) => {
-                    const actorName = typeof actor === 'string' ? actor : actor?.name || '';
-                    return (
-                      <Chip
-                        key={idx}
-                        label={actorName}
-                        size="small"
-                        variant="outlined"
-                        onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actorName.toLowerCase())}`)}
-                        sx={{
-                          fontSize: { xs: '0.7rem', sm: '0.85rem' },
-                          height: { xs: 22, sm: 28 },
-                          borderRadius: '7px',
-                          border: '1px solid #333',
-                          color: '#333',
-                          fontWeight: 500,
-                          bgcolor: 'transparent',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            borderColor: '#1a3a5c',
-                            color: '#1a3a5c',
-                            bgcolor: 'rgba(26, 58, 92, 0.05)'
-                          }
-                        }}
-                      />
-                    );
-                  })}
+                  {(!movie.actors || movie.actors.length === 0) ? (
+                    <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
+                  ) : (
+                    movie.actors.slice(0, 3).map((actor, idx) => {
+                      const actorName = typeof actor === 'string' ? actor : actor?.name || '';
+                      return (
+                        <Chip
+                          key={idx}
+                          label={actorName}
+                          size="small"
+                          variant="outlined"
+                          onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actorName.toLowerCase())}`)}
+                          sx={{
+                            fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                            height: { xs: 22, sm: 28 },
+                            borderRadius: '7px',
+                            border: '1px solid #333',
+                            color: '#333',
+                            fontWeight: 500,
+                            bgcolor: 'transparent',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                              borderColor: '#1a3a5c',
+                              color: '#1a3a5c',
+                              bgcolor: 'rgba(26, 58, 92, 0.05)'
+                            }
+                          }}
+                        />
+                      );
+                    })
+                  )}
                 </Box>
               </Box>
 

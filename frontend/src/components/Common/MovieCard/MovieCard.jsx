@@ -135,9 +135,9 @@ function MovieCard({ movie, onTrailerClick }) {
     }
   };
 
-  // Click vào card -> Chi tiết phim
+  // Click vào card -> Đặt vé
   const handleCardClick = () => {
-    navigate(`/chi-tiet-phim/${movie._id}`);
+    navigate(`/dat-ve/${movie._id}`);
   };
 
   // RENDER
@@ -170,9 +170,12 @@ function MovieCard({ movie, onTrailerClick }) {
           sx={styles.ageRating}
         />
 
-        {/* Overlay hiển thị khi hover */}
+        {/* Overlay hiển thị khi hover - Ẩn trên mobile vì không có hover */}
         <Fade in={isHovered}>
-          <Box className="overlay" sx={styles.overlay}>
+          <Box className="overlay" sx={{
+            ...styles.overlay,
+            display: { xs: 'none', sm: 'flex' }
+          }}>
             {/* Nút Mua vé */}
             <Button
               variant="contained"
