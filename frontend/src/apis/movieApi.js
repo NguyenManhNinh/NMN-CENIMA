@@ -1,17 +1,18 @@
 import axios from 'axios';
 
+// Base URL từ environment variable hoặc mặc định localhost
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
 
-// Create axios instance
+// Tạo axios instance cho Movie API
 const api = axios.create({
   baseURL: `${API_URL}/movies`,
-  withCredentials: true, // Important for cookies (refresh token)
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Add token to requests automatically
+// Request Interceptor - Tự động thêm access token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) {
@@ -20,7 +21,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle token refresh on 401
+// Response Interceptor - Xử lý refresh token khi 401
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -30,7 +31,6 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Call refresh token endpoint
         const response = await axios.post(`${API_URL}/auth/refresh-token`, {}, {
           withCredentials: true
         });
@@ -43,7 +43,6 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
-        // Don't redirect, let the calling code handle this
         return Promise.reject(refreshError);
       }
     }
@@ -52,10 +51,8 @@ api.interceptors.response.use(
   }
 );
 
-// ==================== MOVIE API ====================
-
 /**
- * Get all movies with filters
+ * Lấy danh sách tất cả phim với filters
  * @param {Object} params - { status, genre, page, limit }
  */
 export const getAllMoviesAPI = async (params = {}) => {
@@ -64,7 +61,8 @@ export const getAllMoviesAPI = async (params = {}) => {
 };
 
 /**
- * Get movies currently showing
+ * Lấy danh sách phim đang chiếu
+ * @param {number} limit - Số lượng phim (default: 8)
  */
 export const getNowShowingMoviesAPI = async (limit = 8) => {
   const response = await api.get('/', {
@@ -74,7 +72,8 @@ export const getNowShowingMoviesAPI = async (limit = 8) => {
 };
 
 /**
- * Get coming soon movies
+ * Lấy danh sách phim sắp chiếu
+ * @param {number} limit - Số lượng phim (default: 8)
  */
 export const getComingSoonMoviesAPI = async (limit = 8) => {
   const response = await api.get('/', {
@@ -84,8 +83,8 @@ export const getComingSoonMoviesAPI = async (limit = 8) => {
 };
 
 /**
- * Get movie by ID or slug
- * @param {string} id - Movie ID or slug
+ * Lấy chi tiết phim theo ID hoặc slug
+ * @param {string} id - Movie ID hoặc slug
  */
 export const getMovieAPI = async (id) => {
   const response = await api.get(`/${id}`);
@@ -93,8 +92,9 @@ export const getMovieAPI = async (id) => {
 };
 
 /**
- * Get movies by genre
- * @param {string} genreId - Genre ID
+ * Lấy danh sách phim theo thể loại
+ * @param {string} genreId - ID thể loại
+ * @param {number} limit - Số lượng phim (default: 8)
  */
 export const getMoviesByGenreAPI = async (genreId, limit = 8) => {
   const response = await api.get('/', {
@@ -104,12 +104,11 @@ export const getMoviesByGenreAPI = async (genreId, limit = 8) => {
 };
 
 /**
- * Rate a movie
- * @param {string} movieId - Movie ID
- * @param {number} rating - Rating value (1-10)
+ * Đánh giá phim
+ * @param {string} movieId - ID phim cần đánh giá
+ * @param {number} rating - Điểm đánh giá (1-10)
  */
 export const rateMovieAPI = async (movieId, rating) => {
-  // Token is automatically added by interceptor
   const response = await api.post(`/${movieId}/rate`, { rating });
   return response.data;
 };

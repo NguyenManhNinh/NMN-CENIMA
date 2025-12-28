@@ -12,6 +12,7 @@ import ClientLayout from './components/Layout/ClientLayout';
 // Pages - Client
 import HomePage from './pages/Client/HomePage';
 import BookingPage from './pages/Client/Booking';
+import MoviesPage from './pages/Client/Movie';
 import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 
 function App() {
@@ -30,6 +31,10 @@ function App() {
           <Route path="/" element={<ClientLayout />}>
             {/* Trang chủ */}
             <Route index element={<HomePage />} />
+            {/* Phim đang chiếu */}
+            <Route path="phim-dang-chieu" element={<MoviesPage />} />
+            {/* Phim sắp chiếu */}
+            <Route path="phim-sap-chieu" element={<MoviesPage />} />
             {/* Đặt vé */}
             <Route path="dat-ve/:movieId" element={<BookingPage />} />
           </Route>

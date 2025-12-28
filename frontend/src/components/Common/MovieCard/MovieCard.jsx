@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardMedia,
@@ -15,12 +15,10 @@ import {
   PlayCircle as PlayIcon,
   ConfirmationNumber as TicketIcon
 } from '@mui/icons-material';
-// Background image
-import filmBackground from '../../../assets/images/film-bg.png';
 
 // STYLES
 const styles = {
-  // Card container
+  // Card container - Hiệu ứng hover nâng lên
   card: {
     width: '100%',
     position: 'relative',
@@ -33,12 +31,12 @@ const styles = {
       boxShadow: '0 12px 30px rgba(0,0,0,0.2)'
     }
   },
-  // Container cho poster và overlay
+  // Container poster và overlay
   mediaContainer: {
     position: 'relative',
     overflow: 'hidden',
-    aspectRatio: '2/3', // Tỷ lệ poster chuẩn - ảnh sẽ hiển thị đẹp không bị cắt nhiều
-    backgroundColor: '#1a3a5c', // Background tối để tránh flash trắng
+    aspectRatio: '2/3',
+    backgroundColor: '#1a3a5c',
     '&:hover .overlay': {
       opacity: 1
     }
@@ -49,9 +47,9 @@ const styles = {
     height: '100%',
     objectFit: 'cover',
     userSelect: 'none',
-    pointerEvents: 'none'  // Ngăn kéo thả ảnh
+    pointerEvents: 'none'
   },
-  // Nhãn độ tuổi
+  // Nhãn độ tuổi - góc trên phải
   ageRating: {
     position: 'absolute',
     top: 10,
@@ -59,7 +57,7 @@ const styles = {
     fontWeight: 'bold',
     fontSize: '0.75rem'
   },
-  // Overlay khi hover
+  // Overlay tối khi hover (Desktop only)
   overlay: {
     position: 'absolute',
     top: 0,
@@ -75,55 +73,51 @@ const styles = {
     opacity: 0,
     transition: 'opacity 0.3s ease'
   },
-  // Nút action trong overlay
+  // Nút trong overlay
   overlayButton: {
     minWidth: 130,
     fontWeight: 600,
     textTransform: 'none'
   },
-  // Nội dung card (tên phim, rating)
+  // Nội dung card
   content: {
     textAlign: 'left',
     py: 0.5,
   },
-  // Tên phim - cho phép 2 dòng
+  // Tên phim - tối đa 2 dòng
   title: {
     fontWeight: 800,
     fontSize: { xs: '0.9rem', sm: '1rem' },
     mb: 1,
     fontFamily: '"Space Grotesk", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
-    // Hiển thị tối đa 2 dòng
     display: '-webkit-box',
     WebkitLineClamp: 2,
     WebkitBoxOrient: 'vertical',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     lineHeight: 1.3,
-    minHeight: '2.6em' // 2 dòng x 1.3 line-height
+    minHeight: '2.6em'
   }
 };
 
-// HELPER - Lấy màu cho nhãn độ tuổi
+// Lấy màu cho nhãn độ tuổi
 const getAgeRatingColor = (rating) => {
   const colors = {
-    'P': 'success',    // Phổ biến - xanh lá
-    'C13': 'info',     // 13+ - xanh dương
-    'C16': 'warning',  // 16+ - cam
-    'C18': 'error'     // 18+ - đỏ
+    'P': 'success',     // Phổ biến - xanh lá
+    'C13': 'info',      // 13+ - xanh dương
+    'C16': 'warning',   // 16+ - cam
+    'C18': 'error'      // 18+ - đỏ
   };
   return colors[rating] || 'default';
 };
 
-// MOVIE CARD COMPONENT
 function MovieCard({ movie, onTrailerClick }) {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
-  // HANDLERS
-
   // Click nút Mua vé
   const handleBuyTicket = (e) => {
-    e.stopPropagation(); // Ngăn trigger click card
+    e.stopPropagation();
     navigate(`/dat-ve/${movie._id}`);
   };
 
@@ -135,12 +129,11 @@ function MovieCard({ movie, onTrailerClick }) {
     }
   };
 
-  // Click vào card -> Đặt vé
+  // Click vào card → Đặt vé
   const handleCardClick = () => {
     navigate(`/dat-ve/${movie._id}`);
   };
 
-  // RENDER
   return (
     <Card
       sx={styles.card}
@@ -148,9 +141,8 @@ function MovieCard({ movie, onTrailerClick }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* === POSTER VÀ OVERLAY === */}
+      {/* POSTER VÀ OVERLAY */}
       <Box sx={styles.mediaContainer}>
-        {/* Poster */}
         <CardMedia
           component="img"
           image={movie.posterUrl || 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image'}
@@ -170,13 +162,15 @@ function MovieCard({ movie, onTrailerClick }) {
           sx={styles.ageRating}
         />
 
-        {/* Overlay hiển thị khi hover - Ẩn trên mobile vì không có hover */}
+        {/* Overlay khi hover - Ẩn trên mobile */}
         <Fade in={isHovered}>
-          <Box className="overlay" sx={{
-            ...styles.overlay,
-            display: { xs: 'none', sm: 'flex' }
-          }}>
-            {/* Nút Mua vé */}
+          <Box
+            className="overlay"
+            sx={{
+              ...styles.overlay,
+              display: { xs: 'none', sm: 'flex' }
+            }}
+          >
             <Button
               variant="contained"
               color="warning"
@@ -187,7 +181,6 @@ function MovieCard({ movie, onTrailerClick }) {
               Mua vé
             </Button>
 
-            {/* Nút Xem trailer */}
             {movie.trailerUrl && (
               <Button
                 variant="outlined"
@@ -211,13 +204,12 @@ function MovieCard({ movie, onTrailerClick }) {
         </Fade>
       </Box>
 
-      {/*NỘI DUNG: Tên phim, đánh giá*/}
+      {/* NỘI DUNG: Tên phim, Rating */}
       <CardContent sx={styles.content}>
         <Typography sx={styles.title} title={movie.title}>
           {movie.title}
         </Typography>
 
-        {/* Rating */}
         <Rating
           value={movie.rating ? movie.rating / 2 : 0}
           size="small"

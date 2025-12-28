@@ -5,7 +5,8 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon
 } from '@mui/icons-material';
-// STYLES - Style đơn giản, ổn định
+
+// STYLES
 const styles = {
   container: {
     position: 'relative',
@@ -36,11 +37,10 @@ const styles = {
   image: {
     width: '100%',
     height: 'auto',
-    // aspectRatio: '21/9',
     objectFit: 'cover',
     display: 'block',
     backgroundColor: 'white',
-    userSelect: 'none'  // Ngăn kéo thả ảnh
+    userSelect: 'none'
   },
   navButton: {
     position: 'absolute',
@@ -90,7 +90,7 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const autoplayRef = useRef(null);
 
-  // Autoplay
+  // Autoplay effect
   useEffect(() => {
     if (autoplay && banners.length > 1) {
       autoplayRef.current = setInterval(() => {
@@ -114,7 +114,7 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
     setCurrentIndex(index);
   };
 
-  // Nếu không có banner, hiển thị placeholder full width
+  // Placeholder khi không có banner
   if (!banners || banners.length === 0) {
     return (
       <Box
@@ -128,15 +128,7 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
           overflow: 'hidden'
         }}
       >
-        <Box sx={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
-          {/* <Box
-            component="img"
-            src={LogoNMNCinema}
-            alt="NMN Cinema"
-            sx={{ width: 120, height: 'auto', opacity: 0.5, mb: 2 }}
-            onError={(e) => { e.target.style.display = 'none'; }}
-          /> */}
-        </Box>
+        <Box sx={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)' }} />
       </Box>
     );
   }
@@ -145,12 +137,8 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
 
   return (
     <Box sx={styles.container}>
-      <Box
-        sx={{
-          ...styles.slidesWrapper,
-          transform: `translateX(${translateX}%)`
-        }}
-      >
+      {/* Slides */}
+      <Box sx={{ ...styles.slidesWrapper, transform: `translateX(${translateX}%)` }}>
         {banners.map((banner, index) => (
           <Box
             key={banner._id}
@@ -178,6 +166,7 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
         ))}
       </Box>
 
+      {/* Nút điều hướng (chỉ hiện khi > 1 banner) */}
       {banners.length > 1 && (
         <>
           <IconButton onClick={handlePrev} sx={{ ...styles.navButton, ...styles.prevButton }}>
@@ -189,6 +178,7 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
         </>
       )}
 
+      {/* Dots indicator */}
       {banners.length > 1 && (
         <Box sx={styles.dotsContainer}>
           {banners.map((_, index) => (
