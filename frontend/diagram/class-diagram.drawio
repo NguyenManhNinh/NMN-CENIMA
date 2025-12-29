@@ -1,0 +1,127 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Class Diagram - Home &amp; Auth" id="class-home-auth">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- CONTROLLERS -->
+        <mxCell id="auth-ctrl" value="&lt;b&gt;AuthController&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ login(req, res)&lt;br&gt;+ register(req, res)&lt;br&gt;+ logout(req, res)&lt;br&gt;+ refreshToken(req, res)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="180" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="home-ctrl" value="&lt;b&gt;HomeController&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ getHomeData(req, res)&lt;br&gt;+ getBanners(req, res)&lt;br&gt;+ getEvents(req, res)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="260" width="180" height="110" as="geometry"/>
+        </mxCell>
+
+        <!-- SERVICES -->
+        <mxCell id="auth-svc" value="&lt;b&gt;AuthService&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ login(email, password)&lt;br&gt;+ register(userData)&lt;br&gt;+ verifyPassword(plain, hash)&lt;br&gt;+ generateTokens(user)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="200" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="jwt-svc" value="&lt;b&gt;JwtService&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ signToken(payload)&lt;br&gt;+ verifyToken(token)&lt;br&gt;+ decodeToken(token)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="300" y="220" width="200" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="home-svc" value="&lt;b&gt;HomeService&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ getHomeData()&lt;br&gt;+ getNowShowingMovies()&lt;br&gt;+ getActiveBanners()&lt;br&gt;+ getActiveEvents()&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="300" y="340" width="200" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- REPOSITORIES -->
+        <mxCell id="user-repo" value="&lt;b&gt;UserRepository&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ findByEmail(email)&lt;br&gt;+ findById(id)&lt;br&gt;+ create(userData)&lt;br&gt;+ update(id, data)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="580" y="60" width="180" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="movie-repo" value="&lt;b&gt;MovieRepository&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ findByStatus(status)&lt;br&gt;+ findById(id)&lt;br&gt;+ findAll(limit)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="580" y="200" width="180" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="banner-repo" value="&lt;b&gt;BannerRepository&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ findActive()&lt;br&gt;+ findAll()&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="580" y="320" width="180" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="event-repo" value="&lt;b&gt;EventRepository&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;+ findActive()&lt;br&gt;+ findById(id)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="580" y="420" width="180" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- MODELS -->
+        <mxCell id="user-model" value="&lt;b&gt;User&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;- _id: ObjectId&lt;br&gt;- email: String&lt;br&gt;- password: String&lt;br&gt;- fullName: String&lt;br&gt;- role: String&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="840" y="60" width="160" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="movie-model" value="&lt;b&gt;Movie&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;- _id: ObjectId&lt;br&gt;- title: String&lt;br&gt;- status: String&lt;br&gt;- posterUrl: String&lt;br&gt;- rating: Number&lt;/div&gt;&lt;hr&gt;&lt;div align='left'&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="840" y="200" width="160" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="banner-model" value="&lt;b&gt;Banner&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;- _id: ObjectId&lt;br&gt;- title: String&lt;br&gt;- imageUrl: String&lt;br&gt;- isActive: Boolean&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="840" y="340" width="160" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="event-model" value="&lt;b&gt;Event&lt;/b&gt;&lt;hr&gt;&lt;div align='left'&gt;- _id: ObjectId&lt;br&gt;- title: String&lt;br&gt;- content: String&lt;br&gt;- isActive: Boolean&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="840" y="460" width="160" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- ARROWS: Controller -> Service -->
+        <mxCell id="arr1" style="endArrow=open;endFill=0;dashed=1;html=1;" edge="1" parent="1" source="auth-ctrl" target="auth-svc">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr2" style="endArrow=open;endFill=0;dashed=1;html=1;" edge="1" parent="1" source="home-ctrl" target="home-svc">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ARROWS: AuthService -> JwtService, UserRepo -->
+        <mxCell id="arr3" style="endArrow=open;endFill=0;dashed=1;html=1;" edge="1" parent="1" source="auth-svc" target="jwt-svc">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr4" style="endArrow=open;endFill=0;dashed=1;html=1;" edge="1" parent="1" source="auth-svc" target="user-repo">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ARROWS: HomeService -> Repos -->
+        <mxCell id="arr5" style="endArrow=open;endFill=0;dashed=1;html=1;" edge="1" parent="1" source="home-svc" target="movie-repo">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr6" style="endArrow=open;endFill=0;dashed=1;html=1;" edge="1" parent="1" source="home-svc" target="banner-repo">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr7" style="endArrow=open;endFill=0;dashed=1;html=1;" edge="1" parent="1" source="home-svc" target="event-repo">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ARROWS: Repository -> Model -->
+        <mxCell id="arr8" style="endArrow=open;endFill=0;html=1;" edge="1" parent="1" source="user-repo" target="user-model">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr9" style="endArrow=open;endFill=0;html=1;" edge="1" parent="1" source="movie-repo" target="movie-model">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr10" style="endArrow=open;endFill=0;html=1;" edge="1" parent="1" source="banner-repo" target="banner-model">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr11" style="endArrow=open;endFill=0;html=1;" edge="1" parent="1" source="event-repo" target="event-model">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- LABELS -->
+        <mxCell id="lbl1" value="&lt;b&gt;Controller&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;" vertex="1" parent="1">
+          <mxGeometry x="90" y="60" width="80" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl2" value="&lt;b&gt;Service&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;" vertex="1" parent="1">
+          <mxGeometry x="360" y="50" width="80" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl3" value="&lt;b&gt;Repository&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;" vertex="1" parent="1">
+          <mxGeometry x="630" y="30" width="80" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl4" value="&lt;b&gt;Model&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;" vertex="1" parent="1">
+          <mxGeometry x="890" y="30" width="60" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;font style='font-size:16px'&gt;&lt;b&gt;Class Diagram - Home &amp; Authentication Module&lt;/b&gt;&lt;/font&gt;&lt;br&gt;NMN Cinema Website" style="text;html=1;strokeColor=none;fillColor=none;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="560" width="300" height="40" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

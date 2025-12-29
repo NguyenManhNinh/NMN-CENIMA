@@ -1,0 +1,101 @@
+<mxfile host="app.diagrams.net" modified="2024-01-15T00:00:00.000Z" agent="5.0" version="22.1.0">
+  <diagram name="System Architecture" id="system-arch">
+    <mxGraphModel dx="1434" dy="764" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Frontend -->
+        <mxCell id="frontend" value="&lt;b&gt;Frontend (ReactJS)&lt;/b&gt;&lt;br&gt;- HomePage UI&lt;br&gt;- Login/Register UI&lt;br&gt;- LocalStorage (JWT)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacingLeft=15;spacingTop=15;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="220" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Backend -->
+        <mxCell id="backend" value="&lt;b&gt;Backend API (Node.js/Express)&lt;/b&gt;&lt;br&gt;- AuthController/AuthService&lt;br&gt;- HomeController&lt;br&gt;- Token/JWT Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=15;spacingTop=15;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="400" y="200" width="260" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Database -->
+        <mxCell id="database" value="&lt;b&gt;MongoDB (Collections)&lt;/b&gt;&lt;br&gt;- Users&lt;br&gt;- Movies&lt;br&gt;- Banners&lt;br&gt;- Events" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacingLeft=15;spacingTop=25;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="760" y="200" width="180" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- External Services Label -->
+        <mxCell id="external-label" value="&lt;b&gt;External Services&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="430" y="380" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- VNPay -->
+        <mxCell id="vnpay" value="&lt;b&gt;VNPay&lt;/b&gt;&lt;br&gt;(Payment Gateway)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="380" y="420" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- AI Chatbot -->
+        <mxCell id="chatbot" value="&lt;b&gt;Gemini API&lt;/b&gt;&lt;br&gt;(AI Chatbot)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="560" y="420" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 1: Frontend to Backend (Request) -->
+        <mxCell id="arrow1" value="&lt;b&gt;HTTPS REST API&lt;/b&gt;&lt;br&gt;(Request)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="frontend" target="backend">
+          <mxGeometry x="-0.1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Arrow 2: Backend to Frontend (Response) -->
+        <mxCell id="arrow2" value="&lt;b&gt;JSON Response&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.65;exitDx=0;exitDy=0;entryX=1;entryY=0.65;entryDx=0;entryDy=0;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="backend" target="frontend">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 3: Backend to Database -->
+        <mxCell id="arrow3" value="&lt;b&gt;Query/CRUD&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="backend" target="database">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 4a: Backend to VNPay (Request) -->
+        <mxCell id="arrow4a" value="&lt;b&gt;Request&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="backend" target="vnpay">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Arrow 4b: VNPay to Backend (Callback) -->
+        <mxCell id="arrow4b" value="&lt;b&gt;Callback&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.35;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="vnpay" target="backend">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Arrow 5a: Backend to Gemini (Request) -->
+        <mxCell id="arrow5a" value="&lt;b&gt;Request&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="backend" target="chatbot">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Arrow 5b: Gemini to Backend (Response) -->
+        <mxCell id="arrow5b" value="&lt;b&gt;Response&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="chatbot" target="backend">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;Kiến trúc tổng thể phân hệ Trang chủ – Đăng nhập – Đăng ký&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="80" width="560" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- HTTPS Label for VNPay -->
+        <mxCell id="https-vnpay" value="&lt;i&gt;HTTPS&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="350" width="40" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- HTTPS Label for Gemini -->
+        <mxCell id="https-gemini" value="&lt;i&gt;HTTPS&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="620" y="350" width="40" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

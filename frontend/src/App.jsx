@@ -13,6 +13,7 @@ import ClientLayout from './components/Layout/ClientLayout';
 import HomePage from './pages/Client/HomePage';
 import BookingPage from './pages/Client/Booking';
 import MoviesPage from './pages/Client/Movie';
+import SeatSelectionPage from './pages/Client/SeatSelection';
 import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 
 function App() {
@@ -37,6 +38,8 @@ function App() {
             <Route path="phim-sap-chieu" element={<MoviesPage />} />
             {/* Đặt vé */}
             <Route path="dat-ve/:movieId" element={<BookingPage />} />
+            {/* Chọn ghế */}
+            <Route path="chon-ghe/:showtimeId" element={<SeatSelectionPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
