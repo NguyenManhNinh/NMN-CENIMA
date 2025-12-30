@@ -55,6 +55,26 @@ exports.getAllShowtimes = catchAsync(async (req, res, next) => {
   });
 });
 
+// Lấy chi tiết một suất chiếu (bao gồm thông tin phim, rạp, phòng)
+// QUAN TRỌNG: Endpoint này dùng cho trang chọn ghế
+exports.getShowtimeById = catchAsync(async (req, res, next) => {
+  const showtime = await Showtime.findById(req.params.id)
+    .populate('movieId', 'title duration posterUrl ageRating')
+    .populate('cinemaId', 'name address')
+    .populate('roomId', 'name type totalSeats seatMap');
+
+  if (!showtime) {
+    return next(new AppError('Không tìm thấy suất chiếu này!', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      showtime
+    }
+  });
+});
+
 // Tạo suất chiếu mới (Admin only)
 exports.createShowtime = catchAsync(async (req, res, next) => {
   const { movieId, roomId, startAt, basePrice } = req.body;

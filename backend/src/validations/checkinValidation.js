@@ -1,7 +1,3 @@
-/**
- * Validation schemas cho Payment routes
- * Sử dụng Zod để validate request body
- */
 const { z } = require('zod');
 
 // Schema cho check-in (scan vé)

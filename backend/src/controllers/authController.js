@@ -9,7 +9,7 @@ const sendEmail = require('../services/emailService');
 // Hàm tạo và gửi Token
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '15m' // Access Token ngắn hạn (15 phút)
+    expiresIn: '1h' // Access Token 1 giờ (chuẩn Google/Netflix)
   });
 };
 
