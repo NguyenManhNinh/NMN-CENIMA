@@ -10,7 +10,7 @@ const api = axios.create({
   }
 });
 
-// ==================== PERSON API ====================
+// PERSON API
 
 /**
  * Get all persons (actors + directors)

@@ -10,7 +10,7 @@ const api = axios.create({
   }
 });
 
-// ==================== GENRE API ====================
+// GENRE API
 
 /**
  * Get all genres

@@ -14,6 +14,7 @@ import HomePage from './pages/Client/HomePage';
 import BookingPage from './pages/Client/Booking';
 import MoviesPage from './pages/Client/Movie';
 import SeatSelectionPage from './pages/Client/SeatSelection';
+import ComboPage from './pages/Client/Combo';
 import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 
 function App() {
@@ -40,6 +41,8 @@ function App() {
             <Route path="dat-ve/:movieId" element={<BookingPage />} />
             {/* Chọn ghế */}
             <Route path="chon-ghe/:showtimeId" element={<SeatSelectionPage />} />
+            {/* Đặt combo */}
+            <Route path="dat-ve-combo" element={<ComboPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

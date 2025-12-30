@@ -6,11 +6,6 @@ import { useAuth } from '../../../contexts/AuthContext';
 // Logo
 import LogoImage from '../../../assets/images/NMN_CENIMA_LOGO.png';
 
-/**
- * OAuth Callback Page
- * Xử lý redirect từ Google/Facebook OAuth
- * Lưu token và user vào localStorage, sau đó redirect về home
- */
 function OAuthCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

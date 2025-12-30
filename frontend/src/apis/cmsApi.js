@@ -10,7 +10,7 @@ const api = axios.create({
   }
 });
 
-// ==================== BANNER API ====================
+// BANNER API
 
 /**
  * Get all banners

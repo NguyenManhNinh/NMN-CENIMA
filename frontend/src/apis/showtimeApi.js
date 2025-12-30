@@ -1,23 +1,13 @@
-import axios from 'axios';
+import axiosInstance from './axiosInstance';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
-
-// Create axios instance
-const api = axios.create({
-  baseURL: `${API_URL}/showtimes`,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-// ==================== SHOWTIME API ====================
+// SHOWTIME API
 
 /**
  * Get all showtimes with filters
  * @param {Object} params - { movieId, cinemaId, date }
  */
 export const getAllShowtimesAPI = async (params = {}) => {
-  const response = await api.get('/', { params });
+  const response = await axiosInstance.get('/showtimes', { params });
   return response.data;
 };
 
@@ -28,7 +18,7 @@ export const getAllShowtimesAPI = async (params = {}) => {
  * @param {string} date - Date (YYYY-MM-DD)
  */
 export const getShowtimesByFilterAPI = async (movieId, cinemaId, date) => {
-  const response = await api.get('/', {
+  const response = await axiosInstance.get('/showtimes', {
     params: { movieId, cinemaId, date }
   });
   return response.data;
@@ -40,7 +30,7 @@ export const getShowtimesByFilterAPI = async (movieId, cinemaId, date) => {
  * @param {string} cinemaId - Cinema ID
  */
 export const getAvailableDatesAPI = async (movieId, cinemaId) => {
-  const response = await api.get('/', {
+  const response = await axiosInstance.get('/showtimes', {
     params: { movieId, cinemaId }
   });
 
@@ -54,4 +44,14 @@ export const getAvailableDatesAPI = async (movieId, cinemaId) => {
   return { dates };
 };
 
-export default api;
+/**
+ * Get showtime by ID (includes movie, cinema, room details)
+ * @param {string} showtimeId - Showtime ID
+ * @returns {Promise<{showtime: Object}>}
+ */
+export const getShowtimeByIdAPI = async (showtimeId) => {
+  const response = await axiosInstance.get(`/showtimes/${showtimeId}`);
+  return response.data;
+};
+
+export default axiosInstance;

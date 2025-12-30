@@ -9,7 +9,7 @@ export const mockCombos = [
       { name: 'Bắp rang bơ lớn', quantity: 1 },
       { name: 'Pepsi lớn', quantity: 1 }
     ],
-    imageUrl: '/images/combo-solo.png',
+    imageUrl: 'https://riocinemas.vn/Areas/Admin/Content/Fileuploads/images/COMBO/Hinh%20Combo-06.png',
     status: 'ACTIVE'
   },
   {
@@ -21,7 +21,7 @@ export const mockCombos = [
       { name: 'Bắp rang bơ lớn', quantity: 1 },
       { name: 'Pepsi lớn', quantity: 2 }
     ],
-    imageUrl: '/images/combo-couple.png',
+    imageUrl: 'https://riocinemas.vn/Areas/Admin/Content/Fileuploads/images/COMBO/Hinh%20Combo-06.png',
     status: 'ACTIVE'
   },
   {
@@ -33,7 +33,7 @@ export const mockCombos = [
       { name: 'Bắp rang bơ lớn', quantity: 2 },
       { name: 'Pepsi lớn', quantity: 4 }
     ],
-    imageUrl: '/images/combo-family.png',
+    imageUrl: 'https://riocinemas.vn/Areas/Admin/Content/Fileuploads/images/COMBO/Hinh%20Combo-06.png',
     status: 'ACTIVE'
   },
   {
@@ -46,7 +46,33 @@ export const mockCombos = [
       { name: 'Hotdog', quantity: 1 },
       { name: 'Pepsi vừa', quantity: 1 }
     ],
-    imageUrl: '/images/combo-snack.png',
+    imageUrl: 'https://riocinemas.vn/Areas/Admin/Content/Fileuploads/images/COMBO/Hinh%20Combo-06.png',
+    status: 'ACTIVE'
+  },
+  {
+    _id: 'combo5',
+    name: 'Snack Box',
+    description: '1 Bắp nhỏ + 1 Hotdog + 1 Nước',
+    price: 89000,
+    items: [
+      { name: 'Bắp rang bơ nhỏ', quantity: 1 },
+      { name: 'Hotdog', quantity: 1 },
+      { name: 'Pepsi vừa', quantity: 1 }
+    ],
+    imageUrl: 'https://riocinemas.vn/Areas/Admin/Content/Fileuploads/images/COMBO/Hinh%20Combo-06.png',
+    status: 'ACTIVE'
+  },
+  {
+    _id: 'combo6',
+    name: 'Snack Box',
+    description: '1 Bắp nhỏ + 1 Hotdog + 1 Nước',
+    price: 89000,
+    items: [
+      { name: 'Bắp rang bơ nhỏ', quantity: 1 },
+      { name: 'Hotdog', quantity: 1 },
+      { name: 'Pepsi vừa', quantity: 1 }
+    ],
+    imageUrl: 'https://riocinemas.vn/Areas/Admin/Content/Fileuploads/images/COMBO/Hinh%20Combo-06.png',
     status: 'ACTIVE'
   }
 ];
