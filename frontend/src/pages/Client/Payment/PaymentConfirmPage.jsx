@@ -553,14 +553,9 @@ function PaymentConfirmPage() {
               <Typography sx={styles.sectionHeader}>THÔNG TIN VÉ</Typography>
               <Box sx={styles.sectionContent}>
                 {/* Hiển thị các ghế đã chọn */}
-                {selectedSeats.map((seat, idx) => (
-                  <Chip
-                    key={idx}
-                    label={seat.id || seat.seatCode}
-                    size="small"
-                    sx={{ mr: 0.5, mb: 0.5, bgcolor: '#fef3c7' }}
-                  />
-                ))}
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a2e' }}>
+                  {selectedSeats.map(seat => seat.id || seat.seatCode).join(', ')}
+                </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                   <Typography variant="body2">Số lượng</Typography>
                   <Typography variant="body2" fontWeight={600}>{selectedSeats.length}</Typography>
@@ -646,7 +641,24 @@ function PaymentConfirmPage() {
                           placeholder="Nhập mã giảm giá"
                           value={voucherCode}
                           onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-                          sx={{ flex: 1 }}
+                          sx={{
+                            flex: 1,
+                            '& .MuiOutlinedInput-root': {
+                              '&:focus-within': {
+                                outline: 'none'
+                              },
+                              '& fieldset': {
+                                borderColor: '#ddd'
+                              },
+                              '&:hover fieldset': {
+                                borderColor: '#aaa'
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#F5A623',
+                                borderWidth: 1
+                              }
+                            }
+                          }}
                           inputProps={{ style: { textTransform: 'uppercase' } }}
                         />
                         <Button
