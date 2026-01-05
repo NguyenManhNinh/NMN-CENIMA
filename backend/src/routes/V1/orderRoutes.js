@@ -47,6 +47,29 @@ router.get('/me', orderController.getMyOrders);
 
 /**
  * @swagger
+ * /orders/by-order-no/{orderNo}:
+ *   get:
+ *     summary: Lấy chi tiết đơn hàng theo mã đơn (orderNo)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderNo
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Mã đơn hàng (VD ORD-1767599...)
+ *     responses:
+ *       200:
+ *         description: Chi tiết đơn hàng
+ *       404:
+ *         description: Không tìm thấy đơn hàng
+ */
+router.get('/by-order-no/:orderNo', orderController.getOrderByOrderNo);
+
+/**
+ * @swagger
  * /orders:
  *   post:
  *     summary: Tạo đơn hàng mới (đặt vé)

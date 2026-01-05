@@ -5,7 +5,8 @@
 
 module.exports = {
   // === PRICING ===
-  VIP_SEAT_SURCHARGE: 20000, // Phụ thu ghế VIP (VND)
+  VIP_SEAT_SURCHARGE: 5000,     // Phụ thu ghế VIP (VND) - giữ nhất quán với frontend
+  COUPLE_SEAT_SURCHARGE: 10000, // Phụ thu ghế Couple (VND) - mỗi người
 
   // === SEAT HOLD ===
   SEAT_HOLD_DURATION_MINUTES: 15, // Thời gian giữ ghế (phút)

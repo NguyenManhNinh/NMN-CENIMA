@@ -50,7 +50,7 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   for (const seatCode of seats) {
     // Logic: Find seat type in Room's seatMap
     // seatCode example: 'A1', 'B2'
-    let isVip = false;
+    let seatType = 'standard';
     let price = showtime.basePrice;
 
     if (room && room.seatMap) {
@@ -61,9 +61,17 @@ exports.createOrder = catchAsync(async (req, res, next) => {
       const rowData = room.seatMap.find(r => r.row === rowChar);
       if (rowData) {
         const seatData = rowData.seats.find(s => s.number === seatNum);
-        if (seatData && seatData.type === 'vip') {
-          isVip = true;
-          price += VIP_SEAT_SURCHARGE; // Phụ thu ghế VIP
+        if (seatData) {
+          seatType = seatData.type || 'standard';
+
+          // Tính giá theo loại ghế (giống frontend)
+          if (seatType === 'vip') {
+            price = showtime.basePrice + VIP_SEAT_SURCHARGE; // VIP: +5,000đ
+          } else if (seatType === 'couple') {
+            // Couple: (basePrice + 10,000đ) x 2 người
+            const COUPLE_SEAT_SURCHARGE = require('../config/constants').COUPLE_SEAT_SURCHARGE || 10000;
+            price = (showtime.basePrice + COUPLE_SEAT_SURCHARGE) * 2;
+          }
         }
       }
     }
@@ -72,7 +80,7 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     seatSnapshot.push({
       seatCode,
       price,
-      isVip
+      isVip: seatType === 'vip'
     });
   }
 
@@ -218,6 +226,39 @@ exports.getOrder = catchAsync(async (req, res, next) => {
       populate: [
         { path: 'movieId', select: 'title posterUrl' },
         { path: 'roomId', select: 'name' }
+      ]
+    })
+    .populate('userId', 'name email');
+
+  if (!order) {
+    return next(new AppError('Không tìm thấy đơn hàng!', 404));
+  }
+
+  // Check quyền: Admin hoặc chính chủ mới được xem
+  if (req.user.role !== 'Admin' && req.user.role !== 'Manager' && order.userId._id.toString() !== req.user.id) {
+    return next(new AppError('Bạn không có quyền xem đơn hàng này!', 403));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      order
+    }
+  });
+});
+
+// Lấy chi tiết đơn hàng theo orderNo (cho PaymentResultPage)
+exports.getOrderByOrderNo = catchAsync(async (req, res, next) => {
+  const { orderNo } = req.params;
+
+  const order = await Order.findOne({ orderNo })
+    .populate({
+      path: 'showtimeId',
+      select: 'startAt movieId roomId cinemaId',
+      populate: [
+        { path: 'movieId', select: 'title posterUrl' },
+        { path: 'roomId', select: 'name' },
+        { path: 'cinemaId', select: 'name' }
       ]
     })
     .populate('userId', 'name email');
