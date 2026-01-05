@@ -32,8 +32,8 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-// Dữ liệu mẫu - TODO: Thay bằng API thật
-import { mockVouchers } from '../../../mocks/mockVouchers';
+// API - Vouchers
+import { getAvailableVouchersAPI, applyVoucherAPI } from '../../../apis/voucherApi';
 // API - Verify seat hold
 import { verifyHoldAPI } from '../../../apis/seatHoldApi';
 // API - Order
@@ -178,6 +178,8 @@ function PaymentConfirmPage() {
   const [appliedVoucher, setAppliedVoucher] = useState(null);   // Voucher đã áp dụng
   const [voucherError, setVoucherError] = useState('');         // Thông báo lỗi voucher
   const [voucherDialogOpen, setVoucherDialogOpen] = useState(false); // Dialog chọn voucher
+  const [availableVouchers, setAvailableVouchers] = useState([]); // Danh sách voucher từ API
+  const [loadingVouchers, setLoadingVouchers] = useState(false);
   // STATE THANH TOÁN
   const [paymentMethod, setPaymentMethod] = useState('vnpay');  // Phương thức thanh toán
   const [loading, setLoading] = useState(false);                // Đang xử lý thanh toán
@@ -212,6 +214,26 @@ function PaymentConfirmPage() {
     // Cleanup khi unmount
     return () => clearInterval(timer);
   }, [navigate]);
+
+  /**
+   * Effect: Fetch danh sách voucher từ API
+   */
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      setLoadingVouchers(true);
+      try {
+        const response = await getAvailableVouchersAPI();
+        setAvailableVouchers(response.data?.vouchers || []);
+        console.log('[Voucher] Loaded vouchers:', response.data?.vouchers?.length);
+      } catch (error) {
+        console.error('[Voucher] Error loading vouchers:', error);
+      } finally {
+        setLoadingVouchers(false);
+      }
+    };
+    fetchVouchers();
+  }, []);
+
   /**
    * Effect: Kiểm tra dữ liệu đầu vào
    * - Redirect về trang chủ nếu không có dữ liệu từ trang trước
@@ -280,18 +302,25 @@ function PaymentConfirmPage() {
   // TÍNH TOÁN GIÁ
   /**
    * Tính số tiền giảm giá từ voucher
-   * - PERCENT: Giảm % nhưng không vượt maxDiscount
-   * - FIXED: Giảm số tiền cố định
+   * - Nếu API đã trả về discountAmount thì dùng luôn
+   * - Nếu không thì tính theo type/value
    */
   const calculateDiscount = () => {
     if (!appliedVoucher) return 0;
+
+    // Nếu có discountAmount từ API thì dùng luôn
+    if (appliedVoucher.discountAmount !== undefined) {
+      return appliedVoucher.discountAmount;
+    }
+
+    // Tính từ type/value (cho trường hợp chọn từ dialog)
     const subtotal = seatPrice + comboPrice;
     if (appliedVoucher.type === 'PERCENT') {
       const discount = (subtotal * appliedVoucher.value) / 100;
-      return Math.min(discount, appliedVoucher.maxDiscount);
+      return Math.min(discount, appliedVoucher.maxDiscount || discount);
     } else {
       // FIXED
-      return appliedVoucher.value;
+      return appliedVoucher.value || 0;
     }
   };
   const discount = calculateDiscount();
@@ -299,46 +328,68 @@ function PaymentConfirmPage() {
   // VOUCHER HANDLERS
   /**
    * Xử lý áp dụng voucher từ input nhập mã
-   * - Validate mã không rỗng
-   * - Tìm trong danh sách mockVouchers
-   * - Kiểm tra điều kiện (status, minOrderValue)
+   * - Gọi API applyVoucher trên server
+   * - Server validate và trả về discountAmount
    */
-  const handleApplyVoucher = () => {
+  const handleApplyVoucher = async () => {
     setVoucherError('');
+
     // Validate: Mã không được rỗng
     if (!voucherCode.trim()) {
       setVoucherError('Vui lòng nhập mã giảm giá');
       return;
     }
-    // Tìm voucher trong danh sách
-    const voucher = mockVouchers.find(
-      v => v.code.toUpperCase() === voucherCode.toUpperCase() && v.status === 'ACTIVE'
-    );
-    // Không tìm thấy hoặc hết hạn
-    if (!voucher) {
-      setVoucherError('Mã giảm giá không hợp lệ hoặc đã hết hạn');
-      return;
+
+    try {
+      const totalAmount = seatPrice + comboPrice;
+      const result = await applyVoucherAPI(voucherCode, totalAmount);
+      // result = { status: 'success', data: { code, discountAmount, ... } }
+      const { code, discountAmount, type, value } = result.data;
+
+      // Áp dụng thành công
+      setAppliedVoucher({
+        code,
+        discountAmount,
+        type,
+        value
+      });
+      setVoucherCode('');
+      setVoucherOpen(false);
+      console.log('[Voucher] Áp dụng thành công:', code, 'Giảm:', discountAmount);
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Mã giảm giá không hợp lệ';
+      setVoucherError(errorMessage);
     }
-    // Kiểm tra đơn hàng tối thiểu
-    if (voucher.minOrderValue && (seatPrice + comboPrice) < voucher.minOrderValue) {
-      setVoucherError(`Đơn hàng tối thiểu ${formatPrice(voucher.minOrderValue)}đ`);
-      return;
-    }
-    // Áp dụng thành công
-    setAppliedVoucher(voucher);
-    setVoucherCode('');
-    setVoucherOpen(false);
-    console.log('[Voucher] Áp dụng thành công:', voucher.code);
   };
+
   /**
    * Xử lý chọn voucher từ dialog danh sách
+   * - Cũng cần gọi API để validate (check user đã dùng chưa)
    */
-  const handleSelectVoucher = (voucher) => {
-    setAppliedVoucher(voucher);
-    setVoucherDialogOpen(false);
+  const handleSelectVoucher = async (voucher) => {
     setVoucherError('');
-    console.log('[Voucher] Chọn từ danh sách:', voucher.code);
+    setVoucherDialogOpen(false);
+
+    try {
+      const totalAmount = seatPrice + comboPrice;
+      const result = await applyVoucherAPI(voucher.code, totalAmount);
+      // result = { status: 'success', data: { code, discountAmount, ... } }
+      const { code, discountAmount, type, value } = result.data;
+
+      setAppliedVoucher({
+        code,
+        discountAmount,
+        type,
+        value
+      });
+      console.log('[Voucher] Chọn từ danh sách thành công:', code, 'Giảm:', discountAmount);
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Mã giảm giá không hợp lệ';
+      setVoucherError(errorMessage);
+      console.error('[Voucher] Lỗi chọn từ danh sách:', errorMessage);
+    }
   };
+
   /**
    * Xử lý gỡ voucher đã áp dụng
    */
@@ -364,16 +415,23 @@ function PaymentConfirmPage() {
     });
 
     try {
+      // DEBUG: Log raw combos data
+      console.log('[Payment] Raw combos from ComboPage:', combos);
+      console.log('[Payment] Combos with quantity > 0:', combos.filter(c => c.quantity > 0));
+
       // Chuẩn bị dữ liệu cho API
       const orderData = {
         showtimeId: showtime?._id,
         seats: selectedSeats.map(s => s.seatCode), // Array of seat codes
         combos: combos
           .filter(c => c.quantity > 0) // Chỉ gửi combo có quantity > 0
-          .map(c => ({
-            id: c._id || c.id,
-            quantity: c.quantity
-          }))
+          .map(c => {
+            console.log('[Payment] Processing combo:', c.name, 'ID:', c._id, 'quantity:', c.quantity);
+            return {
+              id: c._id || c.id,
+              quantity: c.quantity
+            };
+          })
       };
 
       // Chỉ thêm voucherCode nếu có giá trị
@@ -381,7 +439,7 @@ function PaymentConfirmPage() {
         orderData.voucherCode = appliedVoucher.code;
       }
 
-      console.log('[Payment] Order data:', orderData);
+      console.log('[Payment] Order data to send:', JSON.stringify(orderData, null, 2));
 
       // Gọi API tạo Order và lấy VNPay URL
       const response = await createOrderAPI(orderData);
@@ -415,8 +473,7 @@ function PaymentConfirmPage() {
       setLoading(false);
     }
   };
-  // DANH SÁCH VOUCHER KHẢ DỤNG
-  const availableVouchers = mockVouchers.filter(v => v.status === 'ACTIVE');
+
   // RENDER
   return (
     <Box sx={styles.wrapper}>

@@ -33,8 +33,19 @@ export const getOrderByIdAPI = async (orderId) => {
   return response.data;
 };
 
+/**
+ * Lấy chi tiết đơn hàng theo orderNo
+ * @param {string} orderNo - Mã đơn hàng (ORD-xxx)
+ * @returns {Promise<{order: Object}>}
+ */
+export const getOrderByOrderNoAPI = async (orderNo) => {
+  const response = await axiosInstance.get(`/orders/by-order-no/${orderNo}`);
+  return response.data;
+};
+
 export default {
   createOrderAPI,
   getMyOrdersAPI,
-  getOrderByIdAPI
+  getOrderByIdAPI,
+  getOrderByOrderNoAPI
 };

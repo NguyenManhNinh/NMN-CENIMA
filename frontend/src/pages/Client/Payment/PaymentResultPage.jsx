@@ -13,7 +13,7 @@ import {
   Paper,
   CircularProgress
 } from '@mui/material';
-import { getOrderByIdAPI } from '../../../apis/orderApi';
+import { getOrderByOrderNoAPI } from '../../../apis/orderApi';
 
 // Styles
 const styles = {
@@ -116,28 +116,58 @@ function PaymentResultPage() {
     return new Intl.NumberFormat('vi-VN').format(price || 0) + ' vnđ';
   };
 
-  // Format ngày
+  // Format ngày giờ theo Việt Nam
   const formatDate = (date) => {
-    if (!date) return new Date().toLocaleDateString('vi-VN');
-    return new Date(date).toLocaleDateString('vi-VN');
+    const d = date ? new Date(date) : new Date();
+    const dateStr = d.toLocaleDateString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    const timeStr = d.toLocaleTimeString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    return `${dateStr} | ${timeStr}`;
   };
 
-  // Format giờ chiếu
+  // Format suất chiếu
   const formatShowtime = (startAt) => {
     if (!startAt) return '';
     const date = new Date(startAt);
-    return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    const time = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' });
+    const weekday = date.toLocaleDateString('vi-VN', { weekday: 'long', timeZone: 'Asia/Ho_Chi_Minh' });
+    const dateStr = date.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+    return `${time} - ${weekday}, ${dateStr}`;
   };
 
   useEffect(() => {
     const fetchOrderData = async () => {
-      // Trong trường hợp thực tế, bạn có thể cần API để lấy thông tin đơn hàng
-      // Tạm thời để mock data hoặc lấy từ sessionStorage
-      setLoading(false);
+      if (!orderNo || !isSuccess) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const result = await getOrderByOrderNoAPI(orderNo);
+        setOrderData(result.data?.order);
+      } catch (error) {
+        console.error('[PaymentResult] Error fetching order:', error);
+        // Fallback to sessionStorage if API fails
+        const storedData = sessionStorage.getItem('lastBookingData');
+        if (storedData) {
+          setOrderData(JSON.parse(storedData));
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchOrderData();
-  }, [orderNo]);
+  }, [orderNo, isSuccess]);
 
   const getStatusMessage = () => {
     if (isSuccess) {
@@ -157,9 +187,13 @@ function PaymentResultPage() {
     );
   }
 
-  // Lấy thông tin từ sessionStorage (được lưu từ trang thanh toán)
-  const storedData = sessionStorage.getItem('lastBookingData');
-  const bookingData = storedData ? JSON.parse(storedData) : {};
+  // Extract order info
+  const order = orderData || {};
+  const showtime = order.showtimeId || {};
+  const movie = showtime.movieId || {};
+  const room = showtime.roomId || {};
+  const cinema = showtime.cinemaId || {};
+  const user = order.userId || {};
 
   return (
     <Box sx={styles.wrapper}>
@@ -184,7 +218,7 @@ function PaymentResultPage() {
                   Người đặt
                 </TableCell>
                 <TableCell sx={{ ...styles.tableCell, ...styles.valueCell }}>
-                  {bookingData.userName || 'Nguyễn Mạnh Ninh'}
+                  {user.name || 'Khách hàng'}
                 </TableCell>
               </TableRow>
 
@@ -194,7 +228,7 @@ function PaymentResultPage() {
                   Ngày đặt
                 </TableCell>
                 <TableCell sx={{ ...styles.tableCell, ...styles.valueCell }}>
-                  {formatDate(new Date())}
+                  {formatDate(order.createdAt)}
                 </TableCell>
               </TableRow>
 
@@ -204,7 +238,7 @@ function PaymentResultPage() {
                   Phim
                 </TableCell>
                 <TableCell sx={{ ...styles.tableCell, ...styles.valueCell }}>
-                  {bookingData.movieTitle || ''}
+                  {movie.title || ''}
                 </TableCell>
               </TableRow>
 
@@ -214,7 +248,7 @@ function PaymentResultPage() {
                   Ghế
                 </TableCell>
                 <TableCell sx={{ ...styles.tableCell, ...styles.valueCell }}>
-                  {bookingData.seats || ''}
+                  {order.seats?.map(s => s.seatCode).join(', ') || ''}
                 </TableCell>
               </TableRow>
 
@@ -224,7 +258,7 @@ function PaymentResultPage() {
                   Suất chiếu
                 </TableCell>
                 <TableCell sx={{ ...styles.tableCell, ...styles.valueCell }}>
-                  {bookingData.showtime || ''}
+                  {formatShowtime(showtime.startAt)}
                 </TableCell>
               </TableRow>
 
@@ -234,17 +268,29 @@ function PaymentResultPage() {
                   Rạp
                 </TableCell>
                 <TableCell sx={{ ...styles.tableCell, ...styles.valueCell }}>
-                  {bookingData.cinema || ''}
+                  {cinema.name} {room.name ? `- ${room.name}` : ''}
                 </TableCell>
               </TableRow>
+
+              {/* Giảm giá (nếu có) */}
+              {order.discount > 0 && (
+                <TableRow>
+                  <TableCell sx={{ ...styles.tableCell, ...styles.labelCell }}>
+                    Giảm giá ({order.voucherCode})
+                  </TableCell>
+                  <TableCell sx={{ ...styles.tableCell, ...styles.valueCell, color: '#4caf50' }}>
+                    -{formatPrice(order.discount)}
+                  </TableCell>
+                </TableRow>
+              )}
 
               {/* Tổng tiền */}
               <TableRow>
                 <TableCell sx={{ ...styles.tableCell, ...styles.labelCell }}>
                   Tổng tiền
                 </TableCell>
-                <TableCell sx={{ ...styles.tableCell, ...styles.valueCell }}>
-                  {formatPrice(bookingData.totalAmount)}
+                <TableCell sx={{ ...styles.tableCell, ...styles.valueCell, fontWeight: 700, color: '#DC2626' }}>
+                  {formatPrice(order.totalAmount)}
                 </TableCell>
               </TableRow>
 
