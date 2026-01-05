@@ -9,16 +9,19 @@ import {
   Grid,
   Divider,
   IconButton,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogContent
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 
 // Custom Hooks
 import { useCombos } from '../../../hooks/useCombos';
+import useSeatTimer from '../../../hooks/useSeatTimer';
 
 // API - Release seat holds when timer expires
-import { releaseHoldAPI } from '../../../apis/seatHoldApi';
+import { releaseHoldAPI, verifyHoldAPI } from '../../../apis/seatHoldApi';
 
 // Styles - Responsive design
 const styles = {
@@ -26,7 +29,8 @@ const styles = {
     minHeight: '100vh',
     bgcolor: '#f5f5f5',
     py: { xs: 2, md: 4 },
-    pb: { xs: 10, md: 4 } // Extra padding bottom for mobile fixed footer
+    pb: { xs: 10, md: 4 }, // Extra padding bottom for mobile fixed footer
+    fontFamily: '"Nunito Sans", sans-serif'
   },
   stepTitle: {
     textAlign: 'center',
@@ -173,6 +177,9 @@ function ComboPage() {
   const { combos, loading, error: comboError } = useCombos();
   const [selectedCombos, setSelectedCombos] = useState({});
 
+  // Modal xác nhận độ tuổi
+  const [ageConfirmOpen, setAgeConfirmOpen] = useState(false);
+
   // Redirect về trang chủ nếu không có dữ liệu từ trang chọn ghế
   useEffect(() => {
     if (!showtime || selectedSeats.length === 0) {
@@ -241,6 +248,39 @@ function ComboPage() {
     return () => clearInterval(timer);
   }, [navigate, showtime?._id]);
 
+  // Verify hold với server khi mount (sync timer)
+  useEffect(() => {
+    const verifyHoldWithServer = async () => {
+      const showtimeId = showtime?._id;
+      if (!showtimeId) return;
+
+      try {
+        const response = await verifyHoldAPI(showtimeId);
+        const { valid, remainingSeconds } = response.data;
+
+        if (valid && remainingSeconds > 0) {
+          // Sync timer với server time
+          setTimeLeft(remainingSeconds);
+          console.log('[ComboPage] Timer synced with server:', remainingSeconds, 'seconds');
+        } else {
+          // Hold đã hết hạn ở server
+          console.log('[ComboPage] Hold expired on server');
+          sessionStorage.removeItem('reservationStartTime');
+          alert('Phiên giữ ghế đã hết hạn. Vui lòng chọn lại!');
+          navigate('/');
+        }
+      } catch (error) {
+        // Bỏ qua lỗi 401 (chưa đăng nhập)
+        if (error.response?.status !== 401) {
+          console.error('[ComboPage] Verify hold failed:', error);
+        }
+      }
+    };
+
+    verifyHoldWithServer();
+  }, [showtime?._id, navigate]);
+
+
   // Format thời gian mm:ss
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -282,8 +322,20 @@ function ComboPage() {
     return new Intl.NumberFormat('vi-VN').format(price) + ' đ';
   };
 
-  // Chuyển đến trang thanh toán
+  // Xử lý khi bấm nút Tiếp tục
   const handleContinue = () => {
+    // Nếu phim có giới hạn độ tuổi (C13, C16, C18) → hiện modal xác nhận
+    const ageRating = showtime?.ageRating;
+    if (ageRating && ageRating !== 'P') {
+      setAgeConfirmOpen(true);
+    } else {
+      // Phim phổ biến (P) → chuyển thẳng sang thanh toán
+      confirmAndContinue();
+    }
+  };
+
+  // Xác nhận độ tuổi và chuyển đến trang thanh toán
+  const confirmAndContinue = () => {
     const selectedComboItems = combos
       .filter(combo => selectedCombos[combo._id] > 0)
       .map(combo => ({
@@ -291,6 +343,7 @@ function ComboPage() {
         quantity: selectedCombos[combo._id]
       }));
 
+    setAgeConfirmOpen(false); // Đóng modal
     navigate('/thanh-toan', {
       state: {
         showtime,
@@ -308,6 +361,17 @@ function ComboPage() {
     navigate(`/chon-ghe/${showtime?._id || 'test'}`, {
       state: { reservationStartTime: startTimeRef.current }
     });
+  };
+
+  // Lấy thông tin độ tuổi để hiển thị trong modal
+  const getAgeInfo = () => {
+    const ageRating = showtime?.ageRating;
+    switch (ageRating) {
+      case 'C13': return { age: 13, label: 'C13' };
+      case 'C16': return { age: 16, label: 'C16' };
+      case 'C18': return { age: 18, label: 'C18' };
+      default: return { age: 0, label: 'P' };
+    }
   };
 
   // Loading screen
@@ -459,22 +523,42 @@ function ComboPage() {
                     }}
                   />
                   <Box sx={{ flex: 1 }}>
-                    <Typography fontWeight={700} sx={{ color: '#1a3a5c', fontSize: '1rem', mb: 1 }}>
+                    <Typography fontWeight={700} sx={{ color: '#333333', fontSize: '1rem', mb: 1 }}>
                       {showtime?.movieTitle}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {showtime?.format}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {showtime?.format}{showtime?.subtitle ? ` ${showtime.subtitle}` : ''}
+                      </Typography>
+                      {showtime?.ageRating && (
+                        <Box
+                          sx={{
+                            bgcolor: showtime.ageRating === 'P' ? '#4caf50' :
+                              showtime.ageRating === 'C13' ? '#ff9800' :
+                                showtime.ageRating === 'C16' ? '#f44336' :
+                                  showtime.ageRating === 'C18' ? '#d32f2f' : '#757575',
+                            color: '#fff',
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: 0.5,
+                            fontSize: '0.7rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          {showtime.ageRating}
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
                 </Box>
 
                 {/* Rạp - Phòng */}
-                <Typography sx={{ color: '#1a3a5c', mb: 1 }}>
+                <Typography sx={{ color: '#333333', mb: 1 }}>
                   <strong>{showtime?.cinemaName}</strong> - {showtime?.roomName}
                 </Typography>
 
                 {/* Suất chiếu */}
-                <Typography sx={{ color: '#1a3a5c', mb: 2 }}>
+                <Typography sx={{ color: '#333333', mb: 2 }}>
                   Suất: <strong>{showtime?.time}</strong> - {showtime?.date}
                 </Typography>
 
@@ -506,7 +590,7 @@ function ComboPage() {
 
                 {/* Tổng cộng */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                  <Typography fontWeight={700} sx={{ color: '#1a3a5c' }}>
+                  <Typography fontWeight={700} sx={{ color: '#333333' }}>
                     Tổng cộng
                   </Typography>
                   <Typography fontWeight={700} sx={{ color: '#F5A623', fontSize: '1.2rem' }}>
@@ -554,6 +638,82 @@ function ComboPage() {
           </Grid>
         </Grid>
       </Container>
+
+      {/* Modal Xác nhận Độ tuổi */}
+      <Dialog
+        open={ageConfirmOpen}
+        onClose={() => setAgeConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 2, p: 2 }
+        }}
+      >
+        <DialogContent sx={{ textAlign: 'center', py: 3 }}>
+          {/* Badge độ tuổi */}
+          <Box
+            sx={{
+              display: 'inline-block',
+              bgcolor: showtime?.ageRating === 'C13' ? '#ff9800' :
+                showtime?.ageRating === 'C16' ? '#f44336' :
+                  showtime?.ageRating === 'C18' ? '#d32f2f' : '#757575',
+              color: '#fff',
+              px: 2,
+              py: 0.5,
+              borderRadius: 1,
+              fontSize: '1rem',
+              fontWeight: 700,
+              mb: 2
+            }}
+          >
+            {showtime?.ageRating}
+          </Box>
+
+          {/* Tiêu đề */}
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: '#333' }}>
+            Xác nhận mua vé cho người có độ tuổi phù hợp
+          </Typography>
+
+          {/* Nội dung */}
+          <Typography variant="body2" sx={{ color: '#666', mb: 3 }}>
+            Tôi xác nhận mua vé phim này cho người có độ tuổi từ {getAgeInfo().age} tuổi trở lên
+            và đồng ý cung cấp giấy tờ tùy thân để xác minh độ tuổi.
+          </Typography>
+
+          {/* Buttons */}
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button
+              variant="outlined"
+              onClick={() => setAgeConfirmOpen(false)}
+              sx={{
+                flex: 1,
+                py: 1.5,
+                borderRadius: 2,
+                borderColor: '#ccc',
+                color: '#666',
+                fontWeight: 600,
+                '&:hover': { borderColor: '#999', bgcolor: '#f5f5f5' }
+              }}
+            >
+              Từ chối
+            </Button>
+            <Button
+              variant="contained"
+              onClick={confirmAndContinue}
+              sx={{
+                flex: 1,
+                py: 1.5,
+                borderRadius: 2,
+                bgcolor: '#F5A623',
+                fontWeight: 700,
+                '&:hover': { bgcolor: '#E09612' }
+              }}
+            >
+              Xác nhận
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

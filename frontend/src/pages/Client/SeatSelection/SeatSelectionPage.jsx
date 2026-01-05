@@ -15,9 +15,14 @@ import {
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
+// Auth Context
+import { useAuth } from '../../../contexts/AuthContext';
+// Login Modal
+import LoginModal from '../../../components/Common/AuthModals/LoginModal';
+
 // API
 import { getShowtimeByIdAPI } from '../../../apis/showtimeApi';
-import { getHoldsByShowtimeAPI, createHoldAPI, releaseHoldAPI } from '../../../apis/seatHoldApi';
+import { getHoldsByShowtimeAPI, createHoldAPI, releaseHoldAPI, verifyHoldAPI } from '../../../apis/seatHoldApi';
 
 // Socket.io - Real-time seat updates
 import {
@@ -45,12 +50,13 @@ const styles = {
     minHeight: '100vh',
     bgcolor: '#fff',
     py: { xs: 2, md: 4 },
-    px: { xs: 1, md: 0 }
+    px: { xs: 1, md: 0 },
+    fontFamily: '"Nunito Sans", sans-serif'
   },
   screenTitle: {
     color: '#1a3a5c',
     fontWeight: 700,
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: '"Nunito Sans", sans-serif',
     fontSize: { xs: '1.1rem', sm: '1.3rem', md: '1.5rem' },
     fontStyle: 'italic',
     textAlign: 'center',
@@ -204,12 +210,14 @@ function SeatSelectionPage() {
   const { showtimeId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [seats, setSeats] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [showtime, setShowtime] = useState(null);
   const [warningOpen, setWarningOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false); // Modal đăng nhập
 
   // Timer đếm ngược (chỉ hiển thị khi có reservationStartTime từ trang combo)
   const RESERVATION_TIME = 15 * 60; // 15 phút
@@ -298,6 +306,38 @@ function SeatSelectionPage() {
     loadData();
   }, [showtimeId]);
 
+  // Verify hold với server khi có reservationStartTime (sync timer)
+  // Đảm bảo hold vẫn còn hiệu lực khi quay lại trang hoặc reload
+  useEffect(() => {
+    const verifyHoldWithServer = async () => {
+      if (!reservationStartTime || !showtimeId) return;
+
+      try {
+        const response = await verifyHoldAPI(showtimeId);
+        const { valid, remainingSeconds } = response.data;
+
+        if (valid && remainingSeconds > 0) {
+          // Sync timer với server time
+          setTimeLeft(remainingSeconds);
+          console.log('[SeatSelection] Timer synced with server:', remainingSeconds, 'seconds');
+        } else {
+          // Hold đã hết hạn ở server -> Clear session
+          console.log('[SeatSelection] Hold expired on server, clearing session');
+          sessionStorage.removeItem('reservationStartTime');
+          setReservationStartTime(null);
+          setSelectedSeats([]);
+        }
+      } catch (error) {
+        // Lỗi 401 = chưa đăng nhập, bỏ qua
+        if (error.response?.status !== 401) {
+          console.error('[SeatSelection] Verify hold failed:', error);
+        }
+      }
+    };
+
+    verifyHoldWithServer();
+  }, [showtimeId, reservationStartTime]);
+
   // REAL-TIME SOCKET.IO
   // Kết nối Socket.io để đồng bộ trạng thái ghế real-time
   useEffect(() => {
@@ -353,10 +393,11 @@ function SeatSelectionPage() {
       const showtimeResponse = await getShowtimeByIdAPI(showtimeId);
       const showtimeData = showtimeResponse.data.showtime;
 
-      // 2. Lấy danh sách ghế đang được giữ
+      // 2. Lấy danh sách ghế đang được giữ VÀ ghế đã bán
       const holdsResponse = await getHoldsByShowtimeAPI(showtimeId);
       const heldSeats = holdsResponse.data?.holds || [];
       const heldSeatCodes = heldSeats.map(h => h.seatCode);
+      const soldSeatCodes = holdsResponse.data?.soldSeats || []; // Ghế đã thanh toán
 
       // 3. Xử lý seatMap từ phòng thành danh sách ghế
       const room = showtimeData.roomId;
@@ -369,10 +410,10 @@ function SeatSelectionPage() {
         rowData.seats.forEach(seat => {
           const seatCode = `${row}${seat.number.toString().padStart(2, '0')}`;
 
-          // Xác định trạng thái ghế
+          // Xác định trạng thái ghế (Ưu tiên: sold > reserved > available)
           let status = 'available';
-          if (seat.isBooked) {
-            status = 'sold';
+          if (seat.isBooked || soldSeatCodes.includes(seatCode)) {
+            status = 'sold'; // Đã thanh toán/bán
           } else if (heldSeatCodes.includes(seatCode)) {
             status = 'reserved'; // Đang được giữ bởi người khác
           }
@@ -415,6 +456,7 @@ function SeatSelectionPage() {
         cinemaName: cinema.name,
         roomName: room.name,
         format: showtimeData.format || '2D',
+        subtitle: showtimeData.subtitle || 'Phụ đề', // Phụ đề/Lồng tiếng
         date: startAt.toLocaleDateString('vi-VN', {
           weekday: 'long',
           day: '2-digit',
@@ -443,6 +485,12 @@ function SeatSelectionPage() {
   const handleSeatClick = async (seat) => {
     // Không cho chọn ghế đã bán hoặc đang được giữ bởi người khác
     if (seat.status === 'sold' || seat.status === 'reserved') return;
+
+    // Kiểm tra đăng nhập TRƯỚC khi gọi API
+    if (!isAuthenticated) {
+      setLoginModalOpen(true);
+      return;
+    }
 
     const isSelected = selectedSeats.find(s => s.id === seat.id);
 
@@ -673,19 +721,24 @@ function SeatSelectionPage() {
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                         <Typography variant="body2" color="text.secondary">
-                          {showtime?.format}
+                          {showtime?.format}{showtime?.subtitle ? ` ${showtime.subtitle}` : ''}
                         </Typography>
-                        <Box sx={{
-                          bgcolor: '#F5A623',
-                          color: '#fff',
-                          px: 1,
-                          py: 0.25,
-                          borderRadius: 0.5,
-                          fontSize: '0.75rem',
-                          fontWeight: 700
-                        }}>
-                          T13
-                        </Box>
+                        {showtime?.ageRating && (
+                          <Box sx={{
+                            bgcolor: showtime.ageRating === 'P' ? '#4caf50' :
+                              showtime.ageRating === 'C13' ? '#ff9800' :
+                                showtime.ageRating === 'C16' ? '#f44336' :
+                                  showtime.ageRating === 'C18' ? '#d32f2f' : '#757575',
+                            color: '#fff',
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: 0.5,
+                            fontSize: '0.75rem',
+                            fontWeight: 700
+                          }}>
+                            {showtime.ageRating}
+                          </Box>
+                        )}
                       </Box>
                     </Box>
                   </Box>
@@ -838,6 +891,12 @@ function SeatSelectionPage() {
           </DialogActions>
         </Dialog>
       </Box>
+
+      {/* Modal Đăng nhập khi chưa đăng nhập mà chọn ghế */}
+      <LoginModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+      />
     </>
   );
 }

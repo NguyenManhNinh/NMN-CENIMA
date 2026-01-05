@@ -15,6 +15,8 @@ import BookingPage from './pages/Client/Booking';
 import MoviesPage from './pages/Client/Movie';
 import SeatSelectionPage from './pages/Client/SeatSelection';
 import ComboPage from './pages/Client/Combo';
+import PaymentConfirmPage from './pages/Client/Payment';
+import PaymentResultPage from './pages/Client/Payment/PaymentResultPage';
 import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 
 function App() {
@@ -43,6 +45,10 @@ function App() {
             <Route path="chon-ghe/:showtimeId" element={<SeatSelectionPage />} />
             {/* Đặt combo */}
             <Route path="dat-ve-combo" element={<ComboPage />} />
+            {/* Thanh toán */}
+            <Route path="thanh-toan" element={<PaymentConfirmPage />} />
+            {/* Kết quả thanh toán */}
+            <Route path="ket-qua-thanh-toan" element={<PaymentResultPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

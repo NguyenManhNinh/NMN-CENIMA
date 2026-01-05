@@ -35,4 +35,14 @@ export const releaseHoldAPI = async (showtimeId, seatCode) => {
   return response.data;
 };
 
+/**
+ * Verify hold còn hiệu lực và lấy thời gian còn lại
+ * @param {string} showtimeId - ID suất chiếu
+ * @returns {Promise<{valid: boolean, remainingSeconds: number, holds: string[]}>}
+ */
+export const verifyHoldAPI = async (showtimeId) => {
+  const response = await axiosInstance.get(`/holds/verify/${showtimeId}`);
+  return response.data;
+};
+
 export default axiosInstance;

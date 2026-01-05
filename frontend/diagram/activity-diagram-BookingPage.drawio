@@ -1,0 +1,320 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Activity Diagram - BookingPage" id="activity-booking-page">
+    <mxGraphModel dx="1434" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1200">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="Hình 3.x. Activity Diagram luồng đặt vé (BookingPage)" style="text;html=1;align=center;verticalAlign=middle;rounded=0;fontSize=18;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="350" y="20" width="600" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Subtitle -->
+        <mxCell id="subtitle" value="NMN Cinema Website - Phân hệ 2: Luồng xử lý trang đặt vé" style="text;html=1;align=center;verticalAlign=middle;rounded=0;fontSize=14;fontStyle=2;fontColor=#666666" parent="1" vertex="1">
+          <mxGeometry x="400" y="55" width="500" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== SWIMLANES ==================== -->
+        <!-- User Swimlane -->
+        <mxCell id="swimlane-user" value="&lt;b&gt;User (Browser)&lt;/b&gt;" style="swimlane;horizontal=1;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="100" y="100" width="320" height="1020" as="geometry"/>
+        </mxCell>
+
+        <!-- Frontend Swimlane -->
+        <mxCell id="swimlane-frontend" value="&lt;b&gt;Frontend (React)&lt;/b&gt;" style="swimlane;horizontal=1;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="440" y="100" width="320" height="1020" as="geometry"/>
+        </mxCell>
+
+        <!-- Backend Swimlane -->
+        <mxCell id="swimlane-backend" value="&lt;b&gt;Backend (API)&lt;/b&gt;" style="swimlane;horizontal=1;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="780" y="100" width="280" height="1020" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== START NODE ==================== -->
+        <mxCell id="start" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="245" y="150" width="30" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 1: User truy cập trang ==================== -->
+        <mxCell id="action1" value="Truy cập&lt;br&gt;/dat-ve/{movieId}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#4fc3f7;strokeWidth=2;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="185" y="200" width="150" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-start-1" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="start" target="action1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 2: Show Loading Screen ==================== -->
+        <mxCell id="action2" value="Hiển thị Loading Screen&lt;br&gt;(Logo + 'Chờ tôi xíu nhé')" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#82b366;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="515" y="200" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-1-2" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action1" target="action2" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 3: Fetch API ==================== -->
+        <mxCell id="action3" value="Fetch API:&lt;br&gt;• getMovieAPI(movieId)&lt;br&gt;• getAllCinemasAPI()&lt;br&gt;• getCitiesAPI()&lt;br&gt;• getAllShowtimesAPI()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#82b366;strokeWidth=2;fontSize=10" parent="1" vertex="1">
+          <mxGeometry x="515" y="280" width="170" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-2-3" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action2" target="action3" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 4: Backend Query ==================== -->
+        <mxCell id="action4" value="Query MongoDB:&lt;br&gt;movies, cinemas,&lt;br&gt;showtimes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#d6b656;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="835" y="295" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-3-4" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action3" target="action4" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== DECISION 1: Phim tồn tại? ==================== -->
+        <mxCell id="decision1" value="Phim&lt;br&gt;tồn tại?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="555" y="410" width="90" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-4-d1" value="Response" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action4" target="decision1" edge="1">
+          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== ACTION 5: 404 Page (Không có phim) ==================== -->
+        <mxCell id="action5-error" value="Hiển thị 404&lt;br&gt;'Không tìm thấy phim'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcdd2;strokeColor=#e57373;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="835" y="415" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-d1-error" value="[Không]" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1;fontColor=#c62828" parent="1" source="decision1" target="action5-error" edge="1">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- End node for 404 -->
+        <mxCell id="end-404" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="905" y="490" width="30" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-error-end" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action5-error" target="end-404" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 6: Hiển thị thông tin phim ==================== -->
+        <mxCell id="action6" value="Hiển thị thông tin phim&lt;br&gt;(poster, mô tả, diễn viên,&lt;br&gt;đạo diễn, thể loại...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#82b366;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="515" y="510" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-d1-6" value="[Có]" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1;fontColor=#2e7d32" parent="1" source="decision1" target="action6" edge="1">
+          <mxGeometry x="-0.2" y="-10" relative="1" as="geometry">
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== ACTION 7: User chọn ngày ==================== -->
+        <mxCell id="action7" value="Chọn ngày chiếu&lt;br&gt;(7 ngày tiếp theo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#4fc3f7;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="185" y="600" width="150" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-6-7" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action6" target="action7" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 8: Fetch showtimes theo ngày ==================== -->
+        <mxCell id="action8" value="Fetch API showtimes&lt;br&gt;theo ngày đã chọn" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#82b366;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="515" y="600" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-7-8" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action7" target="action8" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 9: Backend query showtimes ==================== -->
+        <mxCell id="action9" value="Query showtimes&lt;br&gt;{movieId, date}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#d6b656;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="835" y="600" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-8-9" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action8" target="action9" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== DECISION 2: Có suất chiếu? ==================== -->
+        <mxCell id="decision2" value="Có suất&lt;br&gt;chiếu?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="555" y="690" width="90" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-9-d2" value="Response" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action9" target="decision2" edge="1">
+          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== ACTION 10: Không có suất chiếu ==================== -->
+        <mxCell id="action10-empty" value="Hiển thị thông báo&lt;br&gt;'Không có suất chiếu'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcdd2;strokeColor=#e57373;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="835" y="698" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-d2-empty" value="[Không]" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1;fontColor=#c62828" parent="1" source="decision2" target="action10-empty" edge="1">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- End node for empty showtimes -->
+        <mxCell id="end-empty" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="905" y="773" width="30" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-empty-end" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action10-empty" target="end-empty" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 11: User lọc khu vực/rạp ==================== -->
+        <mxCell id="action11" value="Lọc theo khu vực / rạp&lt;br&gt;(selectedArea, selectedCinema)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#4fc3f7;strokeWidth=2;fontSize=10" parent="1" vertex="1">
+          <mxGeometry x="175" y="795" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-d2-11" value="[Có]" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1;fontColor=#2e7d32" parent="1" source="decision2" target="action11" edge="1">
+          <mxGeometry x="-0.3" y="-10" relative="1" as="geometry">
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== ACTION 12: Hiển thị suất chiếu theo rạp ==================== -->
+        <mxCell id="action12" value="Hiển thị suất chiếu&lt;br&gt;theo rạp (groupedShowtimes)&lt;br&gt;[Rạp → Format → Giờ chiếu]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#82b366;strokeWidth=2;fontSize=10" parent="1" vertex="1">
+          <mxGeometry x="515" y="795" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-11-12" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action11" target="action12" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 13: User chọn giờ chiếu ==================== -->
+        <mxCell id="action13" value="Chọn giờ chiếu&lt;br&gt;(click vào suất chiếu)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#4fc3f7;strokeWidth=2" parent="1" vertex="1">
+          <mxGeometry x="185" y="895" width="150" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-12-13" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action12" target="action13" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ACTION 14: Navigate to Seat Selection ==================== -->
+        <mxCell id="action14" value="Redirect to&lt;br&gt;/chon-ghe/{showtimeId}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#82b366;strokeWidth=2;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="515" y="895" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-13-14" value="" style="endArrow=classic;html=1;strokeWidth=2" parent="1" source="action13" target="action14" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== END NODE (Success) ==================== -->
+        <mxCell id="end-success" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="585" y="980" width="30" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow-14-end" value="→ SeatSelectionPage" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=2" parent="1" source="action14" target="end-success" edge="1">
+          <mxGeometry x="-0.2" y="15" relative="1" as="geometry">
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== LEGEND ==================== -->
+        <mxCell id="legend-box" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1.5" parent="1" vertex="1">
+          <mxGeometry x="1100" y="100" width="260" height="340" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend-title" value="&lt;b&gt;Chú thích (Legend)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="1100" y="105" width="260" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Start -->
+        <mxCell id="legend-start" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="1120" y="145" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-start-text" value="Start (Bắt đầu)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="1150" y="140" width="200" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: End -->
+        <mxCell id="legend-end" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="1120" y="180" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-end-text" value="End (Kết thúc)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="1150" y="175" width="200" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Action -->
+        <mxCell id="legend-action" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#82b366;strokeWidth=1.5" parent="1" vertex="1">
+          <mxGeometry x="1120" y="215" width="30" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-action-text" value="Action (Hành động)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="1160" y="210" width="190" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Decision -->
+        <mxCell id="legend-decision" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5" parent="1" vertex="1">
+          <mxGeometry x="1115" y="250" width="40" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-decision-text" value="Decision (Quyết định)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="1160" y="250" width="190" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Swimlane Colors -->
+        <mxCell id="legend-user-color" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5" parent="1" vertex="1">
+          <mxGeometry x="1120" y="295" width="30" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-user-text" value="User (Browser)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="1160" y="290" width="190" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend-fe-color" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5" parent="1" vertex="1">
+          <mxGeometry x="1120" y="325" width="30" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-fe-text" value="Frontend (React)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="1160" y="320" width="190" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend-be-color" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5" parent="1" vertex="1">
+          <mxGeometry x="1120" y="355" width="30" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-be-text" value="Backend (API)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="1160" y="350" width="190" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Guard -->
+        <mxCell id="legend-guard" value="[Có] / [Không]" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="1120" y="390" width="100" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-guard-text" value="Guard condition" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="1220" y="385" width="130" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== FLOW SUMMARY ==================== -->
+        <mxCell id="summary-box" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#90caf9;strokeWidth=1.5" parent="1" vertex="1">
+          <mxGeometry x="1100" y="460" width="260" height="200" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="summary-title" value="&lt;b&gt;Luồng xử lý chính&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="1100" y="465" width="260" height="25" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="summary-content" value="1. Truy cập /dat-ve/{movieId}&lt;br&gt;2. Loading → Fetch API&lt;br&gt;3. Kiểm tra phim tồn tại?&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;• Không → 404&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;• Có → Hiển thị phim&lt;br&gt;4. User chọn ngày chiếu&lt;br&gt;5. Fetch showtimes theo ngày&lt;br&gt;6. Kiểm tra có suất chiếu?&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;• Không → Thông báo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;• Có → Hiển thị suất&lt;br&gt;7. User lọc khu vực/rạp&lt;br&gt;8. User chọn giờ chiếu&lt;br&gt;9. Redirect → SeatSelection" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=10;spacingLeft=10;spacingTop=5;" parent="1" vertex="1">
+          <mxGeometry x="1105" y="490" width="250" height="165" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== NOTES ==================== -->
+        <mxCell id="note-loading" value="&lt;i&gt;Loading Screen:&lt;br&gt;Logo + Spinner +&lt;br&gt;&quot;Chờ tôi xíu nhé&quot;&lt;/i&gt;" style="shape=note;strokeColor=#82b366;fillColor=#e8f5e9;size=10;fontSize=9;whiteSpace=wrap;html=1;align=center" parent="1" vertex="1">
+          <mxGeometry x="700" y="200" width="90" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="note-redirect" value="&lt;i&gt;handleShowtimeClick()&lt;br&gt;navigate('/chon-ghe/...')&lt;/i&gt;" style="shape=note;strokeColor=#82b366;fillColor=#e8f5e9;size=10;fontSize=9;whiteSpace=wrap;html=1;align=center" parent="1" vertex="1">
+          <mxGeometry x="700" y="895" width="100" height="50" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

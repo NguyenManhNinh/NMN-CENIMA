@@ -40,7 +40,7 @@ const theme = createTheme({
 
   // TYPOGRAPHY - Font chữ
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Nunito Sans", sans-serif',
     h1: {
       fontWeight: 700,
       fontSize: '2.5rem'
