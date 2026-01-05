@@ -77,17 +77,88 @@ exports.releaseHold = catchAsync(async (req, res, next) => {
   });
 });
 
-// Lấy danh sách ghế đang được giữ của một suất chiếu (để hiển thị khi load trang)
+// Lấy danh sách ghế đang được giữ VÀ ghế đã bán của một suất chiếu
 exports.getHoldsByShowtime = catchAsync(async (req, res, next) => {
   const { showtimeId } = req.params;
+  const Ticket = require('../models/Ticket');
 
+  // 1. Lấy ghế đang được tạm giữ (SeatHold)
   const holds = await SeatHold.find({ showtimeId }).select('seatCode userId expiredAt');
+
+  // 2. Lấy ghế đã bán (Ticket với status VALID)
+  const soldTickets = await Ticket.find({
+    showtimeId,
+    status: 'VALID'
+  }).select('seatCode');
+  const soldSeatCodes = soldTickets.map(t => t.seatCode);
 
   res.status(200).json({
     status: 'success',
     results: holds.length,
     data: {
-      holds
+      holds,
+      soldSeats: soldSeatCodes // Danh sách ghế đã bán
     }
   });
 });
+
+/**
+ * Verify hold còn hiệu lực và trả về thời gian còn lại
+ * - Nếu hết hạn: Lazy cleanup (xóa ngay) và trả về valid: false
+ * - Nếu còn hạn: Trả về remainingSeconds để client sync timer
+ */
+exports.verifyHold = catchAsync(async (req, res, next) => {
+  const { showtimeId } = req.params;
+  const userId = req.user.id;
+
+  // 1. Tìm tất cả ghế đang giữ của user cho suất chiếu này
+  const holds = await SeatHold.find({ showtimeId, userId });
+
+  if (!holds || holds.length === 0) {
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        valid: false,
+        message: 'Không tìm thấy ghế nào đang được giữ.',
+        remainingSeconds: 0
+      }
+    });
+  }
+
+  // 2. Tìm thời gian hết hạn sớm nhất
+  const expiryTimes = holds.map(h => new Date(h.expiredAt).getTime());
+  const earliestExpiry = Math.min(...expiryTimes);
+  const now = Date.now();
+
+  let remainingSeconds = Math.floor((earliestExpiry - now) / 1000);
+
+  // 3. Lazy cleanup: Xóa ngay nếu hết hạn (MongoDB TTL có độ trễ ~60s)
+  if (remainingSeconds <= 0) {
+    await SeatHold.deleteMany({ showtimeId, userId });
+
+    // Emit socket event để thông báo ghế đã được nhả
+    holds.forEach(hold => {
+      socketService.emitSeatReleased(showtimeId, hold.seatCode);
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        valid: false,
+        message: 'Thời gian giữ ghế đã hết.',
+        remainingSeconds: 0
+      }
+    });
+  }
+
+  // 4. Trả về kết quả Valid
+  res.status(200).json({
+    status: 'success',
+    data: {
+      valid: true,
+      remainingSeconds,
+      holds: holds.map(h => h.seatCode)
+    }
+  });
+});
+

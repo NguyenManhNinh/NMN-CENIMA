@@ -50,9 +50,13 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['PENDING', 'PAID', 'FAILED', 'CANCELLED'],
+    enum: ['PENDING', 'PROCESSING', 'PAID', 'FAILED', 'CANCELLED', 'EXPIRED'],
     default: 'PENDING',
     index: true
+  },
+  processedAt: {
+    type: Date,
+    default: null // Timestamp khi bắt đầu xử lý payment
   },
   createdAt: {
     type: Date,

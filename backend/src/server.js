@@ -40,6 +40,10 @@ io.on('connection', (socket) => {
 
 server.listen(port, () => {
   logger.info(`🚀 App đang chạy trên cổng ${port}...`);
+
+  // Khởi động Cleanup Job (chạy mỗi ngày lúc 3:00 AM)
+  const { startCleanupJob } = require('./jobs/cleanupJob');
+  startCleanupJob();
 });
 
 // Xử lý lỗi bất đồng bộ chưa được bắt (Unhandled Rejection)

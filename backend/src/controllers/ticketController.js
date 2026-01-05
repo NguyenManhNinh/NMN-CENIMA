@@ -1,5 +1,6 @@
 const Ticket = require('../models/Ticket');
 const SeatHold = require('../models/SeatHold');
+const Showtime = require('../models/Showtime');
 const crypto = require('crypto');
 const QRCode = require('qrcode');
 const sendEmail = require('../services/emailService');
@@ -13,7 +14,28 @@ exports.finalizeTransaction = async (order) => {
   order.status = 'PAID';
   await order.save();
 
-  // 2. Tạo Vé & Xóa Hold
+  // 2. Fetch thông tin Showtime, Movie, Cinema
+  const showtime = await Showtime.findById(order.showtimeId)
+    .populate('movieId', 'title posterUrl duration ageRating')
+    .populate('cinemaId', 'name address')
+    .populate('roomId', 'name');
+
+  const movieTitle = showtime?.movieId?.title || 'Phim';
+  const cinemaName = showtime?.cinemaId?.name || 'Rạp';
+  const roomName = showtime?.roomId?.name || 'Phòng';
+  const showtimeStr = showtime?.startAt
+    ? new Date(showtime.startAt).toLocaleString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh', // Fix timezone
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+    : 'Chưa xác định';
+
+  // 3. Tạo Vé & Xóa Hold
   const tickets = [];
   const qrAttachments = [];
 
@@ -25,12 +47,24 @@ exports.finalizeTransaction = async (order) => {
       .update(`${ticketCode}-${process.env.JWT_SECRET}`)
       .digest('hex');
 
-    // Tạo QR Code Image (Data URL)
-    const qrDataUrl = await QRCode.toDataURL(JSON.stringify({
+    // QR Data - Chứa đầy đủ thông tin để quét check-in
+    const qrData = {
       ticketCode,
       seatCode: seat.seatCode,
-      checksum: qrChecksum
-    }));
+      orderId: order._id.toString(),
+      showtimeId: order.showtimeId.toString(),
+      movie: movieTitle,
+      showtime: showtimeStr,
+      cinema: `${cinemaName} - ${roomName}`,
+      checksum: qrChecksum.substring(0, 16) // Chỉ lấy 16 ký tự đầu
+    };
+
+    // Tạo QR Code Image (Data URL)
+    const qrDataUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 200
+    });
 
     // Tạo vé
     const newTicket = await Ticket.create({
@@ -45,46 +79,34 @@ exports.finalizeTransaction = async (order) => {
     tickets.push(newTicket);
 
     // Chuẩn bị attachment cho email
-    // Convert Data URL to Buffer
     const base64Data = qrDataUrl.replace(/^data:image\/png;base64,/, "");
     qrAttachments.push({
       filename: `ticket-${seat.seatCode}.png`,
       content: Buffer.from(base64Data, 'base64'),
-      cid: `qr-${seat.seatCode}` // Content ID để nhúng vào HTML
+      cid: `qr-${seat.seatCode}`
     });
 
-    // Xóa SeatHold (Quan trọng: Giải phóng ghế khỏi bảng tạm giữ)
+    // Xóa SeatHold
     await SeatHold.findOneAndDelete({
       showtimeId: order.showtimeId,
       seatCode: seat.seatCode
     });
   }
 
-  // 3. Gửi Email
+  // 4. Gửi Email
   try {
     const user = await User.findById(order.userId);
     if (user) {
-      let htmlContent = `<h1>Vé xem phim của bạn</h1>
-      <p>Cảm ơn bạn đã đặt vé tại NMN Cinema!</p>
-      <p>Mã đơn hàng: <b>${order.orderNo}</b></p>
-      <p>Tổng tiền: <b>${order.totalAmount.toLocaleString()} VND</b></p>
-      <hr/>
-      <h3>Danh sách vé:</h3>`;
-
-      tickets.forEach(t => {
-        htmlContent += `
-        <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-          <p>Ghế: <b>${t.seatCode}</b></p>
-          <p>Mã vé: ${t.ticketCode}</p>
-          <img src="cid:qr-${t.seatCode}" alt="QR Code" width="150"/>
-        </div>`;
-      });
-
       await sendEmail.sendTicket(user.email, {
-        movie: 'Phim Demo (Cần fetch tên phim)', // TODO: Fetch movie title
-        showtime: 'Suất chiếu (Cần fetch)', // TODO: Fetch showtime
-        seats: order.seats.map(s => s.seatCode).join(', ')
-      }, qrAttachments[0].content); // Demo gửi 1 QR đầu tiên, thực tế nên gửi list
+        movie: movieTitle,
+        showtime: showtimeStr,
+        cinema: `${cinemaName} - ${roomName}`,
+        seats: order.seats.map(s => s.seatCode).join(', '),
+        orderNo: order.orderNo,
+        totalAmount: order.totalAmount
+      }, qrAttachments[0].content);
+
+      console.log(`✅ Email sent to ${user.email}`);
     }
   } catch (err) {
     console.error('❌ Error sending email:', err);
@@ -92,6 +114,7 @@ exports.finalizeTransaction = async (order) => {
 
   return tickets;
 };
+
 
 // API: Lấy danh sách vé của user đang đăng nhập
 exports.getMyTickets = catchAsync(async (req, res, next) => {
@@ -142,3 +165,82 @@ exports.getTicket = catchAsync(async (req, res, next) => {
     data: { ticket }
   });
 });
+
+/**
+ * API: Check-in vé (Staff/Admin quét QR)
+ * @route POST /api/v1/tickets/checkin
+ * @desc Đánh dấu vé đã sử dụng khi khách đến rạp
+ */
+exports.checkInTicket = catchAsync(async (req, res, next) => {
+  const { ticketCode, checksum } = req.body;
+
+  if (!ticketCode) {
+    return next(new AppError('Vui lòng cung cấp mã vé!', 400));
+  }
+
+  // 1. Tìm vé theo ticketCode
+  const ticket = await Ticket.findOne({ ticketCode })
+    .populate({
+      path: 'showtimeId',
+      select: 'startAt endAt',
+      populate: [
+        { path: 'movieId', select: 'title' },
+        { path: 'cinemaId', select: 'name' }
+      ]
+    });
+
+  if (!ticket) {
+    return next(new AppError('Mã vé không tồn tại!', 404));
+  }
+
+  // 2. Kiểm tra checksum (nếu có)
+  if (checksum && ticket.qrChecksum.substring(0, 16) !== checksum) {
+    return next(new AppError('Mã xác thực không hợp lệ!', 400));
+  }
+
+  // 3. Kiểm tra trạng thái vé
+  if (ticket.status === 'USED') {
+    return next(new AppError('Vé đã được sử dụng trước đó!', 400));
+  }
+  if (ticket.status === 'VOID') {
+    return next(new AppError('Vé đã bị hủy!', 400));
+  }
+
+  // 4. Kiểm tra thời gian suất chiếu (cho phép check-in trước 1 tiếng và sau 30 phút kể từ startAt)
+  const showtime = ticket.showtimeId;
+  if (showtime) {
+    const now = new Date();
+    const startAt = new Date(showtime.startAt);
+    const oneHourBefore = new Date(startAt.getTime() - 60 * 60 * 1000);
+    const thirtyMinutesAfter = new Date(startAt.getTime() + 30 * 60 * 1000);
+
+    if (now < oneHourBefore) {
+      return next(new AppError(`Chưa đến giờ check-in. Vui lòng quay lại sau ${oneHourBefore.toLocaleTimeString('vi-VN')}!`, 400));
+    }
+    if (now > thirtyMinutesAfter) {
+      return next(new AppError('Đã quá thời gian check-in cho suất chiếu này!', 400));
+    }
+  }
+
+  // 5. Cập nhật trạng thái vé
+  ticket.status = 'USED';
+  ticket.usedAt = new Date();
+  await ticket.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Check-in thành công!',
+    data: {
+      ticket: {
+        ticketCode: ticket.ticketCode,
+        seatCode: ticket.seatCode,
+        status: ticket.status,
+        usedAt: ticket.usedAt,
+        movie: ticket.showtimeId?.movieId?.title,
+        cinema: ticket.showtimeId?.cinemaId?.name,
+        showtime: ticket.showtimeId?.startAt
+      }
+    }
+  });
+});
+

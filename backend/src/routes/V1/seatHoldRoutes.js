@@ -128,4 +128,43 @@ router.post('/', validate(createHoldSchema), seatHoldController.createHold);
  */
 router.post('/release', validate(releaseHoldSchema), seatHoldController.releaseHold);
 
+/**
+ * @swagger
+ * /holds/verify/{showtimeId}:
+ *   get:
+ *     summary: Verify hold còn hiệu lực và lấy thời gian còn lại
+ *     tags: [SeatHolds]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: showtimeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID suất chiếu
+ *     responses:
+ *       200:
+ *         description: Trạng thái hold và thời gian còn lại
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     valid:
+ *                       type: boolean
+ *                     remainingSeconds:
+ *                       type: number
+ *                     holds:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ */
+router.get('/verify/:showtimeId', seatHoldController.verifyHold);
+
 module.exports = router;

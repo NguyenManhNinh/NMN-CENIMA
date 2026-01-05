@@ -143,7 +143,7 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
       } catch (err) {
         console.error('Loyalty Error:', err);
       }
-      
+
       return res.status(200).json({ RspCode: '00', Message: 'Success' });
     } else {
       order.status = 'FAILED';
@@ -166,11 +166,15 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
 /**
  * Xử lý Return URL từ VNPay
  * @route GET /api/v1/payments/vnpay_return
- * @desc Hiển thị kết quả giao dịch cho người dùng
+ * @desc Xử lý kết quả thanh toán và redirect về frontend
+ *
+ * LƯU Ý: Trong môi trường localhost, IPN không hoạt động được (VNPay không thể reach localhost)
+ * Nên ta xử lý payment ngay tại đây. Production nên dùng IPN làm source of truth.
  */
 exports.vnpayReturn = catchAsync(async (req, res, next) => {
   const secretKey = process.env.VNP_HASH_SECRET;
-  let vnp_Params = req.query;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  let vnp_Params = { ...req.query }; // Clone để tránh mutate original
   let secureHash = vnp_Params['vnp_SecureHash'];
 
   delete vnp_Params['vnp_SecureHash'];
@@ -182,13 +186,139 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
   const hmac = crypto.createHmac("sha512", secretKey);
   const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
 
+  const orderNo = req.query.vnp_TxnRef;
+  const responseCode = req.query.vnp_ResponseCode;
+  const amount = parseInt(req.query.vnp_Amount) / 100; // VNPay gửi số tiền * 100
+
   if (secureHash === signed) {
-    if (req.query.vnp_ResponseCode === '00') {
-      res.send('<h1>Giao dịch thành công! ✅</h1><p>Bạn có thể đóng tab này và kiểm tra email.</p>');
+    if (responseCode === '00') {
+      // ========== THANH TOÁN THÀNH CÔNG ==========
+      try {
+        // ATOMIC UPDATE: Dùng findOneAndUpdate với điều kiện status='PENDING'
+        // Nếu không tìm thấy = đã được xử lý bởi request khác
+        const order = await Order.findOneAndUpdate(
+          {
+            orderNo: orderNo,
+            status: 'PENDING' // Chỉ update nếu đang PENDING
+          },
+          {
+            $set: {
+              status: 'PROCESSING', // Đánh dấu đang xử lý
+              processedAt: new Date()
+            }
+          },
+          { new: false } // Trả về document TRƯỚC khi update
+        );
+
+        // Nếu không tìm thấy order với status PENDING
+        if (!order) {
+          // Kiểm tra xem order có tồn tại không
+          const existingOrder = await Order.findOne({ orderNo });
+
+          if (!existingOrder) {
+            console.error('[VNPay Return] Order not found:', orderNo);
+            return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=error&message=order_not_found`);
+          }
+
+          // Order đã được xử lý (PROCESSING, PAID, hoặc FAILED)
+          console.log('[VNPay Return] Order already processed:', orderNo, 'Status:', existingOrder.status);
+          if (existingOrder.status === 'PAID' || existingOrder.status === 'PROCESSING') {
+            return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=success&orderNo=${orderNo}`);
+          }
+          return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=error&message=order_already_processed`);
+        }
+
+        // Kiểm tra số tiền
+        if (order.totalAmount !== amount) {
+          console.error('[VNPay Return] Amount mismatch:', { expected: order.totalAmount, received: amount });
+          // Rollback status
+          await Order.findByIdAndUpdate(order._id, { status: 'PENDING', processedAt: null });
+          return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=error&message=amount_mismatch`);
+        }
+
+        // Xử lý đơn hàng: Tạo Ticket, cập nhật Order status thành PAID
+        await ticketController.finalizeTransaction(order);
+
+        // Tạo Payment record
+        await Payment.create({
+          orderId: order._id,
+          gateway: 'VNPAY',
+          txnRef: orderNo,
+          bankTranNo: req.query.vnp_BankTranNo || '',
+          amount: amount,
+          state: 'SUCCESS',
+          rawPayload: req.query
+        });
+
+        // LOYALTY LOGIC - Cộng điểm thưởng (non-blocking)
+        try {
+          const User = require('../models/User');
+          const user = await User.findById(order.userId);
+          if (user) {
+            const pointsEarned = Math.floor(amount / POINTS_PER_VND);
+            user.points += pointsEarned;
+
+            // Rank Upgrade
+            if (user.points >= VVIP_THRESHOLD) user.rank = 'VVIP';
+            else if (user.points >= VIP_THRESHOLD) user.rank = 'VIP';
+            else user.rank = 'MEMBER';
+
+            await user.save();
+            console.log(`[Loyalty] User ${user.email} earned ${pointsEarned} points`);
+          }
+        } catch (loyaltyErr) {
+          console.error('[Loyalty] Error:', loyaltyErr);
+        }
+
+        console.log('[VNPay Return] Payment SUCCESS:', orderNo);
+        return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=success&orderNo=${orderNo}`);
+
+      } catch (err) {
+        // Xử lý trường hợp duplicate key (E11000) - ticket đã tồn tại
+        if (err.code === 11000) {
+          console.log('[VNPay Return] Duplicate ticket detected, treating as success:', orderNo);
+          // Đảm bảo order status = PAID
+          await Order.findOneAndUpdate({ orderNo }, { status: 'PAID' });
+          return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=success&orderNo=${orderNo}`);
+        }
+        console.error('[VNPay Return] Processing error:', err);
+        // Rollback status nếu có lỗi
+        await Order.findOneAndUpdate({ orderNo }, { status: 'PENDING', processedAt: null });
+        return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=error&message=processing_error`);
+      }
+
     } else {
-      res.send('<h1>Giao dịch thất bại! ❌</h1><p>Mã lỗi: ' + req.query.vnp_ResponseCode + '</p>');
+      // ========== THANH TOÁN THẤT BẠI/HỦY ==========
+      console.log('[VNPay Return] Payment FAILED:', orderNo, 'Code:', responseCode);
+
+      // Cập nhật Order status thành FAILED
+      try {
+        const order = await Order.findOne({ orderNo });
+        if (order && order.status === 'PENDING') {
+          order.status = 'FAILED';
+          await order.save();
+
+          // Tạo Payment record với state FAIL
+          await Payment.create({
+            orderId: order._id,
+            gateway: 'VNPAY',
+            txnRef: orderNo,
+            amount: amount,
+            state: 'FAIL',
+            rawPayload: req.query
+          });
+        }
+      } catch (err) {
+        console.error('[VNPay Return] Failed order update error:', err);
+      }
+
+      return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=failed&orderNo=${orderNo}&code=${responseCode}`);
     }
   } else {
-    res.send('<h1>Sai chữ ký! ⚠️</h1>');
+    // Sai chữ ký
+    console.error('[VNPay Return] Invalid signature');
+    return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=error&message=invalid_signature`);
   }
 });
+
+

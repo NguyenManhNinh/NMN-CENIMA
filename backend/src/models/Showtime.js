@@ -17,7 +17,7 @@ const showtimeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
     required: [true, 'Suất chiếu phải thuộc về một phòng!'],
-    index: true // FK
+    index: true // FK 
   },
   startAt: {
     type: Date,
@@ -25,7 +25,7 @@ const showtimeSchema = new mongoose.Schema({
   },
   endAt: {
     type: Date,
-    // Tính toán dựa trên movie.duration + thời gian dọn phòng 
+    // Tính toán dựa trên movie.duration + thời gian dọn phòng
     required: [true, 'Vui lòng nhập thời gian kết thúc!']
   },
   basePrice: {
@@ -36,6 +36,12 @@ const showtimeSchema = new mongoose.Schema({
     type: String,
     enum: ['2D', '3D', 'IMAX'], // Khớp với Room.type
     default: '2D'
+  },
+  // Phụ đề hoặc lồng tiếng
+  subtitle: {
+    type: String,
+    enum: ['Phụ đề', 'Lồng tiếng', 'Thuyết minh', ''],
+    default: 'Phụ đề'
   },
   // Danh sách ghế hỏng/bảo trì riêng cho suất này
   maintenanceSeats: [{

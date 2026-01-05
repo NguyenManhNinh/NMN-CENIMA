@@ -26,6 +26,8 @@ const checkCollision = async (roomId, startAt, endAt, excludeId = null) => {
 };
 
 // Lấy danh sách suất chiếu (Filter: movie, cinema, date)
+// Mặc định chỉ trả về suất chiếu CHƯA qua (startAt > now)
+// Thêm ?includePast=true để lấy cả suất đã qua (cho Admin)
 exports.getAllShowtimes = catchAsync(async (req, res, next) => {
   let filter = {};
   if (req.query.movieId) filter.movieId = req.query.movieId;
@@ -38,6 +40,12 @@ exports.getAllShowtimes = catchAsync(async (req, res, next) => {
     const endOfDay = new Date(req.query.date);
     endOfDay.setDate(endOfDay.getDate() + 1);
     filter.startAt = { $gte: startOfDay, $lt: endOfDay };
+  } else {
+    // Mặc định: CHỈ lấy suất chiếu TƯƠNG LAI (chưa bắt đầu)
+    // Trừ khi có query param includePast=true
+    if (req.query.includePast !== 'true') {
+      filter.startAt = { $gt: new Date() };
+    }
   }
 
   const showtimes = await Showtime.find(filter)
