@@ -270,30 +270,9 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
           console.error('[Loyalty] Error:', loyaltyErr);
         }
 
-        // VOUCHER USAGE - Ghi nhận user đã dùng voucher
-        if (order.voucherCode) {
-          try {
-            const Voucher = require('../models/Voucher');
-            const VoucherUsage = require('../models/VoucherUsage');
-            const voucher = await Voucher.findOne({ code: order.voucherCode });
-            if (voucher) {
-              await VoucherUsage.create({
-                voucherId: voucher._id,
-                userId: order.userId,
-                orderId: order._id
-              });
-              // Tăng usageCount của voucher
-              voucher.usageCount += 1;
-              await voucher.save();
-              console.log(`[Voucher] Recorded usage: ${order.voucherCode} by user ${order.userId}`);
-            }
-          } catch (voucherErr) {
-            // Ignore duplicate error (user đã dùng)
-            if (voucherErr.code !== 11000) {
-              console.error('[Voucher] Error recording usage:', voucherErr);
-            }
-          }
-        }
+        // VOUCHER USAGE - Đã được xử lý trong orderController.createOrder
+        // Khi tạo Order, UserVoucher.usedCount đã được tăng lên
+        // Không cần tạo VoucherUsage nữa
 
         console.log('[VNPay Return] Payment SUCCESS:', orderNo);
         return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=success&orderNo=${orderNo}`);

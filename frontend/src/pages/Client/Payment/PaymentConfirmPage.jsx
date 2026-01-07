@@ -23,7 +23,8 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Alert
+  Alert,
+  Checkbox
 } from '@mui/material';
 // Icons
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -183,6 +184,9 @@ function PaymentConfirmPage() {
   // STATE THANH TOÁN
   const [paymentMethod, setPaymentMethod] = useState('vnpay');  // Phương thức thanh toán
   const [loading, setLoading] = useState(false);                // Đang xử lý thanh toán
+  // STATE MODAL XÁC NHẬN THANH TOÁN
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false); // Mở/đóng modal xác nhận
+  const [termsAccepted, setTermsAccepted] = useState(false);       // Checkbox đồng ý điều khoản
   // EFFECTS
   /**
    * Effect: Timer đếm ngược
@@ -398,13 +402,20 @@ function PaymentConfirmPage() {
     setAppliedVoucher(null);
     setVoucherError('');
   };
-  // PAYMENT HANDLER
+  // PAYMENT HANDLER - Mở modal xác nhận trước khi thanh toán
+  const handleOpenConfirmModal = () => {
+    setConfirmModalOpen(true);
+    setTermsAccepted(false); // Reset checkbox mỗi lần mở
+  };
+
   /**
-   * Xử lý thanh toán
+   * Xử lý thanh toán (sau khi xác nhận modal)
    * - Gọi API tạo Order
    * - Redirect sang VNPay
    */
   const handlePayment = async () => {
+    if (!termsAccepted) return;
+    setConfirmModalOpen(false);
     setLoading(true);
     console.log('[Payment] Bắt đầu thanh toán:', {
       method: paymentMethod,
@@ -742,11 +753,11 @@ function PaymentConfirmPage() {
                     }
                   />
                 </RadioGroup>
-                {/*Nút thanh toán*/}
+                {/*Nút thanh toán - mở modal xác nhận*/}
                 <Button
                   variant="contained"
                   sx={styles.payBtn}
-                  onClick={handlePayment}
+                  onClick={handleOpenConfirmModal}
                   disabled={loading}
                 >
                   {loading ? <CircularProgress size={24} color="inherit" /> : 'Thanh Toán'}
@@ -784,14 +795,24 @@ function PaymentConfirmPage() {
                     <LocalOfferIcon sx={{ color: '#f59e0b', mr: 2 }} />
                     <ListItemText
                       primary={
-                        <Typography fontWeight={600}>{voucher.code}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography fontWeight={600}>{voucher.code}</Typography>
+                          {voucher.remainingUses !== undefined && (
+                            <Chip
+                              label={`Còn ${voucher.remainingUses} lượt`}
+                              size="small"
+                              color={voucher.remainingUses > 1 ? 'success' : 'warning'}
+                              sx={{ fontSize: '0.7rem', height: 20 }}
+                            />
+                          )}
+                        </Box>
                       }
                       secondary={
                         <Typography variant="body2" color="text.secondary">
-                          {voucher.description || (voucher.type === 'PERCENT'
-                            ? `Giảm ${voucher.value}% tối đa ${formatPrice(voucher.maxDiscount)}đ`
+                          {voucher.type === 'PERCENT'
+                            ? `Giảm ${voucher.value}%${voucher.maxDiscount > 0 ? ` tối đa ${formatPrice(voucher.maxDiscount)}đ` : ''}`
                             : `Giảm ${formatPrice(voucher.value)}đ`
-                          )}
+                          }
                         </Typography>
                       }
                     />
@@ -801,8 +822,195 @@ function PaymentConfirmPage() {
             </List>
           </DialogContent>
         </Dialog>
+
+        {/* MODAL XÁC NHẬN THANH TOÁN */}
+        <Dialog
+          open={confirmModalOpen}
+          onClose={() => setConfirmModalOpen(false)}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              overflow: 'hidden', maxWidth: 430
+            }
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ py: 1.5, px: 2, textAlign: 'center', position: 'relative' }}>
+            <Typography variant="h6" fontWeight={600} sx={{ letterSpacing: 1 }}>THÔNG TIN ĐẶT VÉ</Typography>
+            <IconButton
+              onClick={() => setConfirmModalOpen(false)}
+              sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', color: 'hsla(0, 5%, 41%, 1.00)' }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          <DialogContent sx={{ p: 0 }}>
+            {/* Thông tin phim */}
+            <Box sx={{ display: 'flex', gap: 2, p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+              <Box
+                component="img"
+                src={showtime?.posterUrl || '/placeholder-movie.jpg'}
+                alt={showtime?.movieTitle}
+                sx={{ width: 90, height: 130, objectFit: 'cover', borderRadius: 1, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
+              />
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <Typography fontWeight={700} fontSize="1.1rem" sx={{ mb: 0.5, color: '#1A1A2E' }}>
+                  {showtime?.movieTitle}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                  {showtime?.format || '2D'} - {showtime?.language || 'Tiếng Việt'}
+                </Typography>
+                {showtime?.ageRating && (
+                  <Chip
+                    label={showtime.ageRating}
+                    size="small"
+                    sx={{
+                      width: 'fit-content',
+                      bgcolor: showtime.ageRating === 'C18' ? '#e53935' : '#ff9800',
+                      color: '#fff',
+                      fontSize: '0.75rem',
+                      fontWeight: 600
+                    }}
+                  />
+                )}
+              </Box>
+            </Box>
+
+            {/* Thông tin rạp + suất chiếu */}
+            <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid #e0e0e0' }}>
+              <Box sx={{ display: 'flex', mb: 1 }}>
+                <Typography sx={{ width: 90, color: 'text.secondary', fontSize: '0.9rem' }}>Rạp</Typography>
+                <Typography sx={{ flex: 1, fontWeight: 600, color: '#1A1A2E', fontSize: '0.9rem' }}>
+                  {showtime?.cinemaName}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex' }}>
+                <Typography sx={{ width: 90, color: 'text.secondary', fontSize: '0.9rem' }}>Suất chiếu</Typography>
+                <Typography sx={{ flex: 1, fontWeight: 500, fontSize: '0.9rem' }}>
+                  {showtime?.time} - {showtime?.date}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Thông tin phòng + ghế + combo */}
+            <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid #e0e0e0' }}>
+              <Box sx={{ display: 'flex', mb: 1 }}>
+                <Typography sx={{ width: 90, color: 'text.secondary', fontSize: '0.9rem' }}>Phòng</Typography>
+                <Typography sx={{ flex: 1, fontSize: '0.9rem' }}>{showtime?.roomName}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', mb: 1 }}>
+                <Typography sx={{ width: 90, color: 'text.secondary', fontSize: '0.9rem' }}>Ghế</Typography>
+                <Typography sx={{ flex: 1, fontWeight: 600, fontSize: '0.9rem' }}>
+                  {selectedSeats.map(s => s.seatCode).join(', ')}
+                </Typography>
+              </Box>
+              {combos.filter(c => c.quantity > 0).length > 0 && (
+                <Box sx={{ display: 'flex' }}>
+                  <Typography sx={{ width: 90, color: 'text.secondary', fontSize: '0.9rem' }}>Combo</Typography>
+                  <Typography sx={{ flex: 1, fontSize: '0.9rem' }}>
+                    {combos.filter(c => c.quantity > 0).map(c => `${c.quantity}x ${c.name}`).join(', ')}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* Tổng tiền - Style Galaxy Cinema */}
+            <Box sx={{ px: 2.5, py: 2, bgcolor: '#fafafa' }}>
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                border: '2px dashed #e0e0e0',
+                borderRadius: 1,
+                p: 1.5
+              }}>
+                <Typography fontWeight={600} fontSize="1rem">Tổng</Typography>
+                <Typography
+                  sx={{
+                    bgcolor: '#f5a623',
+                    color: '#fff',
+                    px: 2.5,
+                    py: 0.75,
+                    borderRadius: 1,
+                    fontWeight: 700,
+                    fontSize: '1rem'
+                  }}
+                >
+                  {formatPrice(grandTotal)} VNĐ
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Checkbox đồng ý điều khoản */}
+            <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'flex-start', gap: 1.5, borderTop: '1px solid #e0e0e0' }}>
+              <Checkbox
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                sx={{ p: 0, mt: 0.3, color: '#1a73e8', '&.Mui-checked': { color: '#1a73e8' } }}
+              />
+              <Typography variant="body2" sx={{ flex: 1, lineHeight: 1.6, color: '#555' }}>
+                Tôi xác nhận các thông tin đặt vé đã chính xác.
+                Tôi đồng ý với{' '}
+                <Typography
+                  component="a"
+                  href="/dieu-khoan"
+                  target="_blank"
+                  sx={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 500, '&:hover': { textDecoration: 'underline' } }}
+                >
+                  Điều khoản dịch vụ
+                </Typography>
+                {' '}và{' '}
+                <Typography
+                  component="a"
+                  href="/chinh-sach-bao-mat"
+                  target="_blank"
+                  sx={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 500, '&:hover': { textDecoration: 'underline' } }}
+                >
+                  Chính sách bảo mật
+                </Typography>
+                {' '}của NMN Cinema.
+              </Typography>
+            </Box>
+          </DialogContent>
+
+          {/* Footer buttons */}
+          <Box sx={{ display: 'flex', gap: 2, px: 2.5, py: 2, borderTop: '1px solid #e0e0e0' }}>
+            <Button
+              variant="outlined"
+              onClick={() => setConfirmModalOpen(false)}
+              sx={{
+                flex: 1,
+                borderColor: '#ccc',
+                color: '#666',
+                py: 1.2,
+                fontWeight: 600,
+                '&:hover': { borderColor: '#999', bgcolor: '#f5f5f5' }
+              }}
+            >
+              Quay lại
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handlePayment}
+              disabled={!termsAccepted || loading}
+              sx={{
+                flex: 1,
+                py: 1.2,
+                fontWeight: 600,
+                bgcolor: termsAccepted ? '#f5a623' : '#e0e0e0',
+                color: termsAccepted ? '#fff' : '#999',
+                '&:hover': { bgcolor: termsAccepted ? '#e09612' : '#e0e0e0' },
+                '&.Mui-disabled': { bgcolor: '#e0e0e0', color: '#999' }
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Thanh Toán'}
+            </Button>
+          </Box>
+        </Dialog>
       </Container>
-    </Box>
+    </Box >
   );
 }
 export default PaymentConfirmPage;

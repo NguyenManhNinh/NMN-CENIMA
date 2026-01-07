@@ -18,7 +18,7 @@ import { getShowtimesByFilterAPI } from '../../../apis/showtimeApi';
 
 // STYLED COMPONENTS
 
-// Custom Select 
+// Custom Select
 const StyledSelect = styled(Select)(({ theme }) => ({
   backgroundColor: '#fff',
   borderRadius: 0,
@@ -272,7 +272,8 @@ function QuickBookingBar() {
   const handleBuyTicket = () => {
     if (selectedMovie && selectedCinema && selectedDate && selectedShowtime) {
       // Navigate to seat selection page with showtime ID
-      navigate(`/dat-ve/${selectedShowtime}`);
+      // Vì đã chọn xong suất chiếu, chuyển thẳng đến trang chọn ghế
+      navigate(`/chon-ghe/${selectedShowtime}`);
     }
   };
 

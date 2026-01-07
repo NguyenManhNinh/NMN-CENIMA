@@ -83,7 +83,7 @@ const styles = {
   }
 };
 
-// Map mã lỗi VNPay sang thông báo tiếng Việt
+// Map mã lỗi VNPay
 const ERROR_MESSAGES = {
   '24': 'Đặt vé không thành công. Vui lòng kiểm tra lại thông tin hoặc liên hệ hotline để được hỗ trợ.',
   '07': 'Giao dịch bị nghi ngờ gian lận.',
@@ -116,7 +116,7 @@ function PaymentResultPage() {
     return new Intl.NumberFormat('vi-VN').format(price || 0) + ' vnđ';
   };
 
-  // Format ngày giờ theo Việt Nam
+  // Format ngày giờ 
   const formatDate = (date) => {
     const d = date ? new Date(date) : new Date();
     const dateStr = d.toLocaleDateString('vi-VN', {

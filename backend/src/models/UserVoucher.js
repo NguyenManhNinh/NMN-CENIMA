@@ -1,0 +1,75 @@
+const mongoose = require('mongoose');
+
+const userVoucherSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
+  voucherId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Voucher',
+    required: true,
+    index: true
+  },
+  // Số lần user được phép dùng voucher này
+  quantity: {
+    type: Number,
+    required: true,
+    default: 1,
+    min: 1
+  },
+  // Số lần đã dùng
+  usedCount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  // Ngày cấp phát
+  assignedAt: {
+    type: Date,
+    default: Date.now
+  },
+  // Ngày hết hạn (có thể khác với voucher gốc)
+  expiresAt: {
+    type: Date,
+    default: null // null = dùng expiresAt của Voucher gốc
+  },
+  // Trạng thái
+  status: {
+    type: String,
+    enum: ['ACTIVE', 'EXHAUSTED', 'EXPIRED'],
+    default: 'ACTIVE'
+  }
+}, {
+  timestamps: true
+});
+
+// Compound index: Mỗi user có thể được cấp cùng 1 voucher nhiều lần (nếu admin muốn)
+// Nhưng mỗi lần cấp là 1 record riêng
+userVoucherSchema.index({ userId: 1, voucherId: 1 });
+
+// Virtual: Còn lại bao nhiêu lượt
+userVoucherSchema.virtual('remainingUses').get(function () {
+  return Math.max(0, this.quantity - this.usedCount);
+});
+
+// Method: Kiểm tra còn dùng được không
+userVoucherSchema.methods.canUse = function () {
+  if (this.status !== 'ACTIVE') return false;
+  if (this.usedCount >= this.quantity) return false;
+  return true;
+};
+
+// Method: Dùng 1 lượt
+userVoucherSchema.methods.use = async function () {
+  this.usedCount += 1;
+  if (this.usedCount >= this.quantity) {
+    this.status = 'EXHAUSTED';
+  }
+  await this.save();
+};
+
+const UserVoucher = mongoose.model('UserVoucher', userVoucherSchema);
+module.exports = UserVoucher;

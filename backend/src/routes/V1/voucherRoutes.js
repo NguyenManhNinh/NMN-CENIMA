@@ -20,6 +20,9 @@ router.route('/')
   .get(voucherController.getAllVouchers)
   .post(voucherController.createVoucher);
 
+// Cấp voucher cho user (Admin only)
+router.post('/assign', voucherController.assignVoucherToUser);
+
 router.route('/:id')
   .patch(voucherController.updateVoucher)
   .delete(voucherController.deleteVoucher);

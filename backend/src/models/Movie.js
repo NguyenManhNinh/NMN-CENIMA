@@ -89,6 +89,11 @@ const movieSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    // Danh sách user đã đánh giá (để check mỗi user chỉ được đánh giá 1 lần)
+    ratedBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
     // View count
     viewCount: {
       type: Number,

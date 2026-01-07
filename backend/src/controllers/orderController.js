@@ -120,18 +120,29 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   const subTotal = totalAmount; // Chưa tính discount
   let discount = 0;
 
-  // VOUCHER LOGIC
+  // VOUCHER LOGIC - Sử dụng UserVoucher (ví voucher của user)
   if (voucherCode) {
     const Voucher = require('../models/Voucher');
+    const UserVoucher = require('../models/UserVoucher');
+
     const voucher = await Voucher.findOne({ code: voucherCode.toUpperCase() });
 
     if (voucher) {
-      // Validate voucher again (Security check)
-      if (voucher.status === 'ACTIVE' &&
-        now >= voucher.validFrom &&
-        now <= voucher.validTo &&
-        voucher.usageCount < voucher.usageLimit) {
+      // Tìm UserVoucher của user này
+      const userVoucher = await UserVoucher.findOne({
+        userId: userId,
+        voucherId: voucher._id,
+        status: 'ACTIVE'
+      });
 
+      // Validate: user có voucher này trong ví và còn lượt dùng
+      if (userVoucher &&
+        userVoucher.usedCount < userVoucher.quantity &&
+        voucher.status === 'ACTIVE' &&
+        now >= voucher.validFrom &&
+        now <= voucher.validTo) {
+
+        // Tính discount
         if (voucher.type === 'FIXED') {
           discount = voucher.value;
         } else if (voucher.type === 'PERCENT') {
@@ -141,7 +152,14 @@ exports.createOrder = catchAsync(async (req, res, next) => {
           }
         }
 
-        // Cập nhật usageCount
+        // Cập nhật usedCount của UserVoucher (trừ 1 lượt)
+        userVoucher.usedCount += 1;
+        if (userVoucher.usedCount >= userVoucher.quantity) {
+          userVoucher.status = 'EXHAUSTED'; // Hết lượt
+        }
+        await userVoucher.save();
+
+        // Cập nhật global usageCount của Voucher (tracking)
         voucher.usageCount += 1;
         await voucher.save();
       }

@@ -116,9 +116,10 @@ exports.deleteMovie = catchAsync(async (req, res, next) => {
   });
 });
 
-// Đánh giá phim (User)
+// Đánh giá phim (User - Mỗi user chỉ được đánh giá 1 lần)
 exports.rateMovie = catchAsync(async (req, res, next) => {
   const { rating } = req.body;
+  const userId = req.user._id; // Lấy user ID từ middleware auth
 
   // Validate rating
   if (!rating || rating < 1 || rating > 10) {
@@ -131,6 +132,11 @@ exports.rateMovie = catchAsync(async (req, res, next) => {
     return next(new AppError('Không tìm thấy phim với ID này!', 404));
   }
 
+  // Kiểm tra user đã đánh giá phim này chưa
+  if (movie.ratedBy && movie.ratedBy.includes(userId)) {
+    return next(new AppError('Bạn đã bình chọn cho phim này rồi!', 400));
+  }
+
   // Calculate new average rating
   // newAvg = (oldAvg * oldCount + newRating) / (oldCount + 1)
   const oldRating = movie.rating || 0;
@@ -138,12 +144,13 @@ exports.rateMovie = catchAsync(async (req, res, next) => {
   const newCount = oldCount + 1;
   const newRating = ((oldRating * oldCount) + rating) / newCount;
 
-  // Update movie with new rating
+  // Update movie with new rating and add user to ratedBy list
   const updatedMovie = await Movie.findByIdAndUpdate(
     req.params.id,
     {
       rating: Math.round(newRating * 10) / 10, // Round to 1 decimal
-      ratingCount: newCount
+      ratingCount: newCount,
+      $addToSet: { ratedBy: userId } // Thêm user vào danh sách đã đánh giá
     },
     { new: true, runValidators: true }
   );
