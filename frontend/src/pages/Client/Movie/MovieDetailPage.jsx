@@ -40,9 +40,12 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ConfirmationNumberOutlinedIcon from '@mui/icons-material/ConfirmationNumberOutlined';
+import { useTheme, useMediaQuery } from '@mui/material';
 
 //Components
 import { TrailerModal } from '../../../components/Common';
+import CommentSection from '../../../components/Movie/CommentSection';
+import { useAuth } from '../../../contexts/AuthContext';
 
 // MÀU SẮC - lấy từ BookingPage
 const COLORS = {
@@ -133,6 +136,7 @@ const formatDate = (dateString) => {
 function MovieDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // State
   const [movie, setMovie] = useState(null);
@@ -150,6 +154,10 @@ function MovieDetailPage() {
   const [openGallery, setOpenGallery] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
+
+  // Responsive hooks
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Load dữ liệu phim
   useEffect(() => {
@@ -270,6 +278,43 @@ function MovieDetailPage() {
     );
   }
 
+  // HELPER COMPONENT: ITEM CHI TIẾT
+  // HELPER COMPONENT: ITEM CHI TIẾT
+  const DetailItem = ({ label, value }) => {
+    // Handle array or single value
+    const items = Array.isArray(value) ? value : [value];
+
+    return (
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '100px 1fr' : '110px 1fr',
+        gap: 1,
+        fontSize: { xs: '14px', md: '0.85rem' },
+        mb: { xs: 0.5, md: 0 }
+      }}>
+        <Typography sx={{ color: '#4A4A4A', minWidth: '100px' }}>{label}:</Typography>
+        <Box sx={{ color: COLORS.text, fontWeight: 500, width: 'fit-content' }}>
+          {items.map((item, index) => (
+            <Box
+              component="span"
+              key={index}
+              sx={{
+                transition: 'color 0.2s',
+                '&:hover': {
+                  color: (label === 'Quốc gia' && item === 'Việt Nam') ? '#e53935' : '#1a3a5c',
+                  cursor: 'pointer'
+                }
+              }}
+            >
+              {item}
+              {index < items.length - 1 && ', '}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    );
+  };
+
   return (
     <Box sx={{ bgcolor: COLORS.bgLight, minHeight: '100vh' }}>
 
@@ -285,27 +330,9 @@ function MovieDetailPage() {
                 '& .MuiBreadcrumbs-separator': { color: COLORS.textMuted, mx: 1 }
               }}
             >
-              <Link
-                to="/"
-                style={{
-                  textDecoration: 'none',
-                  color: COLORS.textMuted,
-                  fontSize: '14px'
-                }}
-              >
-                Trang chủ
-              </Link>
-              <Link
-                to="/the-loai-phim"
-                style={{
-                  textDecoration: 'none',
-                  color: COLORS.textMuted,
-                  fontSize: '14px'
-                }}
-              >
-                Phim
-              </Link>
-              <Typography sx={{ color: COLORS.text, fontSize: '14px', fontWeight: 500 }}>
+              <Link to="/" style={{ textDecoration: 'none', color: COLORS.textMuted, fontSize: isMobile ? '13px' : '14px' }}>Trang chủ</Link>
+              <Link to="/the-loai-phim" style={{ textDecoration: 'none', color: COLORS.textMuted, fontSize: isMobile ? '13px' : '14px' }}>Phim</Link>
+              <Typography sx={{ color: COLORS.text, fontSize: isMobile ? '13px' : '14px', fontWeight: 500 }}>
                 {movie.title}
               </Typography>
             </Breadcrumbs>
@@ -313,23 +340,24 @@ function MovieDetailPage() {
 
           <Grid container spacing={3} sx={{ alignItems: 'flex-start' }}>
 
-            {/*LEFT COLUMN: Poster + Info*/}
+            {/* LEFT COLUMN: Main Content */}
             <Grid item xs={12} md={8}>
-              <Grid container spacing={{ xs: 2, md: 3 }}>
 
-                {/* Poster with Play Button */}
-                <Grid item xs={5} sm={4}>
-                  <Box sx={{ position: 'relative' }}>
+              {/* RESPONSIVE HEADER SECTION */}
+              {isMobile ? (
+                /* MOBILE VIEW: Stacked Layout */
+                <Box sx={{ mb: 4 }}>
+                  {/* 1. Mobile Banner (Landscape) */}
+                  <Box sx={{ position: 'relative', mb: 2 }}>
                     <Box
                       component="img"
-                      src={movie.posterUrl}
+                      src={movie.bannerUrl || movie.posterUrl}
                       alt={movie.title}
                       sx={{
                         width: '100%',
-                        maxWidth: { xs: 160, sm: 200, md: 240 },
-                        height: { xs: 220, sm: 280, md: 360 },
+                        aspectRatio: '16/9',
                         objectFit: 'cover',
-                        borderRadius: 2
+                        display: 'block',
                       }}
                     />
                     {/* Play Button Overlay */}
@@ -337,266 +365,191 @@ function MovieDetailPage() {
                       <Box
                         onClick={() => setOpenTrailerModal(true)}
                         sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 2,
-                          cursor: 'pointer',
-                          transition: 'all 0.3s',
-
-                          '&:hover .play-icon': {
-                            transform: 'scale(1.1)'
-                          }
+                          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          bgcolor: 'rgba(0,0,0,0.2)', cursor: 'pointer'
                         }}
                       >
-                        <Box
-                          className="play-icon"
-                          sx={{
-                            width: 60,
-                            height: 60,
-                            borderRadius: '50%',
-                            bgcolor: '#0000008F',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'transform 0.3s'
-                          }}
-                        >
-                          <PlayArrowIcon sx={{ fontSize: 35, color: 'white', ml: 0.5 }} />
+                        <Box sx={{
+                          width: 50, height: 50, borderRadius: '50%', bgcolor: 'rgba(0,0,0,0.6)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.8)'
+                        }}>
+                          <PlayArrowIcon sx={{ fontSize: 30, color: 'white', ml: 0.5 }} />
                         </Box>
                       </Box>
                     )}
                   </Box>
-                </Grid>
 
-                {/* Movie Details */}
-                <Grid item xs={7} sm={8}>
-                  {/* Title + Age Rating */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1, md: 2 }, flexWrap: 'wrap' }}>
-                    <Typography sx={{
-                      fontWeight: 700,
-                      fontSize: { xs: '1rem', sm: '1.3rem', md: '1.6rem' },
-                      color: COLORS.dark
-                    }}>
-                      {movie.title}
-                    </Typography>
-                    <Chip
-                      label={movie.ageRating}
-                      size="small"
-                      sx={{
-                        bgcolor: COLORS.orange,
-                        color: '#000',
+                  {/* 2. Mobile Title & Info */}
+                  <Box>
+                    {/* Title + Age */}
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: '#333', lineHeight: 1.3, fontSize: '20px' }}>
+                        {movie.title}
+                      </Typography>
+                      <Chip
+                        label={movie.ageRating}
+                        size="small"
+                        sx={{
+                          bgcolor: COLORS.orange, color: '#fff', fontWeight: 700,
+                          height: 22, fontSize: '10px', borderRadius: '4px', mt: 0.5
+                        }}
+                      />
+                    </Box>
+
+                    {/* Meta Info */}
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 7.1, rowGap: 1.5, mb: 2, color: COLORS.textLight, fontSize: '12px' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <AccessTimeIcon sx={{ fontSize: 16 }} />
+                        <Typography fontSize="inherit" fontWeight={500}>{movie.duration} Phút</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <CalendarTodayIcon sx={{ fontSize: 16 }} />
+                        <Typography fontSize="inherit" fontWeight={500}>{formatDate(movie.releaseDate)}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <VisibilityIcon sx={{ fontSize: 16, color: '#999' }} />
+                        <Typography fontSize="inherit">{movie.views?.toLocaleString()}</Typography>
+                      </Box>
+                      <Box
+                        onClick={() => setOpenRatingModal(true)}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }}
+                      >
+                        <StarIcon sx={{ fontSize: 16, color: COLORS.orange }} />
+                        <Typography fontSize="inherit" fontWeight={700} color="#333">{movie.rating}</Typography>
+                        <Typography fontSize="inherit" color="#999">({movie.ratingCount})</Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Details List */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
+                      <DetailItem label="Diễn viên" value={movie.actors?.map(a => a.name || a) || ['Đang cập nhật']} />
+                      <DetailItem label="Nhà sản xuất" value={movie.studio || 'NMN Studio'} />
+                      <DetailItem label="Thể loại" value={movie.genres || ['Hành động']} />
+                      <DetailItem label="Đạo diễn" value={movie.director || 'Chưa cập nhật'} />
+                      <DetailItem label="Quốc gia" value={movie.country || 'Việt Nam'} />
+                    </Box>
+
+                    {/* Description */}
+                    <Box>
+                      <Typography sx={{
                         fontWeight: 700,
-                        fontSize: { xs: '10px', md: '12px' },
-                        height: { xs: 20, md: 24 }
-                      }}
-                    />
-                  </Box>
-
-                  {/* Meta Row 1: Duration, Release Date */}
-                  <Box sx={{
-                    display: 'flex',
-                    gap: 4,
-                    mb: 1,
-                    color: COLORS.textLight
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <AccessTimeIcon sx={{ fontSize: { xs: 14, md: 18 } }} />
-                      <Typography sx={{ fontSize: { xs: '12px', md: '14px' } }}>
-                        {movie.duration} Phút
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <CalendarTodayIcon sx={{ fontSize: { xs: 14, md: 18 } }} />
-                      <Typography sx={{ fontSize: { xs: '12px', md: '14px' } }}>
-                        {formatDate(movie.releaseDate)}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* Meta Row 2: Views, Rating */}
-                  <Box sx={{
-                    display: 'flex',
-                    gap: 4,
-                    mb: { xs: 1.5, md: 2.5 },
-                    color: COLORS.textLight
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <VisibilityIcon sx={{ fontSize: { xs: 14, md: 18 } }} />
-                      <Typography sx={{ fontSize: { xs: '12px', md: '14px' } }}>
-                        {movie.views?.toLocaleString() || '0'}
-                      </Typography>
-                    </Box>
-                    {/* Rating - Clickable */}
-                    <Box
-                      onClick={() => setOpenRatingModal(true)}
-                      sx={{
+                        fontSize: '16px',
+                        color: COLORS.primary,
+                        mb: 1,
+                        textTransform: 'uppercase',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 0.5,
-                        cursor: 'pointer',
-                        '&:hover': { opacity: 0.8 }
-                      }}
-                    >
-                      <StarIcon sx={{ fontSize: { xs: 14, md: 18 }, color: COLORS.orange }} />
-                      <Typography sx={{ fontSize: { xs: '12px', md: '14px' }, fontWeight: 600 }}>
-                        {movie.rating}
+                        gap: 1,
+                        '&::before': {
+                          content: '""',
+                          width: 4,
+                          height: 20,
+                          bgcolor: COLORS.primary,
+                          borderRadius: 1
+                        }
+                      }}>
+                        Nội dung phim
                       </Typography>
-                      <Typography sx={{ fontSize: { xs: '12px', md: '14px' }, color: COLORS.textMuted }}>
-                        ({movie.ratingCount || 0} đánh giá)
+                      <Typography sx={{ color: '#555', lineHeight: 1.6, fontSize: '14px', textAlign: 'justify' }}>
+                        {movie.description || 'Chưa cập nhật nội dung.'}
                       </Typography>
                     </Box>
                   </Box>
+                </Box>
+              ) : (
+                /* DESKTOP VIEW: Side-by-Side Grid */
+                <>
+                  <Grid container spacing={{ xs: 2, md: 3 }}>
+                    {/* Poster + Play */}
+                    <Grid item xs={5} sm={4}>
+                      <Box sx={{ position: 'relative' }}>
+                        <Box
+                          component="img"
+                          src={movie.posterUrl}
+                          alt={movie.title}
+                          sx={{
+                            width: '100%',
+                            maxWidth: { xs: 160, sm: 200, md: 240 },
+                            height: { xs: 220, sm: 280, md: 360 },
+                            objectFit: 'cover',
+                            borderRadius: 2
+                          }}
+                        />
+                        {movie.trailerUrl && (
+                          <Box
+                            onClick={() => setOpenTrailerModal(true)}
+                            sx={{
+                              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              borderRadius: 2, cursor: 'pointer', transition: 'all 0.3s',
+                              '&:hover .play-icon': { transform: 'scale(1.1)' }
+                            }}
+                          >
+                            <Box className="play-icon" sx={{ width: 60, height: 60, borderRadius: '50%', bgcolor: '#0000008F', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.3s' }}>
+                              <PlayArrowIcon sx={{ fontSize: 35, color: 'white', ml: 0.5 }} />
+                            </Box>
+                          </Box>
+                        )}
+                      </Box>
+                    </Grid>
 
-                  {/* Details Grid */}
-                  <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: '110px 1fr',
-                    gap: 1,
-                    fontSize: '0.85rem'
-                  }}>
-                    {/* Quốc gia */}
-                    <Typography sx={{ color: '#4A4A4A' }}>Quốc gia:</Typography>
-                    <Typography sx={{
-                      color: COLORS.text,
-                      cursor: 'pointer',
-                      transition: 'color 0.2s',
-                      '&:hover': {
-                        color: (movie.country || 'Việt Nam') === 'Việt Nam' ? '#e53935' : COLORS.text
-                      }
-                    }}>
-                      {movie.country || 'Việt Nam'}
+                    {/* Info */}
+                    <Grid item xs={7} sm={8}>
+                      {/* Title */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: '1.6rem', color: COLORS.dark }}>
+                          {movie.title}
+                        </Typography>
+                        <Chip label={movie.ageRating} size="small" sx={{ bgcolor: COLORS.orange, color: '#000', fontWeight: 700 }} />
+                      </Box>
+
+                      {/* Meta */}
+                      <Box sx={{ display: 'flex', gap: 2, mb: 1, color: COLORS.textLight }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <AccessTimeIcon fontSize="small" /> <Typography>{movie.duration} Phút</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <CalendarTodayIcon fontSize="small" /> <Typography>{formatDate(movie.releaseDate)}</Typography>
+                        </Box>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: COLORS.textLight }}>
+                          <VisibilityIcon fontSize="small" /> <Typography>{movie.views?.toLocaleString()}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }} onClick={() => setOpenRatingModal(true)}>
+                          <StarIcon sx={{ color: COLORS.orange }} />
+                          <Typography fontWeight={600}>{movie.rating}</Typography>
+                          <Typography color={COLORS.textMuted}>({movie.ratingCount} đánh giá)</Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Details Grid */}
+                      {/* Details Grid */}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <DetailItem label="Quốc gia" value={movie.country || 'Việt Nam'} />
+                        <DetailItem label="Nhà sản xuất" value={movie.studio || 'NMN Studio'} />
+                        <DetailItem label="Thể loại" value={movie.genres || ['Hành động']} />
+                        <DetailItem label="Đạo diễn" value={movie.director || 'Chưa cập nhật'} />
+                        <DetailItem label="Diễn viên" value={movie.actors?.map(a => a.name || a) || ['Đang cập nhật']} />
+                      </Box>
+                    </Grid>
+                  </Grid>
+
+                  {/* Desktop Description */}
+                  <Box sx={{ mt: 4 }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: '18px', color: COLORS.primary, mb: 2, display: 'flex', alignItems: 'center', gap: 1, '&::before': { content: '""', width: 4, height: 20, bgcolor: COLORS.primary, borderRadius: 1 } }}>
+                      NỘI DUNG PHIM
                     </Typography>
-
-                    {/* Nhà sản xuất */}
-                    <Typography sx={{ color: '#4A4A4A' }}>Nhà sản xuất:</Typography>
-                    <Typography sx={{ color: COLORS.text }}>{movie.studio || 'NMN Studio'}</Typography>
-
-                    {/* Thể loại */}
-                    <Typography sx={{ color: '#4A4A4A' }}>Thể loại:</Typography>
-                    <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                      {movie.genres?.length > 0 ? movie.genres.map((genre, idx) => (
-                        <Chip
-                          key={idx}
-                          label={typeof genre === 'string' ? genre : genre?.name}
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            fontSize: '0.85rem',
-                            height: 28,
-                            borderRadius: '7px',
-                            border: '1px solid #333',
-                            color: '#333',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              color: '#1a3a5c',
-                              borderColor: '#1a3a5c'
-                            }
-                          }}
-                        />
-                      )) : (
-                        <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Chưa cập nhật</Typography>
-                      )}
-                    </Box>
-
-                    {/* Đạo diễn */}
-                    <Typography sx={{ color: '#4A4A4A' }}>Đạo diễn:</Typography>
-                    <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                      {movie.director ? (
-                        <Chip
-                          label={movie.director}
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            fontSize: '0.85rem',
-                            height: 28,
-                            borderRadius: '7px',
-                            border: '1px solid #333',
-                            color: '#333',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              color: '#1a3a5c',
-                              borderColor: '#1a3a5c'
-                            }
-                          }}
-                        />
-                      ) : (
-                        <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Chưa cập nhật</Typography>
-                      )}
-                    </Box>
-
-                    {/* Diễn viên */}
-                    <Typography sx={{ color: '#4A4A4A' }}>Diễn viên:</Typography>
-                    <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                      {movie.actors?.length > 0 ? movie.actors.map((actor, idx) => (
-                        <Chip
-                          key={idx}
-                          label={typeof actor === 'string' ? actor : actor?.name}
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            fontSize: '0.85rem',
-                            height: 28,
-                            borderRadius: '7px',
-                            border: '1px solid #333',
-                            color: '#333',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              color: '#1a3a5c',
-                              borderColor: '#1a3a5c'
-                            }
-                          }}
-                        />
-                      )) : (
-                        <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Chưa cập nhật</Typography>
-                      )}
-                    </Box>
+                    <Typography sx={{ color: COLORS.text, lineHeight: 1.8, fontSize: '14px', whiteSpace: 'pre-line', textAlign: 'justify' }}>
+                      {movie.description}
+                    </Typography>
                   </Box>
-                </Grid>
-              </Grid>
+                </>
+              )}
 
-              {/*NỘI DUNG PHIM*/}
-              <Box sx={{ mt: 4 }}>
-                <Typography sx={{
-                  fontWeight: 700,
-                  fontSize: '18px',
-                  color: COLORS.primary,
-                  mb: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  '&::before': {
-                    content: '""',
-                    width: 4,
-                    height: 20,
-                    bgcolor: COLORS.primary,
-                    borderRadius: 1
-                  }
-                }}>
-                  NỘI DUNG PHIM
-                </Typography>
-                <Typography sx={{
-                  color: COLORS.text,
-                  lineHeight: 1.8,
-                  fontSize: '14px',
-                  whiteSpace: 'pre-line'
-                }}>
-                  {movie.description || <span style={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Chưa cập nhật</span>}
-                </Typography>
-              </Box>
-
-              {/* HÌNH TRONG PHIM */}
+              {/* HÌNH TRONG PHIM - SHARED */}
               <Box sx={{ mt: 4 }}>
                 <Typography sx={{
                   fontWeight: 700,
@@ -618,9 +571,13 @@ function MovieDetailPage() {
                 </Typography>
                 {movie.images && movie.images.length > 0 ? (
                   <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
-                    gap: 1.5
+                    display: { xs: 'flex', sm: 'grid' },
+                    gridTemplateColumns: { sm: 'repeat(4, 1fr)' },
+                    overflowX: { xs: 'auto', sm: 'visible' },
+                    gap: 1.5,
+                    pb: { xs: 1, sm: 0 }, // Add padding bottom for scrollbar spacing on mobile if needed
+                    '::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for cleaner look
+                    scrollbarWidth: 'none'
                   }}>
                     {movie.images.map((img, idx) => (
                       <Box
@@ -630,21 +587,26 @@ function MovieDetailPage() {
                         alt={`Scene ${idx + 1}`}
                         onClick={() => handleOpenGallery(idx)}
                         sx={{
-                          width: 174,
-                          height: 116,
+                          width: { xs: '263px', sm: '100%' }, // Fixed width on mobile for scrolling
+                          flexShrink: 0, // Prevent shrinking in flex container
+                          height: { xs: '187.85px', sm: 'auto' },
+                          aspectRatio: { xs: 'unset', sm: '16/9' }, // Cinematic aspect ratio for desktop, fixed size for mobile
                           objectFit: 'cover',
+                          borderRadius: 0, // No border radius
                           cursor: 'pointer',
                           transition: 'transform 0.3s',
+                          '&:hover': { transform: { sm: 'scale(1.05)' } }
                         }}
                       />
                     ))}
                   </Box>
                 ) : (
                   <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Chưa cập nhật</Typography>
-                )}
+                )
+                }
               </Box>
 
-              {/* DIỄN VIÊN */}
+              {/* DIỄN VIÊN - SHARED */}
               <Box sx={{ mt: 4 }}>
                 <Typography sx={{
                   fontWeight: 700,
@@ -692,31 +654,7 @@ function MovieDetailPage() {
               </Box>
 
               {/*BÌNH LUẬN PHIM*/}
-              <Box sx={{ mt: 4 }}>
-                <Typography sx={{
-                  fontWeight: 700,
-                  fontSize: '18px',
-                  color: COLORS.primary,
-                  mb: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  '&::before': {
-                    content: '""',
-                    width: 4,
-                    height: 20,
-                    bgcolor: COLORS.primary,
-                    borderRadius: 1
-                  }
-                }}>
-                  BÌNH LUẬN PHIM
-                </Typography>
-                <Paper sx={{ p: 2, bgcolor: '#f8f8f8' }} elevation={0}>
-                  <Typography color="text.secondary" fontSize="14px">
-                    Đăng nhập để bình luận về phim này
-                  </Typography>
-                </Paper>
-              </Box>
+              <CommentSection movieId={id} user={user} />
             </Grid>
 
             {/* ===== RIGHT COLUMN: Sidebar - PHIM ĐANG CHIẾU ===== */}
@@ -1224,7 +1162,7 @@ function MovieDetailPage() {
           ))}
         </Box>
       </Dialog>
-    </Box>
+    </Box >
   );
 }
 

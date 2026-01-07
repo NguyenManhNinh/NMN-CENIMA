@@ -14,7 +14,12 @@ import {
   Button,
   Grid,
   Paper,
-  CircularProgress
+  CircularProgress,
+  Drawer,
+  IconButton,
+  Divider,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 
 // Chỗ thêm MUI Icons
@@ -23,6 +28,9 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import StarIcon from '@mui/icons-material/Star';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 // ============================================
 // DỮ LIỆU MẪu (MOCK DATA)
@@ -264,7 +272,7 @@ const styles = {
   // Tiêu đề trang - "PHIM ĐIỆN ẢNH"
   pageTitle: {
     fontWeight: 400,
-    fontSize: '20px',
+    fontSize: { xs: '18px', md: '20px' },
     color: '#4A4A4A',
     textTransform: 'uppercase',
     pl: 2,
@@ -272,9 +280,9 @@ const styles = {
     mb: 3
   },
 
-  // Hàng bộ lọc (Thể loại, Quốc gia, Năm...)
+  // Hàng bộ lọc (Thể loại, Quốc gia, Năm...) -> Desktop only
   filterRow: {
-    display: 'flex',
+    display: { xs: 'none', md: 'flex' },
     flexWrap: 'wrap',
     gap: 2,
     mb: 4,
@@ -304,40 +312,52 @@ const styles = {
     overflow: 'visible',
     border: 'none',
     boxShadow: 'none',
-    borderRadius: 0
+    borderRadius: 0,
+    flexDirection: { xs: 'row', md: 'row' }, // Mobile vẫn ngang
+    alignItems: 'flex-start'
   },
 
-  // Poster phim (hình ngang theo template Galaxy)
+  // Poster phim
   moviePoster: {
-    width: '255px',
-    height: '155px',
+    width: { xs: '140px', sm: '180px', md: '255px' },
+    height: { xs: '210px', sm: '270px', md: '155px' }, // Mobile: Portrait, Desktop: Landscape? Check user templates. Template looks portrait in mobile list usually, but code was 255x155 (Landscape).
+    // User Image 0 shows Landscape poster in the list.
+    // Let's stick to Landscape ratios but smaller if that's what desktop had, OR switch to Portrait if that matches the request.
+    // But current code had 255x155 (Landscape).
+    // Let's look at Image 0 again. It looks like Landscape posters.
+    // I will keep Landscape ratio but responsive.
+    width: { xs: '150px', sm: '200px', md: '255px' },
+    height: { xs: '90px', sm: '120px', md: '155px' },
     objectFit: 'cover',
     flexShrink: 0,
     cursor: 'pointer',
     boxShadow: 'none',
     border: 'none',
-    borderRadius: 0
+    borderRadius: 0,
+    marginRight: 2
   },
 
   // Nội dung phim (tiêu đề, mô tả, nút)
   movieContent: {
     flex: 1,
-    pl: 1.5,
-    pr: 1.5,
     py: 0,
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    minWidth: 0 // Prevent text overflow
   },
 
   // Tiêu đề phim
   movieTitle: {
     fontWeight: 700,
-    fontSize: '18px',
+    fontSize: { xs: '15px', md: '18px' },
     color: '#1A1A2E',
     mt: 0,
     mb: 0.5,
-    cursor: 'pointer'
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   },
 
   // Container nút Thích và Lượt xem
@@ -354,10 +374,11 @@ const styles = {
     color: '#fff',
     textTransform: 'none',
     fontWeight: 500,
-    fontSize: '12px',
-    px: 2.4,
+    fontSize: { xs: '10px', md: '12px' },
+    px: { xs: 1.5, md: 2.4 },
     py: 0.5,
     minWidth: 'auto',
+    height: { xs: '24px', md: '30px' },
     '&:hover': { bgcolor: 'rgba(64,128,255,0.8)' }
   },
 
@@ -369,21 +390,38 @@ const styles = {
     color: '#666',
     border: '1px solid #ddd',
     borderRadius: 1,
-    px: 2.8,
+    px: 1,
     py: 0.2,
-    fontSize: '12px',
+    fontSize: { xs: '10px', md: '12px' },
+    height: { xs: '24px', md: '30px' },
     cursor: 'pointer',
   },
 
   // Mô tả ngắn của phim (tối đa 3 dòng)
   movieDescription: {
-    fontSize: '14px',
+    fontSize: { xs: '12px', md: '14px' },
     color: '#A0A3A7',
-    lineHeight: 1.7,
+    lineHeight: 1.5,
     display: '-webkit-box',
-    WebkitLineClamp: 3,
+    WebkitLineClamp: { xs: 2, md: 3 }, // Mobile 2 dòng
     WebkitBoxOrient: 'vertical',
     overflow: 'hidden',
+  },
+
+  // Mobile Filter Button style
+  mobileFilterBtn: {
+    display: { xs: 'flex', md: 'none' },
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    padding: '10px',
+    backgroundColor: '#fff',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    marginBottom: '20px',
+    color: '#666',
+    fontWeight: 500,
+    gap: 1
   }
 };
 
@@ -401,6 +439,8 @@ const formatNumber = (num) => {
 function GenresPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Đọc URL params khi load trang
   const getParamOrDefault = (param, defaultValue) => {
@@ -424,6 +464,19 @@ function GenresPage() {
 
   // STATE LOADING
   const [loading, setLoading] = useState(true);
+
+  // STATE DRAWER CHO MOBILE
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+
+  // HÀM RESET BỘ LỌC
+  const resetFilters = () => {
+    setSelectedGenre('Tất cả');
+    setSelectedCountry('Tất cả');
+    setSelectedYear('Tất cả');
+    setSelectedStatus('Tất cả');
+    setSelectedSort('Xem nhiều nhất');
+    setCurrentPage(1);
+  };
 
   // Cập nhật URL khi filter hoặc page thay đổi
   useEffect(() => {
@@ -560,7 +613,99 @@ function GenresPage() {
         {/* Tiêu đề trang */}
         <Typography sx={styles.pageTitle}>Phim điện ảnh</Typography>
 
-        {/* Hàng bộ lọc - Thể loại, Quốc gia, Năm, Trạng thái, Sắp xếp */}
+        {/* Mobile Filter Button */}
+        <Box sx={styles.mobileFilterBtn} onClick={() => setFilterDrawerOpen(true)}>
+          <FilterListIcon />
+          <Typography>Phân loại / Lọc</Typography>
+        </Box>
+
+        {/* Drawer for Mobile Filters */}
+        <Drawer
+          anchor="right"
+          open={filterDrawerOpen}
+          onClose={() => setFilterDrawerOpen(false)}
+          PaperProps={{
+            sx: { width: '85%', maxWidth: '360px', p: 2 }
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h6" fontWeight={600}>Bộ lọc tìm kiếm</Typography>
+            <IconButton onClick={() => setFilterDrawerOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {/* Helper to render select fields with custom placeholder logic */}
+            {[
+              { label: 'Thể loại', value: selectedGenre, setter: setSelectedGenre, options: MOCK_GENRES, placeholder: 'Thể Loại' },
+              { label: 'Quốc gia', value: selectedCountry, setter: setSelectedCountry, options: MOCK_COUNTRIES, placeholder: 'Quốc Gia' },
+              { label: 'Năm phát hành', value: selectedYear, setter: setSelectedYear, options: MOCK_YEARS, placeholder: 'Năm' },
+              { label: 'Trạng thái', value: selectedStatus, setter: setSelectedStatus, options: MOCK_STATUS, placeholder: 'Đang Chiếu/ Sắp Chiếu' },
+              { label: 'Sắp xếp', value: selectedSort, setter: setSelectedSort, options: MOCK_SORT, placeholder: 'Xem Nhiều Nhất' }
+            ].map((field) => (
+              <FormControl key={field.label} size="small" fullWidth>
+                <Select
+                  value={field.value}
+                  onChange={(e) => field.setter(e.target.value)}
+                  displayEmpty
+                  renderValue={(selected) => {
+                    // Logic: Nếu selected là 'Tất cả' hoặc 'Xem nhiều nhất' (default sort),
+                    // thì hiển thị placeholder của user yêu cầu.
+                    // Tuy nhiên 'Xem nhiều nhất' là một option hợp lệ, user muốn label 'Xem Nhiều Nhất'
+                    // là default.
+                    if (selected === 'Tất cả') return <span style={{ color: '#666' }}>{field.placeholder}</span>;
+                    // Với Sắp xếp, nếu chọn 'Xem nhiều nhất' (default), ta vẫn hiện nó.
+                    // Nhưng nếu user muốn placeholder giống Image 1, có thể họ muốn cái Text hiển thị ban đầu là "Xem Nhiều Nhất".
+                    // Trong Mock Data có 'Xem nhiều nhất'.
+                    if (field.label === 'Sắp xếp' && selected === 'Xem nhiều nhất') return field.placeholder;
+                    return selected;
+                  }}
+                  sx={{
+                    borderRadius: '4px',
+                    bgcolor: '#fff',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ddd' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#bbb' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#f5a623' },
+                    fontSize: '15px',
+                    color: '#333'
+                  }}
+                >
+                  {field.options.map((opt) => (
+                    <MenuItem key={opt} value={opt}>
+                      {opt === 'Tất cả' ? field.placeholder : opt}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            ))}
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <Button
+                variant="outlined"
+                fullWidth
+                color="error"
+                startIcon={<DeleteOutlineIcon />}
+                onClick={() => {
+                  resetFilters();
+                  setFilterDrawerOpen(false);
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{ bgcolor: '#f5a623', color: '#fff', '&:hover': { bgcolor: '#e0961f' } }}
+                onClick={() => setFilterDrawerOpen(false)}
+              >
+                Áp dụng
+              </Button>
+            </Box>
+          </Box>
+        </Drawer>
+
+        {/* Hàng bộ lọc (Thể loại, Quốc gia, Năm...) */}
         <Box sx={styles.filterRow}>
           <FormControl sx={styles.filterSelect} size="small">
             <Select
