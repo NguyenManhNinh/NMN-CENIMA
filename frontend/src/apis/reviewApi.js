@@ -51,11 +51,32 @@ export const deleteReviewAPI = async (movieId, reviewId) => {
 };
 
 /**
- * Toggle like review
+ * Toggle like/reaction review
  * @param {string} movieId - ID phim
  * @param {string} reviewId - ID review
+ * @param {string} type - Reaction type (LIKE, LOVE, HAHA, WOW, SAD, ANGRY)
  */
-export const likeReviewAPI = async (movieId, reviewId) => {
-  const response = await axiosInstance.post(`/movies/${movieId}/reviews/${reviewId}/like`);
+export const likeReviewAPI = async (movieId, reviewId, type = 'LIKE') => {
+  const response = await axiosInstance.post(`/movies/${movieId}/reviews/${reviewId}/like`, { type });
+  return response.data;
+};
+
+/**
+ * Lấy danh sách replies của một comment
+ * @param {string} movieId - ID phim
+ * @param {string} reviewId - ID comment gốc
+ */
+export const getRepliesAPI = async (movieId, reviewId) => {
+  const response = await axiosInstance.get(`/movies/${movieId}/reviews/${reviewId}/replies`);
+  return response.data;
+};
+
+/**
+ * Reply to a comment (trả lời bình luận)
+ * @param {string} movieId - ID phim
+ * @param {object} data - { content, parentId }
+ */
+export const replyToReviewAPI = async (movieId, data) => {
+  const response = await axiosInstance.post(`/movies/${movieId}/reviews`, data);
   return response.data;
 };

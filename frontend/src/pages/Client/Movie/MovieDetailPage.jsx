@@ -1,9 +1,10 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
 // Nơi Call đường dẫn API
-import { rateMovieAPI, getNowShowingMoviesAPI } from '../../../apis/movieApi';
+// Nơi Call đường dẫn API
+import { getMovieAPI, rateMovieAPI, getNowShowingMoviesAPI, incrementViewAPI } from '../../../apis/movieApi';
 
 // Thêm Matenial MUI Components
 import {
@@ -61,67 +62,7 @@ const COLORS = {
   bgCard: '#FFFFFF'
 };
 
-const MOCK_MOVIE = {
-  _id: '1',
-  title: 'Spongebob: Lời Nguyền Hải Tặc 2',
-  posterUrl: 'https://image.tmdb.org/t/p/w500/kGzFbGhp99zva6oZODW5atUtnqi.jpg',
-  bannerUrl: 'https://image.tmdb.org/t/p/original/kGzFbGhp99zva6oZODW5atUtnqi.jpg',
-  duration: 140,
-  releaseDate: '2025-12-20',
-  views: 2607282,
-  rating: 9.1,
-  ratingCount: 7,
-  ageRating: 'C18',
-  country: 'Việt Nam',
-  studio: 'Paramount Pictures',
-  genres: ['Hành động'],
-  director: 'Christopher Nolan',
-  actors: [
-    { name: 'Robert Downey Jr.', photo: 'https://image.tmdb.org/t/p/w200/5qHNjhtjMD4YWH3UP0rm4tKwxCL.jpg' },
-    { name: 'Tom Cruise', photo: 'https://image.tmdb.org/t/p/w200/8qBylBsQf4llkGrWR3qAsOtOU8O.jpg' },
-    { name: 'Chris Hemsworth', photo: 'https://image.tmdb.org/t/p/w200/jpurJ9jAcLCYjgHHfYF32m3zJYm.jpg' },
-    { name: 'Scarlett Johansson', photo: 'https://image.tmdb.org/t/p/w200/6NsMbJXRlDZuDzatN2akFdGuTvx.jpg' }
-  ],
-  // Hình ảnh trong phim
-  images: [
-    'https://image.tmdb.org/t/p/w500/cqa3sa4c4jevgnEJwq3CMF8UfTG.jpg',
-    'https://image.tmdb.org/t/p/w500/jiqD14fg7UTZOT6qgvzTmfRYpWI.jpg',
-    'https://image.tmdb.org/t/p/w500/hwBiPkXuXP8oexHzFBmDfnr0cN.jpg',
-    'https://image.tmdb.org/t/p/w500/ySS6S4Q9iBuxq68RXUz0zIY4QSC.jpg'
-  ],
-  description: `Sau khi phát hiện ra bản đồ kho báu cổ xưa, SpongeBob và Patrick bắt đầu cuộc phiêu lưu đầy thú vị để tìm kiếm kho báu huyền thoại của thuyền trưởng cướp biển. Trên hành trình, họ phải đối mặt với lời nguyền bí ẩn và những thử thách khó khăn.
-Bộ phim mang đến những pha hành động gay cấn, tiếng cười sảng khoái cùng thông điệp ý nghĩa về tình bạn và lòng dũng cảm.`,
-  trailerUrl: 'https://www.youtube.com/watch?v=example',
-  status: 'NOW'
-};
-
-// Phim đang chiếu cho sidebar
-const MOCK_NOW_SHOWING = [
-  {
-    _id: '2',
-    title: 'Thiên Đường Máu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/cdqLnri3NEGcmfnqwk2TSIYtddg.jpg',
-    ageRating: 'T18',
-    rating: 8.7
-  },
-  {
-    _id: '3',
-    title: 'Avatar: Lửa Và Tro Tàn',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/t6HIqrRAclMCAUMDIoKoRzKDFvX.jpg',
-    ageRating: 'T13',
-    rating: 9.5
-  },
-  {
-    _id: '4',
-    title: 'Ai Thượng Ai Mến',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/qPa4kuaUOHEZi90bwpFg54bLqp8.jpg',
-    ageRating: 'P',
-    rating: 7.2
-  }
-];
-
 // HÀM TIỆN ÍCH (UTILITIES)
-
 // Format ngày tháng
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -155,32 +96,62 @@ function MovieDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
 
+
   // Responsive hooks
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Ref để chống double-call (do React StrictMode)
+  const viewIncrementedRef = useRef({});
+
+  // Cooldown window cho view counting (30 phút = 30 * 60 * 1000 ms)
+  const VIEW_COOLDOWN_MS = 30 * 60 * 1000;
 
   // Load dữ liệu phim
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // TODO: Thay bằng API call thực tế cho movie
-        setMovie(MOCK_MOVIE);
+        // Fetch chi tiết phim từ API
+        const movieRes = await getMovieAPI(id);
+        setMovie(movieRes?.data?.movie || null);
 
-        // Fetch phim đang chiếu từ API
+        // Fetch phim đang chiếu từ API cho sidebar
         const nowShowingRes = await getNowShowingMoviesAPI(5);
         const nowShowingMovies = nowShowingRes?.data?.movies || [];
         setOtherMovies(nowShowingMovies.filter(m => m._id !== id).slice(0, 4));
+
+        // Tăng lượt xem phim (với cooldown window 30 phút)
+        if (!viewIncrementedRef.current[id]) {
+          viewIncrementedRef.current[id] = true;
+
+          const viewKey = `movie_view_${id}`;
+          const lastViewTime = localStorage.getItem(viewKey);
+          const now = Date.now();
+
+          // Chỉ tăng view nếu chưa xem hoặc đã quá cooldown window
+          if (!lastViewTime || (now - parseInt(lastViewTime, 10)) > VIEW_COOLDOWN_MS) {
+            localStorage.setItem(viewKey, now.toString());
+            incrementViewAPI(id).catch(err => console.log('View increment failed:', err));
+          }
+        }
       } catch (error) {
-        console.error('Error fetching data:', error);
-        setOtherMovies(MOCK_NOW_SHOWING);
+        console.error('Error fetching movie data:', error);
+        setMovie(null);
+        setOtherMovies([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    if (id) {
+      fetchData();
+    }
   }, [id]);
+
+
+
+
 
   // Xử lý click Mua vé
   const handleBuyTicket = () => {
@@ -194,27 +165,27 @@ function MovieDetailPage() {
   };
 
   const handleNextImage = () => {
-    if (movie?.images) {
-      setCurrentImageIndex((prev) => (prev + 1) % movie.images.length);
+    if (movie?.stills) {
+      setCurrentImageIndex((prev) => (prev + 1) % movie.stills.length);
     }
   };
 
   const handlePrevImage = () => {
-    if (movie?.images) {
-      setCurrentImageIndex((prev) => (prev - 1 + movie.images.length) % movie.images.length);
+    if (movie?.stills) {
+      setCurrentImageIndex((prev) => (prev - 1 + movie.stills.length) % movie.stills.length);
     }
   };
 
   // Autoplay for gallery
   useEffect(() => {
     let interval;
-    if (openGallery && isAutoPlay && movie?.images?.length > 1) {
+    if (openGallery && isAutoPlay && movie?.stills?.length > 1) {
       interval = setInterval(() => {
-        setCurrentImageIndex((prev) => (prev + 1) % movie.images.length);
+        setCurrentImageIndex((prev) => (prev + 1) % movie.stills.length);
       }, 3000); // Chuyển ảnh mỗi 3 giây
     }
     return () => clearInterval(interval);
-  }, [openGallery, isAutoPlay, movie?.images?.length]);
+  }, [openGallery, isAutoPlay, movie?.stills?.length]);
 
   // Loading state
   if (loading) {
@@ -279,10 +250,53 @@ function MovieDetailPage() {
   }
 
   // HELPER COMPONENT: ITEM CHI TIẾT
-  // HELPER COMPONENT: ITEM CHI TIẾT
   const DetailItem = ({ label, value }) => {
+    // Helper function để đảm bảo chỉ render string
+    const getDisplayValue = (item) => {
+      if (item === null || item === undefined) return '';
+      if (typeof item === 'string') return item;
+      if (typeof item === 'object' && item.name) return item.name;
+      return String(item);
+    };
+
     // Handle array or single value
     const items = Array.isArray(value) ? value : [value];
+
+    // Kiểm tra nếu không có dữ liệu
+    const placeholderTexts = ['chưa cập nhật', 'đang cập nhật', 'không có', 'n/a', ''];
+
+    const isEmptyValue = (v) => {
+      if (v === null || v === undefined) return true;
+      if (typeof v === 'string' && !v.trim()) return true;
+      if (typeof v === 'string' && placeholderTexts.includes(v.toLowerCase().trim())) return true;
+      if (typeof v === 'object' && !v.name) return true;
+      if (typeof v === 'object' && v.name && !v.name.trim()) return true;
+      if (typeof v === 'object' && v.name && placeholderTexts.includes(v.name.toLowerCase().trim())) return true;
+      return false;
+    };
+
+    const hasNoData = !value ||
+      (Array.isArray(value) && value.length === 0) ||
+      (Array.isArray(value) && value.every(v => isEmptyValue(v))) ||
+      (!Array.isArray(value) && isEmptyValue(value));
+
+    // Nếu không có dữ liệu, hiển thị "Chưa cập nhật" với màu #999999
+    if (hasNoData) {
+      return (
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '100px 1fr' : '110px 1fr',
+          gap: 1,
+          fontSize: { xs: '14px', md: '0.85rem' },
+          mb: { xs: 0.5, md: 0 }
+        }}>
+          <Typography sx={{ color: '#4A4A4A', minWidth: '100px' }}>{label}:</Typography>
+          <Typography sx={{ color: '#999999', fontWeight: 400, fontStyle: 'italic' }}>
+            Chưa cập nhật
+          </Typography>
+        </Box>
+      );
+    }
 
     return (
       <Box sx={{
@@ -294,22 +308,26 @@ function MovieDetailPage() {
       }}>
         <Typography sx={{ color: '#4A4A4A', minWidth: '100px' }}>{label}:</Typography>
         <Box sx={{ color: COLORS.text, fontWeight: 500, width: 'fit-content' }}>
-          {items.map((item, index) => (
-            <Box
-              component="span"
-              key={index}
-              sx={{
-                transition: 'color 0.2s',
-                '&:hover': {
-                  color: (label === 'Quốc gia' && item === 'Việt Nam') ? '#e53935' : '#1a3a5c',
-                  cursor: 'pointer'
-                }
-              }}
-            >
-              {item}
-              {index < items.length - 1 && ', '}
-            </Box>
-          ))}
+          {items.map((item, index) => {
+            const displayValue = getDisplayValue(item);
+            if (!displayValue) return null;
+            return (
+              <Box
+                component="span"
+                key={index}
+                sx={{
+                  transition: 'color 0.2s',
+                  '&:hover': {
+                    color: (label === 'Quốc gia' && displayValue === 'Việt Nam') ? '#e53935' : '#1a3a5c',
+                    cursor: 'pointer'
+                  }
+                }}
+              >
+                {displayValue}
+                {index < items.length - 1 && ', '}
+              </Box>
+            );
+          })}
         </Box>
       </Box>
     );
@@ -398,7 +416,7 @@ function MovieDetailPage() {
                     </Box>
 
                     {/* Meta Info */}
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 7.1, rowGap: 1.5, mb: 2, color: COLORS.textLight, fontSize: '12px' }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 8, rowGap: 1.5, mb: 2, color: COLORS.textLight, fontSize: '12px' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <AccessTimeIcon sx={{ fontSize: 16 }} />
                         <Typography fontSize="inherit" fontWeight={500}>{movie.duration} Phút</Typography>
@@ -409,25 +427,30 @@ function MovieDetailPage() {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <VisibilityIcon sx={{ fontSize: 16, color: '#999' }} />
-                        <Typography fontSize="inherit">{movie.views?.toLocaleString()}</Typography>
+                        <Typography fontSize="inherit">{movie.viewCount?.toLocaleString() || 0}</Typography>
                       </Box>
                       <Box
                         onClick={() => setOpenRatingModal(true)}
-                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }}
+                        sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', lineHeight: 1 }}
                       >
-                        <StarIcon sx={{ fontSize: 16, color: COLORS.orange }} />
-                        <Typography fontSize="inherit" fontWeight={700} color="#333">{movie.rating}</Typography>
-                        <Typography fontSize="inherit" color="#999">({movie.ratingCount})</Typography>
+                        <StarIcon sx={{ fontSize: 16, color: COLORS.orange, display: 'block' }} />
+                        <Typography fontSize="inherit" fontWeight={700} color="#333" sx={{ lineHeight: 1 }}>
+                          {movie.rating}
+                        </Typography>
+                        <Typography fontSize="inherit" color="#999" sx={{ lineHeight: 1 }}>
+                          ({movie.ratingCount})
+                        </Typography>
                       </Box>
                     </Box>
 
                     {/* Details List */}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
-                      <DetailItem label="Diễn viên" value={movie.actors?.map(a => a.name || a) || ['Đang cập nhật']} />
-                      <DetailItem label="Nhà sản xuất" value={movie.studio || 'NMN Studio'} />
-                      <DetailItem label="Thể loại" value={movie.genres || ['Hành động']} />
-                      <DetailItem label="Đạo diễn" value={movie.director || 'Chưa cập nhật'} />
-                      <DetailItem label="Quốc gia" value={movie.country || 'Việt Nam'} />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>
+                      <DetailItem label="Quốc gia" value={movie.country} />
+                      <DetailItem label="Diễn viên" value={movie.actors} />
+                      <DetailItem label="Nhà sản xuất" value={movie.studio} />
+                      <DetailItem label="Thể loại" value={movie.genres} />
+                      <DetailItem label="Đạo diễn" value={movie.director} />
+
                     </Box>
 
                     {/* Description */}
@@ -509,17 +532,20 @@ function MovieDetailPage() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <AccessTimeIcon fontSize="small" /> <Typography>{movie.duration} Phút</Typography>
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <CalendarTodayIcon fontSize="small" /> <Typography>{formatDate(movie.releaseDate)}</Typography>
+                        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, lineHeight: 1 }}>
+                          <CalendarTodayIcon sx={{ fontSize: 16, display: 'block' }} />
+                          <Typography fontSize="inherit" fontWeight={500} sx={{ lineHeight: 1 }}>
+                            {formatDate(movie.releaseDate)}
+                          </Typography>
                         </Box>
                       </Box>
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: COLORS.textLight }}>
-                          <VisibilityIcon fontSize="small" /> <Typography>{movie.views?.toLocaleString()}</Typography>
+                          <VisibilityIcon fontSize="small" /> <Typography>{movie.viewCount?.toLocaleString() || 0}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }} onClick={() => setOpenRatingModal(true)}>
-                          <StarIcon sx={{ color: COLORS.orange }} />
+                          <StarIcon sx={{ fontSize: 16, color: COLORS.orange, position: 'relative', top: 1 }} />
                           <Typography fontWeight={600}>{movie.rating}</Typography>
                           <Typography color={COLORS.textMuted}>({movie.ratingCount} đánh giá)</Typography>
                         </Box>
@@ -569,7 +595,7 @@ function MovieDetailPage() {
                 }}>
                   HÌNH TRONG PHIM
                 </Typography>
-                {movie.images && movie.images.length > 0 ? (
+                {movie.stills && movie.stills.length > 0 ? (
                   <Box sx={{
                     display: { xs: 'flex', sm: 'grid' },
                     gridTemplateColumns: { sm: 'repeat(4, 1fr)' },
@@ -579,11 +605,11 @@ function MovieDetailPage() {
                     '::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for cleaner look
                     scrollbarWidth: 'none'
                   }}>
-                    {movie.images.map((img, idx) => (
+                    {movie.stills.map((still, idx) => (
                       <Box
                         key={idx}
                         component="img"
-                        src={img}
+                        src={typeof still === 'object' ? still.url : still}
                         alt={`Scene ${idx + 1}`}
                         onClick={() => handleOpenGallery(idx)}
                         sx={{
@@ -632,7 +658,7 @@ function MovieDetailPage() {
                       <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: { xs: '100%', sm: '48%' } }}>
                         <Box
                           component="img"
-                          src={typeof actor === 'object' ? actor.photo : 'https://via.placeholder.com/110'}
+                          src={typeof actor === 'object' ? actor.photoUrl : 'https://via.placeholder.com/110'}
                           alt={typeof actor === 'object' ? actor.name : actor}
                           sx={{
                             width: 128,
@@ -1091,11 +1117,11 @@ function MovieDetailPage() {
           </IconButton>
 
           {/* Current Image */}
-          {movie?.images && (
+          {movie?.stills && (
             <Box
               component="img"
               className="gallery-image"
-              src={movie.images[currentImageIndex]}
+              src={typeof movie.stills[currentImageIndex] === 'object' ? movie.stills[currentImageIndex]?.url : movie.stills[currentImageIndex]}
               alt={`Scene ${currentImageIndex + 1}`}
               sx={{
                 maxWidth: '85vw',
@@ -1141,11 +1167,11 @@ function MovieDetailPage() {
           left: 0,
           right: 0
         }}>
-          {movie?.images?.map((img, idx) => (
+          {movie?.stills?.map((still, idx) => (
             <Box
               key={idx}
               component="img"
-              src={img}
+              src={typeof still === 'object' ? still.url : still}
               alt={`Thumb ${idx + 1}`}
               onClick={() => setCurrentImageIndex(idx)}
               sx={{

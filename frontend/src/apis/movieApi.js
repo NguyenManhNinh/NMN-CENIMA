@@ -104,12 +104,54 @@ export const getMoviesByGenreAPI = async (genreId, limit = 8) => {
 };
 
 /**
+ * Lấy danh sách quốc gia unique từ database
+ */
+export const getCountriesAPI = async () => {
+  const response = await api.get('/countries');
+  return response.data;
+};
+
+/**
+ * Lấy danh sách năm phát hành unique từ database
+ */
+export const getYearsAPI = async () => {
+  const response = await api.get('/years');
+  return response.data;
+};
+/**
  * Đánh giá phim
  * @param {string} movieId - ID phim cần đánh giá
  * @param {number} rating - Điểm đánh giá (1-10)
  */
 export const rateMovieAPI = async (movieId, rating) => {
   const response = await api.post(`/${movieId}/rate`, { rating });
+  return response.data;
+};
+
+/**
+ * Tăng lượt xem phim
+ * @param {string} movieId - ID phim
+ */
+export const incrementViewAPI = async (movieId) => {
+  const response = await api.post(`/${movieId}/view`);
+  return response.data;
+};
+
+/**
+ * Toggle like phim (like/unlike)
+ * @param {string} movieId - ID phim
+ */
+export const toggleLikeAPI = async (movieId) => {
+  const response = await api.post(`/${movieId}/like`);
+  return response.data;
+};
+
+/**
+ * Kiểm tra trạng thái like của user hiện tại
+ * @param {string} movieId - ID phim
+ */
+export const getLikeStatusAPI = async (movieId) => {
+  const response = await api.get(`/${movieId}/like`);
   return response.data;
 };
 

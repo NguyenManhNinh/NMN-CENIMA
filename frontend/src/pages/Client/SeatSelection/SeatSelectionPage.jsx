@@ -14,6 +14,9 @@ import {
   DialogActions
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import StarIcon from '@mui/icons-material/Star';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 // Auth Context
 import { useAuth } from '../../../contexts/AuthContext';
@@ -467,7 +470,12 @@ function SeatSelectionPage() {
           hour: '2-digit',
           minute: '2-digit'
         }),
-        basePrice: showtimeData.basePrice
+        basePrice: showtimeData.basePrice,
+        rating: movie.rating || 0,
+        ratingCount: movie.ratingCount || 0,
+        viewCount: movie.viewCount || 0,
+        duration: movie.duration,
+        releaseDate: movie.releaseDate
       };
 
       setSeats(processedSeats);
@@ -723,6 +731,18 @@ function SeatSelectionPage() {
                         <Typography variant="body2" color="text.secondary">
                           {showtime?.format}{showtime?.subtitle ? ` ${showtime.subtitle}` : ''}
                         </Typography>
+
+                        {/* Rating */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <StarIcon sx={{ fontSize: 16, color: '#F5A623' }} />
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#333' }}>
+                            {showtime?.rating}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            ({showtime?.ratingCount} đánh giá)
+                          </Typography>
+                        </Box>
+
                         {showtime?.ageRating && (
                           <Box sx={{
                             bgcolor: showtime.ageRating === 'P' ? '#4caf50' :

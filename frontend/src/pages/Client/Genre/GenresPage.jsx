@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 
-// Chỗ thêm MUI
+// APIs
+import { getAllMoviesAPI, getCountriesAPI, getYearsAPI, toggleLikeAPI, getLikeStatusAPI } from '@/apis/movieApi';
+import { getAllGenresAPI } from '@/apis/genreApi';
+
+// Auth Context
+import { useAuth } from '@/contexts/AuthContext';
+
+// MUI Components
 import {
   Box,
   Container,
@@ -22,7 +29,7 @@ import {
   useTheme
 } from '@mui/material';
 
-// Chỗ thêm MUI Icons
+// MUI Icons
 import MovieIcon from '@mui/icons-material/Movie';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -32,232 +39,25 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
-// ============================================
-// DỮ LIỆU MẪu (MOCK DATA)
-// Sử dụng tạm thời, sẽ thay bằng API thực tế
-// ============================================
+// CẤU HÌNH BỘ LỌC TĨNH (Static Filter Options)
 
-// Danh sách thể loại phim
-const MOCK_GENRES = ['Tất cả', 'Hành động', 'Kinh dị', 'Hài', 'Tình cảm', 'Hoạt hình', 'Khoa học viễn tưởng'];
-
-// Danh sách quốc gia sản xuất
-const MOCK_COUNTRIES = ['Tất cả', 'Việt Nam', 'Mỹ', 'Hàn Quốc', 'Trung Quốc', 'Nhật Bản'];
-
-// Danh sách năm phát hành
-const MOCK_YEARS = ['Tất cả', '2026', '2025', '2024', '2023', '2022'];
-
-// Trạng thái phim
-const MOCK_STATUS = ['Tất cả', 'Đang chiếu', 'Sắp chiếu'];
+// Trạng thái phim (không cần lấy từ API)
+const STATUS_OPTIONS = [
+  { value: '', label: 'Đang Chiếu/' },
+  { value: 'NOW', label: 'Đang chiếu' },
+  { value: 'COMING', label: 'Sắp chiếu' }
+];
 
 // Tùy chọn sắp xếp
-const MOCK_SORT = ['Xem nhiều nhất', 'Mới nhất', 'Thích nhiều nhất'];
-
-const MOCK_MOVIES = [
-  {
-    id: 1,
-    title: 'Avengers: Endgame',
-    posterUrl: 'https://www.galaxycine.vn/media/2019/4/10/640wx396h_1554864314405.jpg',
-    description: 'Cú búng tay của Thanos đã khiến toàn bộ dân số biến mất một nửa. Các siêu anh hùng đánh mất bạn bè, người thân và đánh mất cả chính mình. Bộ sáu Avengers đầu tiên từ tan. Iron Man kẹt lại ngoài không gian, Hawkeye mất tích. Thor, Capta...',
-    likes: 2607278,
-    views: 5200000,
-    genre: 'Hành động',
-    country: 'Mỹ',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 2,
-    title: 'AVENGERS: INFINITY WAR',
-    posterUrl: 'https://www.galaxycine.vn/media/2020/9/3/avengers-infinity-war-4k-8k_1599105170451.jpg',
-    description: 'Biệt Đội Siêu Anh Hùng và đồng minh tiếp tục bảo vệ thế giới khỏi những mối đe dọa đến từ ngoài vũ trụ. Đối thủ lần này của họ là kẻ hùng mạnh nhất: Thanos.',
-    likes: 1338494,
-    views: 4500000,
-    genre: 'Hành động',
-    country: 'Mỹ',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 5,
-    title: 'Lật Mặt 7: Một Điều Ước',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/tXHpvlr5F7gV2DmblhCNfxGSwxf.jpg',
-    description: 'Câu chuyện cảm động về tình thân, gia đình và những điều ước giản đơn nhưng đầy ý nghĩa. Phần 7 của series Lật Mặt tiếp tục gây bất ngờ với những tình tiết đậm chất nhân văn.',
-    likes: 980000,
-    views: 2300000,
-    genre: 'Tâm lý',
-    country: 'Việt Nam',
-    year: '2025',
-    status: 'COMING'
-  },
-  {
-    id: 6,
-    title: 'MUFASA: Vua Sư Tử',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/lurEK87kukWNaHd0zYnsi3yzJrs.jpg',
-    description: 'Câu chuyện về nguồn gốc của Mufasa, từ một chú sư tử mồ côi lạc lõng đến khi trở thành vị vua vĩ đại của Pride Lands. Hành trình đầy thử thách và cảm động.',
-    likes: 750000,
-    views: 1800000,
-    genre: 'Hoạt hình',
-    country: 'Mỹ',
-    year: '2025',
-    status: 'COMING'
-  },
-  {
-    id: 7,
-    title: 'Công Tử Bạc Liêu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/aYPm0EiVNnIlZpTx3BPsOvDMaWo.jpg',
-    description: 'Bộ phim tái hiện cuộc đời vị công tử giàu có nhất miền Nam Việt Nam thời thuộc địa. Câu chuyện về tình yêu, danh vọng và sự hy sinh.',
-    likes: 520000,
-    views: 1200000,
-    genre: 'Tình cảm',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 8,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 9,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 10,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 11,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 12,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 13,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 14,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 15,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 16,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 17,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 18,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  },
-  {
-    id: 19,
-    title: 'Quỷ Cẩu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSvCRwBjPWaSB0NJ.jpg',
-    description: 'Bộ phim kinh dị Việt Nam với những cảnh rùng rợn và câu chuyện về tín ngưỡng dân gian. Khi quá khứ trở về ám ảnh, nỗi sợ hãi không còn chỉ là trí tưởng tượng.',
-    likes: 430000,
-    views: 980000,
-    genre: 'Kinh dị',
-    country: 'Việt Nam',
-    year: '2024',
-    status: 'NOW'
-  }
+const SORT_OPTIONS = [
+  { value: 'views', label: 'Xem nhiều nhất' },
+  { value: 'newest', label: 'Mới nhất' },
+  { value: 'rating', label: 'Thích nhiều nhất' }
 ];
+
+// Danh sách quốc gia sẽ được fetch từ API
+
+// Danh sách năm phát hành sẽ được fetch từ API
 
 // CẤU HÌNH GIAO DIỆN (STYLES)
 // Sử dụng MUI sx prop
@@ -269,7 +69,7 @@ const styles = {
     py: { xs: 2, md: 4 }
   },
 
-  // Tiêu đề trang - "PHIM ĐIỆN ẢNH"
+  // Tiêu đề trang - "THẾ GIỚI ĐIỆN ẢNH"
   pageTitle: {
     fontWeight: 400,
     fontSize: { xs: '18px', md: '20px' },
@@ -448,14 +248,23 @@ function GenresPage() {
     return value || defaultValue;
   };
 
-  //STATE QUẢN LÝ BỘ LỌC - khởi tạo từ URL params
-  const [selectedGenre, setSelectedGenre] = useState(getParamOrDefault('the-loai', 'Tất cả'));
-  const [selectedCountry, setSelectedCountry] = useState(getParamOrDefault('quoc-gia', 'Tất cả'));
-  const [selectedYear, setSelectedYear] = useState(getParamOrDefault('nam', 'Tất cả'));
-  const [selectedStatus, setSelectedStatus] = useState(getParamOrDefault('trang-thai', 'Tất cả'));
-  const [selectedSort, setSelectedSort] = useState(getParamOrDefault('sap-xep', 'Xem nhiều nhất'));
+  // STATE DỮ LIỆU TỪ API
+  const [movies, setMovies] = useState([]);
+  const [sidebarMovies, setSidebarMovies] = useState([]); // Phim đang chiếu cho sidebar (độc lập với filter)
+  const [genres, setGenres] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [years, setYears] = useState([]);
+  const [totalMovies, setTotalMovies] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  //STATE PHÂN TRANG - khởi tạo từ URL params
+  // STATE QUẢN LÝ BỘ LỌC - khởi tạo từ URL params (sử dụng value thay vì label)
+  const [selectedGenre, setSelectedGenre] = useState(getParamOrDefault('the-loai', ''));
+  const [selectedCountry, setSelectedCountry] = useState(getParamOrDefault('quoc-gia', ''));
+  const [selectedYear, setSelectedYear] = useState(getParamOrDefault('nam', ''));
+  const [selectedStatus, setSelectedStatus] = useState(getParamOrDefault('trang-thai', ''));
+  const [selectedSort, setSelectedSort] = useState(getParamOrDefault('sap-xep', 'views'));
+
+  // STATE PHÂN TRANG - khởi tạo từ URL params
   const [currentPage, setCurrentPage] = useState(() => {
     const pageParam = searchParams.get('page');
     return pageParam ? parseInt(pageParam, 10) : 1;
@@ -468,85 +277,153 @@ function GenresPage() {
   // STATE DRAWER CHO MOBILE
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
+  // STATE LIKE - track like status cho mỗi movie
+  const [likeStates, setLikeStates] = useState({});
+  const { user } = useAuth();
+
+  // HÀM TOGGLE LIKE cho từng movie card
+  const handleToggleLike = async (movieId, e) => {
+    e.stopPropagation(); // Ngăn click lan ra card
+
+    if (!user) {
+      alert('Vui lòng đăng nhập để thích phim!');
+      return;
+    }
+
+    try {
+      const res = await toggleLikeAPI(movieId);
+      // Cập nhật local state
+      setLikeStates(prev => ({
+        ...prev,
+        [movieId]: {
+          liked: res?.data?.liked,
+          likeCount: res?.data?.likeCount
+        }
+      }));
+      // Cập nhật movie trong danh sách
+      setMovies(prev => prev.map(m =>
+        m._id === movieId ? { ...m, likeCount: res?.data?.likeCount } : m
+      ));
+    } catch (error) {
+      console.error('Toggle like failed:', error);
+      if (error.response?.status === 401) {
+        alert('Vui lòng đăng nhập để thích phim!');
+      }
+    }
+  };
+
   // HÀM RESET BỘ LỌC
   const resetFilters = () => {
-    setSelectedGenre('Tất cả');
-    setSelectedCountry('Tất cả');
-    setSelectedYear('Tất cả');
-    setSelectedStatus('Tất cả');
-    setSelectedSort('Xem nhiều nhất');
+    setSelectedGenre('');
+    setSelectedCountry('');
+    setSelectedYear('');
+    setSelectedStatus('');
+    setSelectedSort('views');
     setCurrentPage(1);
   };
+
+  // Fetch genres từ API khi mount component
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const res = await getAllGenresAPI();
+        // API trả về { success, count, data: [...] }
+        setGenres(res.data || []);
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách thể loại:', error);
+      }
+    };
+    fetchGenres();
+  }, []);
+
+  // Fetch countries từ API khi mount component
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await getCountriesAPI();
+        setCountries(res.data?.countries || []);
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách quốc gia:', error);
+      }
+    };
+    fetchCountries();
+  }, []);
+
+  // Fetch years từ API khi mount component
+  useEffect(() => {
+    const fetchYears = async () => {
+      try {
+        const res = await getYearsAPI();
+        setYears(res.data?.years || []);
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách năm:', error);
+      }
+    };
+    fetchYears();
+  }, []);
+
+  // Fetch phim đang chiếu cho sidebar (độc lập với filter chính)
+  useEffect(() => {
+    const fetchSidebarMovies = async () => {
+      try {
+        const res = await getAllMoviesAPI({ status: 'NOW', limit: 5, sortBy: 'views' });
+        setSidebarMovies(res.data?.movies || []);
+      } catch (error) {
+        console.error('Lỗi khi tải phim đang chiếu cho sidebar:', error);
+      }
+    };
+    fetchSidebarMovies();
+  }, []);
 
   // Cập nhật URL khi filter hoặc page thay đổi
   useEffect(() => {
     const params = new URLSearchParams();
-    if (selectedGenre !== 'Tất cả') params.set('the-loai', selectedGenre);
-    if (selectedCountry !== 'Tất cả') params.set('quoc-gia', selectedCountry);
-    if (selectedYear !== 'Tất cả') params.set('nam', selectedYear);
-    if (selectedStatus !== 'Tất cả') params.set('trang-thai', selectedStatus);
-    if (selectedSort !== 'Xem nhiều nhất') params.set('sap-xep', selectedSort);
+    if (selectedGenre) params.set('the-loai', selectedGenre);
+    if (selectedCountry) params.set('quoc-gia', selectedCountry);
+    if (selectedYear) params.set('nam', selectedYear);
+    if (selectedStatus) params.set('trang-thai', selectedStatus);
+    if (selectedSort && selectedSort !== 'views') params.set('sap-xep', selectedSort);
     if (currentPage > 1) params.set('page', currentPage.toString());
 
     setSearchParams(params, { replace: true });
   }, [selectedGenre, selectedCountry, selectedYear, selectedStatus, selectedSort, currentPage, setSearchParams]);
 
-  // Simulate loading khi mount component HOẶC khi filter/page thay đổi
+  // Fetch movies từ API khi filter hoặc page thay đổi
   useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 800); // Loading 800ms
-    return () => clearTimeout(timer);
+    const fetchMovies = async () => {
+      setLoading(true);
+      try {
+        const params = {
+          page: currentPage,
+          limit: itemsPerPage,
+          sortBy: selectedSort || 'views'
+        };
+
+        // Thêm filters nếu có giá trị
+        if (selectedGenre) params.genre = selectedGenre;
+        if (selectedCountry) params.country = selectedCountry;
+        if (selectedYear) params.year = selectedYear;
+        if (selectedStatus) params.status = selectedStatus;
+
+        const res = await getAllMoviesAPI(params);
+
+        setMovies(res.data?.movies || []);
+        setTotalMovies(res.total || 0);
+        setTotalPages(res.totalPages || 1);
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách phim:', error);
+        setMovies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMovies();
   }, [selectedGenre, selectedCountry, selectedYear, selectedStatus, selectedSort, currentPage]);
-
-  // HÀM LỌC PHIM
-  // Lọc và sắp xếp danh sách phim theo các tiêu chí đã chọn
-  const getFilteredMovies = () => {
-    let filtered = [...MOCK_MOVIES];
-
-    // Lọc theo thể loại
-    if (selectedGenre !== 'Tất cả') {
-      filtered = filtered.filter(m => m.genre === selectedGenre);
-    }
-    // Lọc theo quốc gia
-    if (selectedCountry !== 'Tất cả') {
-      filtered = filtered.filter(m => m.country === selectedCountry);
-    }
-    // Lọc theo năm
-    if (selectedYear !== 'Tất cả') {
-      filtered = filtered.filter(m => m.year === selectedYear);
-    }
-    // Lọc theo trạng thái (Đang chiếu / Sắp chiếu)
-    if (selectedStatus !== 'Tất cả') {
-      const status = selectedStatus === 'Đang chiếu' ? 'NOW' : 'COMING';
-      filtered = filtered.filter(m => m.status === status);
-    }
-
-    // Sắp xếp theo tiêu chí đã chọn
-    if (selectedSort === 'Xem nhiều nhất') {
-      filtered.sort((a, b) => b.views - a.views);
-    } else if (selectedSort === 'Thích nhiều nhất') {
-      filtered.sort((a, b) => b.likes - a.likes);
-    }
-
-    return filtered;
-  };
 
   // Xử lý click vào phim -> chuyển đến trang chi tiết phim
   const handleMovieClick = (movieId) => {
     navigate(`/phim/${movieId}`);
   };
-
-  // Lấy danh sách phim đã lọc
-  const filteredMovies = getFilteredMovies();
-
-  // TÍNH TOÁN PHÂN TRANG
-  const totalPages = Math.ceil(filteredMovies.length / itemsPerPage); // Tổng số trang
-  const paginatedMovies = filteredMovies.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  ); // Danh sách phim của trang hiện tại
 
   // Xử lý chuyển trang
   const handlePageChange = (page) => {
@@ -611,7 +488,7 @@ function GenresPage() {
     <Box sx={styles.wrapper}>
       <Container maxWidth="lg">
         {/* Tiêu đề trang */}
-        <Typography sx={styles.pageTitle}>Phim điện ảnh</Typography>
+        <Typography sx={styles.pageTitle}>Thế giới phim ảnh</Typography>
 
         {/* Mobile Filter Button */}
         <Box sx={styles.mobileFilterBtn} onClick={() => setFilterDrawerOpen(true)}>
@@ -636,49 +513,88 @@ function GenresPage() {
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {/* Helper to render select fields with custom placeholder logic */}
-            {[
-              { label: 'Thể loại', value: selectedGenre, setter: setSelectedGenre, options: MOCK_GENRES, placeholder: 'Thể Loại' },
-              { label: 'Quốc gia', value: selectedCountry, setter: setSelectedCountry, options: MOCK_COUNTRIES, placeholder: 'Quốc Gia' },
-              { label: 'Năm phát hành', value: selectedYear, setter: setSelectedYear, options: MOCK_YEARS, placeholder: 'Năm' },
-              { label: 'Trạng thái', value: selectedStatus, setter: setSelectedStatus, options: MOCK_STATUS, placeholder: 'Đang Chiếu/ Sắp Chiếu' },
-              { label: 'Sắp xếp', value: selectedSort, setter: setSelectedSort, options: MOCK_SORT, placeholder: 'Xem Nhiều Nhất' }
-            ].map((field) => (
-              <FormControl key={field.label} size="small" fullWidth>
-                <Select
-                  value={field.value}
-                  onChange={(e) => field.setter(e.target.value)}
-                  displayEmpty
-                  renderValue={(selected) => {
-                    // Logic: Nếu selected là 'Tất cả' hoặc 'Xem nhiều nhất' (default sort),
-                    // thì hiển thị placeholder của user yêu cầu.
-                    // Tuy nhiên 'Xem nhiều nhất' là một option hợp lệ, user muốn label 'Xem Nhiều Nhất'
-                    // là default.
-                    if (selected === 'Tất cả') return <span style={{ color: '#666' }}>{field.placeholder}</span>;
-                    // Với Sắp xếp, nếu chọn 'Xem nhiều nhất' (default), ta vẫn hiện nó.
-                    // Nhưng nếu user muốn placeholder giống Image 1, có thể họ muốn cái Text hiển thị ban đầu là "Xem Nhiều Nhất".
-                    // Trong Mock Data có 'Xem nhiều nhất'.
-                    if (field.label === 'Sắp xếp' && selected === 'Xem nhiều nhất') return field.placeholder;
-                    return selected;
-                  }}
-                  sx={{
-                    borderRadius: '4px',
-                    bgcolor: '#fff',
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ddd' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#bbb' },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#f5a623' },
-                    fontSize: '15px',
-                    color: '#333'
-                  }}
-                >
-                  {field.options.map((opt) => (
-                    <MenuItem key={opt} value={opt}>
-                      {opt === 'Tất cả' ? field.placeholder : opt}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            ))}
+            {/* Thể loại - từ API */}
+            <FormControl size="small" fullWidth>
+              <Select
+                value={selectedGenre}
+                onChange={(e) => setSelectedGenre(e.target.value)}
+                displayEmpty
+                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Thể Loại</span> : genres.find(g => g._id === selected)?.name || selected}
+                sx={{
+                  borderRadius: '4px',
+                  bgcolor: '#fff',
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ddd' },
+                  fontSize: '15px'
+                }}
+              >
+                <MenuItem value="">Tất cả</MenuItem>
+                {genres.map((genre) => (
+                  <MenuItem key={genre._id} value={genre._id}>{genre.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Quốc gia - từ API */}
+            <FormControl size="small" fullWidth>
+              <Select
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
+                displayEmpty
+                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Quốc Gia</span> : selected}
+                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+              >
+                <MenuItem value="">Tất cả</MenuItem>
+                {countries.map((country) => (
+                  <MenuItem key={country} value={country}>{country}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Năm - từ API */}
+            <FormControl size="small" fullWidth>
+              <Select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                displayEmpty
+                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Năm</span> : selected}
+                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+              >
+                <MenuItem value="">Tất cả</MenuItem>
+                {years.map((year) => (
+                  <MenuItem key={year} value={year}>{year}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Trạng thái - static */}
+            <FormControl size="small" fullWidth>
+              <Select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                displayEmpty
+                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Đang Chiếu/ Sắp Chiếu</span> : STATUS_OPTIONS.find(s => s.value === selected)?.label || selected}
+                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+              >
+                {STATUS_OPTIONS.map((status) => (
+                  <MenuItem key={status.value || 'all'} value={status.value}>{status.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Sắp xếp - static */}
+            <FormControl size="small" fullWidth>
+              <Select
+                value={selectedSort}
+                onChange={(e) => setSelectedSort(e.target.value)}
+                displayEmpty
+                renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Xem nhiều nhất'}
+                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+              >
+                {SORT_OPTIONS.map((sort) => (
+                  <MenuItem key={sort.value} value={sort.value}>{sort.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
               <Button
@@ -705,68 +621,77 @@ function GenresPage() {
           </Box>
         </Drawer>
 
-        {/* Hàng bộ lọc (Thể loại, Quốc gia, Năm...) */}
+        {/* Hàng bộ lọc (Thể loại, Quốc gia, Năm...) - Desktop */}
         <Box sx={styles.filterRow}>
+          {/* Thể loại - từ API */}
           <FormControl sx={styles.filterSelect} size="small">
             <Select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
               displayEmpty
+              renderValue={(selected) => !selected ? 'Thể Loại' : genres.find(g => g._id === selected)?.name || 'Thể Loại'}
             >
-              {MOCK_GENRES.map((genre) => (
-                <MenuItem key={genre} value={genre}>
-                  {genre === 'Tất cả' ? 'Thể Loại' : genre}
-                </MenuItem>
+              <MenuItem value="">Thể Loại</MenuItem>
+              {genres.map((genre) => (
+                <MenuItem key={genre._id} value={genre._id}>{genre.name}</MenuItem>
               ))}
             </Select>
           </FormControl>
 
+          {/* Quốc gia - từ API */}
           <FormControl sx={styles.filterSelect} size="small">
             <Select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
+              displayEmpty
+              renderValue={(selected) => selected || 'Quốc Gia'}
             >
-              {MOCK_COUNTRIES.map((country) => (
-                <MenuItem key={country} value={country}>
-                  {country === 'Tất cả' ? 'Quốc Gia' : country}
-                </MenuItem>
+              <MenuItem value="">Quốc Gia</MenuItem>
+              {countries.map((country) => (
+                <MenuItem key={country} value={country}>{country}</MenuItem>
               ))}
             </Select>
           </FormControl>
 
+          {/* Năm - từ API */}
           <FormControl sx={styles.filterSelect} size="small">
             <Select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
+              displayEmpty
+              renderValue={(selected) => selected || 'Năm'}
             >
-              {MOCK_YEARS.map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year === 'Tất cả' ? 'Năm' : year}
-                </MenuItem>
+              <MenuItem value="">Năm</MenuItem>
+              {years.map((year) => (
+                <MenuItem key={year} value={year}>{year}</MenuItem>
               ))}
             </Select>
           </FormControl>
 
+          {/* Trạng thái */}
           <FormControl sx={styles.filterSelect} size="small">
             <Select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
+              displayEmpty
+              renderValue={(selected) => STATUS_OPTIONS.find(s => s.value === selected)?.label || 'Đang Chiếu/'}
             >
-              {MOCK_STATUS.map((status) => (
-                <MenuItem key={status} value={status}>
-                  {status === 'Tất cả' ? 'Đang Chiếu/' : status}
-                </MenuItem>
+              {STATUS_OPTIONS.map((status) => (
+                <MenuItem key={status.value || 'all'} value={status.value}>{status.label}</MenuItem>
               ))}
             </Select>
           </FormControl>
 
+          {/* Sắp xếp */}
           <FormControl sx={styles.filterSelect} size="small">
             <Select
               value={selectedSort}
               onChange={(e) => setSelectedSort(e.target.value)}
+              displayEmpty
+              renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Xem nhiều nhất'}
             >
-              {MOCK_SORT.map((sort) => (
-                <MenuItem key={sort} value={sort}>{sort}</MenuItem>
+              {SORT_OPTIONS.map((sort) => (
+                <MenuItem key={sort.value} value={sort.value}>{sort.label}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -776,19 +701,24 @@ function GenresPage() {
           {/* Main Content */}
           <Grid item xs={12} md={8}>
             {/* Movies List */}
-            {paginatedMovies.map((movie) => (
-              <Card key={movie.id} sx={styles.movieCard}>
+            {movies.length === 0 && !loading && (
+              <Typography sx={{ textAlign: 'center', color: '#999', py: 4 }}>
+                Không tìm thấy phim nào phù hợp với bộ lọc.
+              </Typography>
+            )}
+            {movies.map((movie) => (
+              <Card key={movie._id} sx={styles.movieCard}>
                 <CardMedia
                   component="img"
                   sx={styles.moviePoster}
                   image={movie.posterUrl}
                   alt={movie.title}
-                  onClick={() => handleMovieClick(movie.id)}
+                  onClick={() => handleMovieClick(movie._id)}
                 />
                 <Box sx={styles.movieContent}>
                   <Typography
                     sx={styles.movieTitle}
-                    onClick={() => handleMovieClick(movie.id)}
+                    onClick={() => handleMovieClick(movie._id)}
                   >
                     {movie.title}
                   </Typography>
@@ -798,14 +728,21 @@ function GenresPage() {
                     <Button
                       variant="contained"
                       startIcon={<ThumbUpIcon />}
-                      sx={styles.likeBtn}
+                      sx={{
+                        ...styles.likeBtn,
+                        bgcolor: likeStates[movie._id]?.liked ? '#034EA2' : '#4285F4',
+                        '&:hover': {
+                          bgcolor: likeStates[movie._id]?.liked ? '#023B7A' : '#3367D6'
+                        }
+                      }}
                       size="small"
+                      onClick={(e) => handleToggleLike(movie._id, e)}
                     >
-                      Thích
+                      {likeStates[movie._id]?.likeCount ?? movie.likeCount ?? 0}
                     </Button>
                     <Box sx={styles.viewCount}>
                       <VisibilityIcon sx={{ fontSize: 18 }} />
-                      <span>{formatNumber(movie.likes)}</span>
+                      <span>{formatNumber(movie.viewCount || 0)}</span>
                     </Box>
                   </Box>
 
@@ -959,14 +896,7 @@ function GenresPage() {
               </Box>
             )}
 
-            {/* Empty State */}
-            {filteredMovies.length === 0 && (
-              <Box sx={{ textAlign: 'center', py: 8 }}>
-                <Typography color="text.secondary" fontSize="1.1rem">
-                  Không tìm thấy phim phù hợp với bộ lọc
-                </Typography>
-              </Box>
-            )}
+            {/* Empty State - Already handled above in movies list */}
           </Grid>
 
           {/* Sidebar - Phim đang chiếu */}
@@ -985,11 +915,11 @@ function GenresPage() {
 
               {/* Movie Cards - Vertical Layout */}
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {MOCK_MOVIES.filter(m => m.status === 'NOW').slice(0, 3).map((movie) => (
+                {sidebarMovies.slice(0, 3).map((movie) => (
                   <Box
-                    key={movie.id}
+                    key={movie._id}
                     component={Link}
-                    to={`/dat-ve/${movie.id}`}
+                    to={`/dat-ve/${movie._id}`}
                     sx={{
                       textDecoration: 'none',
                       display: 'block',
@@ -1044,7 +974,7 @@ function GenresPage() {
                             fontWeight: 700,
                             fontSize: '10px'
                           }}>
-                            C18
+                            {movie.ageRating || 'P'}
                           </Typography>
                         </Box>
 
@@ -1062,7 +992,7 @@ function GenresPage() {
                             fontWeight: 700,
                             fontSize: '10px'
                           }}>
-                            10
+                            {movie.rating?.toFixed(1) || '0'}
                           </Typography>
                         </Box>
                       </Box>

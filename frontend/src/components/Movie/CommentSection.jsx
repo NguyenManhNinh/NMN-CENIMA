@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -34,7 +34,8 @@ import {
   Visibility as VisibilityIcon,
   Share as ShareIcon,
   Flag as FlagIcon,
-  Block as BlockIcon
+  Block as BlockIcon,
+  ArrowDropUp as ArrowDropUpIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -42,7 +43,9 @@ import {
   getReviewsByMovieAPI,
   getReviewSummaryAPI,
   createReviewAPI,
-  likeReviewAPI
+  likeReviewAPI,
+  getRepliesAPI,
+  replyToReviewAPI
 } from '../../apis/reviewApi';
 
 // Color palette matching the site
@@ -58,6 +61,17 @@ const COLORS = {
   success: '#4CAF50',
   error: '#F44336'
 };
+
+// Reaction Constants
+const REACTIONS = {
+  LIKE: { label: 'Thích', icon: '👍', color: '#2196F3' },
+  LOVE: { label: 'Yêu thích', icon: '❤️', color: '#F44336' },
+  HAHA: { label: 'Haha', icon: '😂', color: '#FFC107' },
+  WOW: { label: 'Wow', icon: '😮', color: '#FFC107' },
+  SAD: { label: 'Buồn', icon: '😢', color: '#FFC107' },
+  ANGRY: { label: 'Phẫn nộ', icon: '😡', color: '#FF5722' }
+};
+
 
 // Rating text mapping
 const RATING_TEXT = {
@@ -109,6 +123,75 @@ const inputStyle = {
   },
 };
 
+// Helper Component: Reaction Action
+const ReactionAction = ({ item, user, onReact }) => {
+  const getMyReaction = () => {
+    if (item.myReaction) return item.myReaction;
+    if (!user || !item.reactions) return null;
+    const r = item.reactions.find(x => x.user?._id === user._id || x.user === user._id);
+    return r ? r.type : null;
+  };
+  const myReaction = getMyReaction();
+  const count = item.likesCount ?? item.reactions?.length ?? 0;
+
+  return (
+    <Tooltip
+      title={
+        <Box sx={{ display: 'flex', gap: 1, p: 0.5, bgcolor: '#fff', borderRadius: 20 }}>
+          {Object.entries(REACTIONS).map(([type, { icon, label }]) => (
+            <Box
+              key={type}
+              component="span"
+              onClick={(e) => {
+                e.stopPropagation();
+                onReact(type);
+              }}
+              sx={{
+                cursor: 'pointer',
+                fontSize: '24px',
+                transition: 'transform 0.2s',
+                '&:hover': { transform: 'scale(1.3)' }
+              }}
+              title={label}
+            >
+              {icon}
+            </Box>
+          ))}
+        </Box>
+      }
+      placement="top"
+      arrow
+      componentsProps={{
+        tooltip: {
+          sx: {
+            bgcolor: 'transparent',
+            color: 'inherit',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            p: 0
+          }
+        }
+      }}
+    >
+      <Button
+        size="small"
+        startIcon={
+          myReaction
+            ? <span style={{ fontSize: '18px' }}>{REACTIONS[myReaction].icon}</span>
+            : <ThumbUpOutlinedIcon />
+        }
+        onClick={() => onReact('LIKE')}
+        sx={{
+          color: myReaction ? REACTIONS[myReaction].color : COLORS.textMuted,
+          textTransform: 'none',
+          fontWeight: myReaction ? 600 : 400
+        }}
+      >
+        {myReaction ? REACTIONS[myReaction].label : 'Thích'} ({count})
+      </Button>
+    </Tooltip>
+  );
+};
+
 /**
  * CommentSection - Main component for movie reviews
  * @param {string} movieId - ID của phim
@@ -145,6 +228,15 @@ function CommentSection({ movieId, user }) {
   // Menu state
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [menuReviewId, setMenuReviewId] = useState(null);
+
+  // Reply states
+  const [replyingTo, setReplyingTo] = useState(null); // ID of comment being replied to
+  const [replyContent, setReplyContent] = useState('');
+  const [replies, setReplies] = useState({}); // { reviewId: [replies] }
+  const [loadingReplies, setLoadingReplies] = useState({}); // { reviewId: boolean }
+  const [submittingReply, setSubmittingReply] = useState(false);
+  const [hiddenReplies, setHiddenReplies] = useState({}); // { reviewId: boolean }
+  const reviewRefs = useRef({});
 
   // Fetch reviews and summary
   const fetchData = async (resetPage = true) => {
@@ -242,32 +334,57 @@ function CommentSection({ movieId, user }) {
     }
   };
 
-  // Handle like
-  const handleLikeReview = async (reviewId) => {
+  // Handle reaction
+  const handleReaction = async (reviewId, type = 'LIKE') => {
     if (!user) {
-      toast.warning('Vui lòng đăng nhập để vote hữu ích');
+      toast.warning('Vui lòng đăng nhập để bày tỏ cảm xúc');
       return;
     }
 
     try {
-      const response = await likeReviewAPI(movieId, reviewId);
+      const response = await likeReviewAPI(movieId, reviewId, type);
       if (response.status === 'success') {
+        const { likesCount, myReaction, reactions } = response.data;
+
         // Update local state
         setReviews(prev => prev.map(r => {
           if (r._id === reviewId) {
             return {
               ...r,
-              likesCount: response.data.likesCount,
-              likes: response.data.liked
-                ? [...(r.likes || []), user._id]
-                : (r.likes || []).filter(id => id !== user._id)
+              likesCount,
+              myReaction, // Update myReaction specifically
+              reactions // Update full reactions array
             };
           }
           return r;
         }));
       }
     } catch (error) {
-      toast.error('Không thể vote');
+      toast.error('Không thể thực hiện hành động');
+    }
+  };
+
+  // Handle reaction for reply
+  const handleReplyReaction = async (parentId, replyId, type = 'LIKE') => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để bày tỏ cảm xúc');
+      return;
+    }
+
+    try {
+      const response = await likeReviewAPI(movieId, replyId, type);
+      if (response.status === 'success') {
+        const { likesCount, myReaction, reactions } = response.data;
+
+        setReplies(prev => ({
+          ...prev,
+          [parentId]: prev[parentId].map(r =>
+            r._id === replyId ? { ...r, likesCount, myReaction, reactions } : r
+          )
+        }));
+      }
+    } catch (error) {
+      toast.error('Bày tỏ cảm xúc thất bại');
     }
   };
 
@@ -313,10 +430,90 @@ function CommentSection({ movieId, user }) {
     return Math.round((starCount / summary.total) * 100);
   };
 
-  // Check if user liked this review
-  const isLiked = (review) => {
-    if (!user) return false;
-    return (review.likes || []).some(id => String(id) === String(user._id));
+
+
+  // Toggle replies visibility
+  const toggleRepliesVisibility = (reviewId) => {
+    const isCollapsing = !hiddenReplies[reviewId];
+    setHiddenReplies(prev => ({ ...prev, [reviewId]: !prev[reviewId] }));
+
+    if (isCollapsing) {
+      // Small timeout to allow state update/UI shift, or immediate?
+      // Immediate scroll might be jittery if height changes.
+      // User requested scroll UP.
+      setTimeout(() => {
+        reviewRefs.current[reviewId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  };
+
+  // Fetch replies for a comment
+  const fetchReplies = async (reviewId) => {
+    if (hiddenReplies[reviewId]) {
+      setHiddenReplies(prev => ({ ...prev, [reviewId]: false }));
+      return;
+    }
+    if (replies[reviewId]) return; // Already loaded
+
+    setLoadingReplies(prev => ({ ...prev, [reviewId]: true }));
+    try {
+      const response = await getRepliesAPI(movieId, reviewId);
+      if (response.status === 'success') {
+        setReplies(prev => ({ ...prev, [reviewId]: response.data.replies }));
+      }
+    } catch (error) {
+      console.error('Error fetching replies:', error);
+    } finally {
+      setLoadingReplies(prev => ({ ...prev, [reviewId]: false }));
+    }
+  };
+
+  // Handle reply button click
+  const handleReplyClick = (reviewId) => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để trả lời bình luận');
+      return;
+    }
+    setReplyingTo(replyingTo === reviewId ? null : reviewId);
+    setReplyContent('');
+    // Load replies if not loaded
+    if (!replies[reviewId]) {
+      fetchReplies(reviewId);
+    }
+  };
+
+  // Submit reply
+  const handleSubmitReply = async (parentId) => {
+    if (!user || !replyContent.trim()) return;
+
+    if (replyContent.length < 10) {
+      toast.warning('Nội dung trả lời phải có ít nhất 10 ký tự');
+      return;
+    }
+
+    setSubmittingReply(true);
+    try {
+      const response = await replyToReviewAPI(movieId, {
+        content: replyContent,
+        parentId
+      });
+
+      if (response.status === 'success') {
+        toast.success('Đã gửi trả lời!');
+        // Add new reply to local state
+        setReplies(prev => ({
+          ...prev,
+          [parentId]: [...(prev[parentId] || []), response.data.review]
+        }));
+        setReplyContent('');
+        setReplyingTo(null);
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Gửi thất bại';
+      toast.error(message);
+    } finally {
+      setSubmittingReply(false);
+    }
   };
 
   return (
@@ -619,7 +816,7 @@ function CommentSection({ movieId, user }) {
         // Review cards
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {reviews.map((review) => (
-            <Paper key={review._id} sx={{ ...cardStyle }}>
+            <Paper key={review._id} ref={(el) => (reviewRefs.current[review._id] = el)} sx={{ ...cardStyle }}>
               {/* Header */}
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1.5 }}>
                 <Avatar
@@ -721,20 +918,134 @@ function CommentSection({ movieId, user }) {
 
               {/* Footer actions */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                <ReactionAction
+                  item={review}
+                  user={user}
+                  onReact={(type) => handleReaction(review._id, type)}
+                />
                 <Button
                   size="small"
-                  startIcon={isLiked(review) ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
-                  onClick={() => handleLikeReview(review._id)}
-                  sx={{
-                    color: isLiked(review) ? COLORS.primary : COLORS.textMuted,
-                    textTransform: 'none'
-                  }}
+                  startIcon={<ReplyIcon />}
+                  onClick={() => handleReplyClick(review._id)}
+                  sx={{ color: COLORS.textMuted, textTransform: 'none' }}
                 >
-                  Hữu ích ({review.likesCount || 0})
+                  Trả lời {replies[review._id]?.length > 0 ? `(${replies[review._id].length})` : ''}
                 </Button>
+
               </Box>
+
+              {/* Reply Form */}
+              <Collapse in={replyingTo === review._id}>
+                <Box sx={{ mt: 2, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                    <Avatar src={user?.avatar} sx={{ width: 32, height: 32 }} />
+                    <Box sx={{ flex: 1 }}>
+                      <TextField
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        placeholder="Viết trả lời... (tối thiểu 10 ký tự)"
+                        value={replyContent}
+                        onChange={(e) => setReplyContent(e.target.value)}
+                        size="small"
+                        sx={{ ...inputStyle }}
+                      />
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={() => handleSubmitReply(review._id)}
+                          disabled={replyContent.length < 10 || submittingReply}
+                          sx={{ bgcolor: COLORS.primary }}
+                        >
+                          {submittingReply ? <CircularProgress size={16} /> : 'Gửi'}
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={() => { setReplyingTo(null); setReplyContent(''); }}
+                        >
+                          Hủy
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+              </Collapse>
+
+              {/* Replies List */}
+              {replies[review._id] && replies[review._id].length > 0 && !hiddenReplies[review._id] && (
+                <Box sx={{ mt: 2, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
+                  {replies[review._id].map((reply) => (
+                    <Box key={reply._id} sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
+                      <Avatar src={reply.user?.avatar} sx={{ width: 32, height: 32 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                          <Typography sx={{ fontWeight: 600, fontSize: '13px' }}>
+                            {reply.user?.name}
+                          </Typography>
+                          {reply.user?.role === 'admin' && (
+                            <Chip label="Admin" size="small" sx={{ height: 18, fontSize: '10px', bgcolor: COLORS.primary, color: '#fff' }} />
+                          )}
+                          <Typography sx={{ fontSize: '11px', color: COLORS.textMuted }}>
+                            {formatRelativeTime(reply.createdAt)}
+                          </Typography>
+                        </Box>
+                        <Typography sx={{ fontSize: '13px', color: COLORS.text, mt: 0.5 }}>
+                          {reply.content}
+                        </Typography>
+                        {/* Reply Actions */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                          <ReactionAction
+                            item={reply}
+                            user={user}
+                            onReact={(type) => handleReplyReaction(review._id, reply._id, type)}
+                          />
+                          <Button
+                            size="small"
+                            startIcon={<ReplyIcon sx={{ fontSize: 16 }} />}
+                            onClick={() => {
+                              setReplyingTo(review._id);
+                              setReplyContent(`@${reply.user?.name} `);
+                            }}
+                            sx={{ color: COLORS.textMuted, textTransform: 'none', fontSize: '12px', minWidth: 'auto' }}
+                          >
+                            Trả lời
+                          </Button>
+                        </Box>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+
+
+              {/* Collapse button */}
+              {replies[review._id] && replies[review._id].length > 0 && !hiddenReplies[review._id] && (
+                <Button
+                  size="small"
+                  startIcon={<ArrowDropUpIcon />}
+                  onClick={() => toggleRepliesVisibility(review._id)}
+                  sx={{ mt: 1, color: COLORS.textMuted, textTransform: 'none' }}
+                >
+                  Thu gọn
+                </Button>
+              )}
+
+              {/* Load replies button */}
+              {(!replies[review._id] || hiddenReplies[review._id]) && (
+                <Button
+                  size="small"
+                  onClick={() => fetchReplies(review._id)}
+                  disabled={loadingReplies[review._id]}
+                  sx={{ mt: 1, color: COLORS.textMuted, textTransform: 'none' }}
+                >
+                  {loadingReplies[review._id] ? <CircularProgress size={14} /> : 'Xem trả lời'}
+                </Button>
+              )}
             </Paper>
           ))}
+
+
 
           {/* Load more */}
           {page < totalPages && (
