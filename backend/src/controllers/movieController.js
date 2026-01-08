@@ -4,7 +4,7 @@ const AppError = require('../utils/AppError');
 
 // Lấy danh sách phim (có thể lọc, phân trang)
 exports.getAllMovies = catchAsync(async (req, res, next) => {
-  const { status, genre, limit = 50, page = 1 } = req.query;
+  const { status, genre, country, year, sortBy, limit = 50, page = 1 } = req.query;
 
   // Build filter query
   const query = {};
@@ -14,10 +14,28 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
     query.status = status.toUpperCase();
   }
 
-  // Filter by genre
+  // Filter by genre (slug or ObjectId)
   if (genre) {
     query.genres = genre;
   }
+
+  // Filter by country
+  if (country) {
+    query.country = country;
+  }
+
+  // Filter by year (extract from releaseDate)
+  if (year) {
+    const startDate = new Date(`${year}-01-01`);
+    const endDate = new Date(`${year}-12-31T23:59:59.999Z`);
+    query.releaseDate = { $gte: startDate, $lte: endDate };
+  }
+
+  // Sorting options
+  let sort = { releaseDate: -1 }; // default: newest first
+  if (sortBy === 'views') sort = { viewCount: -1 };
+  if (sortBy === 'rating') sort = { rating: -1, ratingCount: -1 };
+  if (sortBy === 'newest') sort = { releaseDate: -1 };
 
   // Execute query with pagination
   const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -28,7 +46,7 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
     .populate('genres', 'name slug')
     .limit(parseInt(limit))
     .skip(skip)
-    .sort({ releaseDate: -1 });
+    .sort(sort);
 
   const total = await Movie.countDocuments(query);
 
@@ -36,8 +54,56 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
     status: 'success',
     results: movies.length,
     total,
+    page: parseInt(page),
+    totalPages: Math.ceil(total / parseInt(limit)),
     data: {
       movies
+    }
+  });
+});
+
+// Lấy danh sách quốc gia unique từ database
+exports.getCountries = catchAsync(async (req, res, next) => {
+  const countries = await Movie.distinct('country');
+
+  // Lọc bỏ null/undefined và sắp xếp theo alphabet
+  const filteredCountries = countries
+    .filter(c => c && c.trim())
+    .sort((a, b) => a.localeCompare(b, 'vi'));
+
+  res.status(200).json({
+    status: 'success',
+    results: filteredCountries.length,
+    data: {
+      countries: filteredCountries
+    }
+  });
+});
+
+// Lấy danh sách năm phát hành unique từ database
+exports.getYears = catchAsync(async (req, res, next) => {
+  // Aggregation để extract năm từ releaseDate
+  const yearsResult = await Movie.aggregate([
+    {
+      $match: { releaseDate: { $exists: true, $ne: null } }
+    },
+    {
+      $group: {
+        _id: { $year: '$releaseDate' }
+      }
+    },
+    {
+      $sort: { _id: -1 } // Sắp xếp giảm dần (năm mới nhất trước)
+    }
+  ]);
+
+  const years = yearsResult.map(item => item._id.toString());
+
+  res.status(200).json({
+    status: 'success',
+    results: years.length,
+    data: {
+      years
     }
   });
 });
@@ -118,13 +184,17 @@ exports.deleteMovie = catchAsync(async (req, res, next) => {
 
 // Đánh giá phim (User - Mỗi user chỉ được đánh giá 1 lần)
 exports.rateMovie = catchAsync(async (req, res, next) => {
-  const { rating } = req.body;
+  let { rating } = req.body;
   const userId = req.user._id; // Lấy user ID từ middleware auth
 
-  // Validate rating
-  if (!rating || rating < 1 || rating > 10) {
+  // Validate rating: phải là số và trong khoảng 1-10
+  rating = Number(rating);
+  if (isNaN(rating) || rating < 1 || rating > 10) {
     return next(new AppError('Vui lòng đánh giá từ 1 đến 10!', 400));
   }
+
+  // Giới hạn tối đa 10 sao (phòng trường hợp bypass)
+  rating = Math.min(10, Math.max(1, rating));
 
   const movie = await Movie.findById(req.params.id);
 
@@ -142,13 +212,16 @@ exports.rateMovie = catchAsync(async (req, res, next) => {
   const oldRating = movie.rating || 0;
   const oldCount = movie.ratingCount || 0;
   const newCount = oldCount + 1;
-  const newRating = ((oldRating * oldCount) + rating) / newCount;
+  let newRating = ((oldRating * oldCount) + rating) / newCount;
+
+  // Đảm bảo rating không vượt quá 10 và làm tròn 1 chữ số thập phân
+  newRating = Math.min(10, Math.round(newRating * 10) / 10);
 
   // Update movie with new rating and add user to ratedBy list
   const updatedMovie = await Movie.findByIdAndUpdate(
     req.params.id,
     {
-      rating: Math.round(newRating * 10) / 10, // Round to 1 decimal
+      rating: newRating,
       ratingCount: newCount,
       $addToSet: { ratedBy: userId } // Thêm user vào danh sách đã đánh giá
     },
@@ -160,7 +233,105 @@ exports.rateMovie = catchAsync(async (req, res, next) => {
     message: 'Đánh giá thành công!',
     data: {
       rating: updatedMovie.rating,
-      ratingCount: updatedMovie.ratingCount
+      ratingCount: updatedMovie.ratingCount,
+      userRating: rating
     }
+  });
+});
+
+// Tăng lượt xem phim (gọi khi user vào trang chi tiết phim)
+exports.incrementViewCount = catchAsync(async (req, res, next) => {
+  const movie = await Movie.findByIdAndUpdate(
+    req.params.id,
+    { $inc: { viewCount: 1 } },
+    { new: true }
+  );
+
+  if (!movie) {
+    return next(new AppError('Không tìm thấy phim với ID này!', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      viewCount: movie.viewCount
+    }
+  });
+});
+
+// Toggle Like phim (User - Mỗi user chỉ được like 1 lần, click lại sẽ unlike)
+exports.toggleLike = catchAsync(async (req, res, next) => {
+  const userId = req.user._id;
+  const movieId = req.params.id;
+
+  const movie = await Movie.findById(movieId);
+  if (!movie) {
+    return next(new AppError('Không tìm thấy phim với ID này!', 404));
+  }
+
+  // Kiểm tra user đã like chưa
+  const hasLiked = movie.likedBy && movie.likedBy.includes(userId);
+
+  let updatedMovie;
+  if (hasLiked) {
+    // UNLIKE: Xóa user khỏi likedBy và giảm likeCount
+    updatedMovie = await Movie.findByIdAndUpdate(
+      movieId,
+      {
+        $pull: { likedBy: userId },
+        $inc: { likeCount: -1 }
+      },
+      { new: true }
+    );
+    // Đảm bảo likeCount không âm
+    if (updatedMovie.likeCount < 0) {
+      await Movie.findByIdAndUpdate(movieId, { likeCount: 0 });
+      updatedMovie.likeCount = 0;
+    }
+  } else {
+    // LIKE: Thêm user vào likedBy và tăng likeCount
+    updatedMovie = await Movie.findByIdAndUpdate(
+      movieId,
+      {
+        $addToSet: { likedBy: userId },
+        $inc: { likeCount: 1 }
+      },
+      { new: true }
+    );
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      liked: !hasLiked,
+      likeCount: updatedMovie.likeCount
+    }
+  });
+});
+
+// Kiểm tra trạng thái like của user hiện tại
+exports.getLikeStatus = catchAsync(async (req, res, next) => {
+  const movieId = req.params.id;
+
+  // Nếu không đăng nhập, trả về liked: false
+  if (!req.user) {
+    return res.status(200).json({
+      status: 'success',
+      data: { liked: false }
+    });
+  }
+
+  const userId = req.user._id;
+  const movie = await Movie.findById(movieId).select('likedBy');
+
+  if (!movie) {
+    return next(new AppError('Không tìm thấy phim với ID này!', 404));
+  }
+
+  const liked = movie.likedBy && movie.likedBy.includes(userId);
+
+  res.status(200).json({
+    status: 'success',
+    data: { liked }
   });
 });

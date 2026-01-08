@@ -13,11 +13,18 @@ const reviewSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  // Parent comment ID for replies (null = top-level comment)
+  parentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Review',
+    default: null,
+    index: true
+  },
   rating: {
     type: Number,
-    required: true,
     min: 1,
-    max: 5
+    max: 5,
+    default: null // Optional for replies
   },
   title: {
     type: String,
@@ -27,16 +34,23 @@ const reviewSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-    minLength: 20,
+    minLength: 10, // Reduced for replies
     trim: true
   },
   hasSpoiler: {
     type: Boolean,
     default: false
   },
-  likes: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  reactions: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    type: {
+      type: String,
+      enum: ['LIKE', 'LOVE', 'HAHA', 'WOW', 'SAD', 'ANGRY'],
+      default: 'LIKE'
+    }
   }],
   isVerified: {
     type: Boolean,
@@ -51,11 +65,12 @@ const reviewSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Mỗi user chỉ review 1 phim 1 lần
-reviewSchema.index({ movie: 1, user: 1 }, { unique: true });
-
-// Index cho sort theo thời gian
+// Index cho sort theo thời gian (không còn unique constraint)
 reviewSchema.index({ movie: 1, createdAt: -1 });
+
+// Index cho replies
+reviewSchema.index({ parentId: 1, createdAt: 1 });
 
 const Review = mongoose.model('Review', reviewSchema);
 module.exports = Review;
+

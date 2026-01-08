@@ -83,6 +83,30 @@ router
 
 /**
  * @swagger
+ * /movies/countries:
+ *   get:
+ *     summary: Lấy danh sách quốc gia unique
+ *     tags: [Movies]
+ *     responses:
+ *       200:
+ *         description: Danh sách quốc gia
+ */
+router.get('/countries', movieController.getCountries);
+
+/**
+ * @swagger
+ * /movies/years:
+ *   get:
+ *     summary: Lấy danh sách năm phát hành unique
+ *     tags: [Movies]
+ *     responses:
+ *       200:
+ *         description: Danh sách năm
+ */
+router.get('/years', movieController.getYears);
+
+/**
+ * @swagger
  * /movies/{id}:
  *   get:
  *     summary: Lấy chi tiết phim
@@ -173,6 +197,57 @@ router.post(
   authMiddleware.protect,
   movieController.rateMovie
 );
+
+/**
+ * @swagger
+ * /movies/{id}/view:
+ *   post:
+ *     summary: Tăng lượt xem phim
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tăng lượt xem thành công
+ */
+router.post('/:id/view', movieController.incrementViewCount);
+
+/**
+ * @swagger
+ * /movies/{id}/like:
+ *   post:
+ *     summary: Toggle like phim (like/unlike)
+ *     tags: [Movies]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Toggle like thành công
+ *   get:
+ *     summary: Kiểm tra trạng thái like của user hiện tại
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Trạng thái like
+ */
+router.post('/:id/like', authMiddleware.protect, movieController.toggleLike);
+router.get('/:id/like', authMiddleware.optionalAuth, movieController.getLikeStatus);
 
 module.exports = router;
 

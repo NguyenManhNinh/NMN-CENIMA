@@ -233,4 +233,27 @@ router.route('/:id')
  */
 router.post('/:id/like', authMiddleware.protect, reviewController.likeReview);
 
+/**
+ * @swagger
+ * /movies/{movieId}/reviews/{id}/replies:
+ *   get:
+ *     summary: Lấy danh sách replies của một comment
+ *     tags: [Reviews]
+ *     parameters:
+ *       - in: path
+ *         name: movieId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Danh sách replies
+ */
+router.get('/:id/replies', reviewController.getReplies);
+
 module.exports = router;

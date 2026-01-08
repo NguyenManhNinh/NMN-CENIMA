@@ -34,8 +34,12 @@ exports.getReviewsByMovie = catchAsync(async (req, res, next) => {
     });
   }
 
-  // Build query
-  const query = { movie: new mongoose.Types.ObjectId(movieId), status: 'APPROVED' };
+  // Build query - only top-level comments (parentId is null)
+  const query = {
+    movie: new mongoose.Types.ObjectId(movieId),
+    status: 'APPROVED',
+    parentId: null // Only get root comments, not replies
+  };
   if (verified === '1') query.isVerified = true;
   if (noSpoiler === '1') query.hasSpoiler = false;
 
@@ -47,10 +51,14 @@ exports.getReviewsByMovie = catchAsync(async (req, res, next) => {
 
   const skip = (Number(page) - 1) * Number(limit);
 
-  // Aggregation pipeline for likesCount computed field
+  // Aggregation pipeline for reactions
   const pipeline = [
     { $match: query },
-    { $addFields: { likesCount: { $size: { $ifNull: ['$likes', []] } } } },
+    {
+      $addFields: {
+        likesCount: { $size: { $ifNull: ['$reactions', []] } }
+      }
+    },
     { $sort: sortObj },
     { $skip: skip },
     { $limit: Number(limit) },
@@ -72,12 +80,14 @@ exports.getReviewsByMovie = catchAsync(async (req, res, next) => {
         hasSpoiler: 1,
         isVerified: 1,
         likesCount: 1,
-        likes: 1,
+        reactions: 1, // Return full reactions array for frontend processing if needed
         createdAt: 1,
+        parentId: 1,
         user: {
           _id: '$userObj._id',
           name: '$userObj.name',
-          avatar: '$userObj.avatar'
+          avatar: '$userObj.avatar',
+          role: '$userObj.role'
         }
       }
     }
@@ -154,29 +164,31 @@ exports.getReviewsSummary = catchAsync(async (req, res, next) => {
 });
 
 /**
- * Tạo review mới
+ * Tạo review mới (hoặc reply)
  * POST /movies/:movieId/reviews
  */
 exports.createReview = catchAsync(async (req, res, next) => {
   const userId = req.user._id;
   const { movieId } = req.params;
-  const { rating, title = '', content, hasSpoiler = false } = req.body;
+  const { rating, title = '', content, hasSpoiler = false, parentId = null } = req.body;
 
-  // Validate content length
-  if (!content || content.length < 20) {
-    return next(new AppError('Nội dung bình luận phải có ít nhất 20 ký tự', 400));
+  // Validate content length (10 chars cho reply, 20 cho top-level)
+  const minLength = parentId ? 10 : 20;
+  if (!content || content.length < minLength) {
+    return next(new AppError(`Nội dung phải có ít nhất ${minLength} ký tự`, 400));
   }
 
-  // Check if user already reviewed this movie
-  const existingReview = await Review.findOne({ movie: movieId, user: userId });
-  if (existingReview) {
-    return next(new AppError('Bạn đã đánh giá phim này rồi', 400));
+  // Nếu là reply, kiểm tra parent comment có tồn tại
+  if (parentId) {
+    const parentExists = await Review.findById(parentId);
+    if (!parentExists) {
+      return next(new AppError('Bình luận gốc không tồn tại', 404));
+    }
   }
 
   // Check verified (user đã mua vé cho phim này)
   let isVerified = false;
   try {
-    // Tìm order đã thanh toán có phim này
     const hasOrder = await Order.findOne({
       user: userId,
       'movieInfo.movieId': movieId,
@@ -184,26 +196,46 @@ exports.createReview = catchAsync(async (req, res, next) => {
     });
     isVerified = !!hasOrder;
   } catch (err) {
-    // Nếu không có Order model hoặc lỗi, bỏ qua
     console.log('Verified check skipped:', err.message);
   }
 
   const review = await Review.create({
     movie: movieId,
     user: userId,
-    rating,
-    title,
+    parentId,
+    rating: parentId ? null : rating, // Replies don't have rating
+    title: parentId ? '' : title, // Replies don't have title
     content,
     hasSpoiler,
     isVerified
   });
 
   // Populate user info
-  await review.populate('user', 'name avatar');
+  await review.populate('user', 'name avatar role');
 
   res.status(201).json({
     status: 'success',
     data: { review }
+  });
+});
+
+/**
+ * Lấy replies của một comment
+ * GET /reviews/:id/replies
+ */
+exports.getReplies = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  const replies = await Review.find({ parentId: id, status: 'APPROVED' })
+    .populate('user', 'name avatar role')
+    .sort({ createdAt: 1 });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      replies,
+      count: replies.length
+    }
   });
 });
 
@@ -261,32 +293,49 @@ exports.deleteReview = catchAsync(async (req, res, next) => {
 });
 
 /**
- * Toggle like review
+ * React to review (Like, Love, Haha, etc.)
  * POST /reviews/:id/like
  */
 exports.likeReview = catchAsync(async (req, res, next) => {
   const userId = req.user._id;
   const { id } = req.params;
+  const { type = 'LIKE' } = req.body; // Default to LIKE if not provided
 
   const review = await Review.findById(id);
   if (!review) {
     return next(new AppError('Không tìm thấy bình luận', 404));
   }
 
-  const idx = review.likes.findIndex((u) => String(u) === String(userId));
+  // Ensure reactions array exists
+  if (!review.reactions) review.reactions = [];
+
+  const idx = review.reactions.findIndex((r) => String(r.user) === String(userId));
+
   if (idx >= 0) {
-    review.likes.splice(idx, 1); // Unlike
+    // User already reacted
+    if (review.reactions[idx].type === type) {
+      // Same reaction -> toggle off (unlike)
+      review.reactions.splice(idx, 1);
+    } else {
+      // Different reaction -> update type
+      review.reactions[idx].type = type;
+    }
   } else {
-    review.likes.push(userId); // Like
+    // New reaction
+    review.reactions.push({ user: userId, type });
   }
 
   await review.save();
 
+  // Find user's current reaction (if any)
+  const myReaction = review.reactions.find(r => String(r.user) === String(userId));
+
   res.status(200).json({
     status: 'success',
     data: {
-      likesCount: review.likes.length,
-      liked: idx < 0
+      likesCount: review.reactions.length,
+      myReaction: myReaction ? myReaction.type : null,
+      reactions: review.reactions
     }
   });
 });

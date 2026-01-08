@@ -67,7 +67,7 @@ exports.getAllShowtimes = catchAsync(async (req, res, next) => {
 // QUAN TRỌNG: Endpoint này dùng cho trang chọn ghế
 exports.getShowtimeById = catchAsync(async (req, res, next) => {
   const showtime = await Showtime.findById(req.params.id)
-    .populate('movieId', 'title duration posterUrl ageRating')
+    .populate('movieId', 'title duration posterUrl ageRating rating ratingCount viewCount country studio genres director actors releaseDate')
     .populate('cinemaId', 'name address')
     .populate('roomId', 'name type totalSeats seatMap');
 

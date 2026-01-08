@@ -98,7 +98,17 @@ const movieSchema = new mongoose.Schema(
     viewCount: {
       type: Number,
       default: 0
-    }
+    },
+    // Like count
+    likeCount: {
+      type: Number,
+      default: 0
+    },
+    // Danh sách user đã like (để check mỗi user chỉ được like 1 lần)
+    likedBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }]
   },
   {
     timestamps: true,
@@ -122,10 +132,10 @@ movieSchema.pre(/^find/, function (next) {
     select: 'name slug'
   }).populate({
     path: 'director',
-    select: 'name slug'
+    select: 'name slug photoUrl'
   }).populate({
     path: 'actors',
-    select: 'name slug'
+    select: 'name slug photoUrl'
   });
   next();
 });
