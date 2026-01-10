@@ -38,7 +38,7 @@ import {
   ArrowDropUp as ArrowDropUpIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { LoginModal, RegisterModal, ForgotPasswordModal } from '../Common';
 import {
   getReviewsByMovieAPI,
   getReviewSummaryAPI,
@@ -48,7 +48,7 @@ import {
   replyToReviewAPI
 } from '../../apis/reviewApi';
 
-// Color palette matching the site
+// Bảng màu đồng bộ với website
 const COLORS = {
   primary: '#1976D2',
   primaryLight: '#42A5F5',
@@ -62,7 +62,7 @@ const COLORS = {
   error: '#F44336'
 };
 
-// Reaction Constants
+// Danh sách biểu cảm (Reaction)
 const REACTIONS = {
   LIKE: { label: 'Thích', icon: '👍', color: '#2196F3' },
   LOVE: { label: 'Yêu thích', icon: '❤️', color: '#F44336' },
@@ -73,7 +73,7 @@ const REACTIONS = {
 };
 
 
-// Rating text mapping
+// Map điểm đánh giá với text
 const RATING_TEXT = {
   5: 'Tuyệt vời',
   4: 'Rất ốn',
@@ -82,7 +82,7 @@ const RATING_TEXT = {
   1: 'Thất vọng'
 };
 
-// Section header style matching other sections
+// Style tiêu đề
 const sectionTitleStyle = {
   fontWeight: 700,
   fontSize: '18px',
@@ -101,7 +101,7 @@ const sectionTitleStyle = {
   }
 };
 
-// Card style
+// Style khung thẻ
 const cardStyle = {
   p: 2.5,
   bgcolor: COLORS.white,
@@ -110,7 +110,7 @@ const cardStyle = {
   boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
 };
 
-// Input style - no focus outline
+// Style ô nhập liệu - bỏ outline khi focus
 const inputStyle = {
   '& .MuiOutlinedInput-root': {
     '&:hover fieldset': {
@@ -123,7 +123,7 @@ const inputStyle = {
   },
 };
 
-// Helper Component: Reaction Action
+// Component phụ: Nút Reaction
 const ReactionAction = ({ item, user, onReact }) => {
   const getMyReaction = () => {
     if (item.myReaction) return item.myReaction;
@@ -193,14 +193,17 @@ const ReactionAction = ({ item, user, onReact }) => {
 };
 
 /**
- * CommentSection - Main component for movie reviews
+ * CommentSection - Component chính cho bình luận
  * @param {string} movieId - ID của phim
  * @param {object} user - User hiện tại (null nếu chưa đăng nhập)
  */
 function CommentSection({ movieId, user }) {
-  const navigate = useNavigate();
+  // State cho Auth Modals
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
 
-  // States
+  // Các State
   const [reviews, setReviews] = useState([]);
   const [summary, setSummary] = useState({ avgRating: 0, total: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } });
   const [loading, setLoading] = useState(true);
@@ -209,28 +212,28 @@ function CommentSection({ movieId, user }) {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Filter states
+  // State bộ lọc
   const [sortBy, setSortBy] = useState('newest');
   const [filterVerified, setFilterVerified] = useState(false);
   const [filterNoSpoiler, setFilterNoSpoiler] = useState(false);
   const [hideSpoilers, setHideSpoilers] = useState(true);
 
-  // Composer states
+  // State soạn thảo bình luận
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [hasSpoiler, setHasSpoiler] = useState(false);
   const [showComposer, setShowComposer] = useState(false);
 
-  // Spoiler reveal states (per review)
+  // State hiển thị nội dung Spoiler (từng review)
   const [revealedSpoilers, setRevealedSpoilers] = useState(new Set());
 
-  // Menu state
+  // State Menu
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [menuReviewId, setMenuReviewId] = useState(null);
 
-  // Reply states
-  const [replyingTo, setReplyingTo] = useState(null); // ID of comment being replied to
+  // State phản hồi
+  const [replyingTo, setReplyingTo] = useState(null); // ID của bình luận đang được trả lời
   const [replyContent, setReplyContent] = useState('');
   const [replies, setReplies] = useState({}); // { reviewId: [replies] }
   const [loadingReplies, setLoadingReplies] = useState({}); // { reviewId: boolean }
@@ -238,7 +241,7 @@ function CommentSection({ movieId, user }) {
   const [hiddenReplies, setHiddenReplies] = useState({}); // { reviewId: boolean }
   const reviewRefs = useRef({});
 
-  // Fetch reviews and summary
+  // Lấy dữ liệu đánh giá
   const fetchData = async (resetPage = true) => {
     try {
       if (resetPage) {
@@ -288,11 +291,11 @@ function CommentSection({ movieId, user }) {
     }
   }, [movieId, sortBy, filterVerified, filterNoSpoiler]);
 
-  // Submit review
+  // Gửi đánh giá
   const handleSubmitReview = async () => {
     if (!user) {
       toast.warning('Vui lòng đăng nhập để bình luận');
-      navigate('/dang-nhap');
+      setLoginModalOpen(true);
       return;
     }
 
@@ -334,10 +337,11 @@ function CommentSection({ movieId, user }) {
     }
   };
 
-  // Handle reaction
+  // Xử lý Reaction
   const handleReaction = async (reviewId, type = 'LIKE') => {
     if (!user) {
       toast.warning('Vui lòng đăng nhập để bày tỏ cảm xúc');
+      setLoginModalOpen(true);
       return;
     }
 
@@ -364,10 +368,11 @@ function CommentSection({ movieId, user }) {
     }
   };
 
-  // Handle reaction for reply
+  // Xử lý Reaction cho phản hồi
   const handleReplyReaction = async (parentId, replyId, type = 'LIKE') => {
     if (!user) {
       toast.warning('Vui lòng đăng nhập để bày tỏ cảm xúc');
+      setLoginModalOpen(true);
       return;
     }
 
@@ -388,7 +393,7 @@ function CommentSection({ movieId, user }) {
     }
   };
 
-  // Toggle spoiler reveal
+  // Bật/Tắt hiển thị Spoiler
   const toggleSpoilerReveal = (reviewId) => {
     setRevealedSpoilers(prev => {
       const newSet = new Set(prev);
@@ -401,7 +406,7 @@ function CommentSection({ movieId, user }) {
     });
   };
 
-  // Load more
+  // Tải thêm bình luận
   const handleLoadMore = () => {
     if (page < totalPages) {
       setPage(prev => prev + 1);
@@ -409,7 +414,7 @@ function CommentSection({ movieId, user }) {
     }
   };
 
-  // Format relative time
+  // Định dạng thời gian tương đối
   const formatRelativeTime = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -424,7 +429,7 @@ function CommentSection({ movieId, user }) {
     return date.toLocaleDateString('vi-VN');
   };
 
-  // Calculate percentage for distribution bar
+  // Tính phần trăm phân bổ sao
   const getDistributionPercent = (starCount) => {
     if (summary.total === 0) return 0;
     return Math.round((starCount / summary.total) * 100);
@@ -432,7 +437,7 @@ function CommentSection({ movieId, user }) {
 
 
 
-  // Toggle replies visibility
+  // Bật/Tắt hiển thị phản hồi
   const toggleRepliesVisibility = (reviewId) => {
     const isCollapsing = !hiddenReplies[reviewId];
     setHiddenReplies(prev => ({ ...prev, [reviewId]: !prev[reviewId] }));
@@ -447,7 +452,7 @@ function CommentSection({ movieId, user }) {
     }
   };
 
-  // Fetch replies for a comment
+  // Tải phản hồi
   const fetchReplies = async (reviewId) => {
     if (hiddenReplies[reviewId]) {
       setHiddenReplies(prev => ({ ...prev, [reviewId]: false }));
@@ -468,10 +473,11 @@ function CommentSection({ movieId, user }) {
     }
   };
 
-  // Handle reply button click
+  // Xử lý nút Trả lời
   const handleReplyClick = (reviewId) => {
     if (!user) {
       toast.warning('Vui lòng đăng nhập để trả lời bình luận');
+      setLoginModalOpen(true);
       return;
     }
     setReplyingTo(replyingTo === reviewId ? null : reviewId);
@@ -482,7 +488,7 @@ function CommentSection({ movieId, user }) {
     }
   };
 
-  // Submit reply
+  // Gửi phản hồi
   const handleSubmitReply = async (parentId) => {
     if (!user || !replyContent.trim()) return;
 
@@ -518,7 +524,7 @@ function CommentSection({ movieId, user }) {
 
   return (
     <Box sx={{ mt: 4 }}>
-      {/* Section Title */}
+      {/* Tiêu đề phần bình luận */}
       <Typography sx={sectionTitleStyle}>
         BÌNH LUẬN PHIM
       </Typography>
@@ -527,159 +533,153 @@ function CommentSection({ movieId, user }) {
         Chia sẻ cảm nhận để giúp người khác chọn phim phù hợp.
       </Typography>
 
-      {/* Comment Composer */}
-      {!user ? (
-        // State: Chưa đăng nhập
-        <Paper sx={{ ...cardStyle, mb: 3 }}>
-          <TextField
-            fullWidth
-            disabled
-            placeholder="Đăng nhập để viết bình luận và chấm điểm phim này…"
-            sx={{ mb: 2, ...inputStyle }}
+      {/* Form viết bình luận - hiển thị cho tất cả */}
+      <Paper sx={{ ...cardStyle, mb: 3 }}>
+        {/* Hàng thông tin User */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+          <Avatar
+            src={user?.avatar}
+            alt={user?.name || 'Guest'}
+            sx={{ width: 40, height: 40, bgcolor: COLORS.primary }}
           />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Button
-              variant="contained"
-              onClick={() => navigate('/dang-nhap')}
-              sx={{ bgcolor: COLORS.primary }}
-            >
-              Đăng nhập
-            </Button>
-            <Button
-              variant="text"
-              onClick={() => navigate('/dang-ky')}
-              sx={{ color: COLORS.primary }}
-            >
-              Tạo tài khoản
-            </Button>
-          </Box>
-          <Typography sx={{ color: COLORS.textMuted, fontSize: '12px', mt: 1 }}>
-            Bạn chỉ mất 10 giây để bắt đầu bình luận.
+          <Typography sx={{ fontWeight: 600, fontSize: '15px' }}>
+            {user?.name || 'Khách'}
           </Typography>
-        </Paper>
-      ) : (
-        // State: Đã đăng nhập
-        <Paper sx={{ ...cardStyle, mb: 3 }}>
-          {/* User info row */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <Avatar
-              src={user.avatar}
-              alt={user.name}
-              sx={{ width: 40, height: 40 }}
-            />
-            <Typography sx={{ fontWeight: 600, fontSize: '15px' }}>
-              {user.name}
-            </Typography>
-          </Box>
+        </Box>
 
-          {/* Rating row */}
-          <Box sx={{ mb: 2 }}>
-            <Typography sx={{ fontSize: '14px', color: COLORS.textMuted, mb: 0.5 }}>
-              Bạn chấm phim này mấy sao?
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Rating
-                value={rating}
-                onChange={(e, newValue) => setRating(newValue)}
-                size="large"
+        {/* Hàng đánh giá sao */}
+        <Box sx={{ mb: 2 }}>
+          <Typography sx={{ fontSize: '14px', color: COLORS.textMuted, mb: 0.5 }}>
+            Bạn chấm phim này mấy sao?
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Rating
+              value={rating}
+              onChange={(e, newValue) => {
+                if (!user) {
+                  toast.warning('Vui lòng đăng nhập để đánh giá');
+                  setLoginModalOpen(true);
+                  return;
+                }
+                setRating(newValue);
+              }}
+              size="large"
+              sx={{
+                '& .MuiRating-iconFilled': { color: COLORS.orange },
+                '& .MuiRating-iconHover': { color: COLORS.orange }
+              }}
+            />
+            {rating > 0 && (
+              <Chip
+                label={RATING_TEXT[rating]}
+                size="small"
                 sx={{
-                  '& .MuiRating-iconFilled': { color: COLORS.orange },
-                  '& .MuiRating-iconHover': { color: COLORS.orange }
+                  bgcolor: COLORS.orange,
+                  color: COLORS.white,
+                  fontWeight: 600
                 }}
               />
-              {rating > 0 && (
-                <Chip
-                  label={RATING_TEXT[rating]}
-                  size="small"
-                  sx={{
-                    bgcolor: COLORS.orange,
-                    color: COLORS.white,
-                    fontWeight: 600
-                  }}
-                />
-              )}
+            )}
+          </Box>
+        </Box>
+
+        {/* Ô nhập tiêu đề */}
+        <TextField
+          fullWidth
+          placeholder="Tiêu đề ngắn (ví dụ: Hành động đã mắt, nhịp nhanh)"
+          value={title}
+          onClick={() => {
+            if (!user) {
+              toast.warning('Vui lòng đăng nhập để viết bình luận');
+              setLoginModalOpen(true);
+            }
+          }}
+          onChange={(e) => setTitle(e.target.value)}
+          inputProps={{ maxLength: 100 }}
+          sx={{ mb: 2, ...inputStyle }}
+          size="small"
+        />
+
+        {/* Ô nhập nội dung */}
+        <TextField
+          fullWidth
+          multiline
+          minRows={4}
+          placeholder="Chia sẻ cảm nhận của bạn về nội dung, diễn xuất, âm thanh, hình ảnh… (tối thiểu 20 ký tự)"
+          value={content}
+          onClick={() => {
+            if (!user) {
+              toast.warning('Vui lòng đăng nhập để viết bình luận');
+              setLoginModalOpen(true);
+            }
+          }}
+          onChange={(e) => setContent(e.target.value)}
+          sx={{ mb: 2, ...inputStyle }}
+          helperText={`${content.length}/20 ký tự tối thiểu`}
+        />
+
+        {/* Tùy chọn Spoiler */}
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={hasSpoiler}
+              onChange={(e) => {
+                if (!user) {
+                  toast.warning('Vui lòng đăng nhập để viết bình luận');
+                  setLoginModalOpen(true);
+                  return;
+                }
+                setHasSpoiler(e.target.checked);
+              }}
+              sx={{ '&.Mui-checked': { color: COLORS.primary } }}
+            />
+          }
+          label={
+            <Box>
+              <Typography sx={{ fontSize: '14px' }}>Bình luận có spoiler</Typography>
+              <Typography sx={{ fontSize: '12px', color: COLORS.textMuted }}>
+                Nếu có tiết lộ nội dung quan trọng, hãy bật spoiler để người khác không bị lộ.
+              </Typography>
             </Box>
-          </Box>
+          }
+        />
 
-          {/* Title input (optional) */}
-          <TextField
-            fullWidth
-            placeholder="Tiêu đề ngắn (ví dụ: Hành động đã mắt, nhịp nhanh)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            inputProps={{ maxLength: 100 }}
-            sx={{ mb: 2, ...inputStyle }}
-            size="small"
-          />
+        {/* Nút hành động */}
+        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleSubmitReview}
+            disabled={rating === 0 || content.length < 20 || submitting}
+            sx={{
+              bgcolor: COLORS.primary,
+              '&:disabled': { bgcolor: '#ccc' }
+            }}
+          >
+            {submitting ? <CircularProgress size={20} /> : 'Gửi đánh giá'}
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setRating(0);
+              setTitle('');
+              setContent('');
+              setHasSpoiler(false);
+            }}
+            sx={{
+              '&:focus': { outline: 'none' },
+              '&:hover': { borderColor: COLORS.border }
+            }}
+          >
+            Hủy
+          </Button>
+        </Box>
+      </Paper>
 
-          {/* Content textarea */}
-          <TextField
-            fullWidth
-            multiline
-            minRows={4}
-            placeholder="Chia sẻ cảm nhận của bạn về nội dung, diễn xuất, âm thanh, hình ảnh… (tối thiểu 20 ký tự)"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            sx={{ mb: 2, ...inputStyle }}
-            helperText={`${content.length}/20 ký tự tối thiểu`}
-          />
-
-          {/* Spoiler toggle */}
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={hasSpoiler}
-                onChange={(e) => setHasSpoiler(e.target.checked)}
-                sx={{ '&.Mui-checked': { color: COLORS.primary } }}
-              />
-            }
-            label={
-              <Box>
-                <Typography sx={{ fontSize: '14px' }}>Bình luận có spoiler</Typography>
-                <Typography sx={{ fontSize: '12px', color: COLORS.textMuted }}>
-                  Nếu có tiết lộ nội dung quan trọng, hãy bật spoiler để người khác không bị lộ.
-                </Typography>
-              </Box>
-            }
-          />
-
-          {/* Action buttons */}
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <Button
-              variant="contained"
-              onClick={handleSubmitReview}
-              disabled={rating === 0 || content.length < 20 || submitting}
-              sx={{
-                bgcolor: COLORS.primary,
-                '&:disabled': { bgcolor: '#ccc' }
-              }}
-            >
-              {submitting ? <CircularProgress size={20} /> : 'Gửi đánh giá'}
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                setRating(0);
-                setTitle('');
-                setContent('');
-                setHasSpoiler(false);
-              }}
-              sx={{
-                '&:focus': { outline: 'none' },
-                '&:hover': { borderColor: COLORS.border }
-              }}
-            >
-              Hủy
-            </Button>
-          </Box>
-        </Paper>
-      )}
-
-      {/* Review Summary */}
+      {/* Tổng quan đánh giá */}
       {!loading && summary.total > 0 && (
         <Paper sx={{ ...cardStyle, mb: 3 }}>
           <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            {/* Average rating */}
+            {/* Điểm trung bình */}
             <Box sx={{ textAlign: 'center', minWidth: 100 }}>
               <Typography sx={{ fontSize: '42px', fontWeight: 700, color: COLORS.text }}>
                 {summary.avgRating}
@@ -691,7 +691,7 @@ function CommentSection({ movieId, user }) {
               </Typography>
             </Box>
 
-            {/* Distribution bars */}
+            {/* Thanh phân bổ */}
             <Box sx={{ flex: 1, minWidth: 200 }}>
               {[5, 4, 3, 2, 1].map((star) => (
                 <Box key={star} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
@@ -717,7 +717,7 @@ function CommentSection({ movieId, user }) {
         </Paper>
       )}
 
-      {/* Sort & Filter bar */}
+      {/* Thanh Sắp xếp & Bộ lọc */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3, alignItems: 'center' }}>
         <FormControl size="small" sx={{ minWidth: 150, ...inputStyle }}>
           <InputLabel>Sắp xếp</InputLabel>
@@ -775,9 +775,9 @@ function CommentSection({ movieId, user }) {
         />
       </Box>
 
-      {/* Reviews List */}
+      {/* Danh sách bình luận */}
       {loading ? (
-        // Loading skeletons
+        // Skeleton loading
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {[1, 2, 3].map((i) => (
             <Paper key={i} sx={{ ...cardStyle }}>
@@ -794,7 +794,7 @@ function CommentSection({ movieId, user }) {
           ))}
         </Box>
       ) : reviews.length === 0 ? (
-        // Empty state
+        // Trạng thái trống
         <Paper sx={{ ...cardStyle, textAlign: 'center', py: 5 }}>
           <Typography sx={{ fontSize: '16px', color: COLORS.textMuted, mb: 1 }}>
             Chưa có bình luận nào.
@@ -813,11 +813,11 @@ function CommentSection({ movieId, user }) {
           )}
         </Paper>
       ) : (
-        // Review cards
+        // Danh sách thẻ đánh giá
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {reviews.map((review) => (
             <Paper key={review._id} ref={(el) => (reviewRefs.current[review._id] = el)} sx={{ ...cardStyle }}>
-              {/* Header */}
+              {/* Phần đầu */}
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1.5 }}>
                 <Avatar
                   src={review.user?.avatar}
@@ -854,7 +854,7 @@ function CommentSection({ movieId, user }) {
                   </Box>
                 </Box>
 
-                {/* Menu */}
+                {/* Menu tùy chọn */}
                 <IconButton
                   size="small"
                   onClick={(e) => {
@@ -866,14 +866,14 @@ function CommentSection({ movieId, user }) {
                 </IconButton>
               </Box>
 
-              {/* Title */}
+              {/* Tiêu đề */}
               {review.title && (
                 <Typography sx={{ fontWeight: 600, fontSize: '15px', mb: 1 }}>
                   {review.title}
                 </Typography>
               )}
 
-              {/* Content */}
+              {/* Nội dung */}
               {review.hasSpoiler && hideSpoilers && !revealedSpoilers.has(review._id) ? (
                 // Spoiler hidden
                 <Box
@@ -916,7 +916,7 @@ function CommentSection({ movieId, user }) {
                 </Typography>
               )}
 
-              {/* Footer actions */}
+              {/* Hành động (Like, Reply) */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
                 <ReactionAction
                   item={review}
@@ -934,7 +934,7 @@ function CommentSection({ movieId, user }) {
 
               </Box>
 
-              {/* Reply Form */}
+              {/* Form trả lời */}
               <Collapse in={replyingTo === review._id}>
                 <Box sx={{ mt: 2, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
                   <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
@@ -972,7 +972,7 @@ function CommentSection({ movieId, user }) {
                 </Box>
               </Collapse>
 
-              {/* Replies List */}
+              {/* Danh sách trả lời */}
               {replies[review._id] && replies[review._id].length > 0 && !hiddenReplies[review._id] && (
                 <Box sx={{ mt: 2, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
                   {replies[review._id].map((reply) => (
@@ -993,7 +993,7 @@ function CommentSection({ movieId, user }) {
                         <Typography sx={{ fontSize: '13px', color: COLORS.text, mt: 0.5 }}>
                           {reply.content}
                         </Typography>
-                        {/* Reply Actions */}
+                        {/* Hành động trả lời */}
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
                           <ReactionAction
                             item={reply}
@@ -1019,7 +1019,7 @@ function CommentSection({ movieId, user }) {
               )}
 
 
-              {/* Collapse button */}
+              {/* Nút thu gọn */}
               {replies[review._id] && replies[review._id].length > 0 && !hiddenReplies[review._id] && (
                 <Button
                   size="small"
@@ -1031,7 +1031,7 @@ function CommentSection({ movieId, user }) {
                 </Button>
               )}
 
-              {/* Load replies button */}
+              {/* Nút xem trả lời */}
               {(!replies[review._id] || hiddenReplies[review._id]) && (
                 <Button
                   size="small"
@@ -1047,7 +1047,7 @@ function CommentSection({ movieId, user }) {
 
 
 
-          {/* Load more */}
+          {/* Tải thêm */}
           {page < totalPages && (
             <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Button
@@ -1068,7 +1068,7 @@ function CommentSection({ movieId, user }) {
         </Box>
       )}
 
-      {/* Context Menu */}
+      {/* Menu ngữ cảnh */}
       <Menu
         anchorEl={menuAnchorEl}
         open={Boolean(menuAnchorEl)}
@@ -1093,6 +1093,36 @@ function CommentSection({ movieId, user }) {
           <BlockIcon sx={{ mr: 1, fontSize: 18 }} /> Ẩn bình luận này
         </MenuItem>
       </Menu>
+
+      {/* Auth Modals */}
+      <LoginModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onSwitchToRegister={() => {
+          setLoginModalOpen(false);
+          setRegisterModalOpen(true);
+        }}
+        onForgotPassword={() => {
+          setLoginModalOpen(false);
+          setForgotPasswordModalOpen(true);
+        }}
+      />
+      <RegisterModal
+        open={registerModalOpen}
+        onClose={() => setRegisterModalOpen(false)}
+        onSwitchToLogin={() => {
+          setRegisterModalOpen(false);
+          setLoginModalOpen(true);
+        }}
+      />
+      <ForgotPasswordModal
+        open={forgotPasswordModalOpen}
+        onClose={() => setForgotPasswordModalOpen(false)}
+        onBackToLogin={() => {
+          setForgotPasswordModalOpen(false);
+          setLoginModalOpen(true);
+        }}
+      />
     </Box>
   );
 }

@@ -40,4 +40,28 @@ export const getMoviesByGenreAPI = async (slug, params = {}) => {
   return response.data;
 };
 
+/**
+ * Get unique categories for dropdown filter
+ */
+export const getCategoriesAPI = async () => {
+  const response = await api.get('/categories');
+  return response.data;
+};
+
+/**
+ * Get unique countries for dropdown filter
+ */
+export const getCountriesAPI = async () => {
+  const response = await api.get('/countries');
+  return response.data;
+};
+
+/**
+ * Get unique years for dropdown filter
+ */
+export const getYearsAPI = async () => {
+  const response = await api.get('/years');
+  return response.data;
+};
+
 export default api;

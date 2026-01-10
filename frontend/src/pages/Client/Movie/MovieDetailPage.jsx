@@ -2,11 +2,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
-// Nơi Call đường dẫn API
-// Nơi Call đường dẫn API
+// Import Hook Call API
 import { getMovieAPI, rateMovieAPI, getNowShowingMoviesAPI, incrementViewAPI } from '../../../apis/movieApi';
 
-// Thêm Matenial MUI Components
+// Import các thành phần giao diện từ Material UI
 import {
   Box,
   Container,
@@ -25,7 +24,7 @@ import {
   Rating
 } from '@mui/material';
 
-// Thêm Matenial MUI Icons
+// Import các biểu tượng từ Material UI
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -43,7 +42,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ConfirmationNumberOutlinedIcon from '@mui/icons-material/ConfirmationNumberOutlined';
 import { useTheme, useMediaQuery } from '@mui/material';
 
-//Components
+// Các thành phần (Components)
 import { TrailerModal } from '../../../components/Common';
 import CommentSection from '../../../components/Movie/CommentSection';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -79,35 +78,35 @@ function MovieDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // State
+  // Khởi tạo State
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [otherMovies, setOtherMovies] = useState([]);
 
-  // Rating Modal State
+  // State cho Modal Đánh giá
   const [openRatingModal, setOpenRatingModal] = useState(false);
   const [userRating, setUserRating] = useState(0);
 
-  // Trailer Modal State
+  // State cho Modal Trailer
   const [openTrailerModal, setOpenTrailerModal] = useState(false);
 
-  // Image Gallery Lightbox State
+  // State cho Thư viện ảnh (Lightbox)
   const [openGallery, setOpenGallery] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
 
 
-  // Responsive hooks
+  // Hooks xử lý giao diện Responsive
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Ref để chống double-call (do React StrictMode)
+  // Ref để ngăn gọi API 2 lần (do StrictMode)
   const viewIncrementedRef = useRef({});
 
-  // Cooldown window cho view counting (30 phút = 30 * 60 * 1000 ms)
+  // Thời gian chờ giữa các lần tính lượt xem (30 phút = 30 * 60 * 1000 ms)
   const VIEW_COOLDOWN_MS = 30 * 60 * 1000;
 
-  // Load dữ liệu phim
+  // Tải dữ liệu phim từ API
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -153,12 +152,12 @@ function MovieDetailPage() {
 
 
 
-  // Xử lý click Mua vé
+  // Xử lý sự kiện mua vé
   const handleBuyTicket = () => {
     navigate(`/dat-ve/${id}`);
   };
 
-  // Gallery handlers
+  // Xử lý thư viện ảnh
   const handleOpenGallery = (index) => {
     setCurrentImageIndex(index);
     setOpenGallery(true);
@@ -176,7 +175,7 @@ function MovieDetailPage() {
     }
   };
 
-  // Autoplay for gallery
+  // Tự động chuyển ảnh cho thư viện
   useEffect(() => {
     let interval;
     if (openGallery && isAutoPlay && movie?.stills?.length > 1) {
@@ -187,7 +186,7 @@ function MovieDetailPage() {
     return () => clearInterval(interval);
   }, [openGallery, isAutoPlay, movie?.stills?.length]);
 
-  // Loading state
+  // Hiển thị màn hình chờ (Loading)
   if (loading) {
     return (
       <Box
@@ -249,7 +248,7 @@ function MovieDetailPage() {
     );
   }
 
-  // HELPER COMPONENT: ITEM CHI TIẾT
+  // THÀNH PHẦN PHỤ: Hàng thông tin chi tiết
   const DetailItem = ({ label, value }) => {
     // Helper function để đảm bảo chỉ render string
     const getDisplayValue = (item) => {
@@ -257,6 +256,18 @@ function MovieDetailPage() {
       if (typeof item === 'string') return item;
       if (typeof item === 'object' && item.name) return item.name;
       return String(item);
+    };
+
+    // Helper function để tạo slug từ tên thể loại
+    const createSlug = (name) => {
+      return name
+        ?.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Bỏ dấu
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .replace(/\s+/g, '-') // Thay khoảng trắng bằng -
+        .replace(/[^\w-]/g, ''); // Bỏ ký tự đặc biệt
     };
 
     // Handle array or single value
@@ -311,6 +322,73 @@ function MovieDetailPage() {
           {items.map((item, index) => {
             const displayValue = getDisplayValue(item);
             if (!displayValue) return null;
+
+            // Nếu là Thể loại thì render Link
+            if (label === 'Thể loại') {
+              const slug = createSlug(displayValue);
+              return (
+                <Box component="span" key={index}>
+                  <Link
+                    to={`/the-loai-phim/${slug}`}
+                    style={{
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = '#1a3a5c'}
+                    onMouseLeave={(e) => e.target.style.color = 'inherit'}
+                  >
+                    {displayValue}
+                  </Link>
+                  {index < items.length - 1 && ', '}
+                </Box>
+              );
+            }
+
+            // Nếu là Đạo diễn thì render Link
+            if (label === 'Đạo diễn') {
+              const slug = createSlug(displayValue);
+              return (
+                <Box component="span" key={index}>
+                  <Link
+                    to={`/dao-dien/${slug}`}
+                    style={{
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = '#1a3a5c'}
+                    onMouseLeave={(e) => e.target.style.color = 'inherit'}
+                  >
+                    {displayValue}
+                  </Link>
+                  {index < items.length - 1 && ', '}
+                </Box>
+              );
+            }
+
+            // Nếu là Diễn viên thì render Link
+            if (label === 'Diễn viên') {
+              const slug = createSlug(displayValue);
+              return (
+                <Box component="span" key={index}>
+                  <Link
+                    to={`/dien-vien/${slug}`}
+                    style={{
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = '#1a3a5c'}
+                    onMouseLeave={(e) => e.target.style.color = 'inherit'}
+                  >
+                    {displayValue}
+                  </Link>
+                  {index < items.length - 1 && ', '}
+                </Box>
+              );
+            }
+
             return (
               <Box
                 component="span"
@@ -336,11 +414,11 @@ function MovieDetailPage() {
   return (
     <Box sx={{ bgcolor: COLORS.bgLight, minHeight: '100vh' }}>
 
-      {/*MAIN CONTENT*/}
+      {/* NỘI DUNG CHÍNH */}
       <Box sx={{ bgcolor: COLORS.white, pb: 5 }}>
         <Container maxWidth="lg">
 
-          {/* Breadcrumb Navigation */}
+          {/* Thanh điều hướng (Breadcrumbs) */}
           <Box sx={{ py: 2 }}>
             <Breadcrumbs
               separator="/"
@@ -358,12 +436,12 @@ function MovieDetailPage() {
 
           <Grid container spacing={3} sx={{ alignItems: 'flex-start' }}>
 
-            {/* LEFT COLUMN: Main Content */}
+            {/* CỘT TRÁI: Nội dung chính */}
             <Grid item xs={12} md={8}>
 
-              {/* RESPONSIVE HEADER SECTION */}
+              {/* PHẦN ĐẦU TRANG (RESPONSIVE) */}
               {isMobile ? (
-                /* MOBILE VIEW: Stacked Layout */
+                /* GIAO DIỆN MOBILE: Dạng chồng */
                 <Box sx={{ mb: 4 }}>
                   {/* 1. Mobile Banner (Landscape) */}
                   <Box sx={{ position: 'relative', mb: 2 }}>
@@ -481,7 +559,7 @@ function MovieDetailPage() {
                   </Box>
                 </Box>
               ) : (
-                /* DESKTOP VIEW: Side-by-Side Grid */
+                /* GIAO DIỆN DESKTOP: Dạng lưới song song */
                 <>
                   <Grid container spacing={{ xs: 2, md: 3 }}>
                     {/* Poster + Play */}
@@ -552,18 +630,18 @@ function MovieDetailPage() {
                       </Box>
 
                       {/* Details Grid */}
-                      {/* Details Grid */}
+                      {/* Lưới thông tin chi tiết */}
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <DetailItem label="Quốc gia" value={movie.country || 'Việt Nam'} />
-                        <DetailItem label="Nhà sản xuất" value={movie.studio || 'NMN Studio'} />
-                        <DetailItem label="Thể loại" value={movie.genres || ['Hành động']} />
+                        <DetailItem label="Quốc gia" value={movie.country || 'Chưa cập nhật'} />
+                        <DetailItem label="Nhà sản xuất" value={movie.studio || 'Chưa cập nhật'} />
+                        <DetailItem label="Thể loại" value={movie.genres || ['Chưa cập nhật']} />
                         <DetailItem label="Đạo diễn" value={movie.director || 'Chưa cập nhật'} />
                         <DetailItem label="Diễn viên" value={movie.actors?.map(a => a.name || a) || ['Đang cập nhật']} />
                       </Box>
                     </Grid>
                   </Grid>
 
-                  {/* Desktop Description */}
+                  {/* Mô tả phim (Desktop) */}
                   <Box sx={{ mt: 4 }}>
                     <Typography sx={{ fontWeight: 700, fontSize: '18px', color: COLORS.primary, mb: 2, display: 'flex', alignItems: 'center', gap: 1, '&::before': { content: '""', width: 4, height: 20, bgcolor: COLORS.primary, borderRadius: 1 } }}>
                       NỘI DUNG PHIM
@@ -575,7 +653,7 @@ function MovieDetailPage() {
                 </>
               )}
 
-              {/* HÌNH TRONG PHIM - SHARED */}
+              {/* HÌNH TRONG PHIM - Dùng chung */}
               <Box sx={{ mt: 4 }}>
                 <Typography sx={{
                   fontWeight: 700,
@@ -632,7 +710,7 @@ function MovieDetailPage() {
                 }
               </Box>
 
-              {/* DIỄN VIÊN - SHARED */}
+              {/* DIỄN VIÊN - Dùng chung */}
               <Box sx={{ mt: 4 }}>
                 <Typography sx={{
                   fontWeight: 700,
@@ -654,36 +732,63 @@ function MovieDetailPage() {
                 </Typography>
                 {movie.actors && movie.actors.length > 0 ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                    {movie.actors.map((actor, idx) => (
-                      <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: { xs: '100%', sm: '48%' } }}>
+                    {movie.actors.map((actor, idx) => {
+                      const actorName = typeof actor === 'object' ? actor.name : actor;
+                      const actorSlug = actorName
+                        ?.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .replace(/đ/g, 'd')
+                        .replace(/Đ/g, 'D')
+                        .replace(/\s+/g, '-')
+                        .replace(/[^\w-]/g, '');
+                      return (
                         <Box
-                          component="img"
-                          src={typeof actor === 'object' ? actor.photoUrl : 'https://via.placeholder.com/110'}
-                          alt={typeof actor === 'object' ? actor.name : actor}
+                          key={idx}
+                          component={Link}
+                          to={`/dien-vien/${actorSlug}`}
                           sx={{
-                            width: 128,
-                            height: 85,
-                            objectFit: 'cover',
-                            flexShrink: 0,
-                            cursor: 'pointer'
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            width: { xs: '100%', sm: '48%' },
+                            textDecoration: 'none',
+                            color: 'inherit',
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                              '& .actor-name': { color: COLORS.primary }
+                            }
                           }}
-                        />
-                        <Typography sx={{ fontSize: '14px', fontWeight: 500, color: COLORS.text }}>
-                          {typeof actor === 'object' ? actor.name : actor}
-                        </Typography>
-                      </Box>
-                    ))}
+                        >
+                          <Box
+                            component="img"
+                            src={typeof actor === 'object' ? actor.photoUrl : 'https://via.placeholder.com/110'}
+                            alt={actorName}
+                            sx={{
+                              width: 128,
+                              height: 85,
+                              objectFit: 'cover',
+                              flexShrink: 0,
+                              cursor: 'pointer'
+                            }}
+                          />
+                          <Typography className="actor-name" sx={{ fontSize: '14px', fontWeight: 500, color: COLORS.text, transition: 'color 0.2s' }}>
+                            {actorName}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
                   </Box>
                 ) : (
                   <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Chưa cập nhật</Typography>
                 )}
               </Box>
 
-              {/*BÌNH LUẬN PHIM*/}
+              {/* BÌNH LUẬN PHIM */}
               <CommentSection movieId={id} user={user} />
             </Grid>
 
-            {/* ===== RIGHT COLUMN: Sidebar - PHIM ĐANG CHIẾU ===== */}
+            {/* ===== CỘT PHẢI: Thanh bên - Phim đang chiếu ===== */}
             <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
               <Paper
                 sx={{
@@ -869,7 +974,7 @@ function MovieDetailPage() {
         </Container>
       </Box>
 
-      {/* ==================== RATING MODAL ==================== */}
+      {/* ==================== MODAL ĐÁNH GIÁ (RATING) ==================== */}
       <Dialog
         open={openRatingModal}
         onClose={() => setOpenRatingModal(false)}
@@ -1018,7 +1123,7 @@ function MovieDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ==================== TRAILER MODAL ==================== */}
+      {/* ==================== MODAL TRAILER ==================== */}
       <TrailerModal
         open={openTrailerModal}
         onClose={() => setOpenTrailerModal(false)}
@@ -1026,7 +1131,7 @@ function MovieDetailPage() {
         movieTitle={movie?.title}
       />
 
-      {/* ==================== IMAGE GALLERY LIGHTBOX ==================== */}
+      {/* ==================== THƯ VIỆN ẢNH (LB) ==================== */}
       <Dialog
         open={openGallery}
         onClose={() => setOpenGallery(false)}

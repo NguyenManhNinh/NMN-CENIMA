@@ -53,6 +53,7 @@ function App() {
 
             {/* GÓC ĐIỆN ẢNH - Thể loại phim */}
             <Route path="the-loai-phim" element={<GenresPage />} />
+            <Route path="the-loai-phim/:genreSlug" element={<GenresPage />} />
 
 
             {/* Chi tiết phim */}

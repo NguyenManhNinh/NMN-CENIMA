@@ -567,7 +567,17 @@ function BookingPage() {
                               label={genreName}
                               size="small"
                               variant="outlined"
-                              onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genreName.toLowerCase())}`)}
+                              onClick={() => {
+                                const slug = genreName
+                                  ?.toLowerCase()
+                                  .normalize('NFD')
+                                  .replace(/[\u0300-\u036f]/g, '')
+                                  .replace(/đ/g, 'd')
+                                  .replace(/Đ/g, 'D')
+                                  .replace(/\s+/g, '-')
+                                  .replace(/[^\w-]/g, '');
+                                navigate(`/the-loai-phim/${slug}`);
+                              }}
                               sx={{
                                 fontSize: '0.85rem',
                                 height: 28,
@@ -609,7 +619,17 @@ function BookingPage() {
                             label={directorName}
                             size="small"
                             variant="outlined"
-                            onClick={() => navigate(`/goc-dien-anh/dao-dien/${encodeURIComponent(directorName.toLowerCase())}`)}
+                            onClick={() => {
+                              const slug = directorName
+                                ?.toLowerCase()
+                                .normalize('NFD')
+                                .replace(/[\u0300-\u036f]/g, '')
+                                .replace(/đ/g, 'd')
+                                .replace(/Đ/g, 'D')
+                                .replace(/\s+/g, '-')
+                                .replace(/[^\w-]/g, '');
+                              navigate(`/dao-dien/${slug}`);
+                            }}
                             sx={{
                               fontSize: '0.85rem',
                               height: 28,
@@ -644,7 +664,17 @@ function BookingPage() {
                               label={actorName}
                               size="small"
                               variant="outlined"
-                              onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actorName.toLowerCase())}`)}
+                              onClick={() => {
+                                const slug = actorName
+                                  ?.toLowerCase()
+                                  .normalize('NFD')
+                                  .replace(/[\u0300-\u036f]/g, '')
+                                  .replace(/đ/g, 'd')
+                                  .replace(/Đ/g, 'D')
+                                  .replace(/\s+/g, '-')
+                                  .replace(/[^\w-]/g, '');
+                                navigate(`/dien-vien/${slug}`);
+                              }}
                               sx={{
                                 fontSize: '0.85rem',
                                 height: 28,
@@ -695,7 +725,17 @@ function BookingPage() {
                           label={genreName}
                           size="small"
                           variant="outlined"
-                          onClick={() => navigate(`/goc-dien-anh/the-loai/${encodeURIComponent(genreName.toLowerCase())}`)}
+                          onClick={() => {
+                            const slug = genreName
+                              ?.toLowerCase()
+                              .normalize('NFD')
+                              .replace(/[\u0300-\u036f]/g, '')
+                              .replace(/đ/g, 'd')
+                              .replace(/Đ/g, 'D')
+                              .replace(/\s+/g, '-')
+                              .replace(/[^\w-]/g, '');
+                            navigate(`/the-loai-phim/${slug}`);
+                          }}
                           sx={{
                             fontSize: { xs: '0.7rem', sm: '0.85rem' },
                             height: { xs: 22, sm: 28 },
@@ -736,7 +776,17 @@ function BookingPage() {
                         label={directorName}
                         size="small"
                         variant="outlined"
-                        onClick={() => navigate(`/goc-dien-anh/dao-dien/${encodeURIComponent(directorName.toLowerCase())}`)}
+                        onClick={() => {
+                          const slug = directorName
+                            ?.toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/đ/g, 'd')
+                            .replace(/Đ/g, 'D')
+                            .replace(/\s+/g, '-')
+                            .replace(/[^\w-]/g, '');
+                          navigate(`/dao-dien/${slug}`);
+                        }}
                         sx={{
                           fontSize: { xs: '0.7rem', sm: '0.85rem' },
                           height: { xs: 22, sm: 28 },
@@ -771,7 +821,17 @@ function BookingPage() {
                           label={actorName}
                           size="small"
                           variant="outlined"
-                          onClick={() => navigate(`/goc-dien-anh/dien-vien/${encodeURIComponent(actorName.toLowerCase())}`)}
+                          onClick={() => {
+                            const slug = actorName
+                              ?.toLowerCase()
+                              .normalize('NFD')
+                              .replace(/[\u0300-\u036f]/g, '')
+                              .replace(/đ/g, 'd')
+                              .replace(/Đ/g, 'D')
+                              .replace(/\s+/g, '-')
+                              .replace(/[^\w-]/g, '');
+                            navigate(`/dien-vien/${slug}`);
+                          }}
                           sx={{
                             fontSize: { xs: '0.7rem', sm: '0.85rem' },
                             height: { xs: 22, sm: 28 },

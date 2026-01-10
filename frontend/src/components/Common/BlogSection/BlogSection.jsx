@@ -195,15 +195,17 @@ function BlogSection() {
         switch (activeTab) {
           case TAB_GENRES:
             response = await getAllGenresAPI();
-            // Backend trả về { success: true, data: [...] }
-            const genresData = response?.data;
+            // Backend trả về { success: true, data: { genres: [...] } }
+            const genresData = response?.data?.genres || response?.data || [];
             if (Array.isArray(genresData) && genresData.length > 0) {
-              setItems(genresData.map(g => ({
-                _id: g._id,
-                slug: g.slug,
-                title: g.name,
-                imageUrl: g.imageUrl,
-                viewCount: g.viewCount || 0
+              // Sử dụng trực tiếp dữ liệu từ Genre
+              setItems(genresData.slice(0, 4).map(genre => ({
+                _id: genre._id,
+                slug: genre.slug,
+                title: genre.name,
+                imageUrl: genre.imageUrl,
+                viewCount: genre.viewCount || 0,
+                likeCount: genre.likeCount || 0
               })));
             } else {
               setItems([]);
@@ -220,7 +222,8 @@ function BlogSection() {
                 slug: p.slug,
                 title: p.name,
                 imageUrl: p.photoUrl,
-                viewCount: p.viewCount || 0
+                viewCount: p.viewCount || 0,
+                likeCount: p.likeCount || 0
               })));
             } else {
               setItems([]);
@@ -237,7 +240,8 @@ function BlogSection() {
                 slug: p.slug,
                 title: p.name,
                 imageUrl: p.photoUrl,
-                viewCount: p.viewCount || 0
+                viewCount: p.viewCount || 0,
+                likeCount: p.likeCount || 0
               })));
             } else {
               setItems([]);
@@ -263,13 +267,29 @@ function BlogSection() {
   };
 
   const handleItemClick = (item) => {
+    // Helper function to create slug from name
+    const createSlug = (name) => {
+      return name
+        ?.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]/g, '');
+    };
+
+    const slug = item.slug || createSlug(item.title);
+
     switch (activeTab) {
       case TAB_GENRES:
-        navigate(`/the-loai/${item.slug}`);
+        navigate(`/the-loai-phim/${slug}`);
         break;
       case TAB_ACTORS:
+        navigate(`/dien-vien/${slug}`);
+        break;
       case TAB_DIRECTORS:
-        navigate(`/nghe-si/${item.slug}`);
+        navigate(`/dao-dien/${slug}`);
         break;
       default:
         break;
@@ -279,13 +299,13 @@ function BlogSection() {
   const getViewMoreUrl = () => {
     switch (activeTab) {
       case TAB_GENRES:
-        return '/the-loai';
+        return '/the-loai-phim';
       case TAB_ACTORS:
-        return '/nghe-si?role=actor';
+        return '/dien-vien';
       case TAB_DIRECTORS:
-        return '/nghe-si?role=director';
+        return '/dao-dien';
       default:
-        return '/goc-dien-anh';
+        return '/the-loai-phim';
     }
   };
 
@@ -379,7 +399,7 @@ function BlogSection() {
                   <Box sx={styles.stats}>
                     <Chip
                       icon={<ThumbUpIcon sx={{ fontSize: '0.9rem !important' }} />}
-                      label="Thích"
+                      label={featuredItem.likeCount || 0}
                       size="small"
                       sx={styles.likeButton}
                       onClick={(e) => e.stopPropagation()}
@@ -424,7 +444,7 @@ function BlogSection() {
                     <Box sx={styles.stats}>
                       <Chip
                         icon={<ThumbUpIcon sx={{ fontSize: '0.8rem !important' }} />}
-                        label="Thích"
+                        label={item.likeCount || 0}
                         size="small"
                         sx={{ ...styles.likeButton, height: 24 }}
                         onClick={(e) => e.stopPropagation()}
