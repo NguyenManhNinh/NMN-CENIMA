@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 
 /**
- * Genre Model - Thể loại phim
+ * Genre Model - Thể loại phim / Bài viết review
  */
 const genreSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Vui lòng nhập tên thể loại!'],
+      required: [true, 'Vui lòng nhập tên!'],
       trim: true,
       unique: true
     },
@@ -24,7 +24,13 @@ const genreSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    // Ảnh đại diện (thumbnail)
     imageUrl: {
+      type: String,
+      default: null
+    },
+    // Ảnh banner lớn
+    bannerUrl: {
       type: String,
       default: null
     },
@@ -32,6 +38,43 @@ const genreSchema = new mongoose.Schema(
       type: String,
       default: null
     },
+    // Phân loại/Thể loại: Hành động, Viễn tưởng, Kinh dị, Hài, Khoa học, etc.
+    category: {
+      type: String,
+      trim: true,
+      required: [true, 'Vui lòng chọn thể loại!']
+    },
+    // Quốc gia (cho filter)
+    country: {
+      type: String,
+      trim: true,
+      default: 'Việt Nam'
+    },
+    // Năm (cho filter)
+    year: {
+      type: Number,
+      default: new Date().getFullYear()
+    },
+    // Trạng thái: NOW (hiện tại), COMING (sắp tới)
+    status: {
+      type: String,
+      enum: ['NOW', 'COMING', 'ARCHIVE'],
+      default: 'NOW'
+    },
+    // Thống kê
+    viewCount: {
+      type: Number,
+      default: 0
+    },
+    likeCount: {
+      type: Number,
+      default: 0
+    },
+    // Danh sách user đã like
+    likedBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
     isActive: {
       type: Boolean,
       default: true

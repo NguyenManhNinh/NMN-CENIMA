@@ -6,7 +6,10 @@ const {
   getMoviesByGenre,
   createGenre,
   updateGenre,
-  deleteGenre
+  deleteGenre,
+  getCategories,
+  getCountries,
+  getYears
 } = require('../controllers/genreController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
@@ -28,6 +31,11 @@ const { protect, restrictTo } = require('../middlewares/authMiddleware');
  *         description: Thành công
  */
 router.get('/', getGenres);
+
+// Routes lấy danh sách duy nhất cho dropdown (phải đặt trước /:slug)
+router.get('/categories', getCategories);
+router.get('/countries', getCountries);
+router.get('/years', getYears);
 
 /**
  * @swagger
