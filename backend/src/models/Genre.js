@@ -6,6 +6,7 @@ const slugify = require('slugify');
  */
 const genreSchema = new mongoose.Schema(
   {
+    // LOG DEBUG
     name: {
       type: String,
       required: [true, 'Vui lòng nhập tên!'],
@@ -82,7 +83,86 @@ const genreSchema = new mongoose.Schema(
     order: {
       type: Number,
       default: 0
-    }
+    },
+
+    // ========== CÁC TRƯỜNG MỚI ĐỂ GIỐNG MOVIE UI ==========
+
+    // Thời lượng (phút)
+    duration: {
+      type: Number,
+      default: null
+    },
+    // Ngày phát hành / Ngày công chiếu
+    releaseDate: {
+      type: Date,
+      default: null
+    },
+    // Phân loại độ tuổi: P, C13, C16, C18
+    ageRating: {
+      type: String,
+      enum: ['P', 'C13', 'C16', 'C18', 'K'],
+      default: 'P'
+    },
+    // Điểm đánh giá trung bình (0-10)
+    rating: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: 0
+    },
+    // Số lượt đánh giá
+    ratingCount: {
+      type: Number,
+      default: 0
+    },
+    // Danh sách user đã đánh giá (để check trùng)
+    ratedBy: [{
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      rating: {
+        type: Number,
+        min: 1,
+        max: 10
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    // Nhà sản xuất / Studio
+    studio: {
+      type: String,
+      trim: true,
+      default: null
+    },
+    // Đạo diễn (có thể là tên hoặc ObjectId ref Director)
+    director: {
+      type: String,
+      trim: true,
+      default: null
+    },
+    // Diễn viên (danh sách tên hoặc object chứa name, photoUrl)
+    actors: [{
+      name: {
+        type: String,
+        trim: true
+      },
+      photoUrl: {
+        type: String,
+        default: null
+      }
+    }],
+    // Link Trailer (Youtube)
+    trailerUrl: {
+      type: String,
+      default: null
+    },
+    // Hình ảnh trong bài viết (stills/gallery)
+    stills: [{
+      type: String
+    }]
   },
   {
     timestamps: true,

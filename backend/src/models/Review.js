@@ -4,8 +4,14 @@ const reviewSchema = new mongoose.Schema({
   movie: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Movie',
-    required: true,
     index: true
+    // Không required - có thể là review cho genre
+  },
+  genre: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Genre',
+    index: true
+    // Review cho bài viết genre
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -65,11 +71,22 @@ const reviewSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index cho sort theo thời gian (không còn unique constraint)
+// Index cho sort theo thời gian (movie reviews)
 reviewSchema.index({ movie: 1, createdAt: -1 });
+
+// Index cho genre reviews
+reviewSchema.index({ genre: 1, createdAt: -1 });
 
 // Index cho replies
 reviewSchema.index({ parentId: 1, createdAt: 1 });
+
+// Custom validation: phải có movie HOẶC genre (một trong hai)
+reviewSchema.pre('validate', function (next) {
+  if (!this.movie && !this.genre && !this.parentId) {
+    return next(new Error('Review must be associated with either a movie or a genre'));
+  }
+  next();
+});
 
 const Review = mongoose.model('Review', reviewSchema);
 module.exports = Review;

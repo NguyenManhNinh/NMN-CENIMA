@@ -9,10 +9,19 @@ const {
   deleteGenre,
   getCategories,
   getCountries,
-  getYears
+  getYears,
+  toggleLike,
+  getLikeStatus,
+  rateGenre,
+  incrementView
 } = require('../controllers/genreController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
+// Import genreReviewRoutes để nested mount
+const genreReviewRoutes = require('./V1/genreReviewRoutes');
+
+// Mount genre review routes: /genres/:genreId/reviews
+router.use('/:genreId/reviews', genreReviewRoutes);
 /**
  * @swagger
  * /api/v1/genres:
@@ -36,6 +45,14 @@ router.get('/', getGenres);
 router.get('/categories', getCategories);
 router.get('/countries', getCountries);
 router.get('/years', getYears);
+
+// Routes like/unlike (phải đặt trước /:slug)
+router.post('/:id/like', protect, toggleLike);
+router.get('/:id/like-status', protect, getLikeStatus);
+
+// Routes rate và view (phải đặt trước /:slug)
+router.post('/:id/rate', protect, rateGenre);
+router.post('/:id/view', incrementView);
 
 /**
  * @swagger

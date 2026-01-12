@@ -43,7 +43,7 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
   const movies = await Movie.find(query)
     .populate('director', 'name photoUrl')
     .populate('actors', 'name photoUrl')
-    .populate('genres', 'name slug')
+    .populate('genres', 'name slug category')
     .limit(parseInt(limit))
     .skip(skip)
     .sort(sort);
@@ -113,7 +113,7 @@ exports.getMovie = catchAsync(async (req, res, next) => {
   const movie = await Movie.findById(req.params.id)
     .populate('director', 'name photoUrl slug')
     .populate('actors', 'name photoUrl slug')
-    .populate('genres', 'name slug');
+    .populate('genres', 'name slug category');
 
   if (!movie) {
     return next(new AppError('Không tìm thấy phim với ID này!', 404));

@@ -129,7 +129,7 @@ movieSchema.pre('save', function (next) {
 movieSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'genres',
-    select: 'name slug'
+    select: 'name slug category'
   }).populate({
     path: 'director',
     select: 'name slug photoUrl'

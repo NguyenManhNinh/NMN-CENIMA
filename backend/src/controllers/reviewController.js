@@ -344,3 +344,164 @@ exports.likeReview = catchAsync(async (req, res, next) => {
  * Legacy API compatibility - getAllReviews
  */
 exports.getAllReviews = exports.getReviewsByMovie;
+
+// ============== GENRE REVIEW FUNCTIONS ==============
+
+/**
+ * Lấy danh sách reviews của genre (bài viết)
+ * GET /genres/:genreId/reviews
+ */
+exports.getReviewsByGenre = catchAsync(async (req, res, next) => {
+  const { genreId } = req.params;
+  const {
+    sort = 'newest',
+    verified,
+    noSpoiler,
+    page = 1,
+    limit = 10
+  } = req.query;
+
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(genreId)) {
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        reviews: [],
+        pagination: { page: Number(page), limit: Number(limit), total: 0, totalPages: 0 }
+      }
+    });
+  }
+
+  // Build query - only top-level comments
+  const query = {
+    genre: new mongoose.Types.ObjectId(genreId),
+    status: 'APPROVED',
+    parentId: null
+  };
+  if (verified === '1') query.isVerified = true;
+  if (noSpoiler === '1') query.hasSpoiler = false;
+
+  // Sort options
+  let sortObj = { createdAt: -1 };
+  if (sort === 'helpful') sortObj = { likesCount: -1, createdAt: -1 };
+  if (sort === 'high') sortObj = { rating: -1, createdAt: -1 };
+  if (sort === 'low') sortObj = { rating: 1, createdAt: -1 };
+
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const pipeline = [
+    { $match: query },
+    { $addFields: { likesCount: { $size: { $ifNull: ['$reactions', []] } } } },
+    { $sort: sortObj },
+    { $skip: skip },
+    { $limit: Number(limit) },
+    { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userObj' } },
+    { $unwind: '$userObj' },
+    {
+      $project: {
+        _id: 1, rating: 1, title: 1, content: 1, hasSpoiler: 1, isVerified: 1,
+        likesCount: 1, reactions: 1, createdAt: 1, parentId: 1,
+        user: { _id: '$userObj._id', name: '$userObj.name', avatar: '$userObj.avatar', role: '$userObj.role' }
+      }
+    }
+  ];
+
+  const [reviews, total] = await Promise.all([
+    Review.aggregate(pipeline),
+    Review.countDocuments(query)
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      reviews,
+      pagination: { page: Number(page), limit: Number(limit), total, totalPages: Math.ceil(total / Number(limit)) }
+    }
+  });
+});
+
+/**
+ * Lấy tóm tắt reviews cho genre
+ * GET /genres/:genreId/reviews/summary
+ */
+exports.getGenreReviewsSummary = catchAsync(async (req, res, next) => {
+  const { genreId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(genreId)) {
+    return res.status(200).json({
+      status: 'success',
+      data: { avgRating: 0, total: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } }
+    });
+  }
+
+  const result = await Review.aggregate([
+    { $match: { genre: new mongoose.Types.ObjectId(genreId), status: 'APPROVED' } },
+    {
+      $group: {
+        _id: '$genre',
+        avgRating: { $avg: '$rating' },
+        total: { $sum: 1 },
+        star1: { $sum: { $cond: [{ $eq: ['$rating', 1] }, 1, 0] } },
+        star2: { $sum: { $cond: [{ $eq: ['$rating', 2] }, 1, 0] } },
+        star3: { $sum: { $cond: [{ $eq: ['$rating', 3] }, 1, 0] } },
+        star4: { $sum: { $cond: [{ $eq: ['$rating', 4] }, 1, 0] } },
+        star5: { $sum: { $cond: [{ $eq: ['$rating', 5] }, 1, 0] } }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        avgRating: { $round: ['$avgRating', 1] },
+        total: 1,
+        distribution: { 1: '$star1', 2: '$star2', 3: '$star3', 4: '$star4', 5: '$star5' }
+      }
+    }
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: result[0] || { avgRating: 0, total: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } }
+  });
+});
+
+/**
+ * Tạo review mới cho genre (hoặc reply)
+ * POST /genres/:genreId/reviews
+ */
+exports.createGenreReview = catchAsync(async (req, res, next) => {
+  const userId = req.user._id;
+  const { genreId } = req.params;
+  const { rating, title = '', content, hasSpoiler = false, parentId = null } = req.body;
+
+  // Validate content length
+  const minLength = parentId ? 10 : 20;
+  if (!content || content.length < minLength) {
+    return next(new AppError(`Nội dung phải có ít nhất ${minLength} ký tự`, 400));
+  }
+
+  // Nếu là reply, kiểm tra parent
+  if (parentId) {
+    const parentExists = await Review.findById(parentId);
+    if (!parentExists) {
+      return next(new AppError('Bình luận gốc không tồn tại', 404));
+    }
+  }
+
+  const review = await Review.create({
+    genre: genreId,
+    user: userId,
+    parentId,
+    rating: parentId ? null : rating,
+    title: parentId ? '' : title,
+    content,
+    hasSpoiler,
+    isVerified: false // Genre reviews không có verified status như movie
+  });
+
+  await review.populate('user', 'name avatar role');
+
+  res.status(201).json({
+    status: 'success',
+    data: { review }
+  });
+});

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Genre = require('../models/Genre');
 const Movie = require('../models/Movie');
 const catchAsync = require('../utils/catchAsync');
@@ -248,6 +249,196 @@ const getYears = catchAsync(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Toggle like/unlike cho genre (mỗi user chỉ like 1 lần)
+ * @route   POST /api/v1/genres/:id/like
+ * @access  Private (phải đăng nhập)
+ */
+const toggleLike = catchAsync(async (req, res) => {
+  console.log('=== TOGGLE LIKE DEBUG ===');
+  console.log('Params:', req.params);
+  console.log('User:', req.user ? { _id: req.user._id, email: req.user.email } : 'NO USER');
+  console.log('Headers Auth:', req.headers.authorization ? 'Present' : 'Missing');
+
+  const { id } = req.params;
+
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: 'ID không hợp lệ!'
+    });
+  }
+
+  // Kiểm tra user đã đăng nhập
+  if (!req.user || !req.user._id) {
+    return res.status(401).json({
+      success: false,
+      message: 'Vui lòng đăng nhập!'
+    });
+  }
+
+  const userId = req.user._id;
+
+  const genre = await Genre.findById(id);
+  if (!genre) {
+    return res.status(404).json({
+      success: false,
+      message: 'Không tìm thấy bài viết!'
+    });
+  }
+
+  // Kiểm tra user đã like chưa
+  const hasLiked = genre.likedBy.some(uid => uid.toString() === userId.toString());
+
+  if (hasLiked) {
+    // Unlike - xóa userId khỏi likedBy và giảm likeCount
+    genre.likedBy = genre.likedBy.filter(id => id.toString() !== userId.toString());
+    genre.likeCount = Math.max(0, genre.likeCount - 1);
+  } else {
+    // Like - thêm userId vào likedBy và tăng likeCount
+    genre.likedBy.push(userId);
+    genre.likeCount = genre.likeCount + 1;
+  }
+
+  await genre.save();
+
+  res.status(200).json({
+    success: true,
+    liked: !hasLiked,
+    likeCount: genre.likeCount,
+    message: hasLiked ? 'Đã bỏ thích!' : 'Đã thích!'
+  });
+});
+
+/**
+ * @desc    Kiểm tra trạng thái like của user
+ * @route   GET /api/v1/genres/:id/like-status
+ * @access  Private (phải đăng nhập)
+ */
+const getLikeStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  const genre = await Genre.findById(id);
+  if (!genre) {
+    return res.status(404).json({
+      success: false,
+      message: 'Không tìm thấy bài viết!'
+    });
+  }
+
+  const hasLiked = genre.likedBy.includes(userId);
+
+  res.status(200).json({
+    success: true,
+    liked: hasLiked,
+    likeCount: genre.likeCount
+  });
+});
+
+/**
+ * @desc    Rate genre (đánh giá bài viết)
+ * @route   POST /api/v1/genres/:id/rate
+ * @access  Private
+ */
+const rateGenre = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { rating } = req.body;
+  const userId = req.user._id;
+
+  // Validate rating
+  if (!rating || rating < 1 || rating > 10) {
+    return res.status(400).json({
+      success: false,
+      message: 'Rating phải từ 1 đến 10!'
+    });
+  }
+
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: 'ID không hợp lệ!'
+    });
+  }
+
+  const genre = await Genre.findById(id);
+  if (!genre) {
+    return res.status(404).json({
+      success: false,
+      message: 'Không tìm thấy bài viết!'
+    });
+  }
+
+  // Check if user already rated
+  const existingRating = genre.ratedBy.find(
+    r => r.user && r.user.toString() === userId.toString()
+  );
+
+  if (existingRating) {
+    return res.status(400).json({
+      success: false,
+      message: 'Bạn đã đánh giá bài viết này rồi!'
+    });
+  }
+
+  // Add new rating
+  genre.ratedBy.push({ user: userId, rating: rating });
+
+  // Recalculate average rating
+  const totalRatings = genre.ratedBy.length;
+  const sumRatings = genre.ratedBy.reduce((sum, r) => sum + (r.rating || 0), 0);
+  genre.rating = Math.round((sumRatings / totalRatings) * 10) / 10; // Round to 1 decimal
+  genre.ratingCount = totalRatings;
+
+  await genre.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Đánh giá thành công!',
+    data: {
+      rating: genre.rating,
+      ratingCount: genre.ratingCount
+    }
+  });
+});
+
+/**
+ * @desc    Increment view count cho genre
+ * @route   POST /api/v1/genres/:id/view
+ * @access  Public
+ */
+const incrementView = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: 'ID không hợp lệ!'
+    });
+  }
+
+  const genre = await Genre.findByIdAndUpdate(
+    id,
+    { $inc: { viewCount: 1 } },
+    { new: true }
+  );
+
+  if (!genre) {
+    return res.status(404).json({
+      success: false,
+      message: 'Không tìm thấy bài viết!'
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    viewCount: genre.viewCount
+  });
+});
+
 module.exports = {
   getGenres,
   getGenreBySlug,
@@ -257,5 +448,9 @@ module.exports = {
   deleteGenre,
   getCategories,
   getCountries,
-  getYears
+  getYears,
+  toggleLike,
+  getLikeStatus,
+  rateGenre,
+  incrementView
 };
