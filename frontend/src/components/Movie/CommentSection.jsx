@@ -21,7 +21,13 @@ import {
   LinearProgress,
   Tooltip,
   Menu,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  RadioGroup,
+  Radio
 } from '@mui/material';
 import {
   Star as StarIcon,
@@ -35,7 +41,8 @@ import {
   Share as ShareIcon,
   Flag as FlagIcon,
   Block as BlockIcon,
-  ArrowDropUp as ArrowDropUpIcon
+  ArrowDropUp as ArrowDropUpIcon,
+  Undo as UndoIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { LoginModal, RegisterModal, ForgotPasswordModal } from '../Common';
@@ -52,7 +59,9 @@ import {
   createGenreReviewAPI,
   likeGenreReviewAPI,
   getGenreRepliesAPI,
-  replyToGenreReviewAPI
+  replyToGenreReviewAPI,
+  // Report API
+  reportReviewAPI
 } from '../../apis/reviewApi';
 
 // Bảng màu đồng bộ với website
@@ -253,20 +262,77 @@ function CommentSection({ movieId, genreId, user }) {
   const [hiddenReplies, setHiddenReplies] = useState({}); // { reviewId: boolean }
   const reviewRefs = useRef({});
 
+  // State Report Dialog
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('toxic');
+  const [reportNote, setReportNote] = useState('');
+  const [submittingReport, setSubmittingReport] = useState(false);
+  const [reportedReviews, setReportedReviews] = useState(new Set()); // Lưu ID các review đã report trong phiên này
+
+  // State cho ẩn bình luận local (chỉ user này thấy)
+  const [hiddenByUser, setHiddenByUser] = useState(new Set());
+
+  // Load hidden reviews từ localStorage khi targetId thay đổi
+  useEffect(() => {
+    if (targetId) {
+      const key = `hidden_reviews_${targetId}`;
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setHiddenByUser(new Set(parsed));
+          }
+        } catch (e) {
+          console.error('Error parsing hidden reviews:', e);
+        }
+      }
+    }
+  }, [targetId]);
+
+  // Helper function để lưu vào localStorage
+  const saveHiddenToStorage = (newSet) => {
+    if (targetId) {
+      const key = `hidden_reviews_${targetId}`;
+      localStorage.setItem(key, JSON.stringify(Array.from(newSet)));
+    }
+  };
+
+  // Helper functions cho ẩn bình luận
+  const hideReviewForMe = (reviewId) => {
+    setHiddenByUser(prev => {
+      const newSet = new Set(prev).add(reviewId);
+      saveHiddenToStorage(newSet);
+      return newSet;
+    });
+  };
+
+  const unhideReviewForMe = (reviewId) => {
+    setHiddenByUser(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(reviewId);
+      saveHiddenToStorage(newSet);
+      return newSet;
+    });
+  };
+
+  const clearAllHidden = () => {
+    const newSet = new Set();
+    setHiddenByUser(newSet);
+    saveHiddenToStorage(newSet);
+    toast.success('Đã hiện lại tất cả bình luận');
+  };
+
+
   // Lấy dữ liệu đánh giá
-  const fetchData = async (resetPage = true) => {
+  const fetchData = async (pageNum = 1, fetchSummary = true) => {
     if (!targetId) return; // No target ID, skip
     try {
-      if (resetPage) {
-        setLoading(true);
-        setPage(1);
-      } else {
-        setLoadingMore(true);
-      }
+      setLoading(true);
 
       const params = {
         sort: sortBy,
-        page: resetPage ? 1 : page,
+        page: pageNum,
         limit: 10
       };
       if (filterVerified) params.verified = '1';
@@ -277,18 +343,15 @@ function CommentSection({ movieId, genreId, user }) {
         isGenre
           ? getReviewsByGenreAPI(targetId, params)
           : getReviewsByMovieAPI(targetId, params),
-        resetPage
+        fetchSummary
           ? (isGenre ? getGenreReviewSummaryAPI(targetId) : getReviewSummaryAPI(targetId))
           : Promise.resolve(null)
       ]);
 
       if (reviewsRes.status === 'success') {
-        if (resetPage) {
-          setReviews(reviewsRes.data.reviews);
-        } else {
-          setReviews(prev => [...prev, ...reviewsRes.data.reviews]);
-        }
+        setReviews(reviewsRes.data.reviews);
         setTotalPages(reviewsRes.data.pagination?.totalPages || 1);
+        setPage(pageNum);
       }
 
       if (summaryRes?.status === 'success') {
@@ -302,15 +365,53 @@ function CommentSection({ movieId, genreId, user }) {
       }
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
+  };
+
+  // Xử lý chuyển trang
+  const handlePageChange = (pageNum) => {
+    if (pageNum === page || pageNum < 1 || pageNum > totalPages) return;
+    fetchData(pageNum, false);
+    // Scroll to top of comments section
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   useEffect(() => {
     if (targetId) {
-      fetchData(true);
+      fetchData(1, true);
     }
   }, [targetId, sortBy, filterVerified, filterNoSpoiler]);
+
+  // Gửi báo cáo
+  const handleReportReview = async () => {
+    if (!menuReviewId) return;
+
+    if (!reportReason) {
+      toast.error('Vui lòng chọn lý do báo cáo');
+      return;
+    }
+
+    setSubmittingReport(true);
+    try {
+      await reportReviewAPI(targetId, menuReviewId, {
+        reason: reportReason,
+        note: reportNote
+      });
+
+      toast.success('Báo cáo thành công. Cảm ơn bạn đã đóng góp!');
+      setReportDialogOpen(false);
+      setReportedReviews(prev => new Set(prev).add(menuReviewId));
+
+      // Reset form
+      setReportReason('toxic');
+      setReportNote('');
+    } catch (error) {
+      console.error('Report error:', error);
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi báo cáo');
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
 
   // Gửi đánh giá
   const handleSubmitReview = async () => {
@@ -457,8 +558,6 @@ function CommentSection({ movieId, genreId, user }) {
     return Math.round((starCount / summary.total) * 100);
   };
 
-
-
   // Bật/Tắt hiển thị phản hồi
   const toggleRepliesVisibility = (reviewId) => {
     const isCollapsing = !hiddenReplies[reviewId];
@@ -544,6 +643,49 @@ function CommentSection({ movieId, genreId, user }) {
       setSubmittingReply(false);
     }
   };
+
+  // Gửi báo cáo
+  const handleReport = async () => {
+    if (!reportReason) {
+      toast.warning('Vui lòng chọn lý do báo cáo');
+      return;
+    }
+
+    setSubmittingReport(true);
+    try {
+      // Sử dụng movieId vì API report chỉ hỗ trợ movie reviews
+      const response = await reportReviewAPI(movieId || targetId, menuReviewId, {
+        reason: reportReason,
+        note: reportNote
+      });
+
+      if (response.status === 'success') {
+        toast.success(response.message || 'Đã gửi báo cáo');
+        // Track review đã report
+        setReportedReviews(prev => new Set([...prev, menuReviewId]));
+        // Reset form
+        setReportDialogOpen(false);
+        setReportReason('');
+        setReportNote('');
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Không thể gửi báo cáo';
+      toast.error(message);
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
+
+  // Lý do báo cáo options
+  const REPORT_REASONS = [
+    { value: 'toxic', label: 'Nội dung độc hại' },
+    { value: 'spam', label: 'Spam / Quảng cáo' },
+    { value: 'hate', label: 'Kích động thù địch' },
+    { value: 'harassment', label: 'Quấy rối' },
+    { value: 'sexual', label: 'Nội dung người lớn' },
+    { value: 'spoiler', label: 'Tiết lộ nội dung phim' },
+    { value: 'other', label: 'Lý do khác' }
+  ];
 
   return (
     <Box sx={{ mt: 4 }}>
@@ -796,6 +938,19 @@ function CommentSection({ movieId, genreId, user }) {
           }
           label={<Typography sx={{ fontSize: '13px' }}>Ẩn toàn bộ spoiler</Typography>}
         />
+
+        {/* Chip hiển thị số bình luận đã ẩn */}
+        {hiddenByUser.size > 0 && (
+          <Chip
+            label={`Đã ẩn ${hiddenByUser.size} bình luận`}
+            onDelete={clearAllHidden}
+            variant="outlined"
+            sx={{
+              borderColor: COLORS.border,
+              color: COLORS.text
+            }}
+          />
+        )}
       </Box>
 
       {/* Danh sách bình luận */}
@@ -838,7 +993,7 @@ function CommentSection({ movieId, genreId, user }) {
       ) : (
         // Danh sách thẻ đánh giá
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {reviews.map((review) => (
+          {reviews.filter(review => !hiddenByUser.has(review._id)).map((review) => (
             <Paper key={review._id} ref={(el) => (reviewRefs.current[review._id] = el)} sx={{ ...cardStyle }}>
               {/* Phần đầu */}
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1.5 }}>
@@ -921,7 +1076,7 @@ function CommentSection({ movieId, genreId, user }) {
                   </Button>
                 </Box>
               ) : (
-                <Typography sx={{ fontSize: '14px', lineHeight: 1.6, color: COLORS.text }}>
+                <Typography component="div" sx={{ fontSize: '14px', lineHeight: 1.6, color: COLORS.text }}>
                   {review.hasSpoiler && (
                     <Chip
                       label="SPOILER"
@@ -967,7 +1122,7 @@ function CommentSection({ movieId, genreId, user }) {
                         fullWidth
                         multiline
                         minRows={2}
-                        placeholder="Viết trả lời... (tối thiểu 10 ký tự)"
+                        placeholder="Viết trả lời..."
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
                         size="small"
@@ -978,7 +1133,7 @@ function CommentSection({ movieId, genreId, user }) {
                           size="small"
                           variant="contained"
                           onClick={() => handleSubmitReply(review._id)}
-                          disabled={replyContent.length < 10 || submittingReply}
+                          disabled={replyContent.trim().length < 1 || submittingReply}
                           sx={{ bgcolor: COLORS.primary }}
                         >
                           {submittingReply ? <CircularProgress size={16} /> : 'Gửi'}
@@ -998,8 +1153,8 @@ function CommentSection({ movieId, genreId, user }) {
               {/* Danh sách trả lời */}
               {replies[review._id] && replies[review._id].length > 0 && !hiddenReplies[review._id] && (
                 <Box sx={{ mt: 2, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-                  {replies[review._id].map((reply) => (
-                    <Box key={reply._id} sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
+                  {replies[review._id].filter(reply => !hiddenByUser.has(reply._id)).map((reply) => (
+                    <Box key={reply._id} sx={{ display: 'flex', gap: 1.5, mb: 2, alignItems: 'flex-start' }}>
                       <Avatar src={reply.user?.avatar} sx={{ width: 32, height: 32 }} />
                       <Box sx={{ flex: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
@@ -1036,6 +1191,16 @@ function CommentSection({ movieId, genreId, user }) {
                           </Button>
                         </Box>
                       </Box>
+                      {/* Menu tùy chọn cho reply */}
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          setMenuAnchorEl(e.currentTarget);
+                          setMenuReviewId(reply._id);
+                        }}
+                      >
+                        <MoreVertIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
                     </Box>
                   ))}
                 </Box>
@@ -1070,23 +1235,148 @@ function CommentSection({ movieId, genreId, user }) {
 
 
 
-          {/* Tải thêm */}
-          {page < totalPages && (
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={handleLoadMore}
-                disabled={loadingMore}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 0.5,
+              mt: 3,
+              pt: 2,
+              borderTop: '1px solid #eee'
+            }}>
+              {/* Trang đầu */}
+              <Box
+                onClick={() => handlePageChange(1)}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: page === 1 ? 'default' : 'pointer',
+                  color: page === 1 ? '#ccc' : '#666',
+                  fontSize: '14px'
+                }}
               >
-                {loadingMore ? <CircularProgress size={20} /> : 'Xem thêm bình luận'}
-              </Button>
-            </Box>
-          )}
+                «
+              </Box>
+              {/* Trang trước */}
+              <Box
+                onClick={() => handlePageChange(page - 1)}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: page === 1 ? 'default' : 'pointer',
+                  color: page === 1 ? '#ccc' : '#666',
+                  fontSize: '14px'
+                }}
+              >
+                ‹
+              </Box>
 
-          {page >= totalPages && reviews.length > 0 && (
-            <Typography sx={{ textAlign: 'center', color: COLORS.textMuted, fontSize: '13px', mt: 2 }}>
-              Bạn đã xem hết bình luận.
-            </Typography>
+              {/* Page Numbers */}
+              {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = idx + 1;
+                } else if (page <= 3) {
+                  pageNum = idx + 1;
+                } else if (page >= totalPages - 2) {
+                  pageNum = totalPages - 4 + idx;
+                } else {
+                  pageNum = page - 2 + idx;
+                }
+
+                return (
+                  <Box
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      bgcolor: page === pageNum ? '#f5a623' : 'transparent',
+                      color: page === pageNum ? '#fff' : '#666',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      fontWeight: page === pageNum ? 600 : 400,
+                      '&:hover': {
+                        bgcolor: page === pageNum ? '#f5a623' : '#f0f0f0'
+                      }
+                    }}
+                  >
+                    {pageNum}
+                  </Box>
+                );
+              })}
+
+              {/* Dấu ba chấm (...) */}
+              {totalPages > 5 && page < totalPages - 2 && (
+                <Box sx={{ px: 1, color: '#666' }}>...</Box>
+              )}
+
+              {/* Trang cuối cùng (nếu >5 trang và chưa gần cuối) */}
+              {totalPages > 5 && page < totalPages - 2 && (
+                <Box
+                  onClick={() => handlePageChange(totalPages)}
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#666',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    '&:hover': { bgcolor: '#f0f0f0' }
+                  }}
+                >
+                  {totalPages}
+                </Box>
+              )}
+
+              {/* Trang sau */}
+              <Box
+                onClick={() => handlePageChange(page + 1)}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: page === totalPages ? 'default' : 'pointer',
+                  color: page === totalPages ? '#ccc' : '#666',
+                  fontSize: '14px'
+                }}
+              >
+                ›
+              </Box>
+              {/* Trang cuối */}
+              <Box
+                onClick={() => handlePageChange(totalPages)}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: page === totalPages ? 'default' : 'pointer',
+                  color: page === totalPages ? '#ccc' : '#666',
+                  fontSize: '14px'
+                }}
+              >
+                »
+              </Box>
+            </Box>
           )}
         </Box>
       )}
@@ -1104,48 +1394,99 @@ function CommentSection({ movieId, genreId, user }) {
         }}>
           <ShareIcon sx={{ mr: 1, fontSize: 18 }} /> Chia sẻ
         </MenuItem>
-        <MenuItem onClick={() => {
-          toast.info('Đã báo cáo bình luận');
-          setMenuAnchorEl(null);
-        }}>
-          <FlagIcon sx={{ mr: 1, fontSize: 18 }} /> Báo cáo
+        <MenuItem
+          onClick={() => {
+            if (!user) {
+              toast.warning('Vui lòng đăng nhập để báo cáo');
+              setLoginModalOpen(true);
+              setMenuAnchorEl(null);
+              return;
+            }
+            if (reportedReviews.has(menuReviewId)) {
+              toast.info('Bạn đã báo cáo bình luận này');
+              setMenuAnchorEl(null);
+              return;
+            }
+            setReportDialogOpen(true);
+            setMenuAnchorEl(null);
+          }}
+        >
+          <FlagIcon sx={{ mr: 1, fontSize: 18 }} />
+          {reportedReviews.has(menuReviewId) ? 'Đã báo cáo' : 'Báo cáo'}
         </MenuItem>
         <MenuItem onClick={() => {
+          const reviewIdToHide = menuReviewId;
+          hideReviewForMe(reviewIdToHide);
           setMenuAnchorEl(null);
+          toast.success('Đã ẩn 1 bình luận');
         }}>
           <BlockIcon sx={{ mr: 1, fontSize: 18 }} /> Ẩn bình luận này
         </MenuItem>
       </Menu>
 
       {/* Auth Modals */}
-      <LoginModal
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-        onSwitchToRegister={() => {
-          setLoginModalOpen(false);
-          setRegisterModalOpen(true);
-        }}
-        onForgotPassword={() => {
-          setLoginModalOpen(false);
-          setForgotPasswordModalOpen(true);
-        }}
-      />
-      <RegisterModal
-        open={registerModalOpen}
-        onClose={() => setRegisterModalOpen(false)}
-        onSwitchToLogin={() => {
-          setRegisterModalOpen(false);
-          setLoginModalOpen(true);
-        }}
-      />
-      <ForgotPasswordModal
-        open={forgotPasswordModalOpen}
-        onClose={() => setForgotPasswordModalOpen(false)}
-        onBackToLogin={() => {
-          setForgotPasswordModalOpen(false);
-          setLoginModalOpen(true);
-        }}
-      />
+
+
+      {/* Report Dialog */}
+      <Dialog
+        open={reportDialogOpen}
+        onClose={() => !submittingReport && setReportDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: COLORS.error, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <FlagIcon /> Báo cáo bình luận
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Hãy chọn lý do bạn muốn báo cáo bình luận này. Báo cáo của bạn sẽ được giữ bí mật.
+          </Typography>
+
+          <FormControl component="fieldset" fullWidth>
+            <RadioGroup
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+            >
+              <FormControlLabel value="toxic" control={<Radio />} label="Nội dung độc hại / Xúc phạm" />
+              <FormControlLabel value="spam" control={<Radio />} label="Spam / Quảng cáo" />
+              <FormControlLabel value="spoiler" control={<Radio />} label="Tiết lộ nội dung phim (Spoiler)" />
+              <FormControlLabel value="hate" control={<Radio />} label="Ngôn từ kích động gây war" />
+              <FormControlLabel value="sexual" control={<Radio />} label="Nội dung không phù hợp / Người lớn" />
+              <FormControlLabel value="harassment" control={<Radio />} label="Quấy rối" />
+              <FormControlLabel value="other" control={<Radio />} label="Lý do khác" />
+            </RadioGroup>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            variant="outlined"
+            placeholder="Mô tả thêm (tùy chọn)..."
+            value={reportNote}
+            onChange={(e) => setReportNote(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => setReportDialogOpen(false)}
+            disabled={submittingReport}
+            sx={{ color: COLORS.textMuted }}
+          >
+            Hủy
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleReportReview}
+            disabled={submittingReport}
+            startIcon={submittingReport && <CircularProgress size={20} color="inherit" />}
+          >
+            {submittingReport ? 'Đang gửi...' : 'Gửi báo cáo'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -142,3 +142,27 @@ export const replyToGenreReviewAPI = async (genreId, data) => {
   const response = await axiosInstance.post(`/genres/${genreId}/reviews`, data);
   return response.data;
 };
+
+// ============== REPORT APIs ==============
+
+/**
+ * Báo cáo một review vi phạm
+ * @param {string} movieId - ID phim
+ * @param {string} reviewId - ID review
+ * @param {object} data - { reason, note? }
+ */
+export const reportReviewAPI = async (movieId, reviewId, data) => {
+  const response = await axiosInstance.post(`/movies/${movieId}/reviews/${reviewId}/report`, data);
+  return response.data;
+};
+
+/**
+ * Kiểm tra user đã report review này chưa
+ * @param {string} movieId - ID phim
+ * @param {string} reviewId - ID review
+ */
+export const checkReportStatusAPI = async (movieId, reviewId) => {
+  const response = await axiosInstance.get(`/movies/${movieId}/reviews/${reviewId}/report/status`);
+  return response.data;
+};
+
