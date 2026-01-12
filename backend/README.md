@@ -177,6 +177,7 @@ docker-compose down
 docker-compose down -v
 ```
 docker-compose down; docker-compose build --no-cache backend; docker-compose up -d
+docker-compose restart backend
 ### Services
 
 | Service | Port | Mô tả |

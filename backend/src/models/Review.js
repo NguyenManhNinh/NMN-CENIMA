@@ -40,7 +40,7 @@ const reviewSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-    minLength: 10, // Reduced for replies
+    minLength: 1, // Giảm để cho phép replies ngắn với @mention
     trim: true
   },
   hasSpoiler: {
@@ -66,6 +66,28 @@ const reviewSchema = new mongoose.Schema({
     type: String,
     enum: ['PENDING', 'APPROVED', 'REJECTED'],
     default: 'APPROVED'
+  },
+  // === MODERATION FIELDS ===
+  // Bình luận bị ẩn bởi admin
+  isHidden: {
+    type: Boolean,
+    default: false
+  },
+  // Lý do ẩn
+  hiddenReason: {
+    type: String,
+    trim: true,
+    default: null
+  },
+  // Soft delete timestamp
+  deletedAt: {
+    type: Date,
+    default: null
+  },
+  // Số lượng report
+  reportCount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

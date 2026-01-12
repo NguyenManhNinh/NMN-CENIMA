@@ -97,7 +97,13 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false
     },
-    passwordChangedAt: Date
+    passwordChangedAt: Date,
+    // === Chat Ban ===
+    // Thời điểm hết hạn ban chat (null = không bị ban)
+    chatBanUntil: {
+      type: Date,
+      default: null
+    }
   },
   {
     timestamps: true // Tự động tạo createdAt và updatedAt

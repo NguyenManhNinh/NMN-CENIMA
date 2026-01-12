@@ -38,7 +38,8 @@ exports.getReviewsByMovie = catchAsync(async (req, res, next) => {
   const query = {
     movie: new mongoose.Types.ObjectId(movieId),
     status: 'APPROVED',
-    parentId: null // Only get root comments, not replies
+    parentId: null, // Only get root comments, not replies
+    $or: [{ isHidden: false }, { isHidden: { $exists: false } }]
   };
   if (verified === '1') query.isVerified = true;
   if (noSpoiler === '1') query.hasSpoiler = false;
@@ -376,7 +377,8 @@ exports.getReviewsByGenre = catchAsync(async (req, res, next) => {
   const query = {
     genre: new mongoose.Types.ObjectId(genreId),
     status: 'APPROVED',
-    parentId: null
+    parentId: null,
+    $or: [{ isHidden: false }, { isHidden: { $exists: false } }]
   };
   if (verified === '1') query.isVerified = true;
   if (noSpoiler === '1') query.hasSpoiler = false;

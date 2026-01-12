@@ -1,8 +1,13 @@
 const express = require('express');
 const reviewController = require('../../controllers/reviewController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const requireNotChatBanned = require('../../middlewares/chatBanMiddleware');
+const reviewReportRoutes = require('./reviewReportRoutes');
 
 const router = express.Router({ mergeParams: true }); // Để nhận movieId từ nested route
+
+// Mount report routes: /movies/:movieId/reviews/:reviewId/report
+router.use('/:reviewId/report', reviewReportRoutes);
 
 /**
  * @swagger
@@ -100,7 +105,7 @@ const router = express.Router({ mergeParams: true }); // Để nhận movieId t�
  */
 router.route('/')
   .get(reviewController.getReviewsByMovie)
-  .post(authMiddleware.protect, reviewController.createReview);
+  .post(authMiddleware.protect, requireNotChatBanned, reviewController.createReview);
 
 /**
  * @swagger
@@ -231,7 +236,7 @@ router.route('/:id')
  *                 liked:
  *                   type: boolean
  */
-router.post('/:id/like', authMiddleware.protect, reviewController.likeReview);
+router.post('/:id/like', authMiddleware.protect, requireNotChatBanned, reviewController.likeReview);
 
 /**
  * @swagger

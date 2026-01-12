@@ -1,6 +1,7 @@
 const express = require('express');
 const reviewController = require('../../controllers/reviewController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const requireNotChatBanned = require('../../middlewares/chatBanMiddleware');
 
 const router = express.Router({ mergeParams: true }); // Để nhận genreId từ nested route
 
@@ -13,13 +14,13 @@ const router = express.Router({ mergeParams: true }); // Để nhận genreId t�
 // POST /genres/:genreId/reviews - Tạo review mới
 router.route('/')
   .get(reviewController.getReviewsByGenre)
-  .post(authMiddleware.protect, reviewController.createGenreReview);
+  .post(authMiddleware.protect, requireNotChatBanned, reviewController.createGenreReview);
 
 // GET /genres/:genreId/reviews/summary - Lấy tóm tắt
 router.get('/summary', reviewController.getGenreReviewsSummary);
 
 // POST /genres/:genreId/reviews/:id/like - React
-router.post('/:id/like', authMiddleware.protect, reviewController.likeReview);
+router.post('/:id/like', authMiddleware.protect, requireNotChatBanned, reviewController.likeReview);
 
 // GET /genres/:genreId/reviews/:id/replies - Lấy replies
 router.get('/:id/replies', reviewController.getReplies);

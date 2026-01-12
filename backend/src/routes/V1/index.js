@@ -92,6 +92,10 @@ const defaultRoutes = [
   {
     path: '/faqs',
     route: require('./faqRoutes')
+  },
+  {
+    path: '/admin/reports',
+    route: require('./adminReportRoutes')
   }
 ];
 
