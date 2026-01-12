@@ -64,4 +64,57 @@ export const getYearsAPI = async () => {
   return response.data;
 };
 
+/**
+ * Toggle like/unlike cho genre
+ * @param {string} genreId - Genre ID
+ */
+export const toggleGenreLikeAPI = async (genreId) => {
+  const token = localStorage.getItem('accessToken');
+  const response = await api.post(`/${genreId}/like`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+};
+
+/**
+ * Lấy trạng thái like của user cho genre
+ * @param {string} genreId - Genre ID
+ */
+export const getGenreLikeStatusAPI = async (genreId) => {
+  const token = localStorage.getItem('accessToken');
+  const response = await api.get(`/${genreId}/like-status`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+};
+
+/**
+ * Rate genre (đánh giá bài viết)
+ * @param {string} genreId - Genre ID
+ * @param {number} rating - Rating value (1-10)
+ */
+export const rateGenreAPI = async (genreId, rating) => {
+  const token = localStorage.getItem('accessToken');
+  const response = await api.post(`/${genreId}/rate`, { rating }, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+};
+
+/**
+ * Increment view count cho genre
+ * @param {string} genreId - Genre ID
+ */
+export const incrementGenreViewAPI = async (genreId) => {
+  const response = await api.post(`/${genreId}/view`);
+  return response.data;
+};
+
 export default api;
+

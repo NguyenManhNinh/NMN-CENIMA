@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams, useParams } from 'react-router-dom';
 
 // Các API
-import { getAllMoviesAPI, toggleLikeAPI, getLikeStatusAPI } from '@/apis/movieApi';
-import { getAllGenresAPI, getCategoriesAPI, getCountriesAPI, getYearsAPI } from '@/apis/genreApi';
+import { getAllMoviesAPI } from '@/apis/movieApi';
+import { getAllGenresAPI, getCategoriesAPI, getCountriesAPI, getYearsAPI, toggleGenreLikeAPI, getGenreLikeStatusAPI } from '@/apis/genreApi';
 
 // Ngữ cảnh xác thực (Auth Context)
 import { useAuth } from '@/contexts/AuthContext';
@@ -281,33 +281,33 @@ function GenresPage() {
   const [likeStates, setLikeStates] = useState({});
   const { user } = useAuth();
 
-  // Xử lý Thích phim
-  const handleToggleLike = async (movieId, e) => {
+  // Xử lý Thích bài viết (Genre)
+  const handleToggleLike = async (genreId, e) => {
     e.stopPropagation(); // Ngăn click lan ra card
 
     if (!user) {
-      alert('Vui lòng đăng nhập để thích phim!');
+      alert('Vui lòng đăng nhập để thích bài viết!');
       return;
     }
 
     try {
-      const res = await toggleLikeAPI(movieId);
-      // Cập nhật local state
+      const res = await toggleGenreLikeAPI(genreId);
+      // Cập nhật local state - API trả về { success, liked, likeCount }
       setLikeStates(prev => ({
         ...prev,
-        [movieId]: {
-          liked: res?.data?.liked,
-          likeCount: res?.data?.likeCount
+        [genreId]: {
+          liked: res?.liked,
+          likeCount: res?.likeCount
         }
       }));
-      // Cập nhật movie trong danh sách
+      // Cập nhật genre trong danh sách
       setMovies(prev => prev.map(m =>
-        m._id === movieId ? { ...m, likeCount: res?.data?.likeCount } : m
+        m._id === genreId ? { ...m, likeCount: res?.likeCount } : m
       ));
     } catch (error) {
       console.error('Toggle like failed:', error);
       if (error.response?.status === 401) {
-        alert('Vui lòng đăng nhập để thích phim!');
+        alert('Vui lòng đăng nhập để thích bài viết!');
       }
     }
   };
@@ -448,9 +448,9 @@ function GenresPage() {
     fetchGenresData();
   }, [selectedGenre, selectedCountry, selectedYear, selectedStatus, selectedSort, currentPage, genres]);
 
-  // Chuyển hướng đến chi tiết phim
-  const handleMovieClick = (movieId) => {
-    navigate(`/phim/${movieId}`);
+  // Chuyển hướng đến chi tiết bài viết (Genre)
+  const handleMovieClick = (slug) => {
+    navigate(`/phim/${slug}`);
   };
 
   // Xử lý chuyển trang
@@ -741,12 +741,12 @@ function GenresPage() {
                   sx={styles.moviePoster}
                   image={movie.imageUrl || movie.bannerUrl}
                   alt={movie.name}
-                  onClick={() => handleMovieClick(movie._id)}
+                  onClick={() => handleMovieClick(movie.slug)}
                 />
                 <Box sx={styles.movieContent}>
                   <Typography
                     sx={styles.movieTitle}
-                    onClick={() => handleMovieClick(movie._id)}
+                    onClick={() => handleMovieClick(movie.slug)}
                   >
                     {movie.name}
                   </Typography>

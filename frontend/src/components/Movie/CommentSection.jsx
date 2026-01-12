@@ -45,7 +45,14 @@ import {
   createReviewAPI,
   likeReviewAPI,
   getRepliesAPI,
-  replyToReviewAPI
+  replyToReviewAPI,
+  // Genre Review APIs
+  getReviewsByGenreAPI,
+  getGenreReviewSummaryAPI,
+  createGenreReviewAPI,
+  likeGenreReviewAPI,
+  getGenreRepliesAPI,
+  replyToGenreReviewAPI
 } from '../../apis/reviewApi';
 
 // Bảng màu đồng bộ với website
@@ -194,10 +201,15 @@ const ReactionAction = ({ item, user, onReact }) => {
 
 /**
  * CommentSection - Component chính cho bình luận
- * @param {string} movieId - ID của phim
+ * @param {string} movieId - ID của phim (optional)
+ * @param {string} genreId - ID của bài viết/genre (optional)
  * @param {object} user - User hiện tại (null nếu chưa đăng nhập)
  */
-function CommentSection({ movieId, user }) {
+function CommentSection({ movieId, genreId, user }) {
+  // Xác định targetId và isGenre
+  const targetId = genreId || movieId;
+  const isGenre = !!genreId;
+
   // State cho Auth Modals
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
@@ -243,6 +255,7 @@ function CommentSection({ movieId, user }) {
 
   // Lấy dữ liệu đánh giá
   const fetchData = async (resetPage = true) => {
+    if (!targetId) return; // No target ID, skip
     try {
       if (resetPage) {
         setLoading(true);
@@ -259,9 +272,14 @@ function CommentSection({ movieId, user }) {
       if (filterVerified) params.verified = '1';
       if (filterNoSpoiler) params.noSpoiler = '1';
 
+      // Gọi đúng API dựa trên isGenre
       const [reviewsRes, summaryRes] = await Promise.all([
-        getReviewsByMovieAPI(movieId, params),
-        resetPage ? getReviewSummaryAPI(movieId) : Promise.resolve(null)
+        isGenre
+          ? getReviewsByGenreAPI(targetId, params)
+          : getReviewsByMovieAPI(targetId, params),
+        resetPage
+          ? (isGenre ? getGenreReviewSummaryAPI(targetId) : getReviewSummaryAPI(targetId))
+          : Promise.resolve(null)
       ]);
 
       if (reviewsRes.status === 'success') {
@@ -270,7 +288,7 @@ function CommentSection({ movieId, user }) {
         } else {
           setReviews(prev => [...prev, ...reviewsRes.data.reviews]);
         }
-        setTotalPages(reviewsRes.data.pagination.totalPages);
+        setTotalPages(reviewsRes.data.pagination?.totalPages || 1);
       }
 
       if (summaryRes?.status === 'success') {
@@ -278,7 +296,10 @@ function CommentSection({ movieId, user }) {
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
-      toast.error('Không thể tải bình luận');
+      // Không hiển thị toast error nếu chưa có reviews
+      if (error.response?.status !== 404) {
+        toast.error('Không thể tải bình luận');
+      }
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -286,10 +307,10 @@ function CommentSection({ movieId, user }) {
   };
 
   useEffect(() => {
-    if (movieId) {
+    if (targetId) {
       fetchData(true);
     }
-  }, [movieId, sortBy, filterVerified, filterNoSpoiler]);
+  }, [targetId, sortBy, filterVerified, filterNoSpoiler]);
 
   // Gửi đánh giá
   const handleSubmitReview = async () => {
@@ -311,12 +332,9 @@ function CommentSection({ movieId, user }) {
 
     try {
       setSubmitting(true);
-      const response = await createReviewAPI(movieId, {
-        rating,
-        title,
-        content,
-        hasSpoiler
-      });
+      const response = isGenre
+        ? await createGenreReviewAPI(targetId, { rating, title, content, hasSpoiler })
+        : await createReviewAPI(targetId, { rating, title, content, hasSpoiler });
 
       if (response.status === 'success') {
         toast.success('Đã đăng bình luận. Cảm ơn bạn!');
@@ -346,7 +364,9 @@ function CommentSection({ movieId, user }) {
     }
 
     try {
-      const response = await likeReviewAPI(movieId, reviewId, type);
+      const response = isGenre
+        ? await likeGenreReviewAPI(targetId, reviewId, type)
+        : await likeReviewAPI(targetId, reviewId, type);
       if (response.status === 'success') {
         const { likesCount, myReaction, reactions } = response.data;
 
@@ -377,7 +397,9 @@ function CommentSection({ movieId, user }) {
     }
 
     try {
-      const response = await likeReviewAPI(movieId, replyId, type);
+      const response = isGenre
+        ? await likeGenreReviewAPI(targetId, replyId, type)
+        : await likeReviewAPI(targetId, replyId, type);
       if (response.status === 'success') {
         const { likesCount, myReaction, reactions } = response.data;
 
@@ -462,7 +484,9 @@ function CommentSection({ movieId, user }) {
 
     setLoadingReplies(prev => ({ ...prev, [reviewId]: true }));
     try {
-      const response = await getRepliesAPI(movieId, reviewId);
+      const response = isGenre
+        ? await getGenreRepliesAPI(targetId, reviewId)
+        : await getRepliesAPI(targetId, reviewId);
       if (response.status === 'success') {
         setReplies(prev => ({ ...prev, [reviewId]: response.data.replies }));
       }
@@ -499,10 +523,9 @@ function CommentSection({ movieId, user }) {
 
     setSubmittingReply(true);
     try {
-      const response = await replyToReviewAPI(movieId, {
-        content: replyContent,
-        parentId
-      });
+      const response = isGenre
+        ? await replyToGenreReviewAPI(targetId, { content: replyContent, parentId })
+        : await replyToReviewAPI(targetId, { content: replyContent, parentId });
 
       if (response.status === 'success') {
         toast.success('Đã gửi trả lời!');

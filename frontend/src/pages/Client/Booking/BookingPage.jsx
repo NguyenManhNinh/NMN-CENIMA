@@ -560,23 +560,18 @@ function BookingPage() {
                         <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
                       ) : (
                         movie.genres.map((genre, idx) => {
-                          const genreName = typeof genre === 'string' ? genre : genre?.name || '';
+                          // Lấy category (thể loại phim) thay vì name (tên bài viết)
+                          const genreCategory = typeof genre === 'string' ? genre : genre?.category || genre?.name || '';
+                          if (!genreCategory) return null; // Không hiển thị nếu không có category
                           return (
                             <Chip
                               key={idx}
-                              label={genreName}
+                              label={genreCategory}
                               size="small"
                               variant="outlined"
                               onClick={() => {
-                                const slug = genreName
-                                  ?.toLowerCase()
-                                  .normalize('NFD')
-                                  .replace(/[\u0300-\u036f]/g, '')
-                                  .replace(/đ/g, 'd')
-                                  .replace(/Đ/g, 'D')
-                                  .replace(/\s+/g, '-')
-                                  .replace(/[^\w-]/g, '');
-                                navigate(`/the-loai-phim/${slug}`);
+                                // Navigate đến GenresPage với category filter
+                                navigate(`/the-loai-phim?the-loai=${encodeURIComponent(genreCategory)}`);
                               }}
                               sx={{
                                 fontSize: '0.85rem',
@@ -718,23 +713,18 @@ function BookingPage() {
                     <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
                   ) : (
                     movie.genres.map((genre, idx) => {
-                      const genreName = typeof genre === 'string' ? genre : genre?.name || '';
+                      // Lấy category (thể loại phim)
+                      const genreCategory = typeof genre === 'string' ? genre : genre?.category || genre?.name || '';
+                      if (!genreCategory) return null;
                       return (
                         <Chip
                           key={idx}
-                          label={genreName}
+                          label={genreCategory}
                           size="small"
                           variant="outlined"
                           onClick={() => {
-                            const slug = genreName
-                              ?.toLowerCase()
-                              .normalize('NFD')
-                              .replace(/[\u0300-\u036f]/g, '')
-                              .replace(/đ/g, 'd')
-                              .replace(/Đ/g, 'D')
-                              .replace(/\s+/g, '-')
-                              .replace(/[^\w-]/g, '');
-                            navigate(`/the-loai-phim/${slug}`);
+                            // Navigate đến GenresPage với category filter
+                            navigate(`/the-loai-phim?the-loai=${encodeURIComponent(genreCategory)}`);
                           }}
                           sx={{
                             fontSize: { xs: '0.7rem', sm: '0.85rem' },

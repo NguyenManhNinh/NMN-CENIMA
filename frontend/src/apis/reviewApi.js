@@ -80,3 +80,65 @@ export const replyToReviewAPI = async (movieId, data) => {
   const response = await axiosInstance.post(`/movies/${movieId}/reviews`, data);
   return response.data;
 };
+
+// ============== GENRE REVIEW APIs ==============
+
+/**
+ * Lấy danh sách reviews của bài viết (genre)
+ * @param {string} genreId - ID genre
+ * @param {object} params - Query params: sort, verified, noSpoiler, page, limit
+ */
+export const getReviewsByGenreAPI = async (genreId, params = {}) => {
+  const response = await axiosInstance.get(`/genres/${genreId}/reviews`, { params });
+  return response.data;
+};
+
+/**
+ * Lấy tóm tắt reviews cho genre (điểm trung bình + phân bố sao)
+ * @param {string} genreId - ID genre
+ */
+export const getGenreReviewSummaryAPI = async (genreId) => {
+  const response = await axiosInstance.get(`/genres/${genreId}/reviews/summary`);
+  return response.data;
+};
+
+/**
+ * Tạo review mới cho genre
+ * @param {string} genreId - ID genre
+ * @param {object} data - { rating, title?, content, hasSpoiler? }
+ */
+export const createGenreReviewAPI = async (genreId, data) => {
+  const response = await axiosInstance.post(`/genres/${genreId}/reviews`, data);
+  return response.data;
+};
+
+/**
+ * Toggle like/reaction review cho genre
+ * @param {string} genreId - ID genre
+ * @param {string} reviewId - ID review
+ * @param {string} type - Reaction type
+ */
+export const likeGenreReviewAPI = async (genreId, reviewId, type = 'LIKE') => {
+  const response = await axiosInstance.post(`/genres/${genreId}/reviews/${reviewId}/like`, { type });
+  return response.data;
+};
+
+/**
+ * Lấy danh sách replies của một comment trong genre
+ * @param {string} genreId - ID genre
+ * @param {string} reviewId - ID comment gốc
+ */
+export const getGenreRepliesAPI = async (genreId, reviewId) => {
+  const response = await axiosInstance.get(`/genres/${genreId}/reviews/${reviewId}/replies`);
+  return response.data;
+};
+
+/**
+ * Reply to a comment trong genre
+ * @param {string} genreId - ID genre
+ * @param {object} data - { content, parentId }
+ */
+export const replyToGenreReviewAPI = async (genreId, data) => {
+  const response = await axiosInstance.post(`/genres/${genreId}/reviews`, data);
+  return response.data;
+};

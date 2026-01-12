@@ -12,13 +12,13 @@ import ClientLayout from './components/Layout/ClientLayout';
 // Pages - Client
 import HomePage from './pages/Client/HomePage';
 import BookingPage from './pages/Client/Booking';
-import { MoviesPage, MovieDetailPage } from './pages/Client/Movie';
+import { MoviesPage } from './pages/Client/Movie';
 import SeatSelectionPage from './pages/Client/SeatSelection';
 import ComboPage from './pages/Client/Combo';
 import PaymentConfirmPage from './pages/Client/Payment';
 import PaymentResultPage from './pages/Client/Payment/PaymentResultPage';
 import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
-import { GenresPage } from './pages/Client/Genre';
+import { GenresPage, GenresDetailPage } from './pages/Client/Genre';
 
 function App() {
   return (
@@ -57,7 +57,8 @@ function App() {
 
 
             {/* Chi tiết phim */}
-            <Route path="phim/:id" element={<MovieDetailPage />} />
+            {/* Chi tiết bài viết Góc điện ảnh (Genre) */}
+            <Route path="phim/:slug" element={<GenresDetailPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

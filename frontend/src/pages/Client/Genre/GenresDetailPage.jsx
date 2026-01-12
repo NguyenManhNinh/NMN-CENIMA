@@ -1,11 +1,11 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
-// Import Hook Call API
-import { getMovieAPI, rateMovieAPI, getNowShowingMoviesAPI, incrementViewAPI } from '../../../apis/movieApi';
+// Import APIs
+import { getGenreBySlugAPI, getGenreLikeStatusAPI, toggleGenreLikeAPI, rateGenreAPI, incrementGenreViewAPI } from '../../../apis/genreApi';
+import { getNowShowingMoviesAPI } from '../../../apis/movieApi';
 
-// Import các thành phần giao diện từ Material UI
+// Import MUI Components
 import {
   Box,
   Container,
@@ -15,13 +15,11 @@ import {
   Chip,
   Paper,
   Breadcrumbs,
-  Divider,
-  Avatar,
-  CircularProgress,
   Dialog,
   DialogContent,
   IconButton,
-  Rating
+  Rating,
+  CircularProgress
 } from '@mui/material';
 
 // Import các biểu tượng từ Material UI
@@ -72,14 +70,14 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
-// COMPONENT CHÍNH - TRANG CHI TIẾT PHIM
-function MovieDetailPage() {
-  const { id } = useParams();
+// COMPONENT CHÍNH - TRANG CHI TIẾT BÀI VIẾT (GENRES)
+function GenresDetailPage() {
+  const { slug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   // Khởi tạo State
-  const [movie, setMovie] = useState(null);
+  const [genre, setGenre] = useState(null);
   const [loading, setLoading] = useState(true);
   const [otherMovies, setOtherMovies] = useState([]);
 
@@ -106,55 +104,79 @@ function MovieDetailPage() {
   // Thời gian chờ giữa các lần tính lượt xem (30 phút = 30 * 60 * 1000 ms)
   const VIEW_COOLDOWN_MS = 30 * 60 * 1000;
 
-  // Tải dữ liệu phim từ API
+  // Tải dữ liệu bài viết từ API
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch chi tiết phim từ API
-        const movieRes = await getMovieAPI(id);
-        setMovie(movieRes?.data?.movie || null);
+        // Fetch chi tiết Genre (bài viết) từ API
+        const genreRes = await getGenreBySlugAPI(slug);
+        const genreData = genreRes?.data || genreRes;
 
-        // Fetch phim đang chiếu từ API cho sidebar
-        const nowShowingRes = await getNowShowingMoviesAPI(5);
-        const nowShowingMovies = nowShowingRes?.data?.movies || [];
-        setOtherMovies(nowShowingMovies.filter(m => m._id !== id).slice(0, 4));
+        // Biến để lưu viewCount có thể đã được tăng
+        let updatedViewCount = genreData?.viewCount || 0;
 
-        // Tăng lượt xem phim (với cooldown window 30 phút)
-        if (!viewIncrementedRef.current[id]) {
-          viewIncrementedRef.current[id] = true;
+        // Tăng lượt xem bài viết (với cooldown window 30 phút)
+        if (genreData?._id && !viewIncrementedRef.current[genreData._id]) {
+          viewIncrementedRef.current[genreData._id] = true;
 
-          const viewKey = `movie_view_${id}`;
+          const viewKey = `genre_view_${genreData._id}`;
           const lastViewTime = localStorage.getItem(viewKey);
           const now = Date.now();
 
           // Chỉ tăng view nếu chưa xem hoặc đã quá cooldown window
           if (!lastViewTime || (now - parseInt(lastViewTime, 10)) > VIEW_COOLDOWN_MS) {
             localStorage.setItem(viewKey, now.toString());
-            incrementViewAPI(id).catch(err => console.log('View increment failed:', err));
+            try {
+              const viewRes = await incrementGenreViewAPI(genreData._id);
+              // Cập nhật viewCount từ response API
+              if (viewRes?.viewCount) {
+                updatedViewCount = viewRes.viewCount;
+              } else {
+                // Fallback: tăng thủ công nếu API không trả viewCount
+                updatedViewCount = (genreData?.viewCount || 0) + 1;
+              }
+            } catch (err) {
+              console.log('View increment failed:', err);
+              // Vẫn tăng thủ công để UI hiển thị đúng
+              updatedViewCount = (genreData?.viewCount || 0) + 1;
+            }
           }
         }
+
+        // Set genre với viewCount đã cập nhật
+        setGenre({
+          ...genreData,
+          viewCount: updatedViewCount
+        });
+
+        // Fetch phim đang chiếu từ API cho sidebar
+        const nowShowingRes = await getNowShowingMoviesAPI(5);
+        const nowShowingMovies = nowShowingRes?.data?.movies || [];
+        setOtherMovies(nowShowingMovies.slice(0, 4));
+
       } catch (error) {
-        console.error('Error fetching movie data:', error);
-        setMovie(null);
+        console.error('Error fetching genre data:', error);
+        setGenre(null);
         setOtherMovies([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
+    if (slug) {
       fetchData();
     }
-  }, [id]);
+  }, [slug]);
 
 
 
 
 
-  // Xử lý sự kiện mua vé
+  // Xử lý sự kiện mua vé (không áp dụng cho genres - giữ lại để tương thích)
   const handleBuyTicket = () => {
-    navigate(`/dat-ve/${id}`);
+    // Genres không có chức năng mua vé
+    navigate('/the-loai-phim');
   };
 
   // Xử lý thư viện ảnh
@@ -164,27 +186,27 @@ function MovieDetailPage() {
   };
 
   const handleNextImage = () => {
-    if (movie?.stills) {
-      setCurrentImageIndex((prev) => (prev + 1) % movie.stills.length);
+    if (genre?.stills) {
+      setCurrentImageIndex((prev) => (prev + 1) % genre.stills.length);
     }
   };
 
   const handlePrevImage = () => {
-    if (movie?.stills) {
-      setCurrentImageIndex((prev) => (prev - 1 + movie.stills.length) % movie.stills.length);
+    if (genre?.stills) {
+      setCurrentImageIndex((prev) => (prev - 1 + genre.stills.length) % genre.stills.length);
     }
   };
 
   // Tự động chuyển ảnh cho thư viện
   useEffect(() => {
     let interval;
-    if (openGallery && isAutoPlay && movie?.stills?.length > 1) {
+    if (openGallery && isAutoPlay && genre?.stills?.length > 1) {
       interval = setInterval(() => {
-        setCurrentImageIndex((prev) => (prev + 1) % movie.stills.length);
+        setCurrentImageIndex((prev) => (prev + 1) % genre.stills.length);
       }, 3000); // Chuyển ảnh mỗi 3 giây
     }
     return () => clearInterval(interval);
-  }, [openGallery, isAutoPlay, movie?.stills?.length]);
+  }, [openGallery, isAutoPlay, genre?.stills?.length]);
 
   // Hiển thị màn hình chờ (Loading)
   if (loading) {
@@ -238,12 +260,12 @@ function MovieDetailPage() {
     );
   }
 
-  // Không tìm thấy phim
-  if (!movie) {
+  // Không tìm thấy bài viết
+  if (!genre) {
     return (
       <Box sx={{ textAlign: 'center', py: 10 }}>
-        <Typography variant="h6" gutterBottom>Không tìm thấy phim</Typography>
-        <Button onClick={() => navigate(-1)} variant="outlined">Quay lại</Button>
+        <Typography variant="h6" gutterBottom>Không tìm thấy bài viết</Typography>
+        <Button onClick={() => navigate('/the-loai-phim')} variant="outlined">Quay lại danh sách</Button>
       </Box>
     );
   }
@@ -429,7 +451,7 @@ function MovieDetailPage() {
               <Link to="/" style={{ textDecoration: 'none', color: COLORS.textMuted, fontSize: isMobile ? '13px' : '14px' }}>Trang chủ</Link>
               <Link to="/the-loai-phim" style={{ textDecoration: 'none', color: COLORS.textMuted, fontSize: isMobile ? '13px' : '14px' }}>Phim</Link>
               <Typography sx={{ color: COLORS.text, fontSize: isMobile ? '13px' : '14px', fontWeight: 500 }}>
-                {movie.title}
+                {genre.name}
               </Typography>
             </Breadcrumbs>
           </Box>
@@ -447,8 +469,8 @@ function MovieDetailPage() {
                   <Box sx={{ position: 'relative', mb: 2 }}>
                     <Box
                       component="img"
-                      src={movie.bannerUrl || movie.posterUrl}
-                      alt={movie.title}
+                      src={genre.bannerUrl || genre.imageUrl}
+                      alt={genre.name}
                       sx={{
                         width: '100%',
                         aspectRatio: '16/9',
@@ -457,7 +479,7 @@ function MovieDetailPage() {
                       }}
                     />
                     {/* Play Button Overlay */}
-                    {movie.trailerUrl && (
+                    {genre.trailerUrl && (
                       <Box
                         onClick={() => setOpenTrailerModal(true)}
                         sx={{
@@ -481,10 +503,10 @@ function MovieDetailPage() {
                     {/* Title + Age */}
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}>
                       <Typography variant="h5" sx={{ fontWeight: 700, color: '#333', lineHeight: 1.3, fontSize: '20px' }}>
-                        {movie.title}
+                        {genre.name}
                       </Typography>
                       <Chip
-                        label={movie.ageRating}
+                        label={genre.ageRating}
                         size="small"
                         sx={{
                           bgcolor: COLORS.orange, color: '#fff', fontWeight: 700,
@@ -495,39 +517,47 @@ function MovieDetailPage() {
 
                     {/* Meta Info */}
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 8, rowGap: 1.5, mb: 2, color: COLORS.textLight, fontSize: '12px' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <AccessTimeIcon sx={{ fontSize: 16 }} />
-                        <Typography fontSize="inherit" fontWeight={500}>{movie.duration} Phút</Typography>
-                      </Box>
+                      {/* Duration - Ẩn nếu không có */}
+                      {genre.duration && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <AccessTimeIcon sx={{ fontSize: 16 }} />
+                          <Typography fontSize="inherit" fontWeight={500}>{genre.duration} Phút</Typography>
+                        </Box>
+                      )}
+                      {/* Release Date - Hiển thị createdAt nếu không có releaseDate */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <CalendarTodayIcon sx={{ fontSize: 16 }} />
-                        <Typography fontSize="inherit" fontWeight={500}>{formatDate(movie.releaseDate)}</Typography>
+                        <Typography fontSize="inherit" fontWeight={500}>
+                          {formatDate(genre.releaseDate || genre.createdAt)}
+                        </Typography>
                       </Box>
+                      {/* View Count */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <VisibilityIcon sx={{ fontSize: 16, color: '#999' }} />
-                        <Typography fontSize="inherit">{movie.viewCount?.toLocaleString() || 0}</Typography>
+                        <Typography fontSize="inherit">{genre.viewCount?.toLocaleString() || 0}</Typography>
                       </Box>
+                      {/* Rating */}
                       <Box
                         onClick={() => setOpenRatingModal(true)}
                         sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', lineHeight: 1 }}
                       >
                         <StarIcon sx={{ fontSize: 16, color: COLORS.orange, display: 'block' }} />
                         <Typography fontSize="inherit" fontWeight={700} color="#333" sx={{ lineHeight: 1 }}>
-                          {movie.rating}
+                          {genre.rating || 0}
                         </Typography>
                         <Typography fontSize="inherit" color="#999" sx={{ lineHeight: 1 }}>
-                          ({movie.ratingCount})
+                          ({genre.ratingCount || 0} đánh giá)
                         </Typography>
                       </Box>
                     </Box>
 
                     {/* Details List */}
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>
-                      <DetailItem label="Quốc gia" value={movie.country} />
-                      <DetailItem label="Diễn viên" value={movie.actors} />
-                      <DetailItem label="Nhà sản xuất" value={movie.studio} />
-                      <DetailItem label="Thể loại" value={movie.genres} />
-                      <DetailItem label="Đạo diễn" value={movie.director} />
+                      <DetailItem label="Quốc gia" value={genre.country} />
+                      <DetailItem label="Diễn viên" value={genre.actors} />
+                      <DetailItem label="Nhà sản xuất" value={genre.studio} />
+                      <DetailItem label="Thể loại" value={genre.category} />
+                      <DetailItem label="Đạo diễn" value={genre.director} />
 
                     </Box>
 
@@ -553,7 +583,7 @@ function MovieDetailPage() {
                         Nội dung phim
                       </Typography>
                       <Typography sx={{ color: '#555', lineHeight: 1.6, fontSize: '14px', textAlign: 'justify' }}>
-                        {movie.description || 'Chưa cập nhật nội dung.'}
+                        {genre.description || 'Chưa cập nhật nội dung.'}
                       </Typography>
                     </Box>
                   </Box>
@@ -567,8 +597,8 @@ function MovieDetailPage() {
                       <Box sx={{ position: 'relative' }}>
                         <Box
                           component="img"
-                          src={movie.posterUrl}
-                          alt={movie.title}
+                          src={genre.imageUrl}
+                          alt={genre.name}
                           sx={{
                             width: '100%',
                             maxWidth: { xs: 160, sm: 200, md: 240 },
@@ -577,7 +607,7 @@ function MovieDetailPage() {
                             borderRadius: 2
                           }}
                         />
-                        {movie.trailerUrl && (
+                        {genre.trailerUrl && (
                           <Box
                             onClick={() => setOpenTrailerModal(true)}
                             sx={{
@@ -600,43 +630,47 @@ function MovieDetailPage() {
                       {/* Title */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                         <Typography sx={{ fontWeight: 700, fontSize: '1.6rem', color: COLORS.dark }}>
-                          {movie.title}
+                          {genre.name}
                         </Typography>
-                        <Chip label={movie.ageRating} size="small" sx={{ bgcolor: COLORS.orange, color: '#000', fontWeight: 700 }} />
+                        <Chip label={genre.ageRating} size="small" sx={{ bgcolor: COLORS.orange, color: '#000', fontWeight: 700 }} />
                       </Box>
 
                       {/* Meta */}
                       <Box sx={{ display: 'flex', gap: 2, mb: 1, color: COLORS.textLight }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <AccessTimeIcon fontSize="small" /> <Typography>{movie.duration} Phút</Typography>
-                        </Box>
+                        {/* Duration - Ẩn nếu không có */}
+                        {genre.duration && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <AccessTimeIcon fontSize="small" /> <Typography>{genre.duration} Phút</Typography>
+                          </Box>
+                        )}
+                        {/* Release Date - fallback to createdAt */}
                         <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, lineHeight: 1 }}>
                           <CalendarTodayIcon sx={{ fontSize: 16, display: 'block' }} />
                           <Typography fontSize="inherit" fontWeight={500} sx={{ lineHeight: 1 }}>
-                            {formatDate(movie.releaseDate)}
+                            {formatDate(genre.releaseDate || genre.createdAt)}
                           </Typography>
                         </Box>
                       </Box>
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: COLORS.textLight }}>
-                          <VisibilityIcon fontSize="small" /> <Typography>{movie.viewCount?.toLocaleString() || 0}</Typography>
+                          <VisibilityIcon fontSize="small" /> <Typography>{genre.viewCount?.toLocaleString() || 0}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }} onClick={() => setOpenRatingModal(true)}>
                           <StarIcon sx={{ fontSize: 16, color: COLORS.orange, position: 'relative', top: 1 }} />
-                          <Typography fontWeight={600}>{movie.rating}</Typography>
-                          <Typography color={COLORS.textMuted}>({movie.ratingCount} đánh giá)</Typography>
+                          <Typography fontWeight={600}>{genre.rating || 0}</Typography>
+                          <Typography color={COLORS.textMuted}>({genre.ratingCount || 0} đánh giá)</Typography>
                         </Box>
                       </Box>
 
                       {/* Details Grid */}
                       {/* Lưới thông tin chi tiết */}
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <DetailItem label="Quốc gia" value={movie.country || 'Chưa cập nhật'} />
-                        <DetailItem label="Nhà sản xuất" value={movie.studio || 'Chưa cập nhật'} />
-                        <DetailItem label="Thể loại" value={movie.genres || ['Chưa cập nhật']} />
-                        <DetailItem label="Đạo diễn" value={movie.director || 'Chưa cập nhật'} />
-                        <DetailItem label="Diễn viên" value={movie.actors?.map(a => a.name || a) || ['Đang cập nhật']} />
+                        <DetailItem label="Quốc gia" value={genre.country || 'Chưa cập nhật'} />
+                        <DetailItem label="Nhà sản xuất" value={genre.studio || 'Chưa cập nhật'} />
+                        <DetailItem label="Thể loại" value={genre.category || ['Chưa cập nhật']} />
+                        <DetailItem label="Đạo diễn" value={genre.director || 'Chưa cập nhật'} />
+                        <DetailItem label="Diễn viên" value={genre.actors?.map(a => a.name || a) || ['Đang cập nhật']} />
                       </Box>
                     </Grid>
                   </Grid>
@@ -647,7 +681,7 @@ function MovieDetailPage() {
                       NỘI DUNG PHIM
                     </Typography>
                     <Typography sx={{ color: COLORS.text, lineHeight: 1.8, fontSize: '14px', whiteSpace: 'pre-line', textAlign: 'justify' }}>
-                      {movie.description}
+                      {genre.description}
                     </Typography>
                   </Box>
                 </>
@@ -673,7 +707,7 @@ function MovieDetailPage() {
                 }}>
                   HÌNH TRONG PHIM
                 </Typography>
-                {movie.stills && movie.stills.length > 0 ? (
+                {genre.stills && genre.stills.length > 0 ? (
                   <Box sx={{
                     display: { xs: 'flex', sm: 'grid' },
                     gridTemplateColumns: { sm: 'repeat(4, 1fr)' },
@@ -683,7 +717,7 @@ function MovieDetailPage() {
                     '::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for cleaner look
                     scrollbarWidth: 'none'
                   }}>
-                    {movie.stills.map((still, idx) => (
+                    {genre.stills.map((still, idx) => (
                       <Box
                         key={idx}
                         component="img"
@@ -730,9 +764,9 @@ function MovieDetailPage() {
                 }}>
                   DIỄN VIÊN
                 </Typography>
-                {movie.actors && movie.actors.length > 0 ? (
+                {genre.actors && genre.actors.length > 0 ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                    {movie.actors.map((actor, idx) => {
+                    {genre.actors.map((actor, idx) => {
                       const actorName = typeof actor === 'object' ? actor.name : actor;
                       const actorSlug = actorName
                         ?.toLowerCase()
@@ -785,7 +819,7 @@ function MovieDetailPage() {
               </Box>
 
               {/* BÌNH LUẬN PHIM */}
-              <CommentSection movieId={id} user={user} />
+              <CommentSection genreId={genre?._id} user={user} />
             </Grid>
 
             {/* ===== CỘT PHẢI: Thanh bên - Phim đang chiếu ===== */}
@@ -807,7 +841,7 @@ function MovieDetailPage() {
                   Phim đang chiếu
                 </Typography>
 
-                {/* Movie Cards - Vertical Layout */}
+                {/* genre Cards - Vertical Layout */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {otherMovies.slice(0, 3).map((otherMovie) => (
                     <Box
@@ -817,7 +851,7 @@ function MovieDetailPage() {
                       sx={{
                         textDecoration: 'none',
                         display: 'block',
-                        '&:hover .movie-overlay': {
+                        '&:hover .genre-overlay': {
                           opacity: 1
                         }
                       }}
@@ -833,8 +867,8 @@ function MovieDetailPage() {
                         {/* Poster Image */}
                         <Box
                           component="img"
-                          src={otherMovie.bannerUrl || otherMovie.posterUrl}
-                          alt={otherMovie.title}
+                          src={otherMovie.bannerUrl || otherMovie.imageUrl}
+                          alt={otherMovie.name}
                           sx={{
                             width: '100%',
                             height: '100%',
@@ -893,7 +927,7 @@ function MovieDetailPage() {
 
                         {/* Hover Overlay with "Mua vé" button */}
                         <Box
-                          className="movie-overlay"
+                          className="genre-overlay"
                           sx={{
                             position: 'absolute',
                             top: 0,
@@ -929,7 +963,7 @@ function MovieDetailPage() {
                         </Box>
                       </Box>
 
-                      {/* Movie Title - Below Poster */}
+                      {/* genre Title - Below Poster */}
                       <Typography sx={{
                         mt: 0.75,
                         fontWeight: 600,
@@ -940,7 +974,7 @@ function MovieDetailPage() {
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden'
                       }}>
-                        {otherMovie.title}
+                        {otherMovie.name}
                       </Typography>
                     </Box>
                   ))}
@@ -999,21 +1033,21 @@ function MovieDetailPage() {
           <CloseIcon />
         </IconButton>
 
-        {/* Movie Banner */}
+        {/* genre Banner */}
         <Box
           sx={{
             width: '100%',
             height: 250,
-            background: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${movie?.bannerUrl || movie?.posterUrl})`,
+            background: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${genre?.bannerUrl || genre?.imageUrl})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
         />
 
         <DialogContent sx={{ textAlign: 'center', pb: 4 }}>
-          {/* Movie Title */}
+          {/* genre Title */}
           <Typography sx={{ fontWeight: 700, fontSize: '18px', color: COLORS.dark, mb: 3 }}>
-            {movie?.title}
+            {genre?.name}
           </Typography>
 
           {/* Current Rating */}
@@ -1032,10 +1066,10 @@ function MovieDetailPage() {
           >
             <StarIcon sx={{ color: COLORS.orange, fontSize: 28 }} />
             <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: COLORS.dark }}>
-              {movie?.rating}
+              {genre?.rating}
             </Typography>
             <Typography sx={{ fontSize: '0.9rem', color: COLORS.textMuted }}>
-              ({movie?.ratingCount || 0} đánh giá)
+              ({genre?.ratingCount || 0} đánh giá)
             </Typography>
           </Box>
 
@@ -1086,12 +1120,12 @@ function MovieDetailPage() {
 
                 try {
                   // Token is automatically added by interceptor
-                  const result = await rateMovieAPI(movie._id, userRating);
-                  // Update local movie state with new rating
-                  setMovie(prev => ({
+                  const result = await rateGenreAPI(genre._id, userRating);
+                  // Update local genre state with new rating
+                  setGenre(prev => ({
                     ...prev,
-                    rating: result.data.rating,
-                    ratingCount: result.data.ratingCount
+                    rating: result?.data?.rating || result?.rating,
+                    ratingCount: result?.data?.ratingCount || result?.ratingCount
                   }));
                   setOpenRatingModal(false);
                   alert('Đánh giá thành công!');
@@ -1127,8 +1161,8 @@ function MovieDetailPage() {
       <TrailerModal
         open={openTrailerModal}
         onClose={() => setOpenTrailerModal(false)}
-        trailerUrl={movie?.trailerUrl}
-        movieTitle={movie?.title}
+        trailerUrl={genre?.trailerUrl}
+        movieTitle={genre?.name}
       />
 
       {/* ==================== THƯ VIỆN ẢNH (LB) ==================== */}
@@ -1222,11 +1256,11 @@ function MovieDetailPage() {
           </IconButton>
 
           {/* Current Image */}
-          {movie?.stills && (
+          {genre?.stills && (
             <Box
               component="img"
               className="gallery-image"
-              src={typeof movie.stills[currentImageIndex] === 'object' ? movie.stills[currentImageIndex]?.url : movie.stills[currentImageIndex]}
+              src={typeof genre.stills[currentImageIndex] === 'object' ? genre.stills[currentImageIndex]?.url : genre.stills[currentImageIndex]}
               alt={`Scene ${currentImageIndex + 1}`}
               sx={{
                 maxWidth: '85vw',
@@ -1272,7 +1306,7 @@ function MovieDetailPage() {
           left: 0,
           right: 0
         }}>
-          {movie?.stills?.map((still, idx) => (
+          {genre?.stills?.map((still, idx) => (
             <Box
               key={idx}
               component="img"
@@ -1297,4 +1331,4 @@ function MovieDetailPage() {
   );
 }
 
-export default MovieDetailPage;
+export default GenresDetailPage;
