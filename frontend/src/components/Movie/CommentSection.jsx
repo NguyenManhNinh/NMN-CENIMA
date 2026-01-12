@@ -229,7 +229,6 @@ function CommentSection({ movieId, genreId, user }) {
   const [summary, setSummary] = useState({ avgRating: 0, total: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -446,7 +445,7 @@ function CommentSection({ movieId, genreId, user }) {
         setHasSpoiler(false);
         setShowComposer(false);
         // Refresh data
-        fetchData(true);
+        fetchData(1, true);
       }
     } catch (error) {
       const message = error.response?.data?.message || 'Gửi thất bại. Vui lòng thử lại.';
@@ -529,13 +528,6 @@ function CommentSection({ movieId, genreId, user }) {
     });
   };
 
-  // Tải thêm bình luận
-  const handleLoadMore = () => {
-    if (page < totalPages) {
-      setPage(prev => prev + 1);
-      fetchData(false);
-    }
-  };
 
   // Định dạng thời gian tương đối
   const formatRelativeTime = (dateString) => {
