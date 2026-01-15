@@ -37,7 +37,7 @@ import { getNowShowingMoviesAPI } from '@/apis/movieApi';
 const SORT_OPTIONS = [
   { value: 'popular', label: 'Phổ biến nhất' },
   { value: 'newest', label: 'Mới nhất' },
-  { value: 'name', label: 'Được thích nhất' }
+  { value: 'mostLiked', label: 'Được thích nhất' }
 ];
 
 // CẤU HÌNH GIAO DIỆN (STYLES)
@@ -312,7 +312,7 @@ function ActorsPage() {
         const sortMap = {
           'popular': '-viewCount',
           'newest': '-createdAt',
-          'name': 'name'
+          'mostLiked': '-likeCount'
         };
 
         const params = {
