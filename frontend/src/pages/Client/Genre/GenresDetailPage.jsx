@@ -867,7 +867,7 @@ function GenresDetailPage() {
                         {/* Poster Image */}
                         <Box
                           component="img"
-                          src={otherMovie.bannerUrl || otherMovie.imageUrl}
+                          src={otherMovie.bannerUrl || otherMovie.posterUrl}
                           alt={otherMovie.name}
                           sx={{
                             width: '100%',

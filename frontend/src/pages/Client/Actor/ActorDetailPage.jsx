@@ -33,6 +33,9 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useTheme, useMediaQuery } from '@mui/material';
 
+// APIs
+import { getNowShowingMoviesAPI } from '@/apis/movieApi';
+
 // ==================== CONSTANTS ====================
 const COLORS = {
   primary: '#034EA2',
@@ -248,7 +251,15 @@ function ActorDetailPage() {
         }
 
         setActor(actorData);
-        setOtherMovies(MOCK_NOW_SHOWING);
+
+        // Fetch phim đang chiếu từ API cho sidebar
+        try {
+          const moviesRes = await getNowShowingMoviesAPI(5);
+          setOtherMovies(moviesRes?.data?.movies || []);
+        } catch (err) {
+          console.error('Lỗi tải phim đang chiếu:', err);
+          setOtherMovies([]);
+        }
 
       } catch (error) {
         console.error('Lỗi khi tải dữ liệu diễn viên:', error);
@@ -802,7 +813,7 @@ function ActorDetailPage() {
                         {/* Ảnh Poster */}
                         <Box
                           component="img"
-                          src={movie.posterUrl}
+                          src={movie.bannerUrl || movie.posterUrl}
                           alt={movie.title}
                           sx={{
                             width: '100%',

@@ -323,7 +323,7 @@ function ActorsPage() {
         setActors(actorsRes.data || []);
         setTotalActors(actorsRes.total || 0);
         setTotalPages(actorsRes.totalPages || 1);
-        setSidebarMovies(Array.isArray(moviesRes?.data) ? moviesRes.data : []);
+        setSidebarMovies(Array.isArray(moviesRes?.data?.movies) ? moviesRes.data.movies : []);
       } catch (error) {
         console.error('Lỗi khi tải dữ liệu diễn viên:', error);
         // Fallback về mock data nếu API lỗi
@@ -793,7 +793,7 @@ function ActorsPage() {
                       {/* Ảnh Poster */}
                       <Box
                         component="img"
-                        src={movie.posterUrl}
+                        src={movie.bannerUrl || movie.posterUrl}
                         alt={movie.title}
                         sx={{
                           width: '100%',

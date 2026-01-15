@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams, useParams } from 'react-router-dom';
 
 // Các API
-import { getAllMoviesAPI } from '@/apis/movieApi';
+import { getAllMoviesAPI, getNowShowingMoviesAPI } from '@/apis/movieApi';
 import { getAllGenresAPI, getCategoriesAPI, getCountriesAPI, getYearsAPI, toggleGenreLikeAPI, getGenreLikeStatusAPI } from '@/apis/genreApi';
 
 // Ngữ cảnh xác thực (Auth Context)
@@ -392,8 +392,8 @@ function GenresPage() {
   useEffect(() => {
     const fetchSidebarMovies = async () => {
       try {
-        const res = await getAllMoviesAPI({ status: 'NOW', limit: 5, sortBy: 'views' });
-        setSidebarMovies(res.data?.movies || []);
+        const res = await getNowShowingMoviesAPI(5);
+        setSidebarMovies(res?.data?.movies || []);
       } catch (error) {
         console.error('Lỗi khi tải phim đang chiếu cho sidebar:', error);
       }
@@ -968,7 +968,7 @@ function GenresPage() {
                       {/* Ảnh Poster */}
                       <Box
                         component="img"
-                        src={movie.posterUrl}
+                        src={movie.bannerUrl || movie.posterUrl}
                         alt={movie.title}
                         sx={{
                           width: '100%',
