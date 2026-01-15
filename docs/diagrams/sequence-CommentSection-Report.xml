@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-13T08:29:01.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Sequence - Report Review" id="sequence-report-review">
+    <mxGraphModel dx="1434" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;SEQUENCE DIAGRAM - BÁO CÁO BÌNH LUẬN VI PHẠM&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="400" y="10" width="450" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ACTORS/OBJECTS ==================== -->
+        <!-- User -->
+        <mxCell id="user-box" value="&lt;b&gt;User&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="50" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="user-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="user-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="75" y="90" as="sourcePoint" />
+            <mxPoint x="75" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- CommentSection -->
+        <mxCell id="comment-box" value="&lt;b&gt;CommentSection&lt;/b&gt;&lt;br&gt;(Component)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="160" y="50" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="comment-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="comment-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="215" y="90" as="sourcePoint" />
+            <mxPoint x="215" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ReportDialog -->
+        <mxCell id="dialog-box" value="&lt;b&gt;ReportDialog&lt;/b&gt;&lt;br&gt;(Material UI)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="320" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="dialog-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="dialog-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="370" y="90" as="sourcePoint" />
+            <mxPoint x="370" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- reviewApi.js -->
+        <mxCell id="api-box" value="&lt;b&gt;reviewApi.js&lt;/b&gt;&lt;br&gt;(API Client)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="470" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="api-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="api-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="90" as="sourcePoint" />
+            <mxPoint x="520" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Backend API -->
+        <mxCell id="backend-box" value="&lt;b&gt;Backend API&lt;/b&gt;&lt;br&gt;(Express)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="620" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="backend-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="670" y="90" as="sourcePoint" />
+            <mxPoint x="670" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ReviewReport -->
+        <mxCell id="report-box" value="&lt;b&gt;ReviewReport&lt;/b&gt;&lt;br&gt;(MongoDB)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="770" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="report-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="report-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="820" y="90" as="sourcePoint" />
+            <mxPoint x="820" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Review -->
+        <mxCell id="review-box" value="&lt;b&gt;Review&lt;/b&gt;&lt;br&gt;(MongoDB)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="920" y="50" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="review-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="review-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="965" y="90" as="sourcePoint" />
+            <mxPoint x="965" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== MESSAGES ==================== -->
+        <!-- 1. User click menu -->
+        <mxCell id="msg1" value="1. Click menu &quot;...&quot; trên bình luận" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=10;fontStyle=1" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="75" y="120" as="sourcePoint" />
+            <mxPoint x="215" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. Hiển thị menu -->
+        <mxCell id="msg2" value="2. Hiển thị menu options" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=10;dashed=1;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="215" y="150" as="sourcePoint" />
+            <mxPoint x="75" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. User chọn Báo cáo -->
+        <mxCell id="msg3" value="3. Chọn &quot;Báo cáo bình luận&quot;" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=10;fontStyle=1" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="75" y="180" as="sourcePoint" />
+            <mxPoint x="215" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. Mở ReportDialog -->
+        <mxCell id="msg4" value="4. setOpenReportDialog(true)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="215" y="210" as="sourcePoint" />
+            <mxPoint x="370" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Activation bar Dialog -->
+        <mxCell id="act-dialog" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="365" y="205" width="10" height="280" as="geometry" />
+        </mxCell>
+
+        <!-- 4.1 Render danh sách lý do -->
+        <mxCell id="msg4-1" value="4.1. Render danh sách lý do:&lt;br&gt;- Nội dung độc hại&lt;br&gt;- Spam/Quảng cáo&lt;br&gt;- Tiết lộ nội dung (Spoiler)&lt;br&gt;- Kích động thù địch&lt;br&gt;- Nội dung người lớn&lt;br&gt;- Quấy rối&lt;br&gt;- Lý do khác" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=9;dashed=1;endFill=0;align=left" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="370" y="250" as="sourcePoint" />
+            <mxPoint x="75" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. User chọn lý do -->
+        <mxCell id="msg5" value="5. Chọn lý do + nhập ghi chú (optional)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="75" y="360" as="sourcePoint" />
+            <mxPoint x="370" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. User click Gửi báo cáo -->
+        <mxCell id="msg6" value="6. Click &quot;Gửi báo cáo&quot;" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=10;fontStyle=1" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="75" y="400" as="sourcePoint" />
+            <mxPoint x="370" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7. Gọi handleReportReview -->
+        <mxCell id="msg7" value="7. handleReportReview(reviewId, reason, note)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="370" y="440" as="sourcePoint" />
+            <mxPoint x="215" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Activation bar CommentSection -->
+        <mxCell id="act-comment" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="210" y="435" width="10" height="320" as="geometry" />
+        </mxCell>
+
+        <!-- 8. Gọi API -->
+        <mxCell id="msg8" value="8. reportReviewAPI(targetId, reviewId, { reason, note })" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=10;fontStyle=1" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="215" y="480" as="sourcePoint" />
+            <mxPoint x="520" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Activation bar API -->
+        <mxCell id="act-api" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="515" y="475" width="10" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 9. HTTP POST -->
+        <mxCell id="msg9" value="9. POST /reviews/:id/report&lt;br&gt;Body: { reason, note }&lt;br&gt;Headers: Authorization: Bearer &lt;JWT&gt;" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=9;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="520" y="520" as="sourcePoint" />
+            <mxPoint x="670" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Activation bar Backend -->
+        <mxCell id="act-backend" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="665" y="515" width="10" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ALT FRAME ==================== -->
+        <mxCell id="alt-frame" value="" style="shape=umlFrame;whiteSpace=wrap;html=1;rounded=0;fillColor=none;strokeColor=#666666;width=30;height=20;" vertex="1" parent="1">
+          <mxGeometry x="640" y="550" width="380" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="alt-label" value="&lt;b&gt;alt&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666;" vertex="1" parent="1">
+          <mxGeometry x="645" y="553" width="25" height="15" as="geometry" />
+        </mxCell>
+
+        <!-- Alt: Chưa report -->
+        <mxCell id="alt-new" value="[Chưa report trước đó]" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;fontStyle=2;fontColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="555" width="120" height="15" as="geometry" />
+        </mxCell>
+
+        <!-- 10. Create ReviewReport -->
+        <mxCell id="msg10" value="10. ReviewReport.create({ reviewId, userId, reason, note })" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=9;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="670" y="590" as="sourcePoint" />
+            <mxPoint x="820" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Activation bar ReviewReport -->
+        <mxCell id="act-report" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="815" y="585" width="10" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- 10.1 Return report -->
+        <mxCell id="msg10-return" value="created" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=9;dashed=1;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="820" y="610" as="sourcePoint" />
+            <mxPoint x="670" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. Update Review reportCount -->
+        <mxCell id="msg11" value="11. Review.updateOne({ $inc: { reportCount: 1 } })" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=9;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="670" y="640" as="sourcePoint" />
+            <mxPoint x="965" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Activation bar Review -->
+        <mxCell id="act-review" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="960" y="635" width="10" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- 11.1 Return updated -->
+        <mxCell id="msg11-return" value="updated" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=9;dashed=1;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="965" y="655" as="sourcePoint" />
+            <mxPoint x="670" y="655" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Dashed line separator -->
+        <mxCell id="alt-sep" value="" style="endArrow=none;dashed=1;html=1;rounded=0;strokeColor=#999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="650" y="680" as="sourcePoint" />
+            <mxPoint x="1010" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Alt: Đã report -->
+        <mxCell id="alt-dup" value="[Đã report trước đó]" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;fontStyle=2;fontColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="700" y="685" width="110" height="15" as="geometry" />
+        </mxCell>
+
+        <!-- Return error -->
+        <mxCell id="msg-error" value="400 Bad Request: &quot;Bạn đã báo cáo bình luận này&quot;" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=9;dashed=1;endFill=0;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="670" y="720" as="sourcePoint" />
+            <mxPoint x="520" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== SUCCESS PATH ==================== -->
+        <!-- 12. Return success -->
+        <mxCell id="msg12" value="12. Response 200 OK&lt;br&gt;{ success: true, message: &quot;Báo cáo thành công&quot; }" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=9;dashed=1;endFill=0;fontStyle=1" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="670" y="770" as="sourcePoint" />
+            <mxPoint x="520" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 12.1 Return to CommentSection -->
+        <mxCell id="msg12-1" value="{ success: true }" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=9;dashed=1;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="520" y="795" as="sourcePoint" />
+            <mxPoint x="215" y="795" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13. Toast success -->
+        <mxCell id="msg13" value="13. toast.success(&quot;Báo cáo thành công!&quot;)" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=9;dashed=1;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="215" y="820" as="sourcePoint" />
+            <mxPoint x="75" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14. Close dialog -->
+        <mxCell id="msg14" value="14. setOpenReportDialog(false)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=9;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="215" y="845" as="sourcePoint" />
+            <mxPoint x="370" y="845" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 15. Disable report button -->
+        <mxCell id="msg15" value="15. Add reviewId to reportedReviews Set" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=9;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="215" y="870" as="sourcePoint" />
+            <mxPoint x="260" y="870" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="260" y="870" />
+              <mxPoint x="260" y="885" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg15-return" value="" style="html=1;verticalAlign=bottom;endArrow=open;curved=0;rounded=0;fontSize=9;dashed=1;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="260" y="885" as="sourcePoint" />
+            <mxPoint x="215" y="885" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== NOTES ==================== -->
+        <mxCell id="note1" value="&lt;b&gt;Lý do báo cáo:&lt;/b&gt;&lt;br&gt;1. Nội dung độc hại&lt;br&gt;2. Spam/Quảng cáo&lt;br&gt;3. Tiết lộ nội dung&lt;br&gt;4. Kích động thù địch&lt;br&gt;5. Nội dung người lớn&lt;br&gt;6. Quấy rối&lt;br&gt;7. Lý do khác" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=5;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="120" width="120" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note2" value="&lt;b&gt;ReviewReport Schema:&lt;/b&gt;&lt;br&gt;- reviewId: ObjectId&lt;br&gt;- userId: ObjectId&lt;br&gt;- reason: String&lt;br&gt;- note: String (optional)&lt;br&gt;- status: pending/resolved&lt;br&gt;- createdAt: Date" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=5;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="260" width="140" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Caption -->
+        <mxCell id="caption" value="&lt;i&gt;Hình 3.xx. Sơ đồ Sequence Diagram – Chức năng Báo cáo bình luận vi phạm&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="920" width="420" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

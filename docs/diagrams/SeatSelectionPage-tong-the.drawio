@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-06T01:57:30.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="SeatSelectionPage Architecture" id="seat-selection-arch">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Kiến trúc tổng thể SeatSelectionPage" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Box -->
+        <mxCell id="fe-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="220" height="280" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fe-title" value="Frontend (React + Vite)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#1a365d;" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="180" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- SeatSelectionPage Component -->
+        <mxCell id="fe-comp" value="SeatSelectionPage.jsx" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="130" width="180" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Sub Components -->
+        <mxCell id="fe-seatmap" value="SeatMap Renderer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="180" width="85" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fe-timer" value="Timer Display" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="155" y="180" width="85" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fe-sidebar" value="Sidebar Info" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="225" width="85" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fe-summary" value="Summary Panel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="155" y="225" width="85" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- API Client -->
+        <mxCell id="fe-api" value="API Modules (Axios)&#xa;• showtimeApi.js&#xa;• seatHoldApi.js" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="275" width="180" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 1: Frontend to Backend -->
+        <mxCell id="arrow1" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#F5A623;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="270" y="200" as="sourcePoint" />
+            <mxPoint x="370" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow1-label" value="REST API&#xa;(HTTPS + JWT)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#F5A623;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="275" y="155" width="90" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Box -->
+        <mxCell id="be-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="380" y="80" width="260" height="280" as="geometry" />
+        </mxCell>
+
+        <mxCell id="be-title" value="Backend API (Node.js + Express)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#2d572c;" vertex="1" parent="1">
+          <mxGeometry x="390" y="90" width="240" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Controllers -->
+        <mxCell id="be-ctrl-title" value="REST API Controllers" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="125" width="140" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="be-showtime" value="ShowtimeController&#xa;GET /showtimes/:id" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="400" y="150" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="be-seathold" value="SeatHoldController&#xa;POST /seat-holds&#xa;DELETE /seat-holds" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="400" y="200" width="120" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Middleware -->
+        <mxCell id="be-middleware" value="Middleware&#xa;• JWT Auth&#xa;• Validation&#xa;• Error Handler" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="530" y="150" width="100" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Mongoose ODM -->
+        <mxCell id="be-mongoose" value="Mongoose ODM&#xa;Schema + Validation&#xa;+ Population" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="400" y="275" width="230" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 2: Backend to MongoDB -->
+        <mxCell id="arrow2" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#9673a6;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="650" y="200" as="sourcePoint" />
+            <mxPoint x="750" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow2-label" value="Mongoose&#xa;Query" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#9673a6;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="660" y="160" width="70" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- MongoDB Box -->
+        <mxCell id="db-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="760" y="80" width="200" height="280" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-title" value="MongoDB (Database)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#6b2c2c;" vertex="1" parent="1">
+          <mxGeometry x="780" y="90" width="160" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Collections -->
+        <mxCell id="db-coll-title" value="Collections:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="125" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-showtimes" value="showtimes" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="780" y="150" width="80" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-rooms" value="rooms" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="870" y="150" width="80" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-seathold" value="seatHolds" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="780" y="210" width="80" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-cinemas" value="cinemas" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="870" y="210" width="80" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- TTL Index Note -->
+        <mxCell id="db-ttl" value="⏱ TTL Index: expiresAt&#xa;(Auto-delete sau 15 phút)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="780" y="275" width="170" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Legend Box -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="380" width="920" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-title" value="Chú thích:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="385" width="60" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-fe" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="120" y="390" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-fe-text" value="Frontend (React)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="145" y="387" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-be" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="260" y="390" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-be-text" value="Backend (Node.js)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="285" y="387" width="110" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-db" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="410" y="390" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-db-text" value="Database (MongoDB)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="435" y="387" width="120" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-arrow" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#F5A623;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="570" y="397" as="sourcePoint" />
+            <mxPoint x="620" y="397" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-arrow-text" value="HTTP Request/Response" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="625" y="387" width="140" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-tech" value="Tech: React 18, Vite, Node.js 20, Express 4, Mongoose 8, JWT" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="50" y="415" width="400" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

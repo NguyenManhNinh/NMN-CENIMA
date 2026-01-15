@@ -31,11 +31,25 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
     query.releaseDate = { $gte: startDate, $lte: endDate };
   }
 
-  // Sorting options
-  let sort = { releaseDate: -1 }; // default: newest first
+  // Sorting options - Ưu tiên menuPriority (admin ghim) rồi fallback
+  let sort = { releaseDate: -1 }; // default
+
+  // Nếu filter theo status -> sort cho dropdown menu
+  if (status && !sortBy) {
+    if (status.toUpperCase() === 'NOW') {
+      // NOW: menuPriority desc -> createdAt desc (phim mới thêm lên đầu)
+      sort = { menuPriority: -1, createdAt: -1 };
+    } else if (status.toUpperCase() === 'COMING') {
+      // COMING: menuPriority desc -> createdAt desc (phim mới thêm lên đầu)
+      sort = { menuPriority: -1, createdAt: -1 };
+    }
+  }
+
+  // Nếu có sortBy param, override (cho trang danh sách phim đầy đủ)
   if (sortBy === 'views') sort = { viewCount: -1 };
   if (sortBy === 'rating') sort = { rating: -1, ratingCount: -1 };
   if (sortBy === 'newest') sort = { releaseDate: -1 };
+  if (sortBy === 'priority') sort = { menuPriority: -1, createdAt: -1 };
 
   // Execute query with pagination
   const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -110,13 +124,22 @@ exports.getYears = catchAsync(async (req, res, next) => {
 
 // Lấy chi tiết phim (theo ID hoặc Slug)
 exports.getMovie = catchAsync(async (req, res, next) => {
-  const movie = await Movie.findById(req.params.id)
+  const { id } = req.params;
+
+  // Kiểm tra xem param là ObjectId hay slug
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+  const query = isObjectId
+    ? { _id: id }
+    : { slug: id };
+
+  const movie = await Movie.findOne(query)
     .populate('director', 'name photoUrl slug')
     .populate('actors', 'name photoUrl slug')
     .populate('genres', 'name slug category');
 
   if (!movie) {
-    return next(new AppError('Không tìm thấy phim với ID này!', 404));
+    return next(new AppError('Không tìm thấy phim!', 404));
   }
 
   res.status(200).json({

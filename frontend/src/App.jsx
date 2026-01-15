@@ -19,6 +19,7 @@ import PaymentConfirmPage from './pages/Client/Payment';
 import PaymentResultPage from './pages/Client/Payment/PaymentResultPage';
 import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 import { GenresPage, GenresDetailPage } from './pages/Client/Genre';
+import { ActorsPage, ActorDetailPage } from './pages/Client/Actor';
 
 function App() {
   return (
@@ -40,8 +41,8 @@ function App() {
             <Route path="phim-dang-chieu" element={<MoviesPage />} />
             {/* Phim sắp chiếu */}
             <Route path="phim-sap-chieu" element={<MoviesPage />} />
-            {/* Đặt vé */}
-            <Route path="dat-ve/:movieId" element={<BookingPage />} />
+            {/* Đặt vé - sử dụng slug thay vì id */}
+            <Route path="dat-ve/:slug" element={<BookingPage />} />
             {/* Chọn ghế */}
             <Route path="chon-ghe/:showtimeId" element={<SeatSelectionPage />} />
             {/* Đặt combo */}
@@ -55,10 +56,17 @@ function App() {
             <Route path="the-loai-phim" element={<GenresPage />} />
             <Route path="the-loai-phim/:genreSlug" element={<GenresPage />} />
 
+            {/* GÓC ĐIỆN ẢNH - Diễn viên */}
+            <Route path="dien-vien" element={<ActorsPage />} />
+            <Route path="dien-vien/:actorSlug" element={<ActorsPage />} />
 
             {/* Chi tiết phim */}
             {/* Chi tiết bài viết Góc điện ảnh (Genre) */}
             <Route path="phim/:slug" element={<GenresDetailPage />} />
+
+            {/* Chi tiết diễn viên */}
+            <Route path="dao-dien/:slug" element={<ActorDetailPage />} />
+            <Route path="dien-vien-chi-tiet/:slug" element={<ActorDetailPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

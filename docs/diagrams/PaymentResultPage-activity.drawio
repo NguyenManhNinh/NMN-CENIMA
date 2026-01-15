@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-06T03:28:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="PaymentResultActivity" id="result-activity"><mxGraphModel dx="1000" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0"><root><mxCell id="0" /><mxCell id="1" parent="0" />
+        <!-- Start -->
+        <mxCell id="start" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="380" y="40" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Redirect -->
+        <mxCell id="act1" value="Redirect về /ket-qua-thanh-toan&#xa;?status=...&amp;orderNo=..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="280" y="100" width="230" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- GET Order -->
+        <mxCell id="act2" value="GET /orders/by-order-no/{orderNo}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="295" y="180" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: Order found? -->
+        <mxCell id="dec1" value="Lấy được&#xa;order?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="345" y="250" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: Status success? -->
+        <mxCell id="dec2" value="status =&#xa;success?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="345" y="350" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Success Display -->
+        <mxCell id="act_success" value="Hiển thị thông tin&#xa;vé / đơn hàng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="220" y="450" width="140" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Fail Display -->
+        <mxCell id="act_fail" value="Hiển thị thông báo&#xa;thất bại / hủy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="430" y="450" width="140" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Navigation Buttons -->
+        <mxCell id="act_nav" value="Hiển thị nút điều hướng&#xa;(Về trang chủ / Đơn hàng)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="290" y="540" width="210" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Error Display -->
+        <mxCell id="act_error" value="Hiển thị lỗi&#xa;không tìm thấy order" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="530" y="260" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Stop nodes -->
+        <mxCell id="stop1" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a1a2e;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="385" y="620" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="stop1_border" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;strokeColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="382" y="617" width="26" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stop2" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a1a2e;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="595" y="320" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="stop2_border" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;strokeColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="592" y="317" width="26" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- Connectors -->
+        <mxCell id="c1" edge="1" parent="1" source="start" target="act1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="c2" edge="1" parent="1" source="act1" target="act2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="c3" edge="1" parent="1" source="act2" target="dec1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Decision 1: Yes -->
+        <mxCell id="c4" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="dec1" target="dec2"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Decision 1: No -->
+        <mxCell id="c5" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="dec1" target="act_error"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="c6" edge="1" parent="1" source="act_error" target="stop2"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Decision 2: Yes (Success) -->
+        <mxCell id="c7" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="dec2" target="act_success"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Decision 2: No (Fail) -->
+        <mxCell id="c8" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="dec2" target="act_fail"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Merge to Navigation -->
+        <mxCell id="c9" edge="1" parent="1" source="act_success" target="act_nav"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="c10" edge="1" parent="1" source="act_fail" target="act_nav"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- To Stop -->
+        <mxCell id="c11" edge="1" parent="1" source="act_nav" target="stop1"><mxGeometry relative="1" as="geometry"/></mxCell></root></mxGraphModel></diagram></mxfile>

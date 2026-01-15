@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-06T02:40:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="ComboUseCases" id="combo-use-cases"><mxGraphModel dx="1000" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0"><root><mxCell id="0" /><mxCell id="1" parent="0" />
+        <!-- Actor: User -->
+        <mxCell id="actor" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="250" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- System Boundary -->
+        <mxCell id="system" value="NMN Cinema - ComboPage" style="shape=rect;html=1;verticalAlign=top;fontStyle=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="80" width="500" height="450" as="geometry" />
+        </mxCell>
+
+        <!-- Use Cases -->
+        <mxCell id="uc1" value="UC-CB-01&lt;br&gt;Xem danh sách combo" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="260" y="120" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc2" value="UC-CB-02&lt;br&gt;Tăng số lượng combo" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="260" y="210" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc3" value="UC-CB-03&lt;br&gt;Giảm số lượng combo" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="460" y="210" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc4" value="UC-CB-04&lt;br&gt;Xem tổng tiền realtime" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="360" y="300" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc5" value="UC-CB-05&lt;br&gt;Xác nhận điều kiện&lt;br&gt;(Tuổi/Điều khoản)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="510" y="300" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc6" value="UC-CB-06&lt;br&gt;Tiếp tục thanh toán" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="360" y="390" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc7" value="UC-CB-07&lt;br&gt;Quay lại chọn ghế" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="220" y="390" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Relationships -->
+        <!-- User -> UC1, UC2, UC3, UC4, UC6, UC7 -->
+        <mxCell id="line1" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor" target="uc1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="280" as="sourcePoint" />
+            <mxPoint x="250" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="line2" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor" target="uc2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="290" as="sourcePoint" />
+            <mxPoint x="250" y="245" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="line3" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor" target="uc3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="300" as="sourcePoint" />
+            <mxPoint x="450" y="245" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="150" y="200" />
+              <mxPoint x="450" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="line4" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor" target="uc4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="310" as="sourcePoint" />
+            <mxPoint x="360" y="335" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="line6" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor" target="uc6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="320" as="sourcePoint" />
+            <mxPoint x="360" y="425" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="line7" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor" target="uc7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="330" as="sourcePoint" />
+            <mxPoint x="220" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- UC6 extend UC5 -->
+        <mxCell id="ext1" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" edge="1" parent="1" source="uc5" target="uc6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="530" y="370" as="sourcePoint" />
+            <mxPoint x="450" y="425" as="targetPoint" />
+          </mxGeometry>
+        </mxCell></root></mxGraphModel></diagram></mxfile>

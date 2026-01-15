@@ -50,6 +50,9 @@ import { getNowShowingMoviesAPI, getComingSoonMoviesAPI } from '../../../../apis
 import { useAuth } from '../../../../contexts/AuthContext';
 import { LoginModal, RegisterModal, ForgotPasswordModal } from '../../../Common';
 
+// Import ảnh từ background-header
+import backgroundHeader from '../../../../assets/images/header-background.jpg';
+
 // COLORS - Màu sắc
 const COLORS = {
   primary: '#00405d',      // Cam chủ đạo
@@ -63,11 +66,12 @@ const COLORS = {
 // STYLES
 const styles = {
   appBar: {
-    backgroundColor: COLORS.white,
+    backgroundImage: `url(${backgroundHeader})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center 55%',
     boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
     borderBottom: `1px solid ${COLORS.border}`,
     transition: 'transform 0.3s ease-in-out'
-
   },
   appBarHidden: {
     transform: 'translateY(-100%)'
@@ -92,8 +96,8 @@ const styles = {
     gap: 0.5
   },
   navButton: {
-    color: COLORS.text,
-    fontWeight: 500,
+    color: 'white',
+    fontWeight: 700,
     fontSize: '1rem',
     fontFamily: 'DM Sans, system-ui, sans-serif',
     textTransform: 'none',
@@ -137,17 +141,17 @@ const styles = {
     gap: 1
   },
   searchIcon: {
-    color: COLORS.textLight,
+    color: 'white',
     '&:hover': {
       backgroundColor: 'transparent',
-      color: '#00AE72',
+      color: 'hsla(164, 5%, 46%, 1.00)',
       border: 0
     },
     '&:focus': { outline: 'none' },
     '&.Mui-focusVisible': { outline: 'none' }
   },
   loginBtn: {
-    color: '#696969',
+    color: '#ffffff',
     fontWeight: 500,
     fontSize: '0.9rem',
     textTransform: 'none',
@@ -323,8 +327,12 @@ const blogMenuItems = [
 // SỰ KIỆN MENU ITEMS
 const eventMenuItems = [
   { label: 'Khuyến mãi', path: '/khuyen-mai' },
-  { label: 'Ưu đãi thành viên', path: '/uu-dai-thanh-vien' },
   { label: 'Sự kiện đặc biệt', path: '/su-kien-dac-biet' }
+];
+
+// THÀNH VIÊN MENU ITEMS
+const memberMenuItems = [
+  { label: 'Thành viên', path: '/thanh-vien' },
 ];
 
 // HEADER COMPONENT
@@ -366,28 +374,36 @@ function Header() {
   const { user, isAuthenticated, logout } = useAuth();
 
   // Load movies cho Mega Menu từ API
+  // Ref để throttle API call (TTL 30 giây)
+  const lastFetchRef = useRef(0);
+
+  // Function refresh data cho dropdown
+  const refreshMoviesForDropdown = async () => {
+    const now = Date.now();
+    // Chỉ refetch nếu quá 30 giây kể từ lần fetch trước
+    if (now - lastFetchRef.current < 30000) return;
+    lastFetchRef.current = now;
+
+    try {
+      const [nowShowingRes, comingSoonRes] = await Promise.all([
+        getNowShowingMoviesAPI(4),
+        getComingSoonMoviesAPI(4)
+      ]);
+
+      // Parse response
+      const nowShowing = nowShowingRes?.movies || nowShowingRes?.data?.movies || [];
+      const comingSoon = comingSoonRes?.movies || comingSoonRes?.data?.movies || [];
+
+      setNowShowingMovies(nowShowing.slice(0, 4));
+      setComingSoonMovies(comingSoon.slice(0, 4));
+    } catch (error) {
+      console.error('Error loading movies for mega menu:', error);
+    }
+  };
+
+  // Preload khi mount
   useEffect(() => {
-    const loadMoviesForMegaMenu = async () => {
-      try {
-        const [nowShowingRes, comingSoonRes] = await Promise.all([
-          getNowShowingMoviesAPI(4),
-          getComingSoonMoviesAPI(4)
-        ]);
-
-        // Parse response
-        const nowShowing = nowShowingRes?.movies || nowShowingRes?.data?.movies || [];
-        const comingSoon = comingSoonRes?.movies || comingSoonRes?.data?.movies || [];
-
-        setNowShowingMovies(nowShowing.slice(0, 4));
-        setComingSoonMovies(comingSoon.slice(0, 4));
-      } catch (error) {
-        console.error('Error loading movies for mega menu:', error);
-        setNowShowingMovies([]);
-        setComingSoonMovies([]);
-      }
-    };
-
-    loadMoviesForMegaMenu();
+    refreshMoviesForDropdown();
   }, []);
 
   // Hide on scroll effect
@@ -434,6 +450,9 @@ function Header() {
     }
     setMovieMenuAnchor(e.currentTarget);
     setMovieMenuOpen(true);
+
+    // Refresh data khi mở dropdown (với TTL 30s để tránh spam API)
+    refreshMoviesForDropdown();
   };
 
   const handleMovieMenuClose = () => {
@@ -514,6 +533,34 @@ function Header() {
     setEventMenuOpen(false);
   };
 
+  const memberMenuCloseTimeoutRef = useRef(null);
+
+  const handleMemberMenuOpen = (e) => {
+    if (memberMenuCloseTimeoutRef.current) {
+      clearTimeout(memberMenuCloseTimeoutRef.current);
+      memberMenuCloseTimeoutRef.current = null;
+    }
+    setMemberMenuAnchor(e.currentTarget);
+    setMemberMenuOpen(true);
+  };
+
+  const handleMemberMenuClose = () => {
+    memberMenuCloseTimeoutRef.current = setTimeout(() => {
+      setMemberMenuOpen(false);
+    }, 50);
+  };
+
+  const handleMemberMenuEnter = () => {
+    if (memberMenuCloseTimeoutRef.current) {
+      clearTimeout(memberMenuCloseTimeoutRef.current);
+      memberMenuCloseTimeoutRef.current = null;
+    }
+  };
+
+  const handleMemberMenuLeave = () => {
+    setMemberMenuOpen(false);
+  };
+
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
       navigate(`/tim-kiem?search=${encodeURIComponent(searchQuery.trim())}`);
@@ -580,7 +627,7 @@ function Header() {
                         <Box className="movie-overlay" sx={styles.movieOverlay}>
                           <Button
                             component={Link}
-                            to={`/dat-ve/${movie._id}`}
+                            to={`/dat-ve/${movie.slug}`}
                             sx={styles.buyTicketBtn}
                             startIcon={<TicketIcon />}
                             onClick={handleMovieMenuClose}
@@ -626,7 +673,7 @@ function Header() {
                         <Box className="movie-overlay" sx={styles.movieOverlay}>
                           <Button
                             component={Link}
-                            to={`/dat-ve/${movie._id}`}
+                            to={`/dat-ve/${movie.slug}`}
                             sx={styles.buyTicketBtn}
                             startIcon={<TicketIcon />}
                             onClick={handleMovieMenuClose}
@@ -899,7 +946,6 @@ function Header() {
             <ListItemText primary="Đạo diễn" />
           </ListItem>
         </Box>
-
         <Divider />
 
         {/* === SỰ KIỆN === */}
@@ -942,14 +988,6 @@ function Header() {
           </ListItem>
           <ListItem
             component={Link}
-            to="/uu-dai-thanh-vien"
-            onClick={toggleMobileMenu}
-            sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
-          >
-            <ListItemText primary="Ưu đãi thành viên" />
-          </ListItem>
-          <ListItem
-            component={Link}
             to="/su-kien-dac-biet"
             onClick={toggleMobileMenu}
             sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
@@ -957,6 +995,27 @@ function Header() {
             <ListItemText primary="Sự kiện đặc biệt" />
           </ListItem>
         </Box>
+        <Divider />
+
+        {/* === THÀNH VIÊN === */}
+        <ListItem
+          component={Link}
+          to="/thanh-vien"
+          onClick={toggleMobileMenu}
+          sx={{
+            color: COLORS.text,
+            cursor: 'pointer',
+            '&:hover': { backgroundColor: COLORS.hover }
+          }}
+        >
+          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+            <PersonIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Thành viên"
+            primaryTypographyProps={{ fontWeight: 600 }}
+          />
+        </ListItem>
       </List>
     </Drawer>
   );
@@ -1089,6 +1148,19 @@ function Header() {
                 endIcon={<ArrowDownIcon sx={{ fontSize: 18 }} />}
               >
                 Sự kiện
+              </Button>
+            </Box>
+
+            {/* Nút Thành viên */}
+            <Box sx={{ mx: 0.5 }}>
+              <Button
+                component={Link}
+                to="/thanh-vien"
+                disableRipple
+                disableFocusRipple
+                sx={styles.navButton}
+              >
+                Thành viên
               </Button>
             </Box>
           </Box>

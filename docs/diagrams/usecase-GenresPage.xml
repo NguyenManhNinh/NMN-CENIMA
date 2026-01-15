@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-13T06:37:43.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Use Case - GenresPage" id="usecase-genres-page">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;USE CASE DIAGRAM - PHÂN HỆ GENRESPAGE (Thể loại phim)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="284" y="15" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- System Boundary -->
+        <mxCell id="system-boundary" value="&lt;b&gt;Hệ thống GenresPage&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;verticalAlign=top;spacingTop=10;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="220" y="60" width="450" height="480" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ACTORS ==================== -->
+        <!-- Guest Actor -->
+        <mxCell id="guest-actor" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="60" y="180" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="guest-label" value="&lt;b&gt;Guest&lt;/b&gt;&lt;br&gt;(Khách vãng lai)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="265" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- User Actor -->
+        <mxCell id="user-actor" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="user-label" value="&lt;b&gt;User&lt;/b&gt;&lt;br&gt;(Thành viên)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="465" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- System Actor -->
+        <mxCell id="system-actor" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="780" y="250" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="system-label" value="&lt;b&gt;System&lt;/b&gt;&lt;br&gt;(Backend API)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="750" y="335" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== USE CASES ==================== -->
+        <!-- UC-GN-01: Xem danh sách bài viết -->
+        <mxCell id="uc01" value="&lt;b&gt;UC-GN-01&lt;/b&gt;&lt;br&gt;Xem danh sách&lt;br&gt;bài viết thể loại" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="350" y="80" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- UC-GN-02: Lọc bài viết -->
+        <mxCell id="uc02" value="&lt;b&gt;UC-GN-02&lt;/b&gt;&lt;br&gt;Lọc bài viết theo tiêu chí&lt;br&gt;(thể loại, quốc gia, năm...)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="240" y="170" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- UC-GN-03: Sắp xếp danh sách -->
+        <mxCell id="uc03" value="&lt;b&gt;UC-GN-03&lt;/b&gt;&lt;br&gt;Sắp xếp danh sách&lt;br&gt;bài viết" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="430" y="170" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- UC-GN-04: Phân trang -->
+        <mxCell id="uc04" value="&lt;b&gt;UC-GN-04&lt;/b&gt;&lt;br&gt;Phân trang&lt;br&gt;danh sách" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="240" y="260" width="130" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- UC-GN-05: Thích/bỏ thích (User only) -->
+        <mxCell id="uc05" value="&lt;b&gt;UC-GN-05&lt;/b&gt;&lt;br&gt;Thích/Bỏ thích&lt;br&gt;bài viết" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="240" y="450" width="130" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- UC-GN-06: Xem chi tiết bài viết -->
+        <mxCell id="uc06" value="&lt;b&gt;UC-GN-06&lt;/b&gt;&lt;br&gt;Xem chi tiết&lt;br&gt;bài viết" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="430" y="260" width="130" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- UC-GN-07: Xem sidebar phim đang chiếu -->
+        <mxCell id="uc07" value="&lt;b&gt;UC-GN-07&lt;/b&gt;&lt;br&gt;Xem sidebar&lt;br&gt;phim đang chiếu" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="430" y="350" width="150" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- UC: Xác thực (include) -->
+        <mxCell id="uc-auth" value="&lt;b&gt;Xác thực&lt;/b&gt;&lt;br&gt;(Authentication)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="450" width="120" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CONNECTIONS - Guest ==================== -->
+        <!-- Guest to UC01 -->
+        <mxCell id="guest-uc01" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc01">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Guest to UC02 -->
+        <mxCell id="guest-uc02" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc02">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Guest to UC03 -->
+        <mxCell id="guest-uc03" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc03">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Guest to UC04 -->
+        <mxCell id="guest-uc04" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.7;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc04">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Guest to UC06 -->
+        <mxCell id="guest-uc06" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.7;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc06">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Guest to UC07 -->
+        <mxCell id="guest-uc07" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc07">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CONNECTIONS - User ==================== -->
+        <!-- User to UC05 (exclusive) -->
+        <mxCell id="user-uc05" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="user-actor" target="uc05">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- User inherits Guest (generalization) -->
+        <mxCell id="user-inherits-guest" value="" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;" edge="1" parent="1" source="user-actor" target="guest-actor">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CONNECTIONS - System ==================== -->
+        <!-- System to UC01 -->
+        <mxCell id="system-uc01" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#d79b00;" edge="1" parent="1" source="system-actor" target="uc01">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System to UC02 -->
+        <mxCell id="system-uc02" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#d79b00;" edge="1" parent="1" source="system-actor" target="uc02">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System to UC03 -->
+        <mxCell id="system-uc03" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#d79b00;" edge="1" parent="1" source="system-actor" target="uc03">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System to UC04 -->
+        <mxCell id="system-uc04" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#d79b00;" edge="1" parent="1" source="system-actor" target="uc04">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System to UC05 -->
+        <mxCell id="system-uc05" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.7;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#d79b00;" edge="1" parent="1" source="system-actor" target="uc05">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System to UC06 -->
+        <mxCell id="system-uc06" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#d79b00;" edge="1" parent="1" source="system-actor" target="uc06">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System to UC07 -->
+        <mxCell id="system-uc07" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.7;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#d79b00;" edge="1" parent="1" source="system-actor" target="uc07">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== RELATIONSHIPS ==================== -->
+        <!-- UC05 extends UC01 -->
+        <mxCell id="uc05-extends-uc01" value="&lt;i&gt;&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;&lt;/i&gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.3;entryY=1;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="uc05" target="uc01">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="305" y="440" as="sourcePoint" />
+            <mxPoint x="380" y="160" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- UC05 includes Authentication -->
+        <mxCell id="uc05-include-auth" value="&lt;i&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/i&gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="uc05" target="uc-auth">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LEGEND ==================== -->
+        <mxCell id="legend-box" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="430" width="160" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="&lt;b&gt;Chú thích&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="745" y="435" width="70" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-guest" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="710" y="460" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-guest-text" value="Guest + User" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="735" y="455" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-user" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="710" y="480" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-user-text" value="Chỉ User" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="735" y="475" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-include" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="710" y="500" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-include-text" value="Include/Extend" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="735" y="495" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-inherit" value="───▷" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="710" y="515" width="25" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-inherit-text" value="Kế thừa" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="735" y="515" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Caption -->
+        <mxCell id="caption" value="&lt;i&gt;Hình 3.xx. Sơ đồ Use Case Diagram – Phân hệ GenresPage (Thể loại phim)&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="284" y="560" width="400" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

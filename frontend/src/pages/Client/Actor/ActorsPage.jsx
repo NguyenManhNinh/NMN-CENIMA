@@ -1,14 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link, useSearchParams, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 
-// Các API
-import { getAllMoviesAPI } from '@/apis/movieApi';
-import { getAllGenresAPI, getCategoriesAPI, getCountriesAPI, getYearsAPI, toggleGenreLikeAPI, getGenreLikeStatusAPI } from '@/apis/genreApi';
-
-// Ngữ cảnh xác thực (Auth Context)
-import { useAuth } from '@/contexts/AuthContext';
-
-// Các thành phần giao diện từ Material UI
+// Material UI Components
 import {
   Box,
   Container,
@@ -20,47 +13,47 @@ import {
   FormControl,
   Button,
   Grid,
-  Paper,
   CircularProgress,
   Drawer,
   IconButton,
-  Divider,
-  useMediaQuery,
-  useTheme
+  Avatar
 } from '@mui/material';
 
-// Các biểu tượng từ Material UI
-import MovieIcon from '@mui/icons-material/Movie';
+// Material UI Icons
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import StarIcon from '@mui/icons-material/Star';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import StarIcon from '@mui/icons-material/Star';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+
+// APIs
+import { getActorsAPI } from '@/apis/personApi';
+import { getNowShowingMoviesAPI } from '@/apis/movieApi';
 
 // CẤU HÌNH BỘ LỌC TĨNH
-// Trạng thái phim
-const STATUS_OPTIONS = [
+// Tùy chọn quốc tịch
+const NATIONALITY_OPTIONS = [
   { value: '', label: 'Tất cả' },
-  { value: 'NOW', label: 'Đang chiếu' },
-  { value: 'COMING', label: 'Sắp chiếu' }
+  { value: 'Mỹ', label: 'Mỹ' },
+  { value: 'Anh', label: 'Anh' },
+  { value: 'Úc', label: 'Úc' },
+  { value: 'Canada', label: 'Canada' },
+  { value: 'Hàn Quốc', label: 'Hàn Quốc' },
+  { value: 'Nhật Bản', label: 'Nhật Bản' },
+  { value: 'Việt Nam', label: 'Việt Nam' }
 ];
 
 // Tùy chọn sắp xếp
 const SORT_OPTIONS = [
-  { value: 'views', label: 'Xem nhiều nhất' },
+  { value: 'popular', label: 'Phổ biến nhất' },
   { value: 'newest', label: 'Mới nhất' },
-  { value: 'rating', label: 'Thích nhiều nhất' }
+  { value: 'name', label: 'Được thích nhất' }
 ];
 
-// Danh sách quốc gia (lấy từ API)
-
-// Danh sách năm phát hành (lấy từ API)
-
-// CẤU HÌNH GIAO DIỆN
-// Sử dụng thuộc tính sx của MUI
+// CẤU HÌNH GIAO DIỆN (STYLES)
 const styles = {
   // Container chính của trang
   wrapper: {
@@ -69,7 +62,7 @@ const styles = {
     py: { xs: 2, md: 4 }
   },
 
-  // Tiêu đề trang - "THẾ GIỚI ĐIỆN ẢNH"
+  // Tiêu đề trang - "DIỄN VIÊN"
   pageTitle: {
     fontWeight: 400,
     fontSize: { xs: '18px', md: '20px' },
@@ -80,7 +73,7 @@ const styles = {
     mb: 3
   },
 
-  // Hàng bộ lọc (Thể loại, Quốc gia, Năm...) -> Desktop only
+  // Hàng bộ lọc (Desktop only)
   filterRow: {
     display: { xs: 'none', md: 'flex' },
     flexWrap: 'wrap',
@@ -92,7 +85,7 @@ const styles = {
 
   // Dropdown bộ lọc
   filterSelect: {
-    minWidth: 217,
+    minWidth: 180,
     '& .MuiOutlinedInput-root': {
       bgcolor: '#fff',
       '& fieldset': { borderColor: '#ddd', borderRadius: 0 },
@@ -105,57 +98,57 @@ const styles = {
     }
   },
 
-  // Card hiển thị thông tin phim
-  movieCard: {
+  // Card hiển thị thông tin diễn viên
+  actorCard: {
     display: 'flex',
     mb: 3,
+    flexDirection: 'row',
+    gap: { xs: 1.25, md: 2 },
     overflow: 'visible',
     border: 'none',
     boxShadow: 'none',
     borderRadius: 0,
-    flexDirection: { xs: 'row', md: 'row' }, // Mobile vẫn ngang
+    flexDirection: 'row',
     alignItems: 'flex-start'
   },
 
-  // Poster phim
-  moviePoster: {
-    width: { xs: '140px', sm: '180px', md: '255px' },
-    height: { xs: '210px', sm: '270px', md: '155px' }, // Mobile: Portrait, Desktop: Landscape? Check user templates. Template looks portrait in mobile list usually, but code was 255x155 (Landscape).
-    // User Image 0 shows Landscape poster in the list.
-    // Let's stick to Landscape ratios but smaller if that's what desktop had, OR switch to Portrait if that matches the request.
-    // But current code had 255x155 (Landscape).
-    // Let's look at Image 0 again. It looks like Landscape posters.
-    // I will keep Landscape ratio but responsive.
-    width: { xs: '150px', sm: '200px', md: '255px' },
-    height: { xs: '90px', sm: '120px', md: '155px' },
-    objectFit: 'cover',
+  // Avatar diễn viên
+  actorThumb: {
+    width: { xs: 120, sm: 160, md: 300 },
+    aspectRatio: "16 / 9",
+    cursor: "pointer",
+    mr: { xs: 1, md: 2 },
     flexShrink: 0,
-    cursor: 'pointer',
-    boxShadow: 'none',
-    border: 'none',
-    borderRadius: 0,
-    marginRight: 2
+    border: "none",
+    borderRadius: 0.7,
+    overflow: "hidden",
+    objectFit: "cover",
+    display: "block",
+    bgcolor: "#f7f7f9ff",
   },
 
-  // Nội dung phim (tiêu đề, mô tả, nút)
-  movieContent: {
+
+  // Nội dung diễn viên (tên, bio, nút)
+  actorContent: {
     flex: 1,
     py: 0,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    minWidth: 0 // Prevent text overflow
+    minWidth: 0
   },
 
-  // Tiêu đề phim
-  movieTitle: {
+  // Tên diễn viên
+  actorName: {
     fontWeight: 700,
     fontSize: { xs: '15px', md: '18px' },
     color: '#1A1A2E',
     mt: 0,
     mb: 0.5,
     cursor: 'pointer',
-    whiteSpace: 'nowrap',
+    whiteSpace: 'normal',
+    WebkitLineClamp: { xs: 2, md: 1 },
+    WebkitBoxOrient: "vertical",
     overflow: 'hidden',
     textOverflow: 'ellipsis'
   },
@@ -197,15 +190,15 @@ const styles = {
     cursor: 'pointer',
   },
 
-  // Mô tả ngắn của phim (tối đa 3 dòng)
-  movieDescription: {
+  // Mô tả ngắn của diễn viên (tối đa 3 dòng)
+  actorBio: {
     fontSize: { xs: '12px', md: '14px' },
     color: '#A0A3A7',
     lineHeight: 1.5,
     display: '-webkit-box',
-    WebkitLineClamp: { xs: 2, md: 3 }, // Mobile 2 dòng
+    WebkitLineClamp: { xs: 3, md: 3 },
     WebkitBoxOrient: 'vertical',
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
 
   // Nút bộ lọc trên Mobile
@@ -222,55 +215,69 @@ const styles = {
     color: '#666',
     fontWeight: 500,
     gap: 1
+  },
+
+  // Sidebar title
+  sidebarTitle: {
+    fontWeight: 600,
+    fontSize: '16px',
+    color: '#1A3A5C',
+    textTransform: 'uppercase',
+    pl: 1.5,
+    borderLeft: '3px solid #1A3A5C',
+    mb: 2
+  },
+
+  // Sidebar movie item
+  sidebarMovie: {
+    display: 'flex',
+    gap: 1.5,
+    mb: 2,
+    cursor: 'pointer',
+    '&:hover': {
+      opacity: 0.8
+    }
+  },
+
+  sidebarPoster: {
+    width: 80,
+    height: 120,
+    objectFit: 'cover',
+    borderRadius: 1
+  },
+
+  sidebarMovieTitle: {
+    fontSize: '14px',
+    fontWeight: 600,
+    color: '#333',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden'
   }
 };
-
-// CÁC HÀM TIỆN ÍCH
-/**
- * Format số với dấu phẩy ngăn cách hàng nghìn
- * Ví dụ: 1234567 -> "1,234,567"
- */
+// HÀM TIỆN ÍCH
 const formatNumber = (num) => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
-
-
 // COMPONENT CHÍNH
-function GenresPage() {
+function ActorsPage() {
   const navigate = useNavigate();
-  const { genreSlug } = useParams(); // Đọc slug từ URL path (ví dụ: /the-loai-phim/hanh-dong)
   const [searchParams, setSearchParams] = useSearchParams();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  // Đọc tham số URL
-  const getParamOrDefault = (param, defaultValue) => {
-    const value = searchParams.get(param);
-    return value || defaultValue;
-  };
 
   // STATE dữ liệu
-  const [movies, setMovies] = useState([]);
-  const [sidebarMovies, setSidebarMovies] = useState([]); // Phim đang chiếu cho sidebar (độc lập với filter)
-  const [genres, setGenres] = useState([]);
-  const [countries, setCountries] = useState([]);
-  const [years, setYears] = useState([]);
-  const [totalMovies, setTotalMovies] = useState(0);
+  const [actors, setActors] = useState([]);
+  const [sidebarMovies, setSidebarMovies] = useState([]);
+  const [totalActors, setTotalActors] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // STATE bộ lọc - khởi tạo từ URL params (sử dụng value thay vì label)
-  const [selectedGenre, setSelectedGenre] = useState(getParamOrDefault('the-loai', ''));
-  const [selectedCountry, setSelectedCountry] = useState(getParamOrDefault('quoc-gia', ''));
-  const [selectedYear, setSelectedYear] = useState(getParamOrDefault('nam', ''));
-  const [selectedStatus, setSelectedStatus] = useState(getParamOrDefault('trang-thai', ''));
-  const [selectedSort, setSelectedSort] = useState(getParamOrDefault('sap-xep', 'views'));
+  // STATE bộ lọc
+  const [selectedNationality, setSelectedNationality] = useState('');
+  const [selectedSort, setSelectedSort] = useState('popular');
 
-  // STATE phân trang - khởi tạo từ URL params
-  const [currentPage, setCurrentPage] = useState(() => {
-    const pageParam = searchParams.get('page');
-    return pageParam ? parseInt(pageParam, 10) : 1;
-  });
-  const itemsPerPage = 15;  // Số phim hiển thị mỗi trang (mặc định 15)
+  // STATE phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // STATE tải trang
   const [loading, setLoading] = useState(true);
@@ -278,178 +285,76 @@ function GenresPage() {
   // STATE Drawer Mobile
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
-  // STATE trạng thái Thích - track like status cho mỗi movie
+  // STATE trạng thái Thích
   const [likeStates, setLikeStates] = useState({});
-  const { user } = useAuth();
-
-  // Xử lý Thích bài viết (Genre)
-  const handleToggleLike = async (genreId, e) => {
-    e.stopPropagation(); // Ngăn click lan ra card
-
-    if (!user) {
-      alert('Vui lòng đăng nhập để thích bài viết!');
-      return;
-    }
-
-    try {
-      const res = await toggleGenreLikeAPI(genreId);
-      // Cập nhật local state - API trả về { success, liked, likeCount }
-      setLikeStates(prev => ({
-        ...prev,
-        [genreId]: {
-          liked: res?.liked,
-          likeCount: res?.likeCount
-        }
-      }));
-      // Cập nhật genre trong danh sách
-      setMovies(prev => prev.map(m =>
-        m._id === genreId ? { ...m, likeCount: res?.likeCount } : m
-      ));
-    } catch (error) {
-      console.error('Toggle like failed:', error);
-      if (error.response?.status === 401) {
-        alert('Vui lòng đăng nhập để thích bài viết!');
-      }
-    }
-  };
 
   // Đặt lại bộ lọc
   const resetFilters = () => {
-    setSelectedGenre('');
-    setSelectedCountry('');
-    setSelectedYear('');
-    setSelectedStatus('');
-    setSelectedSort('views');
+    setSelectedNationality('');
+    setSelectedSort('popular');
     setCurrentPage(1);
   };
 
-  // Lấy danh sách categories từ API khi mount component (cho dropdown filter)
+  // Load dữ liệu từ API khi mount hoặc thay đổi filter
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        // Lấy danh sách categories duy nhất từ database
-        const res = await getCategoriesAPI();
-        // API trả về { success, count, data: ['Hành động', 'Viễn tưởng', ...] }
-        const categories = res.data || [];
-        // Chuyển đổi thành format giống genres để tương thích với dropdown
-        setGenres(categories.map((cat, index) => ({ _id: cat, name: cat })));
-      } catch (error) {
-        console.error('Lỗi khi tải danh sách thể loại:', error);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  // Khi có genreSlug từ URL và genres đã load, tự động set filter
-  useEffect(() => {
-    if (genreSlug && genres.length > 0) {
-      // Tìm genre theo slug hoặc tên đã được slug hóa
-      const matchedGenre = genres.find(g => {
-        const genreNameSlug = g.name
-          ?.toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') // Bỏ dấu
-          .replace(/đ/g, 'd')
-          .replace(/Đ/g, 'D')
-          .replace(/\s+/g, '-'); // Thay khoảng trắng bằng -
-        return genreNameSlug === genreSlug || g.slug === genreSlug || g._id === genreSlug;
-      });
-      if (matchedGenre) {
-        setSelectedGenre(matchedGenre._id);
-      }
-    }
-  }, [genreSlug, genres]);
-
-  // Lấy danh sách quốc gia từ Genre API khi mount component
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const res = await getCountriesAPI();
-        // Genre API trả về { success, count, data: ['Việt Nam', 'Mỹ', ...] }
-        setCountries(res.data || []);
-      } catch (error) {
-        console.error('Lỗi khi tải danh sách quốc gia:', error);
-      }
-    };
-    fetchCountries();
-  }, []);
-
-  // Lấy danh sách năm từ Genre API khi mount component
-  useEffect(() => {
-    const fetchYears = async () => {
-      try {
-        const res = await getYearsAPI();
-        // Genre API trả về { success, count, data: [2025, 2024, ...] }
-        setYears(res.data || []);
-      } catch (error) {
-        console.error('Lỗi khi tải danh sách năm:', error);
-      }
-    };
-    fetchYears();
-  }, []);
-
-  // Lấy danh sách phim sidebar (đang chiếu, độc lập với filter chính)
-  useEffect(() => {
-    const fetchSidebarMovies = async () => {
-      try {
-        const res = await getAllMoviesAPI({ status: 'NOW', limit: 5, sortBy: 'views' });
-        setSidebarMovies(res.data?.movies || []);
-      } catch (error) {
-        console.error('Lỗi khi tải phim đang chiếu cho sidebar:', error);
-      }
-    };
-    fetchSidebarMovies();
-  }, []);
-
-  // Cập nhật URL khi bộ lọc thay đổi
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (selectedGenre) params.set('the-loai', selectedGenre);
-    if (selectedCountry) params.set('quoc-gia', selectedCountry);
-    if (selectedYear) params.set('nam', selectedYear);
-    if (selectedStatus) params.set('trang-thai', selectedStatus);
-    if (selectedSort && selectedSort !== 'views') params.set('sap-xep', selectedSort);
-    if (currentPage > 1) params.set('page', currentPage.toString());
-
-    setSearchParams(params, { replace: true });
-  }, [selectedGenre, selectedCountry, selectedYear, selectedStatus, selectedSort, currentPage, setSearchParams]);
-
-  // Lấy danh sách bài viết/thể loại theo bộ lọc
-  useEffect(() => {
-    const fetchGenresData = async () => {
+    const loadActors = async () => {
       setLoading(true);
       try {
+        // Map sort UI -> API sort param
+        const sortMap = {
+          'popular': '-viewCount',
+          'newest': '-createdAt',
+          'name': 'name'
+        };
+
         const params = {
           page: currentPage,
           limit: itemsPerPage,
-          sortBy: selectedSort || 'views'
+          sort: sortMap[selectedSort] || '-viewCount'
         };
 
-        // Thêm filters nếu có giá trị
-        // Lọc theo category (Hành động, Viễn tưởng...)
-        if (selectedGenre) {
-          params.category = selectedGenre; // selectedGenre = category name
-        }
-        if (selectedCountry) params.country = selectedCountry;
-        if (selectedYear) params.year = selectedYear;
-        if (selectedStatus) params.status = selectedStatus;
+        // Call APIs song song
+        const [actorsRes, moviesRes] = await Promise.all([
+          getActorsAPI(params),
+          getNowShowingMoviesAPI(5)
+        ]);
 
-        const res = await getAllGenresAPI(params);
-
-        setMovies(res.data?.genres || []);
-        setTotalMovies(res.total || 0);
-        setTotalPages(res.totalPages || 1);
+        // Cập nhật state với data từ API
+        setActors(actorsRes.data || []);
+        setTotalActors(actorsRes.total || 0);
+        setTotalPages(actorsRes.totalPages || 1);
+        setSidebarMovies(Array.isArray(moviesRes?.data) ? moviesRes.data : []);
       } catch (error) {
-        console.error('Lỗi khi tải danh sách:', error);
-        setMovies([]);
+        console.error('Lỗi khi tải dữ liệu diễn viên:', error);
+        // Fallback về mock data nếu API lỗi
+        setActors([]);
+        setTotalActors(0);
+        setTotalPages(1);
+        setSidebarMovies([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchGenresData();
-  }, [selectedGenre, selectedCountry, selectedYear, selectedStatus, selectedSort, currentPage, genres]);
 
-  // Chuyển hướng đến chi tiết bài viết (Genre)
+    loadActors();
+  }, [selectedNationality, selectedSort, currentPage]);
+
+  // Cập nhật URL khi bộ lọc thay đổi
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (selectedNationality) params.set('quoc-tich', selectedNationality);
+    if (selectedSort && selectedSort !== 'popular') params.set('sap-xep', selectedSort);
+    if (currentPage > 1) params.set('page', currentPage.toString());
+
+    setSearchParams(params, { replace: true });
+  }, [selectedNationality, selectedSort, currentPage, setSearchParams]);
+
+  // Chuyển hướng đến chi tiết diễn viên
+  const handleActorClick = (slug) => {
+    navigate(`/dien-vien-chi-tiet/${slug}`);
+  };
+
+  // Chuyển hướng đến chi tiết phim
   const handleMovieClick = (slug) => {
     navigate(`/phim/${slug}`);
   };
@@ -457,7 +362,23 @@ function GenresPage() {
   // Xử lý chuyển trang
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Cuộn lên đầu trang
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Xử lý Like (mock)
+  const handleToggleLike = (actorId, e) => {
+    e.stopPropagation();
+    const actor = actors.find(a => a._id === actorId);
+    const currentLiked = likeStates[actorId]?.liked || false;
+    const currentCount = likeStates[actorId]?.likeCount ?? actor?.likeCount ?? 0;
+
+    setLikeStates(prev => ({
+      ...prev,
+      [actorId]: {
+        liked: !currentLiked,
+        likeCount: currentLiked ? currentCount - 1 : currentCount + 1
+      }
+    }));
   };
 
   // GIAO DIỆN
@@ -491,10 +412,7 @@ function GenresPage() {
         <CircularProgress
           size={40}
           thickness={2}
-          sx={{
-            color: '#F5A623',
-            mb: 2
-          }}
+          sx={{ color: '#F5A623', mb: 2 }}
         />
 
         {/* Loading Text */}
@@ -507,7 +425,7 @@ function GenresPage() {
             letterSpacing: '0.5px'
           }}
         >
-          Chờ tôi xíu nhé
+          Đang tải...
         </Typography>
       </Box>
     );
@@ -517,7 +435,7 @@ function GenresPage() {
     <Box sx={styles.wrapper}>
       <Container maxWidth="lg">
         {/* Tiêu đề trang */}
-        <Typography sx={styles.pageTitle}>Thế giới phim ảnh</Typography>
+        <Typography sx={styles.pageTitle}>Diễn viên</Typography>
 
         {/* Mobile Filter Button */}
         <Box sx={styles.mobileFilterBtn} onClick={() => setFilterDrawerOpen(true)}>
@@ -542,81 +460,28 @@ function GenresPage() {
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {/* Thể loại - từ API */}
+            {/* Quốc tịch */}
             <FormControl size="small" fullWidth>
               <Select
-                value={selectedGenre}
-                onChange={(e) => setSelectedGenre(e.target.value)}
+                value={selectedNationality}
+                onChange={(e) => setSelectedNationality(e.target.value)}
                 displayEmpty
-                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Thể Loại</span> : genres.find(g => g._id === selected)?.name || selected}
-                sx={{
-                  borderRadius: '4px',
-                  bgcolor: '#fff',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ddd' },
-                  fontSize: '15px'
-                }}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                {genres.map((genre) => (
-                  <MenuItem key={genre._id} value={genre._id}>{genre.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Quốc gia - từ API */}
-            <FormControl size="small" fullWidth>
-              <Select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                displayEmpty
-                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Quốc Gia</span> : selected}
+                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Quốc gia</span> : selected}
                 sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
               >
-                <MenuItem value="">Tất cả</MenuItem>
-                {countries.map((country) => (
-                  <MenuItem key={country} value={country}>{country}</MenuItem>
+                {NATIONALITY_OPTIONS.map((option) => (
+                  <MenuItem key={option.value || 'all'} value={option.value}>{option.label}</MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* Năm - từ API */}
-            <FormControl size="small" fullWidth>
-              <Select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                displayEmpty
-                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Năm</span> : selected}
-                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                {years.map((year) => (
-                  <MenuItem key={year} value={year}>{year}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Trạng thái - static */}
-            <FormControl size="small" fullWidth>
-              <Select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                displayEmpty
-                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Đang Chiếu/ Sắp Chiếu</span> : STATUS_OPTIONS.find(s => s.value === selected)?.label || selected}
-                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <MenuItem key={status.value || 'all'} value={status.value}>{status.label}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Sắp xếp - static */}
+            {/* Sắp xếp */}
             <FormControl size="small" fullWidth>
               <Select
                 value={selectedSort}
                 onChange={(e) => setSelectedSort(e.target.value)}
                 displayEmpty
-                renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Xem nhiều nhất'}
+                renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Phổ biến nhất'}
                 sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
               >
                 {SORT_OPTIONS.map((sort) => (
@@ -625,6 +490,7 @@ function GenresPage() {
               </Select>
             </FormControl>
 
+            {/* Nút hành động */}
             <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
               <Button
                 variant="outlined"
@@ -650,63 +516,18 @@ function GenresPage() {
           </Box>
         </Drawer>
 
-        {/* Hàng bộ lọc (Giao diện Desktop) */}
+        {/* Hàng bộ lọc (Desktop) */}
         <Box sx={styles.filterRow}>
-          {/* Chọn thể loại */}
+          {/* Chọn quốc tịch */}
           <FormControl sx={styles.filterSelect} size="small">
             <Select
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
+              value={selectedNationality}
+              onChange={(e) => setSelectedNationality(e.target.value)}
               displayEmpty
-              renderValue={(selected) => !selected ? 'Thể Loại' : genres.find(g => g._id === selected)?.name || 'Thể Loại'}
+              renderValue={(selected) => selected || 'Quốc gia'}
             >
-              <MenuItem value="">Thể Loại</MenuItem>
-              {genres.map((genre) => (
-                <MenuItem key={genre._id} value={genre._id}>{genre.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Chọn quốc gia */}
-          <FormControl sx={styles.filterSelect} size="small">
-            <Select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => selected || 'Quốc Gia'}
-            >
-              <MenuItem value="">Quốc Gia</MenuItem>
-              {countries.map((country) => (
-                <MenuItem key={country} value={country}>{country}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Chọn năm */}
-          <FormControl sx={styles.filterSelect} size="small">
-            <Select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => selected || 'Năm'}
-            >
-              <MenuItem value="">Năm</MenuItem>
-              {years.map((year) => (
-                <MenuItem key={year} value={year}>{year}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Chọn trạng thái */}
-          <FormControl sx={styles.filterSelect} size="small">
-            <Select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => STATUS_OPTIONS.find(s => s.value === selected)?.label || 'Tất cả'}
-            >
-              {STATUS_OPTIONS.map((status) => (
-                <MenuItem key={status.value || 'all'} value={status.value}>{status.label}</MenuItem>
+              {NATIONALITY_OPTIONS.map((option) => (
+                <MenuItem key={option.value || 'all'} value={option.value}>{option.label}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -717,7 +538,7 @@ function GenresPage() {
               value={selectedSort}
               onChange={(e) => setSelectedSort(e.target.value)}
               displayEmpty
-              renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Xem nhiều nhất'}
+              renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Phổ biến nhất'}
             >
               {SORT_OPTIONS.map((sort) => (
                 <MenuItem key={sort.value} value={sort.value}>{sort.label}</MenuItem>
@@ -726,57 +547,63 @@ function GenresPage() {
           </FormControl>
         </Box>
 
+        {/* Grid chính: Danh sách + Sidebar */}
         <Grid container spacing={3}>
-          {/* Nội dung chính */}
+          {/* Nội dung chính - Danh sách diễn viên */}
           <Grid item xs={12} md={8}>
-            {/* Danh sách phim */}
-            {movies.length === 0 && !loading && (
+            {actors.length === 0 && !loading && (
               <Typography sx={{ textAlign: 'center', color: '#999', py: 4 }}>
-                Không tìm thấy phim nào phù hợp với bộ lọc.
+                Không tìm thấy diễn viên nào phù hợp với bộ lọc.
               </Typography>
             )}
-            {movies.map((movie) => (
-              <Card key={movie._id} sx={styles.movieCard}>
-                <CardMedia
+
+            {actors.map((actor) => (
+              <Card key={actor._id} sx={styles.actorCard}>
+                {/* Avatar diễn viên */}
+                <Box
                   component="img"
-                  sx={styles.moviePoster}
-                  image={movie.imageUrl || movie.bannerUrl}
-                  alt={movie.name}
-                  onClick={() => handleMovieClick(movie.slug)}
+                  src={actor.photoUrl}
+                  alt={actor.name}
+                  sx={styles.actorThumb}
+                  onClick={() => handleActorClick(actor.slug)}
                 />
-                <Box sx={styles.movieContent}>
+
+                {/* Thông tin diễn viên */}
+                <Box sx={styles.actorContent}>
+                  {/* Tên diễn viên */}
                   <Typography
-                    sx={styles.movieTitle}
-                    onClick={() => handleMovieClick(movie.slug)}
+                    sx={styles.actorName}
+                    onClick={() => handleActorClick(actor.slug)}
                   >
-                    {movie.name}
+                    {actor.name}
                   </Typography>
 
-                  {/* Action Buttons */}
+                  {/* Nút Like + View */}
                   <Box sx={styles.actionButtons}>
                     <Button
                       variant="contained"
                       startIcon={<ThumbUpIcon />}
                       sx={{
                         ...styles.likeBtn,
-                        bgcolor: likeStates[movie._id]?.liked ? '#034EA2' : '#4285F4',
+                        bgcolor: likeStates[actor._id]?.liked ? '#034EA2' : '#4285F4',
                         '&:hover': {
-                          bgcolor: likeStates[movie._id]?.liked ? '#023B7A' : '#3367D6'
+                          bgcolor: likeStates[actor._id]?.liked ? '#023B7A' : '#3367D6'
                         }
                       }}
                       size="small"
-                      onClick={(e) => handleToggleLike(movie._id, e)}
+                      onClick={(e) => handleToggleLike(actor._id, e)}
                     >
-                      {likeStates[movie._id]?.likeCount ?? movie.likeCount ?? 0}
+                      {formatNumber(likeStates[actor._id]?.likeCount ?? actor.likeCount ?? 0)}
                     </Button>
                     <Box sx={styles.viewCount}>
                       <VisibilityIcon sx={{ fontSize: 18 }} />
-                      <span>{formatNumber(movie.viewCount || 0)}</span>
+                      <span>{formatNumber(actor.viewCount || 0)}</span>
                     </Box>
                   </Box>
 
-                  <Typography sx={styles.movieDescription}>
-                    {movie.description}
+                  {/* Tiểu sử ngắn */}
+                  <Typography sx={styles.actorBio}>
+                    {actor.shortBio}
                   </Typography>
                 </Box>
               </Card>
@@ -924,8 +751,6 @@ function GenresPage() {
                 </Box>
               </Box>
             )}
-
-            {/* Trạng thái trống (đã xử lý ở trên) */}
           </Grid>
 
           {/* Thanh bên - Phim đang chiếu */}
@@ -1109,4 +934,4 @@ function GenresPage() {
   );
 }
 
-export default GenresPage;
+export default ActorsPage;

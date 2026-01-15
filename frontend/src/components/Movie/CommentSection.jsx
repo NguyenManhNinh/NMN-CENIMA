@@ -1457,10 +1457,16 @@ function CommentSection({ movieId, genreId, user }) {
             placeholder="Mô tả thêm (tùy chọn)..."
             value={reportNote}
             onChange={(e) => setReportNote(e.target.value)}
-            sx={{ mt: 2 }}
+            sx={{
+              mt: 2,
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': { borderColor: '#ddd' },
+                '&.Mui-focused fieldset': { borderColor: '#ddd', borderWidth: '1px' }
+              }
+            }}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
+        <DialogActions sx={{ p: 2, }}>
           <Button
             onClick={() => setReportDialogOpen(false)}
             disabled={submittingReport}

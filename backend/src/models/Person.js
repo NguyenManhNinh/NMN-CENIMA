@@ -90,6 +90,11 @@ const personSchema = new mongoose.Schema(
     viewCount: {
       type: Number,
       default: 0
+    },
+    // Like count (số lượt thích)
+    likeCount: {
+      type: Number,
+      default: 0
     }
   },
   {

@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-13T08:22:12.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Activity - Viết bình luận" id="activity-write-comment">
+    <mxGraphModel dx="1434" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;ACTIVITY DIAGRAM - VIẾT VÀ GỬI BÌNH LUẬN&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="280" y="10" width="400" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== SWIM LANES ==================== -->
+        <!-- User Lane -->
+        <mxCell id="lane-user" value="&lt;b&gt;USER&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="40" y="50" width="200" height="1250" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Lane -->
+        <mxCell id="lane-frontend" value="&lt;b&gt;FRONTEND&lt;/b&gt;&lt;br&gt;(ReactJS)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="240" y="50" width="280" height="1250" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Lane -->
+        <mxCell id="lane-backend" value="&lt;b&gt;BACKEND&lt;/b&gt;&lt;br&gt;(API)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="520" y="50" width="200" height="1250" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== START ==================== -->
+        <mxCell id="start" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="120" y="80" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ACTIVITIES ==================== -->
+        <!-- A1: User muốn viết bình luận -->
+        <mxCell id="a1" value="Muốn viết&lt;br&gt;bình luận" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="75" y="130" width="110" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- D1: Decision - User đã đăng nhập? -->
+        <mxCell id="d1" value="User đã&lt;br&gt;đăng nhập?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="330" y="125" width="100" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- A2: Hiển thị modal login -->
+        <mxCell id="a2" value="Hiển thị&lt;br&gt;Modal Đăng nhập" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="315" y="210" width="130" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- D2: User đăng nhập thành công? -->
+        <mxCell id="d2" value="Đăng nhập&lt;br&gt;thành công?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="85" y="270" width="90" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- End Cancel -->
+        <mxCell id="end-cancel" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="118" y="355" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="end-cancel-circle" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="113" y="350" width="35" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="end-cancel-label" value="Hủy" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="115" y="385" width="30" height="15" as="geometry" />
+        </mxCell>
+
+        <!-- A3: Hiển thị form bình luận -->
+        <mxCell id="a3" value="Hiển thị&lt;br&gt;Form bình luận" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="325" y="420" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- A4: User chọn sao -->
+        <mxCell id="a4" value="Chọn số sao&lt;br&gt;đánh giá (1-5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="75" y="500" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- A5: Nhập tiêu đề -->
+        <mxCell id="a5" value="Nhập tiêu đề&lt;br&gt;(tùy chọn)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="75" y="560" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- A6: Nhập nội dung -->
+        <mxCell id="a6" value="Nhập nội dung&lt;br&gt;bình luận" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="75" y="615" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- D3: Đánh dấu spoiler? -->
+        <mxCell id="d3" value="Đánh dấu&lt;br&gt;spoiler?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="85" y="675" width="90" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- A7: Check spoiler -->
+        <mxCell id="a7" value="Check &quot;Có tiết lộ&lt;br&gt;nội dung phim&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="75" y="755" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- A8: Click Đăng bình luận -->
+        <mxCell id="a8" value="Click nút&lt;br&gt;&quot;Đăng bình luận&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="75" y="815" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- A9: Frontend validation -->
+        <mxCell id="a9" value="Validation&lt;br&gt;form data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="330" y="820" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- D4: Đã chọn sao? -->
+        <mxCell id="d4" value="Đã chọn&lt;br&gt;sao?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="333" y="880" width="90" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- A10: Lỗi chưa chọn sao -->
+        <mxCell id="a10" value="Hiển thị lỗi&lt;br&gt;&quot;Vui lòng chọn sao&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="440" y="875" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- D5: Nội dung >= 20 ký tự? -->
+        <mxCell id="d5" value="Nội dung&lt;br&gt;≥ 20 ký tự?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="333" y="955" width="95" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- A11: Lỗi nội dung ngắn -->
+        <mxCell id="a11" value="Hiển thị lỗi&lt;br&gt;&quot;Tối thiểu 20 ký tự&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="440" y="950" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- A12: Gọi API -->
+        <mxCell id="a12" value="Gọi API&lt;br&gt;POST /reviews" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="330" y="1030" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- A13: Backend xử lý -->
+        <mxCell id="a13" value="Verify JWT&lt;br&gt;Check chatBan&lt;br&gt;Create review" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="560" y="1025" width="120" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- D6: API thành công? -->
+        <mxCell id="d6" value="API&lt;br&gt;thành công?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="580" y="1100" width="85" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- A14: Lỗi API -->
+        <mxCell id="a14" value="Hiển thị lỗi&lt;br&gt;(Bị ban / Server error)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="1175" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- End Error -->
+        <mxCell id="end-error" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="612" y="1235" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="end-error-circle" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="607" y="1230" width="35" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- A15: Toast thành công -->
+        <mxCell id="a15" value="Hiển thị toast&lt;br&gt;&quot;Đăng thành công!&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="325" y="1105" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- A16: Reset form -->
+        <mxCell id="a16" value="Reset form&lt;br&gt;(clear all inputs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="330" y="1165" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- A17: Refresh danh sách -->
+        <mxCell id="a17" value="Refresh danh sách&lt;br&gt;bình luận (page 1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="325" y="1220" width="130" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- END Success -->
+        <mxCell id="end" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1230" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="end-circle" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="115" y="1225" width="35" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ARROWS ==================== -->
+        <!-- Start to A1 -->
+        <mxCell id="arr-start-a1" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="start" target="a1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A1 to D1 -->
+        <mxCell id="arr-a1-d1" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="a1" target="d1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D1 No to A2 -->
+        <mxCell id="arr-d1-a2" value="Chưa" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d1" target="a2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A2 to D2 -->
+        <mxCell id="arr-a2-d2" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="a2" target="d2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D2 No to End Cancel -->
+        <mxCell id="arr-d2-cancel" value="Hủy" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d2" target="end-cancel">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D2 Yes to A3 -->
+        <mxCell id="arr-d2-a3" value="OK" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d2" target="a3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="270" y="300" />
+              <mxPoint x="270" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- D1 Yes to A3 -->
+        <mxCell id="arr-d1-a3" value="Rồi" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d1" target="a3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="160" />
+              <mxPoint x="500" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- A3 to A4 -->
+        <mxCell id="arr-a3-a4" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="a3" target="a4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A4 to A5 -->
+        <mxCell id="arr-a4-a5" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a4" target="a5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A5 to A6 -->
+        <mxCell id="arr-a5-a6" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a5" target="a6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A6 to D3 -->
+        <mxCell id="arr-a6-d3" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a6" target="d3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D3 Yes to A7 -->
+        <mxCell id="arr-d3-a7" value="Có" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d3" target="a7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A7 to A8 -->
+        <mxCell id="arr-a7-a8" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a7" target="a8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D3 No to A8 -->
+        <mxCell id="arr-d3-a8" value="Không" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d3" target="a8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="55" y="705" />
+              <mxPoint x="55" y="838" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- A8 to A9 -->
+        <mxCell id="arr-a8-a9" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="a8" target="a9">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A9 to D4 -->
+        <mxCell id="arr-a9-d4" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a9" target="d4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D4 No to A10 -->
+        <mxCell id="arr-d4-a10" value="Chưa" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d4" target="a10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A10 loop back -->
+        <mxCell id="arr-a10-loop" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="a10" target="a4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="585" y="895" />
+              <mxPoint x="585" y="523" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- D4 Yes to D5 -->
+        <mxCell id="arr-d4-d5" value="Rồi" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d4" target="d5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D5 No to A11 -->
+        <mxCell id="arr-d5-a11" value="Không" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d5" target="a11">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A11 loop back -->
+        <mxCell id="arr-a11-loop" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="a11" target="a6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="970" />
+              <mxPoint x="600" y="635" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- D5 Yes to A12 -->
+        <mxCell id="arr-d5-a12" value="Đủ" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d5" target="a12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A12 to A13 -->
+        <mxCell id="arr-a12-a13" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="a12" target="a13">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A13 to D6 -->
+        <mxCell id="arr-a13-d6" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a13" target="d6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D6 No to A14 -->
+        <mxCell id="arr-d6-a14" value="Lỗi" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontStyle=1" edge="1" parent="1" source="d6" target="a14">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A14 to End Error -->
+        <mxCell id="arr-a14-end" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a14" target="end-error">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D6 Yes to A15 -->
+        <mxCell id="arr-d6-a15" value="OK" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontStyle=1;dashed=1;" edge="1" parent="1" source="d6" target="a15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A15 to A16 -->
+        <mxCell id="arr-a15-a16" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a15" target="a16">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A16 to A17 -->
+        <mxCell id="arr-a16-a17" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="a16" target="a17">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A17 to End -->
+        <mxCell id="arr-a17-end" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="a17" target="end">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Caption -->
+        <mxCell id="caption" value="&lt;i&gt;Hình 3.xx. Sơ đồ Activity Diagram – Luồng viết và gửi bình luận (CommentSection)&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1320" width="450" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

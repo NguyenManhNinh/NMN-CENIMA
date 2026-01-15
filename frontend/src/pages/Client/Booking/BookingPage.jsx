@@ -77,9 +77,9 @@ const getNextDays = (count = 7) => {
   return days;
 };
 
-// ==================== BOOKING PAGE COMPONENT ====================
+//BOOKING PAGE COMPONENT
 function BookingPage() {
-  const { movieId } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   // Available dates (next 7 days)
@@ -106,14 +106,14 @@ function BookingPage() {
       setLoading(true);
       try {
         // 1. Get movie details
-        const movieRes = await getMovieAPI(movieId);
+        const movieRes = await getMovieAPI(slug);
         const movieData = movieRes?.data?.movie;
         setMovie(movieData);
 
         // 2. Get other now showing movies
         const nowShowingRes = await getNowShowingMoviesAPI(5);
         const nowShowingMovies = nowShowingRes?.data?.movies || [];
-        setOtherMovies(nowShowingMovies.filter(m => m._id !== movieId).slice(0, 4));
+        setOtherMovies(nowShowingMovies.filter(m => m.slug !== slug).slice(0, 4));
 
         // 3. Get all cinemas
         const cinemasRes = await getAllCinemasAPI();
@@ -131,14 +131,14 @@ function BookingPage() {
     };
 
     fetchData();
-  }, [movieId]);
+  }, [slug]);
 
   // Load showtimes when date changes
   useEffect(() => {
     const fetchShowtimes = async () => {
-      if (!movieId || !selectedDate) return;
+      if (!movie?._id || !selectedDate) return;
       try {
-        const res = await getAllShowtimesAPI({ movieId, date: selectedDate });
+        const res = await getAllShowtimesAPI({ movieId: movie?._id, date: selectedDate });
         setShowtimes(res?.data?.showtimes || []);
       } catch (error) {
         console.error('Error fetching showtimes:', error);
@@ -147,7 +147,7 @@ function BookingPage() {
     };
 
     fetchShowtimes();
-  }, [movieId, selectedDate]);
+  }, [movie?._id, selectedDate]);
 
   // Filter showtimes - use showtimes from API state
   const filteredShowtimes = useMemo(() => {
@@ -1101,7 +1101,7 @@ function BookingPage() {
                     <Box
                       key={otherMovie._id}
                       component={Link}
-                      to={`/dat-ve/${otherMovie._id}`}
+                      to={`/dat-ve/${otherMovie.slug}`}
                       sx={{
                         textDecoration: 'none',
                         display: 'block',
@@ -1114,7 +1114,7 @@ function BookingPage() {
                       <Box sx={{
                         position: "relative",
                         overflow: "hidden",
-                        aspectRatio: "3/4",
+                        aspectRatio: "16/9",
                         borderRadius: 1,
                         bgcolor: "#f7f7f9ff",
                       }}>
@@ -1418,7 +1418,7 @@ function BookingPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ==================== TRAILER MODAL ==================== */}
+      {/*TRAILER MODAL*/}
       <Dialog
         open={openTrailerModal}
         onClose={() => setOpenTrailerModal(false)}

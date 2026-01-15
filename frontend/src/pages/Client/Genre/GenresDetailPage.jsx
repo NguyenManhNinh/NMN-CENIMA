@@ -395,7 +395,7 @@ function GenresDetailPage() {
               return (
                 <Box component="span" key={index}>
                   <Link
-                    to={`/dien-vien/${slug}`}
+                    to={`/dien-vien-chi-tiet/${slug}`}
                     style={{
                       textDecoration: 'none',
                       color: 'inherit',
@@ -653,7 +653,7 @@ function GenresDetailPage() {
                       </Box>
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: COLORS.textLight }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: COLORS.textLight }}>
                           <VisibilityIcon fontSize="small" /> <Typography>{genre.viewCount?.toLocaleString() || 0}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }} onClick={() => setOpenRatingModal(true)}>
@@ -780,7 +780,7 @@ function GenresDetailPage() {
                         <Box
                           key={idx}
                           component={Link}
-                          to={`/dien-vien/${actorSlug}`}
+                          to={`/dien-vien-chi-tiet/${actorSlug}`}
                           sx={{
                             display: 'flex',
                             alignItems: 'center',
@@ -847,7 +847,7 @@ function GenresDetailPage() {
                     <Box
                       key={otherMovie._id}
                       component={Link}
-                      to={`/dat-ve/${otherMovie._id}`}
+                      to={`/dat-ve/${otherMovie.slug}`}
                       sx={{
                         textDecoration: 'none',
                         display: 'block',
@@ -860,7 +860,7 @@ function GenresDetailPage() {
                       <Box sx={{
                         position: "relative",
                         overflow: "hidden",
-                        aspectRatio: "3/4",
+                        aspectRatio: "16/9",
                         borderRadius: 1,
                         bgcolor: "#f7f7f9ff",
                       }}>

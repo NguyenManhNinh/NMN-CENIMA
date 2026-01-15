@@ -28,7 +28,7 @@ const getActors = catchAsync(async (req, res) => {
   const total = await Person.countDocuments(filter);
 
   const actors = await Person.find(filter)
-    .select('name slug photoUrl shortBio genres viewCount')
+    .select('name slug photoUrl shortBio genres viewCount likeCount')
     .sort(sort)
     .skip(skip)
     .limit(parseInt(limit))
@@ -68,7 +68,7 @@ const getDirectors = catchAsync(async (req, res) => {
   const total = await Person.countDocuments(filter);
 
   const directors = await Person.find(filter)
-    .select('name slug photoUrl shortBio genres viewCount')
+    .select('name slug photoUrl shortBio genres viewCount likeCount')
     .sort(sort)
     .skip(skip)
     .limit(parseInt(limit))
@@ -218,7 +218,7 @@ const getPersons = catchAsync(async (req, res) => {
   const total = await Person.countDocuments(filter);
 
   const persons = await Person.find(filter)
-    .select('name slug photoUrl shortBio role genres viewCount')
+    .select('name slug photoUrl shortBio role genres viewCount likeCount')
     .sort(sort)
     .skip(skip)
     .limit(parseInt(limit))

@@ -118,7 +118,7 @@ function MovieCard({ movie, onTrailerClick }) {
   // Click nút Mua vé
   const handleBuyTicket = (e) => {
     e.stopPropagation();
-    navigate(`/dat-ve/${movie._id}`);
+    navigate(`/dat-ve/${movie.slug}`);
   };
 
   // Click nút Xem trailer
@@ -131,7 +131,7 @@ function MovieCard({ movie, onTrailerClick }) {
 
   // Click vào card → Đặt vé
   const handleCardClick = () => {
-    navigate(`/dat-ve/${movie._id}`);
+    navigate(`/dat-ve/${movie.slug}`);
   };
 
   return (

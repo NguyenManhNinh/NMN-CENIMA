@@ -236,9 +236,9 @@ function ComboPage() {
         sessionStorage.removeItem('reservationStartTime');
         alert('Hết thời gian giữ ghế! Vui lòng chọn lại suất chiếu.');
         // Redirect về trang đặt vé của phim hoặc trang chủ
-        const movieId = showtime?.movie?._id || showtime?.movieId;
-        if (movieId) {
-          navigate(`/dat-ve/${movieId}`);
+        const movieSlug = showtime?.movie?.slug || showtime?.movieSlug;
+        if (movieSlug) {
+          navigate(`/dat-ve/${movieSlug}`);
         } else {
           navigate('/');
         }

@@ -108,7 +108,16 @@ const movieSchema = new mongoose.Schema(
     likedBy: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
-    }]
+    }],
+    // === MENU DROPDOWN PRIORITY ===
+    // Admin ghim phim lên dropdown menu (0 = bình thường, 50 = ưu tiên, 100 = ghim top)
+    menuPriority: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 1000,
+      index: true
+    }
   },
   {
     timestamps: true,

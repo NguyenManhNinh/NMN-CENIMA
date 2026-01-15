@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-13T07:12:17.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Kiến trúc GenresDetailPage" id="architecture-genres-detail">
+    <mxGraphModel dx="1434" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;SƠ ĐỒ KIẾN TRÚC TỔNG THỂ - PHÂN HỆ GENRESDETAILPAGE&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="250" y="15" width="550" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== FRONTEND LAYER ==================== -->
+        <mxCell id="frontend-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="380" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend-label" value="&lt;b&gt;FRONTEND (ReactJS)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontColor=#1a5276;" vertex="1" parent="1">
+          <mxGeometry x="130" y="70" width="180" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- GenresDetailPage Component -->
+        <mxCell id="detail-page" value="&lt;b&gt;GenresDetailPage.jsx&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:10px;&#39;&gt;• Hiển thị chi tiết bài viết&lt;br&gt;• Breadcrumb navigation&lt;br&gt;• Metadata (thể loại, quốc gia, năm, views)&lt;br&gt;• Nội dung HTML (dangerouslySetHTML)&lt;br&gt;• Gallery hình ảnh + Lightbox&lt;br&gt;• Nút xem Trailer (Modal)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="105" width="210" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- CommentSection Component -->
+        <mxCell id="comment-section" value="&lt;b&gt;CommentSection&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:10px;&#39;&gt;• Tái sử dụng với prop genreId&lt;br&gt;• Đánh giá sao 1-5&lt;br&gt;• Viết/xem bình luận&lt;br&gt;• Trả lời, thích, báo cáo&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="250" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- TrailerModal Component -->
+        <mxCell id="trailer-modal" value="&lt;b&gt;TrailerModal&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;font-size:10px;&#39;&gt;YouTube embed&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="240" y="250" width="110" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Lightbox Gallery -->
+        <mxCell id="lightbox" value="&lt;b&gt;Lightbox&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;font-size:10px;&#39;&gt;Gallery ảnh&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="240" y="320" width="110" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- API Client -->
+        <mxCell id="api-client" value="&lt;b&gt;genreApi.js&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:10px;&#39;&gt;• getGenreBySlugAPI(slug)&lt;br&gt;• getRelatedGenresAPI(id)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="280" y="115" width="130" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- Review API Client -->
+        <mxCell id="review-api" value="&lt;b&gt;reviewApi.js&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;font-size:10px;&#39;&gt;Genre Review APIs&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="280" y="200" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- User Actor -->
+        <mxCell id="user-actor" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="30" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="user-label" value="User" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="55" y="430" width="40" height="15" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== BACKEND LAYER ==================== -->
+        <mxCell id="backend-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="470" y="60" width="280" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-label" value="&lt;b&gt;BACKEND API (Node.js/Express)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontColor=#7e5109;" vertex="1" parent="1">
+          <mxGeometry x="495" y="70" width="230" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Genre Controller -->
+        <mxCell id="genre-controller" value="&lt;b&gt;GenreController&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:10px;&#39;&gt;• getGenreBySlug(req, res)&lt;br&gt;• incrementViewCount()&lt;br&gt;• getRelatedGenres()&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="490" y="105" width="150" height="85" as="geometry" />
+        </mxCell>
+
+        <!-- Review Controller -->
+        <mxCell id="review-controller" value="&lt;b&gt;ReviewController&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:10px;&#39;&gt;• getReviewsByGenre()&lt;br&gt;• createGenreReview()&lt;br&gt;• likeReview()&lt;br&gt;• replyToReview()&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="490" y="205" width="150" height="95" as="geometry" />
+        </mxCell>
+
+        <!-- REST Endpoints -->
+        <mxCell id="rest-endpoints" value="&lt;b&gt;REST Endpoints&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;GET /genres/:slug&lt;br&gt;GET /genres/:id/related&lt;br&gt;GET /genres/:id/reviews&lt;br&gt;POST /genres/:id/reviews&lt;br&gt;POST /reviews/:id/like&lt;br&gt;POST /reviews/:id/reply&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="655" y="105" width="140" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Middleware -->
+        <mxCell id="middleware" value="&lt;b&gt;Middleware&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;• authMiddleware&lt;br&gt;• chatBanMiddleware&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="655" y="240" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== DATABASE LAYER ==================== -->
+        <mxCell id="database-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="800" y="60" width="180" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="database-label" value="&lt;b&gt;DATABASE&lt;/b&gt;&lt;br&gt;(MongoDB)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontColor=#196f3d;" vertex="1" parent="1">
+          <mxGeometry x="830" y="70" width="120" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Genres Collection -->
+        <mxCell id="genres-collection" value="&lt;b&gt;genres&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;_id, name, slug&lt;br&gt;content (HTML)&lt;br&gt;images[], trailerUrl&lt;br&gt;views, categoryId&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=top;spacingTop=15;" vertex="1" parent="1">
+          <mxGeometry x="825" y="115" width="120" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Reviews Collection -->
+        <mxCell id="reviews-collection" value="&lt;b&gt;reviews&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;_id, genreId, userId&lt;br&gt;rating, content&lt;br&gt;hasSpoiler, parentId&lt;br&gt;likesCount, reactions&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=top;spacingTop=15;" vertex="1" parent="1">
+          <mxGeometry x="825" y="230" width="120" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Users Collection -->
+        <mxCell id="users-collection" value="&lt;b&gt;users&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;div style=&#39;font-size:9px;&#39;&gt;_id, name, avatar&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#e1d5e7;strokeColor=#9673a6;align=center;verticalAlign=top;spacingTop=15;" vertex="1" parent="1">
+          <mxGeometry x="825" y="345" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ARROWS / CONNECTIONS ==================== -->
+        <!-- Frontend to Backend -->
+        <mxCell id="arrow-fe-be" value="HTTP/REST&lt;br&gt;(JSON)" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#1a5276;" edge="1" parent="1" source="api-client" target="genre-controller">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="410" y="150" as="sourcePoint" />
+            <mxPoint x="490" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Review API to Review Controller -->
+        <mxCell id="arrow-review" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#1a5276;" edge="1" parent="1" source="review-api" target="review-controller">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="225" as="sourcePoint" />
+            <mxPoint x="490" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Backend to Database -->
+        <mxCell id="arrow-be-db1" value="Mongoose" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#196f3d;" edge="1" parent="1" source="genre-controller" target="genres-collection">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="750" y="165" as="sourcePoint" />
+            <mxPoint x="825" y="165" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="800" y="148" />
+              <mxPoint x="800" y="165" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow-be-db2" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#196f3d;" edge="1" parent="1" source="review-controller" target="reviews-collection">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="750" y="280" as="sourcePoint" />
+            <mxPoint x="825" y="280" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="800" y="253" />
+              <mxPoint x="800" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DetailPage to CommentSection -->
+        <mxCell id="arrow-detail-comment" value="genreId" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="detail-page" target="comment-section">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="235" as="sourcePoint" />
+            <mxPoint x="140" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DetailPage to TrailerModal -->
+        <mxCell id="arrow-trailer" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="detail-page" target="trailer-modal">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="270" y="200" as="sourcePoint" />
+            <mxPoint x="240" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DetailPage to API Client -->
+        <mxCell id="arrow-detail-api" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="detail-page" target="api-client">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="270" y="130" as="sourcePoint" />
+            <mxPoint x="280" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== DATA FLOW NOTES ==================== -->
+        <mxCell id="flow-note" value="&lt;b&gt;Luồng chính:&lt;/b&gt;&lt;br&gt;1. User truy cập /the-loai-phim/:slug&lt;br&gt;2. Frontend gọi API lấy chi tiết&lt;br&gt;3. Backend tăng viewCount +1&lt;br&gt;4. Trả về genre data + populate&lt;br&gt;5. Render content, gallery, trailer&lt;br&gt;6. Mount CommentSection với genreId" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=5;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="460" width="210" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="integration-note" value="&lt;b&gt;Tích hợp CommentSection:&lt;/b&gt;&lt;br&gt;&amp;lt;CommentSection&lt;br&gt;  genreId={genre._id}&lt;br&gt;  user={currentUser}&lt;br&gt;/&amp;gt;&lt;br&gt;→ Tái sử dụng component bình luận" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=5;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="270" y="460" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Caption -->
+        <mxCell id="caption" value="&lt;i&gt;Hình 3.xx. Sơ đồ kiến trúc tổng thể phân hệ GenresDetailPage (Frontend – Backend – MongoDB)&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="580" width="500" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-13T08:01:56.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Kiến trúc CommentSection" id="architecture-comment-section">
+    <mxGraphModel dx="1434" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;SƠ ĐỒ KIẾN TRÚC TỔNG THỂ - COMPONENT COMMENTSECTION&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="350" y="10" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PARENT COMPONENTS ==================== -->
+        <mxCell id="parent-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;strokeDashArray=8 8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="50" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="parent-label" value="&lt;b&gt;PARENT COMPONENTS&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="60" y="55" width="160" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- BookingPage -->
+        <mxCell id="booking-page" value="&lt;b&gt;BookingPage&lt;/b&gt;&lt;br&gt;&lt;span style=&#39;font-size:10px;&#39;&gt;movieId=&quot;abc123&quot;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="55" y="85" width="100" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- GenresDetailPage -->
+        <mxCell id="genres-detail" value="&lt;b&gt;GenresDetailPage&lt;/b&gt;&lt;br&gt;&lt;span style=&#39;font-size:10px;&#39;&gt;genreId=&quot;xyz789&quot;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="55" y="140" width="110" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== COMMENTSECTION COMPONENT ==================== -->
+        <mxCell id="comment-section-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="280" y="50" width="380" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="comment-label" value="&lt;b&gt;COMMENTSECTION&lt;/b&gt; (React Component)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontColor=#1a5276;" vertex="1" parent="1">
+          <mxGeometry x="340" y="55" width="260" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Props -->
+        <mxCell id="props-box" value="&lt;b&gt;Props&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:10px;&#39;&gt;• movieId?: ObjectId&lt;br&gt;• genreId?: ObjectId&lt;br&gt;• user: User | null&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="295" y="90" width="110" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- State Management -->
+        <mxCell id="state-box" value="&lt;b&gt;State (React Hooks)&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;• reviews: Review[]&lt;br&gt;• summary: {avg, total, distribution}&lt;br&gt;• page, totalPages: number&lt;br&gt;• sortBy, filterVerified, filterNoSpoiler&lt;br&gt;• loading, submitting: boolean&lt;br&gt;• rating, title, content: form state&lt;br&gt;• hiddenByUser: Set&amp;lt;string&amp;gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="420" y="90" width="170" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Dual API Logic -->
+        <mxCell id="dual-api" value="&lt;b&gt;Dual API Support&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;isGenre = !!genreId;&lt;br&gt;&lt;br&gt;if (isGenre) {&lt;br&gt;  → getReviewsByGenreAPI()&lt;br&gt;  → createGenreReviewAPI()&lt;br&gt;} else {&lt;br&gt;  → getReviewsByMovieAPI()&lt;br&gt;  → createReviewAPI()&lt;br&gt;}&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="295" y="185" width="140" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Methods -->
+        <mxCell id="methods-box" value="&lt;b&gt;Methods&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;+ fetchData(pageNum, fetchSummary)&lt;br&gt;+ handleSubmitReview()&lt;br&gt;+ handlePageChange(page)&lt;br&gt;+ handleReaction(reviewId, type)&lt;br&gt;+ handleReplyClick(reviewId)&lt;br&gt;+ handleSubmitReply()&lt;br&gt;+ handleReportReview(reason)&lt;br&gt;+ hideReviewForMe(reviewId)&lt;br&gt;+ clearAllHidden()&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="450" y="225" width="185" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- LocalStorage -->
+        <mxCell id="localstorage" value="&lt;b&gt;localStorage&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;font-size:9px;&#39;&gt;hidden_reviews_{targetId}&lt;br&gt;→ Persist hidden reviews&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffe6cc;strokeColor=#d79b00;align=center;verticalAlign=top;spacingTop=15;" vertex="1" parent="1">
+          <mxGeometry x="295" y="320" width="130" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== API CLIENT LAYER ==================== -->
+        <mxCell id="api-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="50" width="170" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="api-label" value="&lt;b&gt;API CLIENT&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="745" y="55" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- reviewApi -->
+        <mxCell id="review-api" value="&lt;b&gt;reviewApi.js&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;+ getReviewsByMovieAPI()&lt;br&gt;+ getReviewsByGenreAPI()&lt;br&gt;+ createReviewAPI()&lt;br&gt;+ createGenreReviewAPI()&lt;br&gt;+ likeReviewAPI()&lt;br&gt;+ likeGenreReviewAPI()&lt;br&gt;+ getRepliesAPI()&lt;br&gt;+ replyToReviewAPI()&lt;br&gt;+ reportReviewAPI()&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#b85450;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="715" y="85" width="140" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== BACKEND LAYER ==================== -->
+        <mxCell id="backend-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="910" y="50" width="170" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-label" value="&lt;b&gt;BACKEND API&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="945" y="55" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Review Controller -->
+        <mxCell id="review-controller" value="&lt;b&gt;reviewController&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;+ getReviews()&lt;br&gt;+ createReview()&lt;br&gt;+ likeReview()&lt;br&gt;+ getReplies()&lt;br&gt;+ replyToReview()&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="925" y="85" width="140" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Report Controller -->
+        <mxCell id="report-controller" value="&lt;b&gt;reviewReportController&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;+ createReport()&lt;br&gt;+ getReports() [Admin]&lt;br&gt;+ handleReport() [Admin]&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="925" y="200" width="140" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Middleware -->
+        <mxCell id="middleware" value="&lt;b&gt;Middleware&lt;/b&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;font-size:9px;&#39;&gt;• authMiddleware&lt;br&gt;• chatBanMiddleware&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="925" y="295" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== DATABASE LAYER ==================== -->
+        <mxCell id="db-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="280" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="db-label" value="&lt;b&gt;MONGODB&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="745" y="285" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Collections -->
+        <mxCell id="reviews-coll" value="&lt;b&gt;reviews&lt;/b&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="715" y="315" width="60" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="reports-coll" value="&lt;b&gt;reviewReports&lt;/b&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="785" y="315" width="75" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="users-coll" value="&lt;b&gt;users&lt;/b&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="750" y="365" width="60" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ARROWS ==================== -->
+        <!-- Parent to CommentSection -->
+        <mxCell id="arr-booking" value="&lt;CommentSection&lt;br&gt;movieId=...&lt;br&gt;user=.../&gt;" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;strokeWidth=1;fontSize=9;" edge="1" parent="1" source="booking-page" target="props-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-genres" value="&lt;CommentSection&lt;br&gt;genreId=...&lt;br&gt;user=.../&gt;" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;strokeWidth=1;fontSize=9;" edge="1" parent="1" source="genres-detail" target="props-box">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- CommentSection to API -->
+        <mxCell id="arr-to-api" value="HTTP/REST" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#1a5276;" edge="1" parent="1" source="comment-section-layer" target="review-api">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- API to Backend -->
+        <mxCell id="arr-api-backend" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="review-api" target="review-controller">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Backend to DB -->
+        <mxCell id="arr-backend-db" value="Mongoose" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=0;exitY=0.7;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1" source="review-controller" target="reviews-coll">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="890" y="155" />
+              <mxPoint x="890" y="335" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== NOTES ==================== -->
+        <mxCell id="note1" value="&lt;b&gt;Props-based Configuration:&lt;/b&gt;&lt;br&gt;isGenre = !!genreId&lt;br&gt;targetId = genreId || movieId&lt;br&gt;→ Tự động chọn đúng API" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=5;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="210" width="180" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note2" value="&lt;b&gt;localStorage Integration:&lt;/b&gt;&lt;br&gt;• Lưu danh sách reviewId bị ẩn&lt;br&gt;• Key: hidden_reviews_{targetId}&lt;br&gt;• Persist qua page reload" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=5;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="295" width="180" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- User Actor -->
+        <mxCell id="user-actor" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="445" y="415" width="30" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="user-label" value="User" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="440" y="470" width="40" height="15" as="geometry" />
+        </mxCell>
+
+        <!-- Caption -->
+        <mxCell id="caption" value="&lt;i&gt;Hình 3.xx. Sơ đồ kiến trúc tổng thể Component CommentSection (Reusable Component)&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="370" y="500" width="480" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

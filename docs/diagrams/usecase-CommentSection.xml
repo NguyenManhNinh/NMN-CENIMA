@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-01-13T08:13:57.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Use Case - CommentSection" id="usecase-comment-section">
+    <mxGraphModel dx="1434" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;USE CASE DIAGRAM - COMPONENT COMMENTSECTION (Bình luận)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="350" y="10" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- System Boundary -->
+        <mxCell id="system-boundary" value="&lt;b&gt;Hệ thống CommentSection&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;verticalAlign=top;spacingTop=10;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="200" y="50" width="700" height="540" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ACTORS ==================== -->
+        <!-- Guest Actor -->
+        <mxCell id="guest-actor" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="60" y="120" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="guest-label" value="&lt;b&gt;Guest&lt;/b&gt;&lt;br&gt;(Khách vãng lai)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="205" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- User Actor -->
+        <mxCell id="user-actor" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="user-label" value="&lt;b&gt;User&lt;/b&gt;&lt;br&gt;(Thành viên)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="465" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Admin Actor -->
+        <mxCell id="admin-actor" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="380" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-label" value="&lt;b&gt;Admin&lt;/b&gt;&lt;br&gt;(Quản trị viên)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="970" y="465" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== USE CASES - Guest ==================== -->
+        <!-- UC-CM-01: Xem danh sách bình luận -->
+        <mxCell id="uc01" value="&lt;b&gt;UC-CM-01&lt;/b&gt;&lt;br&gt;Xem danh sách&lt;br&gt;bình luận" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="230" y="70" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- UC-CM-02: Xem thống kê đánh giá -->
+        <mxCell id="uc02" value="&lt;b&gt;UC-CM-02&lt;/b&gt;&lt;br&gt;Xem thống kê&lt;br&gt;đánh giá (Summary)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="400" y="70" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- UC-CM-03: Lọc và sắp xếp -->
+        <mxCell id="uc03" value="&lt;b&gt;UC-CM-03&lt;/b&gt;&lt;br&gt;Lọc và sắp xếp&lt;br&gt;bình luận" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="580" y="70" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- UC-CM-04: Phân trang -->
+        <mxCell id="uc04" value="&lt;b&gt;UC-CM-04&lt;/b&gt;&lt;br&gt;Phân trang&lt;br&gt;bình luận" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="750" y="70" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== USE CASES - User Only ==================== -->
+        <!-- UC-CM-05: Viết bình luận mới -->
+        <mxCell id="uc05" value="&lt;b&gt;UC-CM-05&lt;/b&gt;&lt;br&gt;Viết bình luận mới" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="230" y="160" width="140" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- UC-CM-06: Đánh giá sao -->
+        <mxCell id="uc06" value="&lt;b&gt;UC-CM-06&lt;/b&gt;&lt;br&gt;Đánh giá sao&lt;br&gt;(1-5 sao)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="420" y="160" width="130" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- UC-CM-07: Trả lời bình luận -->
+        <mxCell id="uc07" value="&lt;b&gt;UC-CM-07&lt;/b&gt;&lt;br&gt;Trả lời bình luận" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="130" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- UC-CM-08: Thích/Reaction -->
+        <mxCell id="uc08" value="&lt;b&gt;UC-CM-08&lt;/b&gt;&lt;br&gt;Thích/Reaction&lt;br&gt;bình luận" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="230" y="250" width="130" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- UC-CM-09: Báo cáo bình luận -->
+        <mxCell id="uc09" value="&lt;b&gt;UC-CM-09&lt;/b&gt;&lt;br&gt;Báo cáo bình luận&lt;br&gt;vi phạm" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="400" y="250" width="140" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- UC-CM-10: Ẩn bình luận cục bộ -->
+        <mxCell id="uc10" value="&lt;b&gt;UC-CM-10&lt;/b&gt;&lt;br&gt;Ẩn bình luận&lt;br&gt;cục bộ (localStorage)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="580" y="250" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== USE CASES - Admin ==================== -->
+        <!-- UC-CM-11: Xử lý báo cáo -->
+        <mxCell id="uc11" value="&lt;b&gt;UC-CM-11&lt;/b&gt;&lt;br&gt;Xử lý báo cáo&lt;br&gt;(Ẩn/Xóa review)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="750" y="250" width="140" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== SUPPORT USE CASES ==================== -->
+        <!-- Authentication -->
+        <mxCell id="uc-auth" value="&lt;b&gt;Authentication&lt;/b&gt;&lt;br&gt;(Xác thực)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="340" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Login Modal -->
+        <mxCell id="uc-login" value="&lt;b&gt;Hiển thị&lt;/b&gt;&lt;br&gt;Login Modal" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="340" width="110" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Check Chat Ban -->
+        <mxCell id="uc-chatban" value="&lt;b&gt;Kiểm tra&lt;/b&gt;&lt;br&gt;Chat Ban Status" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="340" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CONNECTIONS - Guest ==================== -->
+        <mxCell id="guest-uc01" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc01">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="guest-uc02" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc02">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="guest-uc03" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc03">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="160" />
+              <mxPoint x="180" y="100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="guest-uc04" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="guest-actor" target="uc04">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== CONNECTIONS - User ==================== -->
+        <!-- User inherits Guest -->
+        <mxCell id="user-inherits-guest" value="" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;" edge="1" parent="1" source="user-actor" target="guest-actor">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="user-uc05" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="user-actor" target="uc05">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="user-uc08" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="user-actor" target="uc08">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="user-uc09" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="user-actor" target="uc09">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="160" y="420" />
+              <mxPoint x="160" y="278" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="user-uc10" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.7;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="user-actor" target="uc10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="160" y="450" />
+              <mxPoint x="160" y="278" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== CONNECTIONS - Admin ==================== -->
+        <mxCell id="admin-uc11" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#b85450;" edge="1" parent="1" source="admin-actor" target="uc11">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== RELATIONSHIPS ==================== -->
+        <!-- UC-05 include UC-06 -->
+        <mxCell id="uc05-include-uc06" value="&lt;i&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/i&gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="uc05" target="uc06">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UC-06 include UC-07 -->
+        <mxCell id="uc06-assoc-uc07" value="&lt;i&gt;&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;&lt;/i&gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="uc06" target="uc07">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UC-05 include Authentication -->
+        <mxCell id="uc05-include-auth" value="&lt;i&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/i&gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="uc05" target="uc-auth">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UC-07 include Authentication -->
+        <mxCell id="uc07-include-auth" value="&lt;i&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/i&gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="uc07" target="uc-auth">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="665" y="320" />
+              <mxPoint x="330" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Authentication extend Login Modal -->
+        <mxCell id="auth-extend-login" value="&lt;i&gt;&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;[chưa đăng nhập]" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="uc-auth" target="uc-login">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UC-05 include ChatBan check -->
+        <mxCell id="uc05-include-chatban" value="&lt;i&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/i&gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;" edge="1" parent="1" source="uc05" target="uc-chatban">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="230" />
+              <mxPoint x="500" y="365" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- UC-09 leads to UC-11 -->
+        <mxCell id="uc09-uc11" value="" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#999;" edge="1" parent="1" source="uc09" target="uc11">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LEGEND ==================== -->
+        <mxCell id="legend-box" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="420" width="180" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="&lt;b&gt;Chú thích&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="285" y="425" width="70" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-guest" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="245" y="450" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-guest-text" value="Guest + User" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="270" y="445" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-user" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="245" y="470" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-user-text" value="Chỉ User" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="270" y="465" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-admin" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="245" y="490" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-admin-text" value="Chỉ Admin" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="270" y="485" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-support" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="245" y="510" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-support-text" value="Include/Extend" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="270" y="505" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-inherit" value="───▷" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="245" y="530" width="25" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-inherit-text" value="Kế thừa (Generalization)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="270" y="530" width="130" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Caption -->
+        <mxCell id="caption" value="&lt;i&gt;Hình 3.xx. Sơ đồ Use Case Diagram – Component CommentSection (Bình luận)&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="420" y="600" width="400" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
