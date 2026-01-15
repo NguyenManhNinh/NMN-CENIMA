@@ -102,35 +102,10 @@ const getPersonBySlug = catchAsync(async (req, res, next) => {
     return next(new AppError('Không tìm thấy người này!', 404));
   }
 
-  // Lấy phim tham gia
-  let movies = [];
-  if (person.role === 'actor' || person.role === 'both') {
-    const actorMovies = await Movie.find({ actors: person.name })
-      .select('title slug posterUrl releaseDate rating')
-      .sort('-releaseDate')
-      .lean();
-    movies = [...movies, ...actorMovies];
-  }
-  if (person.role === 'director' || person.role === 'both') {
-    const directorMovies = await Movie.find({ director: person.name })
-      .select('title slug posterUrl releaseDate rating')
-      .sort('-releaseDate')
-      .lean();
-    movies = [...movies, ...directorMovies];
-  }
-
-  // Remove duplicates
-  const uniqueMovies = movies.filter(
-    (movie, index, self) =>
-      index === self.findIndex((m) => m._id.toString() === movie._id.toString())
-  );
-
+  // Trả về person data (filmography đã được lưu trong Person model)
   res.status(200).json({
     success: true,
-    data: {
-      ...person,
-      movies: uniqueMovies
-    }
+    data: person
   });
 });
 

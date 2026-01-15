@@ -47,6 +47,11 @@ const personSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    // Chiều cao (VD: "1.75m")
+    height: {
+      type: String,
+      trim: true
+    },
     // Mô tả ngắn (hiển thị ở list page)
     shortBio: {
       type: String,
@@ -62,6 +67,15 @@ const personSchema = new mongoose.Schema(
     genres: [{
       type: String,
       trim: true
+    }],
+    // Phim đã tham gia (lưu riêng, không phụ thuộc Movie model)
+    filmography: [{
+      title: { type: String, required: true },
+      slug: String,
+      posterUrl: String,
+      releaseDate: Date,
+      role: String, // Vai diễn trong phim
+      rating: Number
     }],
     // Giải thưởng
     awards: [{
