@@ -30,21 +30,8 @@ import StarIcon from '@mui/icons-material/Star';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 
 // APIs
-import { getActorsAPI } from '@/apis/personApi';
+import { getActorsAPI, getNationalitiesAPI, togglePersonLikeAPI } from '@/apis/personApi';
 import { getNowShowingMoviesAPI } from '@/apis/movieApi';
-
-// CẤU HÌNH BỘ LỌC TĨNH
-// Tùy chọn quốc tịch
-const NATIONALITY_OPTIONS = [
-  { value: '', label: 'Tất cả' },
-  { value: 'Mỹ', label: 'Mỹ' },
-  { value: 'Anh', label: 'Anh' },
-  { value: 'Úc', label: 'Úc' },
-  { value: 'Canada', label: 'Canada' },
-  { value: 'Hàn Quốc', label: 'Hàn Quốc' },
-  { value: 'Nhật Bản', label: 'Nhật Bản' },
-  { value: 'Việt Nam', label: 'Việt Nam' }
-];
 
 // Tùy chọn sắp xếp
 const SORT_OPTIONS = [
@@ -268,6 +255,7 @@ function ActorsPage() {
   // STATE dữ liệu
   const [actors, setActors] = useState([]);
   const [sidebarMovies, setSidebarMovies] = useState([]);
+  const [nationalityOptions, setNationalityOptions] = useState([]);
   const [totalActors, setTotalActors] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -287,6 +275,26 @@ function ActorsPage() {
 
   // STATE trạng thái Thích
   const [likeStates, setLikeStates] = useState({});
+
+  // Load danh sách quốc tịch từ API (chỉ chạy 1 lần khi mount)
+  useEffect(() => {
+    const loadNationalities = async () => {
+      try {
+        const res = await getNationalitiesAPI();
+        const options = [{ value: '', label: 'Tất cả' }];
+        if (res?.data) {
+          res.data.forEach(nat => {
+            options.push({ value: nat, label: nat });
+          });
+        }
+        setNationalityOptions(options);
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách quốc tịch:', error);
+        setNationalityOptions([{ value: '', label: 'Tất cả' }]);
+      }
+    };
+    loadNationalities();
+  }, []);
 
   // Đặt lại bộ lọc
   const resetFilters = () => {
@@ -310,7 +318,8 @@ function ActorsPage() {
         const params = {
           page: currentPage,
           limit: itemsPerPage,
-          sort: sortMap[selectedSort] || '-viewCount'
+          sort: sortMap[selectedSort] || '-viewCount',
+          ...(selectedNationality && { nationality: selectedNationality })
         };
 
         // Call APIs song song
@@ -324,9 +333,21 @@ function ActorsPage() {
         setTotalActors(actorsRes.total || 0);
         setTotalPages(actorsRes.totalPages || 1);
         setSidebarMovies(Array.isArray(moviesRes?.data?.movies) ? moviesRes.data.movies : []);
+
+        // Khởi tạo likeStates từ localStorage
+        const initialLikeStates = {};
+        (actorsRes.data || []).forEach(actor => {
+          const likeKey = `actor_liked_${actor._id}`;
+          const isLiked = localStorage.getItem(likeKey) === 'true';
+          initialLikeStates[actor._id] = {
+            liked: isLiked,
+            likeCount: actor.likeCount || 0
+          };
+        });
+        setLikeStates(initialLikeStates);
       } catch (error) {
         console.error('Lỗi khi tải dữ liệu diễn viên:', error);
-        // Fallback về mock data nếu API lỗi
+        // Reset state nếu API lỗi
         setActors([]);
         setTotalActors(0);
         setTotalPages(1);
@@ -365,20 +386,54 @@ function ActorsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Xử lý Like (mock)
-  const handleToggleLike = (actorId, e) => {
+  // Xử lý Like - Call API + lưu localStorage
+  const handleToggleLike = async (actorId, e) => {
     e.stopPropagation();
     const actor = actors.find(a => a._id === actorId);
-    const currentLiked = likeStates[actorId]?.liked || false;
-    const currentCount = likeStates[actorId]?.likeCount ?? actor?.likeCount ?? 0;
 
+    // Kiểm tra trạng thái like từ localStorage
+    const likeKey = `actor_liked_${actorId}`;
+    const currentLiked = localStorage.getItem(likeKey) === 'true';
+    const action = currentLiked ? 'unlike' : 'like';
+
+    // Optimistic update UI
+    const newLiked = !currentLiked;
     setLikeStates(prev => ({
       ...prev,
       [actorId]: {
-        liked: !currentLiked,
-        likeCount: currentLiked ? currentCount - 1 : currentCount + 1
+        liked: newLiked,
+        likeCount: currentLiked
+          ? (prev[actorId]?.likeCount ?? actor?.likeCount ?? 1) - 1
+          : (prev[actorId]?.likeCount ?? actor?.likeCount ?? 0) + 1
       }
     }));
+
+    // Lưu vào localStorage
+    localStorage.setItem(likeKey, newLiked.toString());
+
+    // Call API
+    try {
+      const res = await togglePersonLikeAPI(actorId, action);
+      // Update with actual count from server
+      setLikeStates(prev => ({
+        ...prev,
+        [actorId]: {
+          ...prev[actorId],
+          likeCount: res.data?.likeCount ?? prev[actorId]?.likeCount
+        }
+      }));
+    } catch (error) {
+      console.error('Lỗi khi toggle like:', error);
+      // Revert on error
+      localStorage.setItem(likeKey, currentLiked.toString());
+      setLikeStates(prev => ({
+        ...prev,
+        [actorId]: {
+          liked: currentLiked,
+          likeCount: actor?.likeCount ?? 0
+        }
+      }));
+    }
   };
 
   // GIAO DIỆN
@@ -469,7 +524,7 @@ function ActorsPage() {
                 renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Quốc gia</span> : selected}
                 sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
               >
-                {NATIONALITY_OPTIONS.map((option) => (
+                {nationalityOptions.map((option) => (
                   <MenuItem key={option.value || 'all'} value={option.value}>{option.label}</MenuItem>
                 ))}
               </Select>
@@ -526,7 +581,7 @@ function ActorsPage() {
               displayEmpty
               renderValue={(selected) => selected || 'Quốc gia'}
             >
-              {NATIONALITY_OPTIONS.map((option) => (
+              {nationalityOptions.map((option) => (
                 <MenuItem key={option.value || 'all'} value={option.value}>{option.label}</MenuItem>
               ))}
             </Select>

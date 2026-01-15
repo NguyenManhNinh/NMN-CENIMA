@@ -7,7 +7,10 @@ const {
   getPersons,
   createPerson,
   updatePerson,
-  deletePerson
+  deletePerson,
+  getNationalities,
+  togglePersonLike,
+  incrementPersonView
 } = require('../controllers/personController');
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
@@ -74,6 +77,18 @@ router.get('/', getPersons);
  *         description: Thành công
  */
 router.get('/actors', getActors);
+
+/**
+ * @swagger
+ * /api/v1/persons/nationalities:
+ *   get:
+ *     summary: Lấy danh sách quốc tịch unique của diễn viên
+ *     tags: [Persons]
+ *     responses:
+ *       200:
+ *         description: Thành công
+ */
+router.get('/nationalities', getNationalities);
 
 /**
  * @swagger
@@ -189,5 +204,51 @@ router.put('/:id', protect, restrictTo('admin'), updatePerson);
  *       - bearerAuth: []
  */
 router.delete('/:id', protect, restrictTo('admin'), deletePerson);
+
+/**
+ * @swagger
+ * /api/v1/persons/{id}/like:
+ *   post:
+ *     summary: Toggle like cho person
+ *     tags: [Persons]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               action:
+ *                 type: string
+ *                 enum: [like, unlike]
+ *     responses:
+ *       200:
+ *         description: Thành công
+ */
+router.post('/:id/like', togglePersonLike);
+
+/**
+ * @swagger
+ * /api/v1/persons/{id}/view:
+ *   post:
+ *     summary: Tăng view count cho person
+ *     tags: [Persons]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Thành công
+ */
+router.post('/:id/view', incrementPersonView);
 
 module.exports = router;

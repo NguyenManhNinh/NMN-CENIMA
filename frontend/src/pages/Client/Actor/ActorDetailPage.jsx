@@ -35,6 +35,7 @@ import { useTheme, useMediaQuery } from '@mui/material';
 
 // APIs
 import { getNowShowingMoviesAPI } from '@/apis/movieApi';
+import { getPersonBySlugAPI, incrementPersonViewAPI } from '@/apis/personApi';
 
 // ==================== CONSTANTS ====================
 const COLORS = {
@@ -50,133 +51,7 @@ const COLORS = {
   bgCard: '#FFFFFF'
 };
 
-// ==================== MOCK DATA ====================
-const MOCK_ACTOR = {
-  _id: 'actor-001',
-  name: 'Chris Evans',
-  slug: 'chris-evans',
-  photoUrl: 'https://image.tmdb.org/t/p/w500/3bOGNsHlrswhyW79uvIHH1V43JI.jpg',
-  bannerUrl: 'https://image.tmdb.org/t/p/original/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
-  birthDate: '1981-06-13',
-  birthPlace: 'Boston, Massachusetts, Hoa Kỳ',
-  nationality: 'Mỹ',
-  height: '1.83m',
-  occupation: 'Diễn viên, Đạo diễn',
-  // Giới thiệu ngắn về bản thân (hiển thị ở header)
-  shortBio: 'Chris Evans là một diễn viên và đạo diễn người Mỹ. Anh được biết đến rộng rãi với vai diễn Captain America trong các bộ phim thuộc Vũ trụ Điện ảnh Marvel (MCU). Evans bắt đầu sự nghiệp diễn xuất vào cuối những năm 1990, xuất hiện trong nhiều bộ phim truyền hình và điện ảnh.',
-
-  // Tiểu sử chi tiết - Lịch sử hoạt động, thành tựu (hiển thị ở section riêng)
-  biography: `Vai diễn đáng chú ý đầu tiên của anh là Johnny Storm / Human Torch trong các phim Fantastic Four (2005) và Fantastic Four: Rise of the Silver Surfer (2007).
-
-Năm 2011, Evans được chọn đóng vai Steve Rogers / Captain America trong Captain America: The First Avenger. Vai diễn này đã đưa anh trở thành một trong những ngôi sao điện ảnh hàng đầu Hollywood. Anh tiếp tục thể hiện nhân vật này trong nhiều phim MCU bao gồm The Avengers (2012), Captain America: The Winter Soldier (2014), Avengers: Age of Ultron (2015), Captain America: Civil War (2016), Avengers: Infinity War (2018) và Avengers: Endgame (2019).
-
-Ngoài MCU, Evans còn tham gia các phim như Snowpiercer (2013), Gifted (2017), Knives Out (2019), và The Gray Man (2022). Anh cũng lấn sân sang lĩnh vực đạo diễn với bộ phim Before We Go (2014).
-
-Các giải thưởng và đề cử:
-• 2015: MTV Movie Award - Best Fight (Captain America: The Winter Soldier)
-• 2016: People's Choice Award - Favorite Action Movie Actor
-• 2019: MTV Movie Award - Best Hero (Avengers: Endgame)
-• 2019: Teen Choice Award - Choice Action Movie Actor`,
-  viewCount: 125890,
-  likeCount: 154307,
-  // Gallery ảnh
-  photos: [
-    'https://image.tmdb.org/t/p/original/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
-    'https://image.tmdb.org/t/p/original/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg',
-    'https://image.tmdb.org/t/p/original/5TbtcmRySXPAEXj5Guq3SFejZ5T.jpg',
-    'https://image.tmdb.org/t/p/original/orjiB3oUIsyz60hoEqkiGpy5CeO.jpg'
-  ],
-  // Phim đã tham gia
-  filmography: [
-    {
-      _id: 'movie-001',
-      title: 'Avengers: Endgame',
-      slug: 'avengers-endgame',
-      posterUrl: 'https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
-      releaseDate: '2019-04-26',
-
-      rating: 9.2
-    },
-    {
-      _id: 'movie-002',
-      title: 'Avengers: Infinity War',
-      slug: 'avengers-infinity-war',
-      posterUrl: 'https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg',
-      releaseDate: '2018-04-27',
-      role: 'Steve Rogers / Captain America',
-      rating: 8.9
-    },
-    {
-      _id: 'movie-003',
-      title: 'Captain America: Civil War',
-      slug: 'captain-america-civil-war',
-      posterUrl: 'https://image.tmdb.org/t/p/w500/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg',
-      releaseDate: '2016-05-06',
-      role: 'Steve Rogers / Captain America',
-      rating: 8.7
-    },
-    {
-      _id: 'movie-004',
-      title: 'Knives Out',
-      slug: 'knives-out',
-      posterUrl: 'https://image.tmdb.org/t/p/w500/pThyQovXQrw2m0s9x82twj48Jq4.jpg',
-      releaseDate: '2019-11-27',
-      role: 'Ransom Drysdale',
-      rating: 8.5
-    },
-    {
-      _id: 'movie-005',
-      title: 'The Gray Man',
-      slug: 'the-gray-man',
-      posterUrl: 'https://image.tmdb.org/t/p/w500/8cXbitsS6dWQ5gfMTZdorpW5Pgi.jpg',
-      releaseDate: '2022-07-22',
-      role: 'Lloyd Hansen',
-      rating: 7.8
-    },
-    {
-      _id: 'movie-006',
-      title: 'Lightyear',
-      slug: 'lightyear',
-      posterUrl: 'https://image.tmdb.org/t/p/w500/vpILbP9eOQEtdQgl4vgjZUNY07r.jpg',
-      releaseDate: '2022-06-17',
-      role: 'Buzz Lightyear (voice)',
-      rating: 7.2
-    }
-  ]
-};
-
-// Mock phim đang chiếu cho sidebar
-const MOCK_NOW_SHOWING = [
-  {
-    _id: 'now-001',
-    title: 'Lật Mặt 7',
-    slug: 'lat-mat-7',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg',
-    bannerUrl: 'https://image.tmdb.org/t/p/original/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg',
-    ageRating: 'T18',
-    rating: 8.5
-  },
-  {
-    _id: 'now-002',
-    title: 'Công Tử Bạc Liêu',
-    slug: 'cong-tu-bac-lieu',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/qtXqj3vp2LqO48sQFBOcT1609xq.jpg',
-    bannerUrl: 'https://image.tmdb.org/t/p/original/qtXqj3vp2LqO48sQFBOcT1609xq.jpg',
-    ageRating: 'T13',
-    rating: 7.8
-  },
-  {
-    _id: 'now-003',
-    title: 'Deadpool & Wolverine',
-    slug: 'deadpool-wolverine',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
-    bannerUrl: 'https://image.tmdb.org/t/p/original/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
-    ageRating: 'T18',
-    rating: 9.0
-  }
-];
-
-//HELPER FUNCTIONS
+// ==================== HELPER FUNCTIONS ====================
 // Format ngày tháng
 const formatDate = (dateString) => {
   if (!dateString) return 'Chưa cập nhật';
@@ -228,14 +103,16 @@ function ActorDetailPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // TODO: Thay bằng API call thực tế
-        // const actorRes = await getActorBySlugAPI(slug);
+        // Gọi API lấy thông tin diễn viên
+        const actorRes = await getPersonBySlugAPI(slug);
+        const actorData = actorRes?.data;
 
-        // Sử dụng mock data
-        await new Promise(resolve => setTimeout(resolve, 500)); // Giả lập delay
-        const actorData = MOCK_ACTOR;
+        if (!actorData) {
+          setActor(null);
+          return;
+        }
 
-        // Tăng view count (với cooldown)
+        // Tăng view count (với cooldown - chỉ 1 lần mỗi 24h)
         if (actorData?._id && !viewIncrementedRef.current[actorData._id]) {
           viewIncrementedRef.current[actorData._id] = true;
 
@@ -245,8 +122,14 @@ function ActorDetailPage() {
 
           if (!lastViewTime || (now - parseInt(lastViewTime, 10)) > VIEW_COOLDOWN_MS) {
             localStorage.setItem(viewKey, now.toString());
-            // TODO: Call API incrementActorViewAPI(actorData._id)
-            actorData.viewCount = (actorData.viewCount || 0) + 1;
+            // Call API tăng view count
+            try {
+              const viewRes = await incrementPersonViewAPI(actorData._id);
+              // Update viewCount từ server
+              actorData.viewCount = viewRes?.data?.viewCount ?? actorData.viewCount;
+            } catch (err) {
+              console.error('Lỗi tăng view count:', err);
+            }
           }
         }
 

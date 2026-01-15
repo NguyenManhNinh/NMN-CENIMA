@@ -48,4 +48,31 @@ export const getPersonBySlugAPI = async (slug) => {
   return response.data;
 };
 
+/**
+ * Get list of unique nationalities from actors
+ */
+export const getNationalitiesAPI = async () => {
+  const response = await api.get('/nationalities');
+  return response.data;
+};
+
+/**
+ * Toggle like for a person
+ * @param {string} personId - Person ID
+ * @param {string} action - 'like' or 'unlike'
+ */
+export const togglePersonLikeAPI = async (personId, action) => {
+  const response = await api.post(`/${personId}/like`, { action });
+  return response.data;
+};
+
+/**
+ * Increment view count for a person
+ * @param {string} personId - Person ID
+ */
+export const incrementPersonViewAPI = async (personId) => {
+  const response = await api.post(`/${personId}/view`);
+  return response.data;
+};
+
 export default api;

@@ -9,12 +9,17 @@ const AppError = require('../utils/AppError');
  * @access  Public
  */
 const getActors = catchAsync(async (req, res) => {
-  const { page = 1, limit = 12, search, sort = '-viewCount' } = req.query;
+  const { page = 1, limit = 12, search, sort = '-viewCount', nationality } = req.query;
 
   const filter = {
     role: { $in: ['actor', 'both'] },
     isActive: true
   };
+
+  // Filter by nationality
+  if (nationality) {
+    filter.nationality = nationality;
+  }
 
   // Search by name
   if (search) {
@@ -90,11 +95,8 @@ const getDirectors = catchAsync(async (req, res) => {
  * @access  Public
  */
 const getPersonBySlug = catchAsync(async (req, res, next) => {
-  const person = await Person.findOneAndUpdate(
-    { slug: req.params.slug },
-    { $inc: { viewCount: 1 } }, // Tăng view count
-    { new: true }
-  ).lean();
+  // Không tự động tăng viewCount ở đây - dùng endpoint riêng POST /:id/view
+  const person = await Person.findOne({ slug: req.params.slug }).lean();
 
   if (!person) {
     return next(new AppError('Không tìm thấy người này!', 404));
@@ -234,6 +236,90 @@ const getPersons = catchAsync(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Lấy danh sách quốc tịch unique
+ * @route   GET /api/v1/persons/nationalities
+ * @access  Public
+ */
+const getNationalities = catchAsync(async (req, res) => {
+  const nationalities = await Person.distinct('nationality', {
+    role: { $in: ['actor', 'both'] },
+    isActive: true,
+    nationality: { $ne: null, $ne: '' }
+  });
+
+  // Sort và format
+  const sortedNationalities = nationalities
+    .filter(n => n && n.trim())
+    .sort((a, b) => a.localeCompare(b, 'vi'));
+
+  res.status(200).json({
+    success: true,
+    count: sortedNationalities.length,
+    data: sortedNationalities
+  });
+});
+
+/**
+ * @desc    Toggle like cho person (diễn viên/đạo diễn)
+ * @route   POST /api/v1/persons/:id/like
+ * @access  Public (có thể thêm protect nếu cần auth)
+ */
+const togglePersonLike = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { action } = req.body; // 'like' hoặc 'unlike'
+
+  const person = await Person.findById(id);
+  if (!person) {
+    return next(new AppError('Không tìm thấy người này!', 404));
+  }
+
+  // Toggle like count
+  if (action === 'like') {
+    person.likeCount = (person.likeCount || 0) + 1;
+  } else if (action === 'unlike') {
+    person.likeCount = Math.max((person.likeCount || 0) - 1, 0);
+  } else {
+    return next(new AppError('Action không hợp lệ! Sử dụng "like" hoặc "unlike"', 400));
+  }
+
+  await person.save();
+
+  res.status(200).json({
+    success: true,
+    message: action === 'like' ? 'Đã thích!' : 'Đã bỏ thích!',
+    data: {
+      likeCount: person.likeCount
+    }
+  });
+});
+
+/**
+ * @desc    Tăng view count cho person
+ * @route   POST /api/v1/persons/:id/view
+ * @access  Public
+ */
+const incrementPersonView = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  const person = await Person.findByIdAndUpdate(
+    id,
+    { $inc: { viewCount: 1 } },
+    { new: true }
+  );
+
+  if (!person) {
+    return next(new AppError('Không tìm thấy người này!', 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      viewCount: person.viewCount
+    }
+  });
+});
+
 module.exports = {
   getActors,
   getDirectors,
@@ -241,5 +327,8 @@ module.exports = {
   getPersons,
   createPerson,
   updatePerson,
-  deletePerson
+  deletePerson,
+  getNationalities,
+  togglePersonLike,
+  incrementPersonView
 };
