@@ -37,7 +37,7 @@ import { useTheme, useMediaQuery } from '@mui/material';
 import { getNowShowingMoviesAPI } from '@/apis/movieApi';
 import { getPersonBySlugAPI, incrementPersonViewAPI } from '@/apis/personApi';
 
-// ==================== CONSTANTS ====================
+//CONSTANTS
 const COLORS = {
   primary: '#034EA2',
   orange: '#F5A623',
@@ -51,7 +51,7 @@ const COLORS = {
   bgCard: '#FFFFFF'
 };
 
-// ==================== HELPER FUNCTIONS ====================
+//HELPER FUNCTIONS
 // Format ngày tháng
 const formatDate = (dateString) => {
   if (!dateString) return 'Chưa cập nhật';
@@ -96,7 +96,7 @@ function ActorDetailPage() {
 
   // View count tracking
   const viewIncrementedRef = useRef({});
-  const VIEW_COOLDOWN_MS = 30 * 60 * 1000; // 30 phút
+  const VIEW_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 giờ
 
   //FETCH DATA
   useEffect(() => {
@@ -133,7 +133,18 @@ function ActorDetailPage() {
           }
         }
 
-        setActor(actorData);
+        // Mapping fields từ backend sang frontend naming convention
+        const mappedActor = {
+          ...actorData,
+          // Backend trả filmography trực tiếp trong Person model
+          filmography: actorData.filmography || [],
+          // Backend trả gallery array [{url, caption}], frontend dùng photos array [string]
+          photos: actorData.gallery?.map(g => g.url || g) || [],
+          // Backend trả fullBio, frontend dùng biography
+          biography: actorData.fullBio || ''
+        };
+
+        setActor(mappedActor);
 
         // Fetch phim đang chiếu từ API cho sidebar
         try {
@@ -552,7 +563,7 @@ function ActorDetailPage() {
                       <Box
                         key={movie._id}
                         component={Link}
-                        to={`/dat-ve/${movie.slug}`}
+                        to={`/phim/${movie.slug}`}
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
@@ -562,7 +573,6 @@ function ActorDetailPage() {
                           p: 1,
                           borderRadius: 1,
                           transition: 'all 0.2s',
-
                         }}
                       >
                         {/* Poster phim - nhỏ ngang */}

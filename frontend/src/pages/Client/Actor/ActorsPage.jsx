@@ -7,7 +7,6 @@ import {
   Container,
   Typography,
   Card,
-  CardMedia,
   Select,
   MenuItem,
   FormControl,
@@ -16,7 +15,6 @@ import {
   CircularProgress,
   Drawer,
   IconButton,
-  Avatar
 } from '@mui/material';
 
 // Material UI Icons

@@ -668,7 +668,7 @@ function BookingPage() {
                                   .replace(/Đ/g, 'D')
                                   .replace(/\s+/g, '-')
                                   .replace(/[^\w-]/g, '');
-                                navigate(`/dien-vien/${slug}`);
+                                navigate(`/dien-vien-chi-tiet/${slug}`);
                               }}
                               sx={{
                                 fontSize: '0.85rem',
