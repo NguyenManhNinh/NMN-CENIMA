@@ -118,18 +118,20 @@ const personSchema = new mongoose.Schema(
   }
 );
 
-// Virtual: Lấy danh sách phim tham gia (cho Actor)
+// Virtual: Lấy danh sách phim tham gia (cho Actor) - match bằng ObjectId
 personSchema.virtual('moviesAsActor', {
   ref: 'Movie',
-  localField: 'name',
-  foreignField: 'actors'
+  localField: '_id',
+  foreignField: 'actors',
+  justOne: false
 });
 
-// Virtual: Lấy danh sách phim đạo diễn (cho Director)
+// Virtual: Lấy danh sách phim đạo diễn (cho Director) - match bằng ObjectId
 personSchema.virtual('moviesAsDirector', {
   ref: 'Movie',
-  localField: 'name',
-  foreignField: 'director'
+  localField: '_id',
+  foreignField: 'director',
+  justOne: false
 });
 
 // Virtual: Tính tuổi

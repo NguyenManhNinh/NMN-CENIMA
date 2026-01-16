@@ -6,10 +6,13 @@ const handleCastErrorDB = err => {
   return new AppError(message, 400);
 };
 
-// Xử lý lỗi trùng lặp (Duplicate Fields)
+// Xử lý lỗi trùng lặp (Duplicate Fields) - dùng keyValue thay vì errmsg
 const handleDuplicateFieldsDB = err => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  const message = `Giá trị trùng lặp: ${value}. Vui lòng sử dụng giá trị khác!`;
+  // MongoDB 4.x+ dùng keyValue thay vì errmsg
+  const keyValue = err.keyValue || {};
+  const field = Object.keys(keyValue)[0] || 'field';
+  const value = keyValue[field] || 'unknown';
+  const message = `Giá trị trùng lặp cho ${field}: "${value}". Vui lòng sử dụng giá trị khác!`;
   return new AppError(message, 400);
 };
 
@@ -63,14 +66,23 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    let error = { ...err };
+    // Clone Error đúng cách - spread operator không copy non-enumerable props
+    let error = Object.create(err);
     error.message = err.message;
+    error.name = err.name;
+    error.code = err.code;
+    error.keyValue = err.keyValue;
+    error.errors = err.errors;
+    error.statusCode = err.statusCode;
+    error.status = err.status;
+    error.isOperational = err.isOperational;
 
-    if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
-    if (error.name === 'JsonWebTokenError') error = handleJWTError();
-    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+    // Xử lý các loại lỗi DB và chuyển thành AppError (400)
+    if (err.name === 'CastError') error = handleCastErrorDB(err);
+    if (err.code === 11000) error = handleDuplicateFieldsDB(err);
+    if (err.name === 'ValidationError') error = handleValidationErrorDB(err);
+    if (err.name === 'JsonWebTokenError') error = handleJWTError();
+    if (err.name === 'TokenExpiredError') error = handleJWTExpiredError();
 
     sendErrorProd(error, res);
   }

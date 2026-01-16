@@ -236,33 +236,40 @@ const getNationalities = catchAsync(async (req, res) => {
 });
 
 /**
- * @desc    Toggle like cho person (diễn viên/đạo diễn)
+ * @desc    Toggle like/unlike cho person (dùng $inc atomic để tránh lỗi validator)
  * @route   POST /api/v1/persons/:id/like
- * @access  Public (có thể thêm protect nếu cần auth)
+ * @access  Public
  */
 const togglePersonLike = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { action } = req.body; // 'like' hoặc 'unlike'
 
-  const person = await Person.findById(id);
+  // Validate action
+  if (!['like', 'unlike'].includes(action)) {
+    return next(new AppError('Action không hợp lệ! Sử dụng "like" hoặc "unlike"', 400));
+  }
+
+  // Dùng $inc atomic để update, không trigger validator toàn bộ document
+  const incValue = action === 'like' ? 1 : -1;
+
+  const person = await Person.findByIdAndUpdate(
+    id,
+    { $inc: { likeCount: incValue } },
+    { new: true, runValidators: false } // Không chạy validator
+  );
+
   if (!person) {
     return next(new AppError('Không tìm thấy người này!', 404));
   }
 
-  // Toggle like count
-  if (action === 'like') {
-    person.likeCount = (person.likeCount || 0) + 1;
-  } else if (action === 'unlike') {
-    person.likeCount = Math.max((person.likeCount || 0) - 1, 0);
-  } else {
-    return next(new AppError('Action không hợp lệ! Sử dụng "like" hoặc "unlike"', 400));
+  // Chặn âm: nếu likeCount < 0 thì set về 0
+  if (person.likeCount < 0) {
+    await Person.findByIdAndUpdate(id, { likeCount: 0 }, { runValidators: false });
+    person.likeCount = 0;
   }
-
-  await person.save();
 
   res.status(200).json({
     success: true,
-    message: action === 'like' ? 'Đã thích!' : 'Đã bỏ thích!',
     data: {
       likeCount: person.likeCount
     }
@@ -280,7 +287,7 @@ const incrementPersonView = catchAsync(async (req, res, next) => {
   const person = await Person.findByIdAndUpdate(
     id,
     { $inc: { viewCount: 1 } },
-    { new: true }
+    { new: true, runValidators: false } // Không chạy validator
   );
 
   if (!person) {
