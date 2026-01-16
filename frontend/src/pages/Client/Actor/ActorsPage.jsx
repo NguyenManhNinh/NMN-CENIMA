@@ -273,6 +273,8 @@ function ActorsPage() {
 
   // STATE trạng thái Thích
   const [likeStates, setLikeStates] = useState({});
+  // STATE loading per-item khi call API like (chống spam click)
+  const [likeLoading, setLikeLoading] = useState({});
 
   // Load danh sách quốc tịch từ API (chỉ chạy 1 lần khi mount)
   useEffect(() => {
@@ -384,53 +386,56 @@ function ActorsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Xử lý Like - Call API + lưu localStorage
+  // Xử lý Like - Call API + lưu localStorage (chống spam + optimistic + rollback)
   const handleToggleLike = async (actorId, e) => {
     e.stopPropagation();
+
+    // Chống spam click - nếu đang loading thì bỏ qua
+    if (likeLoading[actorId]) return;
+
     const actor = actors.find(a => a._id === actorId);
-
-    // Kiểm tra trạng thái like từ localStorage
     const likeKey = `actor_liked_${actorId}`;
-    const currentLiked = localStorage.getItem(likeKey) === 'true';
-    const action = currentLiked ? 'unlike' : 'like';
 
-    // Optimistic update UI
-    const newLiked = !currentLiked;
+    // Lấy trạng thái trước khi click
+    const prevLiked = localStorage.getItem(likeKey) === 'true';
+    const prevCount = likeStates[actorId]?.likeCount ?? actor?.likeCount ?? 0;
+
+    // Tính trạng thái mới
+    const nextLiked = !prevLiked;
+    const nextCount = Math.max(0, nextLiked ? prevCount + 1 : prevCount - 1);
+    const action = nextLiked ? 'like' : 'unlike';
+
+    // Set loading cho item này
+    setLikeLoading(prev => ({ ...prev, [actorId]: true }));
+
+    // Optimistic update UI + localStorage
     setLikeStates(prev => ({
       ...prev,
-      [actorId]: {
-        liked: newLiked,
-        likeCount: currentLiked
-          ? (prev[actorId]?.likeCount ?? actor?.likeCount ?? 1) - 1
-          : (prev[actorId]?.likeCount ?? actor?.likeCount ?? 0) + 1
-      }
+      [actorId]: { liked: nextLiked, likeCount: nextCount }
     }));
-
-    // Lưu vào localStorage
-    localStorage.setItem(likeKey, newLiked.toString());
+    localStorage.setItem(likeKey, nextLiked.toString());
 
     // Call API
     try {
       const res = await togglePersonLikeAPI(actorId, action);
-      // Update with actual count from server
-      setLikeStates(prev => ({
-        ...prev,
-        [actorId]: {
-          ...prev[actorId],
-          likeCount: res.data?.likeCount ?? prev[actorId]?.likeCount
-        }
-      }));
+      // Sync với số like từ server
+      if (res.data?.likeCount !== undefined) {
+        setLikeStates(prev => ({
+          ...prev,
+          [actorId]: { ...prev[actorId], likeCount: res.data.likeCount }
+        }));
+      }
     } catch (error) {
       console.error('Lỗi khi toggle like:', error);
-      // Revert on error
-      localStorage.setItem(likeKey, currentLiked.toString());
+      // Rollback về trạng thái trước
+      localStorage.setItem(likeKey, prevLiked.toString());
       setLikeStates(prev => ({
         ...prev,
-        [actorId]: {
-          liked: currentLiked,
-          likeCount: actor?.likeCount ?? 0
-        }
+        [actorId]: { liked: prevLiked, likeCount: prevCount }
       }));
+    } finally {
+      // Clear loading
+      setLikeLoading(prev => ({ ...prev, [actorId]: false }));
     }
   };
 
@@ -635,12 +640,26 @@ function ActorsPage() {
                   <Box sx={styles.actionButtons}>
                     <Button
                       variant="contained"
+                      disableRipple
+                      disableElevation
+                      disabled={likeLoading[actor._id]}
                       startIcon={<ThumbUpIcon />}
                       sx={{
                         ...styles.likeBtn,
-                        bgcolor: likeStates[actor._id]?.liked ? '#034EA2' : '#4285F4',
+                        bgcolor: '#4285F4',
+                        boxShadow: 'none',
                         '&:hover': {
-                          bgcolor: likeStates[actor._id]?.liked ? '#023B7A' : '#3367D6'
+                          bgcolor: '#4285F4',
+                          boxShadow: 'none'
+                        },
+                        '&:active': {
+                          bgcolor: '#4285F4',
+                          boxShadow: 'none'
+                        },
+                        '&:disabled': {
+                          bgcolor: '#4285F4',
+                          color: '#fff',
+                          opacity: 0.7
                         }
                       }}
                       size="small"

@@ -35,7 +35,7 @@ import { useTheme, useMediaQuery } from '@mui/material';
 
 // APIs
 import { getNowShowingMoviesAPI } from '@/apis/movieApi';
-import { getPersonBySlugAPI, incrementPersonViewAPI } from '@/apis/personApi';
+import { getPersonBySlugAPI, incrementPersonViewAPI, togglePersonLikeAPI } from '@/apis/personApi';
 
 //CONSTANTS
 const COLORS = {
@@ -106,20 +106,16 @@ function ActorDetailPage() {
         // Gọi API lấy thông tin diễn viên
         const actorRes = await getPersonBySlugAPI(slug);
         const actorData = actorRes?.data;
-
         if (!actorData) {
           setActor(null);
           return;
         }
-
         // Tăng view count (với cooldown - chỉ 1 lần mỗi 24h)
         if (actorData?._id && !viewIncrementedRef.current[actorData._id]) {
           viewIncrementedRef.current[actorData._id] = true;
-
           const viewKey = `actor_view_${actorData._id}`;
           const lastViewTime = localStorage.getItem(viewKey);
           const now = Date.now();
-
           if (!lastViewTime || (now - parseInt(lastViewTime, 10)) > VIEW_COOLDOWN_MS) {
             localStorage.setItem(viewKey, now.toString());
             // Call API tăng view count
@@ -167,6 +163,57 @@ function ActorDetailPage() {
       fetchData();
     }
   }, [slug]);
+
+  // LIKE HANDLER - Gọi API toggle like/unlike
+  const [isLiked, setIsLiked] = useState(false);
+
+  // Khởi tạo trạng thái like từ localStorage
+  useEffect(() => {
+    if (actor?._id) {
+      const likeKey = `actor_liked_${actor._id}`;
+      setIsLiked(localStorage.getItem(likeKey) === 'true');
+    }
+  }, [actor?._id]);
+
+  const handleToggleLike = async () => {
+    if (!actor?._id) return;
+
+    const likeKey = `actor_liked_${actor._id}`;
+    const currentLiked = localStorage.getItem(likeKey) === 'true';
+    const action = currentLiked ? 'unlike' : 'like';
+
+    // Optimistic update
+    const newLiked = !currentLiked;
+    setIsLiked(newLiked);
+    localStorage.setItem(likeKey, newLiked.toString());
+    setActor(prev => ({
+      ...prev,
+      likeCount: currentLiked
+        ? Math.max((prev.likeCount || 1) - 1, 0)
+        : (prev.likeCount || 0) + 1
+    }));
+
+    // Call API
+    try {
+      const res = await togglePersonLikeAPI(actor._id, action);
+      // Update với giá trị thực từ server
+      setActor(prev => ({
+        ...prev,
+        likeCount: res.data?.likeCount ?? prev.likeCount
+      }));
+    } catch (error) {
+      console.error('Lỗi toggle like:', error);
+      // Revert on error
+      localStorage.setItem(likeKey, currentLiked.toString());
+      setIsLiked(currentLiked);
+      setActor(prev => ({
+        ...prev,
+        likeCount: currentLiked
+          ? (prev.likeCount || 0) + 1
+          : Math.max((prev.likeCount || 1) - 1, 0)
+      }));
+    }
+  };
 
   //GALLERY HANDLERS
   const handleOpenGallery = (index) => {
@@ -361,9 +408,10 @@ function ActorDetailPage() {
                     {/* Nút Like */}
                     <Button
                       variant="contained"
+                      onClick={handleToggleLike}
                       startIcon={<ThumbUpIcon sx={{ fontSize: 16 }} />}
                       sx={{
-                        bgcolor: 'rgba(64,128,255,1)',
+                        backgroundColor: 'rgba(64,128,255,1)',
                         color: '#fff',
                         textTransform: 'none',
                         fontWeight: 500,
@@ -373,7 +421,13 @@ function ActorDetailPage() {
                         minWidth: 'auto',
                         height: { xs: '30px', md: '32px' },
                         borderRadius: '4px',
-                        '&:hover': { bgcolor: 'rgba(64,128,255,0.8)' }
+                        '&:hover': {
+                          backgroundColor: 'rgba(64,128,255,1)',
+                          boxShadow: 'none',
+                        },
+                        '&:active': {
+                          boxShadow: 'none',
+                        },
                       }}
                     >
                       {actor.likeCount?.toLocaleString() || 0}

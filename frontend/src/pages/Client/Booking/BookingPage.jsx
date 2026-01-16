@@ -1433,18 +1433,43 @@ function BookingPage() {
         }}
       >
         <DialogContent sx={{ p: 0, position: 'relative', aspectRatio: '16/9' }}>
-          {movie?.trailerUrl && (
-            <iframe
-              width="1038px"
-              height="582px"
-              src={movie.trailerUrl.replace('watch?v=', 'embed/')}
-              title={`${movie.title} Trailer`}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-            />
-          )}
+          {movie?.trailerUrl && (() => {
+            // Helper: Chuyển URL YouTube sang embed format
+            const getEmbedUrl = (url) => {
+              if (!url) return '';
+              // Đã là embed format
+              if (url.includes('/embed/')) return url;
+              // Format: youtu.be/VIDEO_ID
+              if (url.includes('youtu.be/')) {
+                const videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+                return `https://www.youtube.com/embed/${videoId}`;
+              }
+              // Format: youtube.com/watch?v=VIDEO_ID
+              if (url.includes('watch?v=')) {
+                const videoId = url.split('watch?v=')[1]?.split(/[?&]/)[0];
+                return `https://www.youtube.com/embed/${videoId}`;
+              }
+              // Format: youtube.com/v/VIDEO_ID
+              if (url.includes('/v/')) {
+                const videoId = url.split('/v/')[1]?.split(/[?&]/)[0];
+                return `https://www.youtube.com/embed/${videoId}`;
+              }
+              return url;
+            };
+
+            return (
+              <iframe
+                width="1038px"
+                height="582px"
+                src={getEmbedUrl(movie.trailerUrl)}
+                title={`${movie.title} Trailer`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              />
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </Box >
