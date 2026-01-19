@@ -20,6 +20,7 @@ import PaymentResultPage from './pages/Client/Payment/PaymentResultPage';
 import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 import { GenresPage, GenresDetailPage } from './pages/Client/Genre';
 import { ActorsPage, ActorDetailPage } from './pages/Client/Actor';
+import { FilmDirectorPage, FilmDirectorDetailPage } from './pages/Client/FilmDirector';
 
 function App() {
   return (
@@ -65,8 +66,11 @@ function App() {
             <Route path="phim/:slug" element={<GenresDetailPage />} />
 
             {/* Chi tiết diễn viên */}
-            <Route path="dao-dien/:slug" element={<ActorDetailPage />} />
             <Route path="dien-vien-chi-tiet/:slug" element={<ActorDetailPage />} />
+
+            {/* GÓC ĐIỆN ẢNH - Đạo diễn */}
+            <Route path="dao-dien" element={<FilmDirectorPage />} />
+            <Route path="dao-dien-chi-tiet/:slug" element={<FilmDirectorDetailPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
