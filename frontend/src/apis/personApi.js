@@ -49,10 +49,11 @@ export const getPersonBySlugAPI = async (slug) => {
 };
 
 /**
- * Get list of unique nationalities from actors
+ * Get list of unique nationalities
+ * @param {Object} params - { role: 'actor' | 'director' } (optional)
  */
-export const getNationalitiesAPI = async () => {
-  const response = await api.get('/nationalities');
+export const getNationalitiesAPI = async (params = {}) => {
+  const response = await api.get('/nationalities', { params });
   return response.data;
 };
 
