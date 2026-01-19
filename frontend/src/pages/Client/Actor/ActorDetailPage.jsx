@@ -1,7 +1,4 @@
-// ActorDetailPage.jsx - Trang chi tiết diễn viên
-// Dựa trên cấu trúc GenresDetailPage với các điều chỉnh phù hợp
-
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
 // Import MUI Components
@@ -49,6 +46,15 @@ const COLORS = {
   border: '#E5E5E5',
   bgLight: '#F8F9FA',
   bgCard: '#FFFFFF'
+};
+
+// Fallback image (data URI - không cần network request, chặn loop onError)
+const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+
+// Helper: Xử lý lỗi ảnh - chặn infinite loop
+const handleImageError = (e) => {
+  e.target.onerror = null; // Chặn loop nếu fallback cũng fail
+  e.target.src = FALLBACK_IMAGE;
 };
 
 //HELPER FUNCTIONS
@@ -166,6 +172,7 @@ function ActorDetailPage() {
 
   // LIKE HANDLER - Gọi API toggle like/unlike
   const [isLiked, setIsLiked] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
 
   // Khởi tạo trạng thái like từ localStorage
   useEffect(() => {
@@ -178,9 +185,15 @@ function ActorDetailPage() {
   const handleToggleLike = async () => {
     if (!actor?._id) return;
 
+    // Chống spam click
+    if (likeLoading) return;
+
     const likeKey = `actor_liked_${actor._id}`;
     const currentLiked = localStorage.getItem(likeKey) === 'true';
     const action = currentLiked ? 'unlike' : 'like';
+
+    // Set loading
+    setLikeLoading(true);
 
     // Optimistic update
     const newLiked = !currentLiked;
@@ -212,6 +225,8 @@ function ActorDetailPage() {
           ? (prev.likeCount || 0) + 1
           : Math.max((prev.likeCount || 1) - 1, 0)
       }));
+    } finally {
+      setLikeLoading(false);
     }
   };
 
@@ -371,6 +386,7 @@ function ActorDetailPage() {
                         component="img"
                         src={actor.photoUrl}
                         alt={actor.name}
+                        onError={handleImageError}
                         sx={{
                           width: '100%',
                           height: '100%',
@@ -409,6 +425,9 @@ function ActorDetailPage() {
                     <Button
                       variant="contained"
                       onClick={handleToggleLike}
+                      disabled={likeLoading}
+                      disableRipple
+                      disableElevation
                       startIcon={<ThumbUpIcon sx={{ fontSize: 16 }} />}
                       sx={{
                         backgroundColor: 'rgba(64,128,255,1)',
@@ -421,12 +440,26 @@ function ActorDetailPage() {
                         minWidth: 'auto',
                         height: { xs: '30px', md: '32px' },
                         borderRadius: '4px',
+                        boxShadow: 'none',
                         '&:hover': {
                           backgroundColor: 'rgba(64,128,255,1)',
                           boxShadow: 'none',
                         },
                         '&:active': {
+                          backgroundColor: 'rgba(64,128,255,1)',
                           boxShadow: 'none',
+                        },
+                        '&:focus': {
+                          backgroundColor: 'rgba(64,128,255,1)',
+                        },
+                        '&.Mui-focusVisible': {
+                          backgroundColor: 'rgba(64,128,255,1)',
+                          boxShadow: 'none',
+                        },
+                        '&.Mui-disabled': {
+                          backgroundColor: 'rgba(64,128,255,1)',
+                          color: '#fff',
+                          opacity: 0.7,
                         },
                       }}
                     >
@@ -535,26 +568,27 @@ function ActorDetailPage() {
               </Grid>
 
               {/*SECTION: HÌNH ẢNH */}
-              {actor.photos && actor.photos.length > 0 && (
-                <Box sx={{ mt: 4 }}>
-                  <Typography sx={{
-                    fontWeight: 700,
-                    fontSize: '18px',
-                    color: COLORS.primary,
-                    mb: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    '&::before': {
-                      content: '""',
-                      width: 4,
-                      height: 20,
-                      bgcolor: COLORS.primary,
-                      borderRadius: 1
-                    }
-                  }}>
-                    HÌNH ẢNH DIỄN VIÊN
-                  </Typography>
+              <Box sx={{ mt: 4 }}>
+                <Typography sx={{
+                  fontWeight: 700,
+                  fontSize: '18px',
+                  color: COLORS.primary,
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  '&::before': {
+                    content: '""',
+                    width: 4,
+                    height: 20,
+                    bgcolor: COLORS.primary,
+                    borderRadius: 1
+                  }
+                }}>
+                  HÌNH ẢNH DIỄN VIÊN
+                </Typography>
+
+                {actor.photos && actor.photos.length > 0 ? (
                   <Box sx={{
                     display: { xs: 'flex', sm: 'grid' },
                     gridTemplateColumns: { sm: 'repeat(4, 1fr)' },
@@ -571,6 +605,7 @@ function ActorDetailPage() {
                         src={photo}
                         alt={`${actor.name} - ${idx + 1}`}
                         onClick={() => handleOpenGallery(idx)}
+                        onError={handleImageError}
                         sx={{
                           width: { xs: '200px', sm: '100%' },
                           flexShrink: 0,
@@ -583,8 +618,12 @@ function ActorDetailPage() {
                       />
                     ))}
                   </Box>
-                </Box>
-              )}
+                ) : (
+                  <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
+                    Chưa cập nhật
+                  </Typography>
+                )}
+              </Box>
 
               {/*SECTION: PHIM ĐÃ THAM GIA */}
               <Box sx={{ mt: 4 }}>
@@ -634,6 +673,7 @@ function ActorDetailPage() {
                           component="img"
                           src={movie.posterUrl}
                           alt={movie.title}
+                          onError={handleImageError}
                           sx={{
                             width: { xs: 90, md: 100 },
                             height: { xs: 60, md: 65 },
@@ -762,6 +802,7 @@ function ActorDetailPage() {
                           component="img"
                           src={movie.bannerUrl || movie.posterUrl}
                           alt={movie.title}
+                          onError={handleImageError}
                           sx={{
                             width: '100%',
                             height: '100%',

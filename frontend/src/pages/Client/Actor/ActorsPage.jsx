@@ -38,6 +38,15 @@ const SORT_OPTIONS = [
   { value: 'mostLiked', label: 'Được thích nhất' }
 ];
 
+// Fallback image (data URI - không cần network request, chặn loop onError)
+const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+
+// Helper: Xử lý lỗi ảnh - chặn infinite loop
+const handleImageError = (e) => {
+  e.target.onerror = null; // Chặn loop nếu fallback cũng fail
+  e.target.src = FALLBACK_IMAGE;
+};
+
 // CẤU HÌNH GIAO DIỆN (STYLES)
 const styles = {
   // Container chính của trang
@@ -257,12 +266,18 @@ function ActorsPage() {
   const [totalActors, setTotalActors] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // STATE bộ lọc
-  const [selectedNationality, setSelectedNationality] = useState('');
-  const [selectedSort, setSelectedSort] = useState('popular');
+  // STATE bộ lọc - Khởi tạo từ URL query params
+  const [selectedNationality, setSelectedNationality] = useState(
+    () => searchParams.get('quoc-tich') || ''
+  );
+  const [selectedSort, setSelectedSort] = useState(
+    () => searchParams.get('sap-xep') || 'popular'
+  );
 
-  // STATE phân trang
-  const [currentPage, setCurrentPage] = useState(1);
+  // STATE phân trang - Khởi tạo từ URL query params
+  const [currentPage, setCurrentPage] = useState(
+    () => parseInt(searchParams.get('page'), 10) || 1
+  );
   const itemsPerPage = 10;
 
   // STATE tải trang
@@ -360,15 +375,37 @@ function ActorsPage() {
     loadActors();
   }, [selectedNationality, selectedSort, currentPage]);
 
-  // Cập nhật URL khi bộ lọc thay đổi
+  // Cập nhật URL khi bộ lọc thay đổi (có guard tránh update dư)
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedNationality) params.set('quoc-tich', selectedNationality);
     if (selectedSort && selectedSort !== 'popular') params.set('sap-xep', selectedSort);
     if (currentPage > 1) params.set('page', currentPage.toString());
 
-    setSearchParams(params, { replace: true });
-  }, [selectedNationality, selectedSort, currentPage, setSearchParams]);
+    // Guard: chỉ update nếu URL thực sự thay đổi
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [selectedNationality, selectedSort, currentPage, searchParams, setSearchParams]);
+
+  // Sync URL → state khi Back/Forward browser (popstate)
+  useEffect(() => {
+    const urlNationality = searchParams.get('quoc-tich') || '';
+    const urlSort = searchParams.get('sap-xep') || 'popular';
+    const urlPage = parseInt(searchParams.get('page'), 10) || 1;
+
+    // Chỉ update state nếu URL khác với state hiện tại (tránh loop)
+    if (urlNationality !== selectedNationality) {
+      setSelectedNationality(urlNationality);
+    }
+    if (urlSort !== selectedSort) {
+      setSelectedSort(urlSort);
+    }
+    if (urlPage !== currentPage) {
+      setCurrentPage(urlPage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]); // Chỉ depend vào searchParams - khi URL thay đổi từ bên ngoài
 
   // Chuyển hướng đến chi tiết diễn viên
   const handleActorClick = (slug) => {
@@ -622,6 +659,7 @@ function ActorsPage() {
                   component="img"
                   src={actor.photoUrl}
                   alt={actor.name}
+                  onError={handleImageError}
                   sx={styles.actorThumb}
                   onClick={() => handleActorClick(actor.slug)}
                 />
@@ -656,7 +694,7 @@ function ActorsPage() {
                           bgcolor: '#4285F4',
                           boxShadow: 'none'
                         },
-                        '&:disabled': {
+                        '&.Mui-disabled': {
                           bgcolor: '#4285F4',
                           color: '#fff',
                           opacity: 0.7
