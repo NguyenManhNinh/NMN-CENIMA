@@ -55,12 +55,17 @@ const getActors = catchAsync(async (req, res) => {
  * @access  Public
  */
 const getDirectors = catchAsync(async (req, res) => {
-  const { page = 1, limit = 12, search, sort = '-viewCount' } = req.query;
+  const { page = 1, limit = 12, search, sort = '-viewCount', nationality } = req.query;
 
   const filter = {
     role: { $in: ['director', 'both'] },
     isActive: true
   };
+
+  // Filter by nationality
+  if (nationality) {
+    filter.nationality = nationality;
+  }
 
   if (search) {
     filter.$or = [
@@ -73,7 +78,7 @@ const getDirectors = catchAsync(async (req, res) => {
   const total = await Person.countDocuments(filter);
 
   const directors = await Person.find(filter)
-    .select('name slug photoUrl shortBio genres viewCount likeCount')
+    .select('name slug photoUrl shortBio genres viewCount likeCount nationality createdAt')
     .sort(sort)
     .skip(skip)
     .limit(parseInt(limit))
@@ -214,11 +219,25 @@ const getPersons = catchAsync(async (req, res) => {
 /**
  * @desc    Lấy danh sách quốc tịch unique
  * @route   GET /api/v1/persons/nationalities
+ * @query   role - 'actor' | 'director' (optional, default: all)
  * @access  Public
  */
 const getNationalities = catchAsync(async (req, res) => {
+  const { role } = req.query;
+
+  // Build role filter based on query
+  let roleFilter;
+  if (role === 'director') {
+    roleFilter = { $in: ['director', 'both'] };
+  } else if (role === 'actor') {
+    roleFilter = { $in: ['actor', 'both'] };
+  } else {
+    // No role specified - get all nationalities
+    roleFilter = { $exists: true };
+  }
+
   const nationalities = await Person.distinct('nationality', {
-    role: { $in: ['actor', 'both'] },
+    role: roleFilter,
     isActive: true,
     nationality: { $ne: null, $ne: '' }
   });
