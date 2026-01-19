@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams, useParams } from 'react-router-dom';
 
 // Các API
-import { getAllMoviesAPI, getNowShowingMoviesAPI } from '@/apis/movieApi';
+import { getNowShowingMoviesAPI } from '@/apis/movieApi';
 import { getAllGenresAPI, getCategoriesAPI, getCountriesAPI, getYearsAPI, toggleGenreLikeAPI, getGenreLikeStatusAPI } from '@/apis/genreApi';
 
 // Ngữ cảnh xác thực (Auth Context)
@@ -54,6 +54,15 @@ const SORT_OPTIONS = [
   { value: 'newest', label: 'Mới nhất' },
   { value: 'rating', label: 'Thích nhiều nhất' }
 ];
+
+// Fallback image (data URI - không cần network request, chặn loop onError)
+const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+
+// Helper: Xử lý lỗi ảnh - chặn infinite loop
+const handleImageError = (e) => {
+  e.target.onerror = null; // Chặn loop nếu fallback cũng fail
+  e.target.src = FALLBACK_IMAGE;
+};
 
 // Danh sách quốc gia (lấy từ API)
 
@@ -737,11 +746,12 @@ function GenresPage() {
             )}
             {movies.map((movie) => (
               <Card key={movie._id} sx={styles.movieCard}>
-                <CardMedia
+                <Box
                   component="img"
                   sx={styles.moviePoster}
-                  image={movie.imageUrl || movie.bannerUrl}
+                  src={movie.imageUrl || movie.bannerUrl}
                   alt={movie.name}
+                  onError={handleImageError}
                   onClick={() => handleMovieClick(movie.slug)}
                 />
                 <Box sx={styles.movieContent}>
@@ -970,6 +980,7 @@ function GenresPage() {
                         component="img"
                         src={movie.bannerUrl || movie.posterUrl}
                         alt={movie.title}
+                        onError={handleImageError}
                         sx={{
                           width: '100%',
                           height: '100%',

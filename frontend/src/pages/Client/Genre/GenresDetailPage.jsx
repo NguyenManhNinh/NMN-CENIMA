@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
 // Import APIs
-import { getGenreBySlugAPI, getGenreLikeStatusAPI, toggleGenreLikeAPI, rateGenreAPI, incrementGenreViewAPI } from '../../../apis/genreApi';
+import { getGenreBySlugAPI, toggleGenreLikeAPI, rateGenreAPI, incrementGenreViewAPI } from '../../../apis/genreApi';
 import { getNowShowingMoviesAPI } from '../../../apis/movieApi';
 
 // Import MUI Components
@@ -57,6 +57,15 @@ const COLORS = {
   border: '#E5E5E5',
   bgLight: '#F8F9FA',
   bgCard: '#FFFFFF'
+};
+
+// Fallback image (data URI - không cần network request, chặn loop onError)
+const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+
+// Helper: Xử lý lỗi ảnh - chặn infinite loop
+const handleImageError = (e) => {
+  e.target.onerror = null; // Chặn loop nếu fallback cũng fail
+  e.target.src = FALLBACK_IMAGE;
 };
 
 // HÀM TIỆN ÍCH (UTILITIES)
@@ -471,6 +480,7 @@ function GenresDetailPage() {
                       component="img"
                       src={genre.bannerUrl || genre.imageUrl}
                       alt={genre.name}
+                      onError={handleImageError}
                       sx={{
                         width: '100%',
                         aspectRatio: '16/9',
@@ -599,6 +609,7 @@ function GenresDetailPage() {
                           component="img"
                           src={genre.imageUrl}
                           alt={genre.name}
+                          onError={handleImageError}
                           sx={{
                             width: '100%',
                             maxWidth: { xs: 160, sm: 200, md: 240 },
@@ -724,6 +735,7 @@ function GenresDetailPage() {
                         src={typeof still === 'object' ? still.url : still}
                         alt={`Scene ${idx + 1}`}
                         onClick={() => handleOpenGallery(idx)}
+                        onError={handleImageError}
                         sx={{
                           width: { xs: '263px', sm: '100%' }, // Fixed width on mobile for scrolling
                           flexShrink: 0, // Prevent shrinking in flex container
@@ -767,20 +779,22 @@ function GenresDetailPage() {
                 {genre.actors && genre.actors.length > 0 ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                     {genre.actors.map((actor, idx) => {
-                      const actorName = typeof actor === 'object' ? actor.name : actor;
-                      const actorSlug = actorName
-                        ?.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/đ/g, 'd')
-                        .replace(/Đ/g, 'D')
-                        .replace(/\s+/g, '-')
-                        .replace(/[^\w-]/g, '');
+                      const actorName = (typeof actor === 'object' ? actor.name : actor) || 'Chưa cập nhật';
+                      const actorSlug = actorName !== 'Chưa cập nhật'
+                        ? actorName
+                          ?.toLowerCase()
+                          .normalize('NFD')
+                          .replace(/[\u0300-\u036f]/g, '')
+                          .replace(/đ/g, 'd')
+                          .replace(/Đ/g, 'D')
+                          .replace(/\s+/g, '-')
+                          .replace(/[^\w-]/g, '')
+                        : null;
                       return (
                         <Box
                           key={idx}
-                          component={Link}
-                          to={`/dien-vien-chi-tiet/${actorSlug}`}
+                          component={actorSlug ? Link : 'div'}
+                          to={actorSlug ? `/dien-vien-chi-tiet/${actorSlug}` : undefined}
                           sx={{
                             display: 'flex',
                             alignItems: 'center',
@@ -790,23 +804,33 @@ function GenresDetailPage() {
                             color: 'inherit',
                             transition: 'all 0.2s',
                             '&:hover': {
-                              '& .actor-name': { color: COLORS.primary }
+                              '& .actor-name': { color: actorSlug ? COLORS.primary : 'inherit' }
                             }
                           }}
                         >
                           <Box
                             component="img"
-                            src={typeof actor === 'object' ? actor.photoUrl : 'https://via.placeholder.com/110'}
+                            src={(typeof actor === 'object' && actor.photoUrl) ? actor.photoUrl : FALLBACK_IMAGE}
                             alt={actorName}
+                            onError={handleImageError}
                             sx={{
                               width: 128,
                               height: 85,
                               objectFit: 'cover',
                               flexShrink: 0,
-                              cursor: 'pointer'
+                              cursor: actorSlug ? 'pointer' : 'default'
                             }}
                           />
-                          <Typography className="actor-name" sx={{ fontSize: '14px', fontWeight: 500, color: COLORS.text, transition: 'color 0.2s' }}>
+                          <Typography
+                            className="actor-name"
+                            sx={{
+                              fontSize: '14px',
+                              fontWeight: 500,
+                              color: actorName === 'Chưa cập nhật' ? COLORS.textMuted : COLORS.text,
+                              fontStyle: actorName === 'Chưa cập nhật' ? 'italic' : 'normal',
+                              transition: 'color 0.2s'
+                            }}
+                          >
                             {actorName}
                           </Typography>
                         </Box>
@@ -869,6 +893,7 @@ function GenresDetailPage() {
                           component="img"
                           src={otherMovie.bannerUrl || otherMovie.posterUrl}
                           alt={otherMovie.name}
+                          onError={handleImageError}
                           sx={{
                             width: '100%',
                             height: '100%',
