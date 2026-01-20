@@ -40,11 +40,11 @@ const genreSchema = new mongoose.Schema(
       default: null
     },
     // Phân loại/Thể loại: Hành động, Viễn tưởng, Kinh dị, Hài, Khoa học, etc.
-    category: {
+    // Hỗ trợ nhiều thể loại cho 1 phim
+    category: [{
       type: String,
-      trim: true,
-      required: [true, 'Vui lòng chọn thể loại!']
-    },
+      trim: true
+    }],
     // Quốc gia (cho filter)
     country: {
       type: String,
