@@ -343,7 +343,7 @@ function GenresDetailPage() {
         }}>
           <Typography sx={{ color: '#4A4A4A', minWidth: '100px' }}>{label}:</Typography>
           <Typography sx={{ color: '#999999', fontWeight: 400, fontStyle: 'italic' }}>
-            Chưa cập nhật
+            Đang cập nhật
           </Typography>
         </Box>
       );
@@ -602,7 +602,7 @@ function GenresDetailPage() {
                         Nội dung phim
                       </Typography>
                       <Typography sx={{ color: '#555', lineHeight: 1.6, fontSize: '14px', textAlign: 'justify' }}>
-                        {genre.description || 'Chưa cập nhật nội dung.'}
+                        {genre.description || 'Đang cập nhật nội dung.'}
                       </Typography>
                     </Box>
                   </Box>
@@ -686,10 +686,10 @@ function GenresDetailPage() {
                       {/* Details Grid */}
                       {/* Lưới thông tin chi tiết */}
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <DetailItem label="Quốc gia" value={genre.country || 'Chưa cập nhật'} />
-                        <DetailItem label="Nhà sản xuất" value={genre.studio || 'Chưa cập nhật'} />
-                        <DetailItem label="Thể loại" value={genre.category || ['Chưa cập nhật']} />
-                        <DetailItem label="Đạo diễn" value={genre.director || 'Chưa cập nhật'} />
+                        <DetailItem label="Quốc gia" value={genre.country || 'Đang cập nhật'} />
+                        <DetailItem label="Nhà sản xuất" value={genre.studio || 'Đang cập nhật'} />
+                        <DetailItem label="Thể loại" value={genre.category || ['Đang cập nhật']} />
+                        <DetailItem label="Đạo diễn" value={genre.director || 'Đang cập nhật'} />
                         <DetailItem label="Diễn viên" value={genre.actors?.map(a => a.name || a) || ['Đang cập nhật']} />
                       </Box>
                     </Grid>
@@ -760,7 +760,7 @@ function GenresDetailPage() {
                     ))}
                   </Box>
                 ) : (
-                  <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Chưa cập nhật</Typography>
+                  <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Đang cập nhật</Typography>
                 )
                 }
               </Box>
@@ -788,8 +788,8 @@ function GenresDetailPage() {
                 {genre.actors && genre.actors.length > 0 ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                     {genre.actors.map((actor, idx) => {
-                      const actorName = (typeof actor === 'object' ? actor.name : actor) || 'Chưa cập nhật';
-                      const actorSlug = actorName !== 'Chưa cập nhật'
+                      const actorName = (typeof actor === 'object' ? actor.name : actor) || 'Đang cập nhật';
+                      const actorSlug = actorName !== 'Đang cập nhật'
                         ? actorName
                           ?.toLowerCase()
                           .normalize('NFD')
@@ -835,8 +835,8 @@ function GenresDetailPage() {
                             sx={{
                               fontSize: '14px',
                               fontWeight: 500,
-                              color: actorName === 'Chưa cập nhật' ? COLORS.textMuted : COLORS.text,
-                              fontStyle: actorName === 'Chưa cập nhật' ? 'italic' : 'normal',
+                              color: actorName === 'Đang cập nhật' ? COLORS.textMuted : COLORS.text,
+                              fontStyle: actorName === 'Đang cập nhật' ? 'italic' : 'normal',
                               transition: 'color 0.2s'
                             }}
                           >
@@ -847,7 +847,7 @@ function GenresDetailPage() {
                     })}
                   </Box>
                 ) : (
-                  <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Chưa cập nhật</Typography>
+                  <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>Đang cập nhật</Typography>
                 )}
               </Box>
 

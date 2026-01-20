@@ -60,7 +60,7 @@ const handleImageError = (e) => {
 //HELPER FUNCTIONS
 // Format ngày tháng
 const formatDate = (dateString) => {
-  if (!dateString) return 'Chưa cập nhật';
+  if (!dateString) return 'Đang cập nhật';
   const date = new Date(dateString);
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -620,7 +620,7 @@ function ActorDetailPage() {
                   </Box>
                 ) : (
                   <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
-                    Chưa cập nhật
+                    Đang cập nhật
                   </Typography>
                 )}
               </Box>
@@ -708,7 +708,7 @@ function ActorDetailPage() {
                             textOverflow: 'ellipsis',
                             mt: 0.25
                           }}>
-                            {movie.role || 'Chưa cập nhật'}
+                            {movie.role || 'Đang cập nhật'}
                           </Typography>
                         </Box>
                       </Box>
@@ -716,7 +716,7 @@ function ActorDetailPage() {
                   </Box>
                 ) : (
                   <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
-                    Chưa cập nhật
+                    Đang cập nhật
                   </Typography>
                 )}
               </Box>
@@ -748,7 +748,7 @@ function ActorDetailPage() {
                   whiteSpace: 'pre-line',
                   textAlign: 'justify'
                 }}>
-                  {actor.biography || 'Chưa cập nhật tiểu sử.'}
+                  {actor.biography || 'Đang cập nhật tiểu sử.'}
                 </Typography>
               </Box>
 

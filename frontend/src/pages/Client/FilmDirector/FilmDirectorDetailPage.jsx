@@ -49,7 +49,7 @@ const VIEW_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 giờ
 
 // Helper Functions
 const formatDate = (dateString) => {
-  if (!dateString) return 'Chưa cập nhật';
+  if (!dateString) return 'Đang cập nhật';
   const date = new Date(dateString);
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -609,7 +609,7 @@ function FilmDirectorDetailPage() {
                 </Box>
               ) : (
                 <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
-                  Chưa cập nhật
+                  Đang cập nhật
                 </Typography>
               )}
             </Box>
@@ -696,7 +696,7 @@ function FilmDirectorDetailPage() {
                           textOverflow: 'ellipsis',
                           mt: 0.25
                         }}>
-                          {movie.role || 'Chưa cập nhật'}
+                          {movie.role || 'Đang cập nhật'}
                         </Typography>
                       </Box>
                     </Box>
@@ -704,7 +704,7 @@ function FilmDirectorDetailPage() {
                 </Box>
               ) : (
                 <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
-                  Chưa cập nhật
+                  Đang cập nhật
                 </Typography>
               )}
             </Box>
@@ -736,7 +736,7 @@ function FilmDirectorDetailPage() {
                 whiteSpace: 'pre-line',
                 textAlign: 'justify'
               }}>
-                {director.fullBio || director.biography || 'Chưa cập nhật tiểu sử.'}
+                {director.fullBio || director.biography || 'Đang cập nhật tiểu sử.'}
               </Typography>
             </Box>
           </Grid>
