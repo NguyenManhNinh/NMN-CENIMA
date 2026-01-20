@@ -302,7 +302,16 @@ function GenresDetailPage() {
     };
 
     // Handle array or single value
-    const items = Array.isArray(value) ? value : [value];
+    // Nếu value là string chứa dấu phẩy (ví dụ: "Anthony Russo, Joe Russo"), tách thành mảng
+    let items;
+    if (Array.isArray(value)) {
+      items = value;
+    } else if (typeof value === 'string' && value.includes(',') && (label === 'Đạo diễn' || label === 'Diễn viên')) {
+      // Tách chuỗi thành mảng các tên riêng biệt
+      items = value.split(',').map(s => s.trim()).filter(s => s);
+    } else {
+      items = [value];
+    }
 
     // Kiểm tra nếu không có dữ liệu
     const placeholderTexts = ['chưa cập nhật', 'đang cập nhật', 'không có', 'n/a', ''];
@@ -382,7 +391,7 @@ function GenresDetailPage() {
               return (
                 <Box component="span" key={index}>
                   <Link
-                    to={`/dao-dien/${slug}`}
+                    to={`/dao-dien-chi-tiet/${slug}`}
                     style={{
                       textDecoration: 'none',
                       color: 'inherit',

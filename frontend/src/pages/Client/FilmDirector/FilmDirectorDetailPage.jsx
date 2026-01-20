@@ -103,17 +103,24 @@ function FilmDirectorDetailPage() {
   // View count tracking
   const viewIncrementedRef = useRef({});
 
-  // Fetch Director Data bằng API thật
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+  // Race condition guard - để bỏ qua response fetch cũ
+  const fetchSeqRef = useRef(0);
 
+  // Effect A: Chỉ fetch director (có chống race condition)
+  useEffect(() => {
+    const seq = ++fetchSeqRef.current;
+
+    const fetchDirector = async () => {
+      setLoading(true);
       try {
         // Fetch director và sidebar movies song song
         const [directorRes, moviesRes] = await Promise.all([
           getPersonBySlugAPI(slug),
           getNowShowingMoviesAPI(5)
         ]);
+
+        // Nếu có request mới hơn thì bỏ qua response cũ
+        if (seq !== fetchSeqRef.current) return;
 
         const directorData = directorRes?.data;
 
@@ -123,29 +130,9 @@ function FilmDirectorDetailPage() {
           return;
         }
 
-        // View count với 24h cooldown + useRef guard tránh StrictMode double-call
-        let incrementedViewCount = directorData.viewCount || 0;
-        if (directorData?._id && !viewIncrementedRef.current[directorData._id]) {
-          viewIncrementedRef.current[directorData._id] = true;
-          const viewKey = `director_view_${directorData._id}`;
-          const lastViewTime = localStorage.getItem(viewKey);
-          const now = Date.now();
-
-          if (!lastViewTime || (now - parseInt(lastViewTime, 10)) > VIEW_COOLDOWN_MS) {
-            try {
-              const viewRes = await incrementPersonViewAPI(directorData._id);
-              incrementedViewCount = viewRes?.data?.viewCount ?? (incrementedViewCount + 1);
-              localStorage.setItem(viewKey, now.toString());
-            } catch (viewError) {
-              console.error('Lỗi tăng view count:', viewError);
-            }
-          }
-        }
-
-        // Mapping fields cho UI
+        // Mapping fields cho UI - KHÔNG increment viewCount ở đây
         const mappedDirector = {
           ...directorData,
-          viewCount: incrementedViewCount,
           filmography: directorData.filmography || directorData.moviesAsDirector || [],
           photos: directorData.gallery?.map(g => g.url || g) || [],
           biography: directorData.fullBio || ''
@@ -158,17 +145,56 @@ function FilmDirectorDetailPage() {
         setSidebarMovies(Array.isArray(movies) ? movies : []);
 
       } catch (error) {
+        // Nếu seq không khớp thì bỏ qua
+        if (seq !== fetchSeqRef.current) return;
         console.error('Lỗi khi tải dữ liệu đạo diễn:', error);
         setDirector(null);
       } finally {
-        setLoading(false);
+        if (seq === fetchSeqRef.current) setLoading(false);
       }
     };
 
     if (slug) {
-      fetchData();
+      fetchDirector();
     }
   }, [slug]);
+
+  // Effect B: Increment viewCount riêng (với cooldown + optimistic update)
+  useEffect(() => {
+    if (!director?._id) return;
+
+    const id = director._id;
+    const viewKey = `director_view_${id}`;
+    const now = Date.now();
+    const lastViewTime = Number(localStorage.getItem(viewKey) || 0);
+
+    // Cooldown 24h - nếu đã xem gần đây thì không tăng
+    if (lastViewTime && (now - lastViewTime) <= VIEW_COOLDOWN_MS) return;
+
+    // StrictMode guard - chỉ increment 1 lần per director per session
+    if (viewIncrementedRef.current[id]) return;
+    viewIncrementedRef.current[id] = true;
+
+    // QUAN TRỌNG: Set localStorage TRƯỚC khi gọi API
+    // để effect chạy lần 2 (StrictMode) thấy và bỏ qua
+    localStorage.setItem(viewKey, String(now));
+
+    // Optimistic UI: +1 ngay lập tức
+    setDirector(prev => prev ? ({ ...prev, viewCount: (prev.viewCount || 0) + 1 }) : prev);
+
+    // Sync từ server
+    incrementPersonViewAPI(id)
+      .then(res => {
+        const serverCount = res?.data?.viewCount;
+        if (typeof serverCount === 'number') {
+          setDirector(prev => prev ? ({ ...prev, viewCount: serverCount }) : prev);
+        }
+      })
+      .catch(err => {
+        console.error('Lỗi tăng view count:', err);
+        // Không cần rollback view (metric) - API đã tăng DB rồi
+      });
+  }, [director?._id]);
 
   // Khởi tạo like state từ localStorage
   useEffect(() => {

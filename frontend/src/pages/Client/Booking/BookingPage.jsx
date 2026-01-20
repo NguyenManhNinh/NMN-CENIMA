@@ -623,7 +623,7 @@ function BookingPage() {
                                 .replace(/Đ/g, 'D')
                                 .replace(/\s+/g, '-')
                                 .replace(/[^\w-]/g, '');
-                              navigate(`/dao-dien/${slug}`);
+                              navigate(`/dao-dien-chi-tiet/${slug}`);
                             }}
                             sx={{
                               fontSize: '0.85rem',
@@ -775,7 +775,7 @@ function BookingPage() {
                             .replace(/Đ/g, 'D')
                             .replace(/\s+/g, '-')
                             .replace(/[^\w-]/g, '');
-                          navigate(`/dao-dien/${slug}`);
+                          navigate(`/dao-dien-chi-tiet/${slug}`);
                         }}
                         sx={{
                           fontSize: { xs: '0.7rem', sm: '0.85rem' },

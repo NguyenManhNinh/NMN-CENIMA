@@ -295,7 +295,7 @@ function ActorsPage() {
   useEffect(() => {
     const loadNationalities = async () => {
       try {
-        const res = await getNationalitiesAPI();
+        const res = await getNationalitiesAPI({ role: 'actor' });
         const options = [{ value: '', label: 'Tất cả' }];
         if (res?.data) {
           res.data.forEach(nat => {
