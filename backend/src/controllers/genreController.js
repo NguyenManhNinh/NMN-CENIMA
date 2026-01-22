@@ -288,6 +288,14 @@ const toggleLike = catchAsync(async (req, res) => {
     });
   }
 
+  // Khởi tạo likedBy nếu chưa có (document cũ)
+  if (!genre.likedBy) {
+    genre.likedBy = [];
+  }
+  if (typeof genre.likeCount !== 'number') {
+    genre.likeCount = 0;
+  }
+
   // Kiểm tra user đã like chưa
   const hasLiked = genre.likedBy.some(uid => uid.toString() === userId.toString());
 

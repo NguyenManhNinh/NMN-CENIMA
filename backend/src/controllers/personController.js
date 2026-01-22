@@ -255,43 +255,56 @@ const getNationalities = catchAsync(async (req, res) => {
 });
 
 /**
- * @desc    Toggle like/unlike cho person (dùng $inc atomic để tránh lỗi validator)
+ * @desc    Toggle like/unlike cho person (yêu cầu đăng nhập)
  * @route   POST /api/v1/persons/:id/like
- * @access  Public
+ * @access  Private (phải đăng nhập)
  */
 const togglePersonLike = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const { action } = req.body; // 'like' hoặc 'unlike'
 
-  // Validate action
-  if (!['like', 'unlike'].includes(action)) {
-    return next(new AppError('Action không hợp lệ! Sử dụng "like" hoặc "unlike"', 400));
+  // Kiểm tra user đã đăng nhập
+  if (!req.user || !req.user._id) {
+    return res.status(401).json({
+      success: false,
+      message: 'Vui lòng đăng nhập để thích!'
+    });
   }
 
-  // Dùng $inc atomic để update, không trigger validator toàn bộ document
-  const incValue = action === 'like' ? 1 : -1;
+  const userId = req.user._id;
 
-  const person = await Person.findByIdAndUpdate(
-    id,
-    { $inc: { likeCount: incValue } },
-    { new: true, runValidators: false } // Không chạy validator
-  );
-
+  const person = await Person.findById(id);
   if (!person) {
     return next(new AppError('Không tìm thấy người này!', 404));
   }
 
-  // Chặn âm: nếu likeCount < 0 thì set về 0
-  if (person.likeCount < 0) {
-    await Person.findByIdAndUpdate(id, { likeCount: 0 }, { runValidators: false });
+  // Khởi tạo likedBy nếu chưa có (document cũ)
+  if (!person.likedBy) {
+    person.likedBy = [];
+  }
+  if (typeof person.likeCount !== 'number') {
     person.likeCount = 0;
   }
 
+  // Kiểm tra user đã like chưa
+  const hasLiked = person.likedBy.some(uid => uid.toString() === userId.toString());
+
+  if (hasLiked) {
+    // Unlike - xóa userId khỏi likedBy và giảm likeCount
+    person.likedBy = person.likedBy.filter(uid => uid.toString() !== userId.toString());
+    person.likeCount = Math.max(0, person.likeCount - 1);
+  } else {
+    // Like - thêm userId vào likedBy và tăng likeCount
+    person.likedBy.push(userId);
+    person.likeCount = person.likeCount + 1;
+  }
+
+  await person.save();
+
   res.status(200).json({
     success: true,
-    data: {
-      likeCount: person.likeCount
-    }
+    liked: !hasLiked,
+    likeCount: person.likeCount,
+    message: hasLiked ? 'Đã bỏ thích!' : 'Đã thích!'
   });
 });
 

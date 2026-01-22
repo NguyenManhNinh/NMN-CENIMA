@@ -231,7 +231,7 @@ router.delete('/:id', protect, restrictTo('admin'), deletePerson);
  *       200:
  *         description: Thành công
  */
-router.post('/:id/like', togglePersonLike);
+router.post('/:id/like', protect, togglePersonLike);
 
 /**
  * @swagger

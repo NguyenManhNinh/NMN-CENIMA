@@ -109,7 +109,12 @@ const personSchema = new mongoose.Schema(
     likeCount: {
       type: Number,
       default: 0
-    }
+    },
+    // Danh sách user đã like (để check duplicate)
+    likedBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }]
   },
   {
     timestamps: true,
