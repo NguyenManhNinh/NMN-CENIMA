@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Import MUI Components
 import {
@@ -85,6 +86,7 @@ const calculateAge = (birthDate) => {
 function ActorDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Responsive hooks
   const theme = useTheme();
@@ -185,12 +187,17 @@ function ActorDetailPage() {
   const handleToggleLike = async () => {
     if (!actor?._id) return;
 
+    // Check đăng nhập
+    if (!user) {
+      alert('Vui lòng đăng nhập để thích diễn viên!');
+      return;
+    }
+
     // Chống spam click
     if (likeLoading) return;
 
-    const likeKey = `actor_liked_${actor._id}`;
-    const currentLiked = localStorage.getItem(likeKey) === 'true';
-    const action = currentLiked ? 'unlike' : 'like';
+    const currentLiked = isLiked;
+    const prevCount = actor.likeCount || 0;
 
     // Set loading
     setLikeLoading(true);
@@ -198,7 +205,6 @@ function ActorDetailPage() {
     // Optimistic update
     const newLiked = !currentLiked;
     setIsLiked(newLiked);
-    localStorage.setItem(likeKey, newLiked.toString());
     setActor(prev => ({
       ...prev,
       likeCount: currentLiked
@@ -206,24 +212,25 @@ function ActorDetailPage() {
         : (prev.likeCount || 0) + 1
     }));
 
-    // Call API
+    // Call API (yêu cầu token)
     try {
-      const res = await togglePersonLikeAPI(actor._id, action);
-      // Update với giá trị thực từ server
+      const res = await togglePersonLikeAPI(actor._id);
+      // Sync từ response backend
+      setIsLiked(res.liked);
       setActor(prev => ({
         ...prev,
-        likeCount: res.data?.likeCount ?? prev.likeCount
+        likeCount: res.likeCount ?? prev.likeCount
       }));
     } catch (error) {
       console.error('Lỗi toggle like:', error);
+      if (error.response?.status === 401) {
+        alert('Vui lòng đăng nhập để thích diễn viên!');
+      }
       // Revert on error
-      localStorage.setItem(likeKey, currentLiked.toString());
       setIsLiked(currentLiked);
       setActor(prev => ({
         ...prev,
-        likeCount: currentLiked
-          ? (prev.likeCount || 0) + 1
-          : Math.max((prev.likeCount || 1) - 1, 0)
+        likeCount: prevCount
       }));
     } finally {
       setLikeLoading(false);

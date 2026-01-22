@@ -58,12 +58,16 @@ export const getNationalitiesAPI = async (params = {}) => {
 };
 
 /**
- * Toggle like for a person
+ * Toggle like for a person (yêu cầu đăng nhập)
  * @param {string} personId - Person ID
- * @param {string} action - 'like' or 'unlike'
  */
-export const togglePersonLikeAPI = async (personId, action) => {
-  const response = await api.post(`/${personId}/like`, { action });
+export const togglePersonLikeAPI = async (personId) => {
+  const token = localStorage.getItem('accessToken');
+  const response = await api.post(`/${personId}/like`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Material UI Components
 import {
@@ -214,6 +215,7 @@ const formatNumber = (num) => {
 function FilmDirectorPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
 
   // STATE dữ liệu
   const [directors, setDirectors] = useState([]);
@@ -395,21 +397,24 @@ function FilmDirectorPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Xử lý Like - API thật + lưu localStorage
+  // Xử lý Like - yêu cầu đăng nhập (giống genres)
   const handleToggleLike = async (directorId, e) => {
     e.stopPropagation();
+
+    // Check đăng nhập
+    if (!user) {
+      alert('Vui lòng đăng nhập để thích đạo diễn!');
+      return;
+    }
 
     if (likeLoading[directorId]) return;
 
     const director = directors.find(d => d._id === directorId);
-    const likeKey = `director_liked_${directorId}`;
-
-    const prevLiked = localStorage.getItem(likeKey) === 'true';
+    const prevLiked = likeStates[directorId]?.liked ?? false;
     const prevCount = likeStates[directorId]?.likeCount ?? director?.likeCount ?? 0;
 
     const nextLiked = !prevLiked;
     const nextCount = Math.max(0, nextLiked ? prevCount + 1 : prevCount - 1);
-    const action = nextLiked ? 'like' : 'unlike';
 
     setLikeLoading(prev => ({ ...prev, [directorId]: true }));
 
@@ -418,20 +423,21 @@ function FilmDirectorPage() {
       ...prev,
       [directorId]: { liked: nextLiked, likeCount: nextCount }
     }));
-    localStorage.setItem(likeKey, nextLiked.toString());
 
-    // Call API thật
+    // Call API (yêu cầu token)
     try {
-      const res = await togglePersonLikeAPI(directorId, action);
-      // Sync likeCount từ response backend (chính xác hơn)
+      const res = await togglePersonLikeAPI(directorId);
+      // Sync từ response backend
       setLikeStates(prev => ({
         ...prev,
-        [directorId]: { liked: nextLiked, likeCount: res.data.likeCount }
+        [directorId]: { liked: res.liked, likeCount: res.likeCount }
       }));
     } catch (error) {
       console.error('Lỗi khi toggle like:', error);
+      if (error.response?.status === 401) {
+        alert('Vui lòng đăng nhập để thích đạo diễn!');
+      }
       // Rollback
-      localStorage.setItem(likeKey, prevLiked.toString());
       setLikeStates(prev => ({
         ...prev,
         [directorId]: { liked: prevLiked, likeCount: prevCount }

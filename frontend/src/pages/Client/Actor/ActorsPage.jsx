@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Material UI Components
 import {
@@ -258,6 +259,7 @@ const formatNumber = (num) => {
 function ActorsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
 
   // STATE dữ liệu
   const [actors, setActors] = useState([]);
@@ -427,45 +429,46 @@ function ActorsPage() {
   const handleToggleLike = async (actorId, e) => {
     e.stopPropagation();
 
+    // Check đăng nhập
+    if (!user) {
+      alert('Vui lòng đăng nhập để thích diễn viên!');
+      return;
+    }
+
     // Chống spam click - nếu đang loading thì bỏ qua
     if (likeLoading[actorId]) return;
 
     const actor = actors.find(a => a._id === actorId);
-    const likeKey = `actor_liked_${actorId}`;
-
-    // Lấy trạng thái trước khi click
-    const prevLiked = localStorage.getItem(likeKey) === 'true';
+    const prevLiked = likeStates[actorId]?.liked ?? false;
     const prevCount = likeStates[actorId]?.likeCount ?? actor?.likeCount ?? 0;
 
     // Tính trạng thái mới
     const nextLiked = !prevLiked;
     const nextCount = Math.max(0, nextLiked ? prevCount + 1 : prevCount - 1);
-    const action = nextLiked ? 'like' : 'unlike';
 
     // Set loading cho item này
     setLikeLoading(prev => ({ ...prev, [actorId]: true }));
 
-    // Optimistic update UI + localStorage
+    // Optimistic update UI
     setLikeStates(prev => ({
       ...prev,
       [actorId]: { liked: nextLiked, likeCount: nextCount }
     }));
-    localStorage.setItem(likeKey, nextLiked.toString());
 
-    // Call API
+    // Call API (yêu cầu token)
     try {
-      const res = await togglePersonLikeAPI(actorId, action);
-      // Sync với số like từ server
-      if (res.data?.likeCount !== undefined) {
-        setLikeStates(prev => ({
-          ...prev,
-          [actorId]: { ...prev[actorId], likeCount: res.data.likeCount }
-        }));
-      }
+      const res = await togglePersonLikeAPI(actorId);
+      // Sync từ response backend
+      setLikeStates(prev => ({
+        ...prev,
+        [actorId]: { liked: res.liked, likeCount: res.likeCount }
+      }));
     } catch (error) {
       console.error('Lỗi khi toggle like:', error);
+      if (error.response?.status === 401) {
+        alert('Vui lòng đăng nhập để thích diễn viên!');
+      }
       // Rollback về trạng thái trước
-      localStorage.setItem(likeKey, prevLiked.toString());
       setLikeStates(prev => ({
         ...prev,
         [actorId]: { liked: prevLiked, likeCount: prevCount }
