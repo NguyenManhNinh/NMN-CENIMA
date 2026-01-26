@@ -178,10 +178,6 @@ function GenresDetailPage() {
     }
   }, [slug]);
 
-
-
-
-
   // Xử lý sự kiện mua vé (không áp dụng cho genres - giữ lại để tương thích)
   const handleBuyTicket = () => {
     // Genres không có chức năng mua vé

@@ -86,7 +86,7 @@ const calculateAge = (birthDate) => {
 function ActorDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // Responsive hooks
   const theme = useTheme();
@@ -223,10 +223,14 @@ function ActorDetailPage() {
       }));
     } catch (error) {
       console.error('Lỗi toggle like:', error);
-      if (error.response?.status === 401) {
-        alert('Vui lòng đăng nhập để thích diễn viên!');
+      const status = error.response?.status;
+      // Nếu lỗi xác thực (token hết hạn) - logout ngay để tránh flicker
+      if (status === 401 || status === 500) {
+        alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+        logout();
+        return; // Không rollback vì đã logout
       }
-      // Revert on error
+      // Rollback on other errors
       setIsLiked(currentLiked);
       setActor(prev => ({
         ...prev,

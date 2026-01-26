@@ -215,7 +215,7 @@ const formatNumber = (num) => {
 function FilmDirectorPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // STATE dữ liệu
   const [directors, setDirectors] = useState([]);
@@ -434,10 +434,14 @@ function FilmDirectorPage() {
       }));
     } catch (error) {
       console.error('Lỗi khi toggle like:', error);
-      if (error.response?.status === 401) {
-        alert('Vui lòng đăng nhập để thích đạo diễn!');
+      const status = error.response?.status;
+      // Nếu lỗi xác thực (token hết hạn) - logout ngay để tránh flicker
+      if (status === 401 || status === 500) {
+        alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+        logout();
+        return; // Không rollback vì đã logout
       }
-      // Rollback
+      // Rollback on other errors
       setLikeStates(prev => ({
         ...prev,
         [directorId]: { liked: prevLiked, likeCount: prevCount }

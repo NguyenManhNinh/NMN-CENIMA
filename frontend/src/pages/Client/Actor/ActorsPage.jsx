@@ -259,7 +259,7 @@ const formatNumber = (num) => {
 function ActorsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // STATE dữ liệu
   const [actors, setActors] = useState([]);
@@ -465,8 +465,12 @@ function ActorsPage() {
       }));
     } catch (error) {
       console.error('Lỗi khi toggle like:', error);
-      if (error.response?.status === 401) {
-        alert('Vui lòng đăng nhập để thích diễn viên!');
+      const status = error.response?.status;
+      // Nếu lỗi xác thực (token hết hạn) - logout ngay để tránh flicker
+      if (status === 401 || status === 500) {
+        alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+        logout();
+        return; // Không rollback vì đã logout
       }
       // Rollback về trạng thái trước
       setLikeStates(prev => ({

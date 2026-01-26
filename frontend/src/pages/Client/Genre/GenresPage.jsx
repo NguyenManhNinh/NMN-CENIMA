@@ -289,7 +289,7 @@ function GenresPage() {
 
   // STATE trạng thái Thích - track like status cho mỗi movie
   const [likeStates, setLikeStates] = useState({});
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // Xử lý Thích bài viết (Genre)
   const handleToggleLike = async (genreId, e) => {
@@ -316,8 +316,12 @@ function GenresPage() {
       ));
     } catch (error) {
       console.error('Toggle like failed:', error);
-      if (error.response?.status === 401) {
-        alert('Vui lòng đăng nhập để thích bài viết!');
+      const status = error.response?.status;
+      // Nếu lỗi xác thực (token hết hạn) - logout ngay để tránh flicker
+      if (status === 401 || status === 500) {
+        alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+        logout();
+        return;
       }
     }
   };
