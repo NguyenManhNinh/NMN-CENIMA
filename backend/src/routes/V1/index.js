@@ -96,6 +96,10 @@ const defaultRoutes = [
   {
     path: '/admin/reports',
     route: require('./adminReportRoutes')
+  },
+  {
+    path: '/promotions',
+    route: require('./promotionRoutes')
   }
 ];
 

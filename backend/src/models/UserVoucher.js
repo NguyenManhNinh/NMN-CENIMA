@@ -41,6 +41,16 @@ const userVoucherSchema = new mongoose.Schema({
     type: String,
     enum: ['ACTIVE', 'EXHAUSTED', 'EXPIRED'],
     default: 'ACTIVE'
+  },
+  // Nguồn gốc voucher (để biết từ đâu)
+  source: {
+    type: String,
+    enum: ['ADMIN', 'PROMOTION', 'SYSTEM', 'LOYALTY'],
+    default: 'ADMIN'
+  },
+  sourceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null // ID của Promotion nếu source = PROMOTION
   }
 }, {
   timestamps: true
