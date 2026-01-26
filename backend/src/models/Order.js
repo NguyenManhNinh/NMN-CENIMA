@@ -44,9 +44,36 @@ const orderSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  //liên kết voucher thật để consume đúng ở payment success
+  voucherId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Voucher',
+    default: null,
+    index: true
+  },
+  userVoucherId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'UserVoucher',
+    default: null,
+    index: true
+  },
   discount: {
     type: Number,
     default: 0
+  },
+  // idempotent consume voucher
+  voucherConsumed: {
+    type: Boolean,
+    default: false
+  },
+  voucherConsumeState: {
+    type: String,
+    enum: ['NONE', 'LOCKED', 'DONE', 'FAILED'],
+    default: 'NONE'
+  },
+  voucherConsumedAt: {
+    type: Date,
+    default: null
   },
   status: {
     type: String,

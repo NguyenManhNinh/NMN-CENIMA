@@ -3,6 +3,8 @@ const querystring = require('qs');
 const moment = require('moment');
 const Order = require('../models/Order');
 const Payment = require('../models/Payment');
+const Voucher = require('../models/Voucher');
+const UserVoucher = require('../models/UserVoucher');
 const ticketController = require('./ticketController');
 const catchAsync = require('../utils/catchAsync');
 const {
@@ -10,6 +12,94 @@ const {
   VIP_THRESHOLD,
   VVIP_THRESHOLD
 } = require('../config/constants');
+
+/**
+ * Helper consume voucher sau khi thanh toán thành công (idempotent)
+ * Chỉ trừ lượt voucher khi VNPay SUCCESS, không trừ ở createOrder
+ */
+async function consumeVoucherAfterPaid(orderId) {
+  // 1) Lock order để chống consume trùng (Return + IPN + retry)
+  const lockedOrder = await Order.findOneAndUpdate(
+    {
+      _id: orderId,
+      voucherCode: { $ne: null },
+      voucherConsumed: { $ne: true },
+      voucherConsumeState: { $in: [null, undefined, 'NONE', 'FAILED'] }
+    },
+    {
+      $set: { voucherConsumeState: 'LOCKED' }
+    },
+    { new: true }
+  );
+
+  if (!lockedOrder) return; // đã consume hoặc không có voucher
+
+  // 2) Validate data liên kết
+  if (!lockedOrder.voucherId || !lockedOrder.userVoucherId) {
+    await Order.findByIdAndUpdate(orderId, { $set: { voucherConsumeState: 'FAILED' } });
+    return;
+  }
+
+  try {
+    const uv = await UserVoucher.findById(lockedOrder.userVoucherId);
+
+    if (!uv) throw new Error('UserVoucher not found');
+
+    // check ownership
+    if (uv.userId.toString() !== lockedOrder.userId.toString()) throw new Error('UserVoucher user mismatch');
+    if (uv.voucherId.toString() !== lockedOrder.voucherId.toString()) throw new Error('UserVoucher voucher mismatch');
+
+    // check still usable
+    if (uv.status !== 'ACTIVE') throw new Error('UserVoucher not ACTIVE');
+    if (uv.usedCount >= uv.quantity) throw new Error('UserVoucher exhausted');
+    if (uv.expiresAt && new Date() > uv.expiresAt) throw new Error('UserVoucher expired');
+
+    // 3) Atomic +1 usedCount (CAS theo usedCount hiện tại để chống race nhiều order cùng lúc)
+    let updated = await UserVoucher.findOneAndUpdate(
+      { _id: uv._id, status: 'ACTIVE', usedCount: uv.usedCount },
+      { $inc: { usedCount: 1 } },
+      { new: true }
+    );
+
+    // retry 1 lần nếu có race
+    if (!updated) {
+      const fresh = await UserVoucher.findById(uv._id);
+      if (!fresh || fresh.status !== 'ACTIVE' || fresh.usedCount >= fresh.quantity) {
+        throw new Error('UserVoucher exhausted after race');
+      }
+      updated = await UserVoucher.findOneAndUpdate(
+        { _id: fresh._id, status: 'ACTIVE', usedCount: fresh.usedCount },
+        { $inc: { usedCount: 1 } },
+        { new: true }
+      );
+      if (!updated) throw new Error('CAS update failed');
+    }
+
+    // nếu hết lượt thì set EXHAUSTED
+    if (updated.usedCount >= updated.quantity && updated.status !== 'EXHAUSTED') {
+      updated.status = 'EXHAUSTED';
+      await updated.save();
+    }
+
+    // 4) Tăng usageCount voucher global
+    await Voucher.findByIdAndUpdate(lockedOrder.voucherId, { $inc: { usageCount: 1 } });
+
+    // 5) Mark order consumed DONE
+    await Order.findByIdAndUpdate(orderId, {
+      $set: {
+        voucherConsumed: true,
+        voucherConsumeState: 'DONE',
+        voucherConsumedAt: new Date()
+      }
+    });
+
+    console.log('[Voucher Consume] SUCCESS for order:', orderId);
+
+  } catch (err) {
+    console.error('[Voucher Consume] FAILED:', err.message);
+    await Order.findByIdAndUpdate(orderId, { $set: { voucherConsumeState: 'FAILED' } });
+  }
+}
 
 // 1. HÀM SẮP XẾP & MÃ HÓA
 function sortObject(obj) {
@@ -114,6 +204,10 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
 
     if (rspCode === '00') {
       await ticketController.finalizeTransaction(order);
+
+      //consume voucher sau khi PAID (idempotent)
+      await consumeVoucherAfterPaid(order._id);
+
       await Payment.create({
         orderId: order._id,
         gateway: 'VNPAY',
@@ -239,6 +333,9 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
         // Xử lý đơn hàng: Tạo Ticket, cập nhật Order status thành PAID
         await ticketController.finalizeTransaction(order);
 
+        // ✅ NEW: consume voucher sau khi PAID (idempotent)
+        await consumeVoucherAfterPaid(order._id);
+
         // Tạo Payment record
         await Payment.create({
           orderId: order._id,
@@ -270,7 +367,6 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
           console.error('[Loyalty] Error:', loyaltyErr);
         }
 
-        // VOUCHER USAGE - Đã được xử lý trong orderController.createOrder
         // Khi tạo Order, UserVoucher.usedCount đã được tăng lên
         // Không cần tạo VoucherUsage nữa
 

@@ -120,53 +120,68 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   const subTotal = totalAmount; // Chưa tính discount
   let discount = 0;
 
-  // VOUCHER LOGIC - Sử dụng UserVoucher (ví voucher của user)
+  //giữ để lưu vào Order
+  let voucherIdToSave = null;
+  let userVoucherIdToSave = null;
+
+  // VOUCHER LOGIC - Validate + tính discount (KHÔNG consume)
   if (voucherCode) {
     const Voucher = require('../models/Voucher');
     const UserVoucher = require('../models/UserVoucher');
 
-    const voucher = await Voucher.findOne({ code: voucherCode.toUpperCase() });
+    const codeUpper = voucherCode.toUpperCase();
+    const voucher = await Voucher.findOne({ code: codeUpper });
 
-    if (voucher) {
-      // Tìm UserVoucher của user này
-      const userVoucher = await UserVoucher.findOne({
-        userId: userId,
-        voucherId: voucher._id,
-        status: 'ACTIVE'
-      });
+    if (!voucher) {
+      return next(new AppError('Mã giảm giá không tồn tại!', 404));
+    }
 
-      // Validate: user có voucher này trong ví và còn lượt dùng
-      if (userVoucher &&
-        userVoucher.usedCount < userVoucher.quantity &&
-        voucher.status === 'ACTIVE' &&
-        now >= voucher.validFrom &&
-        now <= voucher.validTo) {
+    const nowDate = new Date();
+    if (voucher.status !== 'ACTIVE') {
+      return next(new AppError('Mã giảm giá không khả dụng!', 400));
+    }
+    if (nowDate < voucher.validFrom || nowDate > voucher.validTo) {
+      return next(new AppError('Mã giảm giá đã hết hạn hoặc chưa có hiệu lực!', 400));
+    }
 
-        // Tính discount
-        if (voucher.type === 'FIXED') {
-          discount = voucher.value;
-        } else if (voucher.type === 'PERCENT') {
-          discount = (totalAmount * voucher.value) / 100;
-          if (voucher.maxDiscount > 0 && discount > voucher.maxDiscount) {
-            discount = voucher.maxDiscount;
-          }
-        }
+    const userVoucher = await UserVoucher.findOne({
+      userId: userId,
+      voucherId: voucher._id,
+      status: 'ACTIVE'
+    });
 
-        // Cập nhật usedCount của UserVoucher (trừ 1 lượt)
-        userVoucher.usedCount += 1;
-        if (userVoucher.usedCount >= userVoucher.quantity) {
-          userVoucher.status = 'EXHAUSTED'; // Hết lượt
-        }
-        await userVoucher.save();
+    if (!userVoucher) {
+      return next(new AppError('Bạn chưa được cấp mã giảm giá này!', 400));
+    }
 
-        // Cập nhật global usageCount của Voucher (tracking)
-        voucher.usageCount += 1;
-        await voucher.save();
+    if (userVoucher.usedCount >= userVoucher.quantity) {
+      return next(new AppError('Bạn đã sử dụng hết lượt của mã giảm giá này!', 400));
+    }
+
+    if (userVoucher.expiresAt && nowDate > userVoucher.expiresAt) {
+      userVoucher.status = 'EXPIRED';
+      await userVoucher.save();
+      return next(new AppError('Mã giảm giá của bạn đã hết hạn!', 400));
+    }
+
+    // Tính discount
+    if (voucher.type === 'FIXED') {
+      discount = voucher.value;
+    } else if (voucher.type === 'PERCENT') {
+      discount = (totalAmount * voucher.value) / 100;
+      if (voucher.maxDiscount > 0 && discount > voucher.maxDiscount) {
+        discount = voucher.maxDiscount;
       }
     }
+
+    // không giảm quá tổng
+    if (discount > totalAmount) discount = totalAmount;
+
+    // ✅ lưu liên kết để payment success consume đúng
+    voucherIdToSave = voucher._id;
+    userVoucherIdToSave = userVoucher._id;
   }
 
-  if (discount > totalAmount) discount = totalAmount;
   totalAmount -= discount;
 
   // 4. Tạo Order PENDING
@@ -178,10 +193,20 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     showtimeId,
     seats: seatSnapshot,
     combos: comboSnapshot,
+
     voucherCode: voucherCode ? voucherCode.toUpperCase() : null,
+    voucherId: voucherIdToSave,
+    userVoucherId: userVoucherIdToSave,
+
     subTotal,
     discount,
     totalAmount,
+
+    // ✅ NEW: voucher chưa consume
+    voucherConsumed: false,
+    voucherConsumeState: 'NONE',
+    voucherConsumedAt: null,
+
     status: 'PENDING'
   });
 

@@ -10,6 +10,18 @@ const AppError = require('../utils/AppError');
 
 // Hàm nội bộ: Hoàn tất giao dịch (Được gọi từ Payment Controller)
 exports.finalizeTransaction = async (order) => {
+  // Idempotency guard - nếu đã có ticket theo orderId => coi như đã finalize
+  const existingTickets = await Ticket.find({ orderId: order._id });
+  if (existingTickets && existingTickets.length > 0) {
+    // đảm bảo order status đúng
+    if (order.status !== 'PAID') {
+      order.status = 'PAID';
+      await order.save();
+    }
+    console.log('[Finalize] Already finalized, returning existing tickets');
+    return existingTickets;
+  }
+
   // 1. Cập nhật trạng thái Order
   order.status = 'PAID';
   await order.save();
