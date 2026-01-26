@@ -37,7 +37,9 @@ import {
   Article as ArticleIcon,
   KeyboardArrowDown as ArrowDownIcon,
   ConfirmationNumber as TicketIcon,
-  PlayCircleOutline as TrailerIcon
+  PlayCircleOutline as TrailerIcon,
+  Phone as PhoneIcon,
+  ConfirmationNumberTwoTone as ConfirmationNumberTwoToneIcon
 } from '@mui/icons-material';
 
 // Logo
@@ -51,7 +53,8 @@ import { useAuth } from '../../../../contexts/AuthContext';
 import { LoginModal, RegisterModal, ForgotPasswordModal } from '../../../Common';
 
 // Import ảnh từ background-header
-import backgroundHeader from '../../../../assets/images/header-background.jpg';
+//Tạm thời comment nào thấy đẹp thì mở lại
+// import backgroundHeader from '../../../../assets/images/bg-header.jpg';
 
 // COLORS - Màu sắc
 const COLORS = {
@@ -66,7 +69,8 @@ const COLORS = {
 // STYLES
 const styles = {
   appBar: {
-    backgroundImage: `url(${backgroundHeader})`,
+    // backgroundImage: `url(${backgroundHeader})`,
+    backgroundColor: '#fff',
     backgroundSize: 'cover',
     backgroundPosition: 'center 55%',
     boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
@@ -96,7 +100,7 @@ const styles = {
     gap: 0.5
   },
   navButton: {
-    color: 'white',
+    color: 'hsla(180, 2%, 24%, 75%)',
     fontWeight: 700,
     fontSize: '1rem',
     fontFamily: 'DM Sans, system-ui, sans-serif',
@@ -141,17 +145,17 @@ const styles = {
     gap: 1
   },
   searchIcon: {
-    color: 'white',
+    color: 'rgba(18, 18, 18, 1)',
     '&:hover': {
       backgroundColor: 'transparent',
-      color: 'hsla(164, 5%, 46%, 1.00)',
+      color: 'rgba(84, 87, 87, 1)',
       border: 0
     },
     '&:focus': { outline: 'none' },
     '&.Mui-focusVisible': { outline: 'none' }
   },
   loginBtn: {
-    color: '#ffffff',
+    color: 'hsla(0, 5%, 40%, 1.00)',
     fontWeight: 500,
     fontSize: '0.9rem',
     textTransform: 'none',
@@ -326,14 +330,21 @@ const blogMenuItems = [
 
 // SỰ KIỆN MENU ITEMS
 const eventMenuItems = [
-  { label: 'Khuyến mãi', path: '/khuyen-mai' },
-  { label: 'Sự kiện đặc biệt', path: '/su-kien-dac-biet' }
+  { label: 'Ưu đãi-Sự kiện', path: '/uu-dai-sự-kien' },
+  { label: 'Phim hay hàng tháng', path: '/phim-hay-hang-thang' }
 ];
-
+// SỰ KIỆN GIÁ VÉ ITEMS
+const eventTicketMenuItems = [
+  { label: 'Giá vé', path: '/gia-ve' },
+];
 // THÀNH VIÊN MENU ITEMS
 const memberMenuItems = [
   { label: 'Thành viên', path: '/thanh-vien' },
 ];
+// LIÊN HỆ MENU ITEMS
+const contactMenuItems = [
+  { label: 'Liên hệ', path: '/lien-he' },
+]
 
 // HEADER COMPONENT
 function Header() {
@@ -996,7 +1007,25 @@ function Header() {
           </ListItem>
         </Box>
         <Divider />
-
+        {/* === Giá vé === */}
+        <ListItem
+          component={Link}
+          to="/gia-ve"
+          onClick={toggleMobileMenu}
+          sx={{
+            color: COLORS.text,
+            cursor: 'pointer',
+            '&:hover': { backgroundColor: COLORS.hover }
+          }}
+        >
+          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+            <ConfirmationNumberTwoToneIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Giá vé"
+            primaryTypographyProps={{ fontWeight: 600 }}
+          />
+        </ListItem>
         {/* === THÀNH VIÊN === */}
         <ListItem
           component={Link}
@@ -1013,6 +1042,25 @@ function Header() {
           </ListItemIcon>
           <ListItemText
             primary="Thành viên"
+            primaryTypographyProps={{ fontWeight: 600 }}
+          />
+        </ListItem>
+        {/* === Liên hệ === */}
+        <ListItem
+          component={Link}
+          to="/lien-he"
+          onClick={toggleMobileMenu}
+          sx={{
+            color: COLORS.text,
+            cursor: 'pointer',
+            '&:hover': { backgroundColor: COLORS.hover }
+          }}
+        >
+          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+            <PhoneIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Liên hệ"
             primaryTypographyProps={{ fontWeight: 600 }}
           />
         </ListItem>
@@ -1150,7 +1198,18 @@ function Header() {
                 Sự kiện
               </Button>
             </Box>
-
+            {/* Nút Giá vé */}
+            <Box sx={{ mx: 0.5 }}>
+              <Button
+                component={Link}
+                to="/gia-ve"
+                disableRipple
+                disableFocusRipple
+                sx={styles.navButton}
+              >
+                Giá vé
+              </Button>
+            </Box>
             {/* Nút Thành viên */}
             <Box sx={{ mx: 0.5 }}>
               <Button
@@ -1161,6 +1220,18 @@ function Header() {
                 sx={styles.navButton}
               >
                 Thành viên
+              </Button>
+            </Box>
+            {/* Nút liên hệ */}
+            <Box sx={{ mx: 0.5 }}>
+              <Button
+                component={Link}
+                to="/lien-he"
+                disableRipple
+                disableFocusRipple
+                sx={styles.navButton}
+              >
+                Liên hệ
               </Button>
             </Box>
           </Box>

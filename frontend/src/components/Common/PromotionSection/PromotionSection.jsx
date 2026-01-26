@@ -15,7 +15,7 @@ import {
 import { getAllEventsAPI } from '../../../apis/cmsApi';
 
 // Background image
-import filmBackground from '../../../assets/images/background-uudai.png';
+import filmBackground from '../../../assets/images/bg-header.jpg';
 
 // CONSTANTS
 const EVENTS_PER_PAGE = 4;
@@ -52,14 +52,14 @@ const styles = {
     width: 10,
     height: 10,
     borderRadius: '50%',
-    backgroundColor: '#ccc',
+    backgroundColor: '#f0ececff',
     cursor: 'pointer',
     transition: 'all 0.3s',
     border: 'none',
     padding: 0
   },
   dotActive: {
-    backgroundColor: '#1a3a5c',
+    backgroundColor: '#090909ff',
     transform: 'scale(1.2)'
   },
   gridContainer: {
@@ -89,7 +89,7 @@ const styles = {
   title: {
     fontWeight: 700,
     fontSize: '0.95rem',
-    color: '#1a3a5c',
+    color: 'hsla(63, 94%, 49%, 80%)',
     textTransform: 'uppercase',
     mt: 1.5,
     lineHeight: 1.4,
@@ -314,13 +314,13 @@ function PromotionSection() {
       <Container maxWidth="lg">
         {/* Header */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h5" component="h2" sx={styles.sectionTitle}>
-            ƯU ĐÃI - KHUYẾN MẠI
+          <Typography variant="h5" component="h2" sx={{ ...styles.sectionTitle, color: 'white' }}>
+            ƯU ĐÃI
           </Typography>
           <Typography
             sx={{
-              fontSize: '0.95rem',
-              color: '#666',
+              fontSize: '1.1rem',
+              color: 'hsla(0, 18%, 93%, 1.00)',
               mt: 1,
               maxWidth: 700,
               mx: 'auto',
@@ -328,7 +328,7 @@ function PromotionSection() {
               px: { xs: 2, md: 0 }
             }}
           >
-            Hệ thống rạp NMN Cinema luôn là cụm rạp có nhiều chương trình ưu đãi khuyến mại nổi bật, cập nhật thường xuyên theo tuần/tháng để khách hàng dễ dàng săn vé rẻ và nhận quà hấp dẫn.
+            Hệ thống rạp NMN Cinema luôn là cụm rạp có nhiều chương trình ưu đãi nổi bật, cập nhật thường xuyên theo tuần/tháng để khách hàng dễ dàng săn vé rẻ và nhận quà hấp dẫn.
           </Typography>
 
           {/* Dots indicator - chỉ hiện trên desktop */}
@@ -351,39 +351,93 @@ function PromotionSection() {
         </Box>
 
         {/* Loading hoặc Content */}
-        {loading ? renderSkeletons() : (
-          <>
-            {/* Mobile: Swipe Carousel */}
-            {isMobile ? (
-              <Box
-                sx={styles.mobileCarousel}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-              >
-                {/* Slider - không có nút điều hướng */}
+        {
+          loading ? renderSkeletons() : (
+            <>
+              {/* Mobile: Swipe Carousel */}
+              {isMobile ? (
                 <Box
+                  sx={styles.mobileCarousel}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  {/* Slider - không có nút điều hướng */}
+                  <Box
+                    sx={{
+                      ...styles.mobileSlider,
+                      transform: `translateX(-${currentMobileIndex * 100}%)`
+                    }}
+                  >
+                    {allEvents.map((event) => (
+                      <Box key={event._id} sx={styles.mobileSlide}>
+                        <Card
+                          sx={styles.mobileCard}
+                          onClick={() => handleEventClick(event._id)}
+                        >
+                          <Box sx={{
+                            ...styles.imageContainer,
+                            width: '100%',
+                            aspectRatio: '2/3',
+                            height: 'auto'
+                          }}>
+                            <Box
+                              component="img"
+                              src={event.bannerUrl || 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image'}
+                              alt={event.title}
+                              sx={styles.image}
+                              draggable={false}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image';
+                              }}
+                            />
+                          </Box>
+                          <Typography sx={{ ...styles.title, textAlign: 'center' }}>
+                            {event.title}
+                          </Typography>
+                        </Card>
+                      </Box>
+                    ))}
+                  </Box>
+
+                  {/* Hint swipe - hiển thị nhẹ ở lần đầu */}
+                  {allEvents.length > 1 && (
+                    <Typography
+                      sx={{
+                        textAlign: 'center',
+                        color: '#999',
+                        fontSize: '0.75rem',
+                        mt: 1,
+                        fontStyle: 'italic'
+                      }}
+                    >
+                      ← Vuốt để xem thêm →
+                    </Typography>
+                  )}
+                </Box>
+              ) : (
+                /* Desktop: Grid 4 cards */
+                <Grid
+                  container
+                  spacing={3}
                   sx={{
-                    ...styles.mobileSlider,
-                    transform: `translateX(-${currentMobileIndex * 100}%)`
+                    ...styles.gridContainer,
+                    opacity: isAnimating ? 0 : 1
                   }}
                 >
-                  {allEvents.map((event) => (
-                    <Box key={event._id} sx={styles.mobileSlide}>
+                  {visibleEvents.map((event) => (
+                    <Grid item xs={6} sm={6} md={3} key={event._id}>
                       <Card
-                        sx={styles.mobileCard}
+                        sx={styles.card}
                         onClick={() => handleEventClick(event._id)}
                       >
-                        <Box sx={{
-                          ...styles.imageContainer,
-                          width: '100%',
-                          aspectRatio: '2/3',
-                          height: 'auto'
-                        }}>
+                        <Box sx={styles.imageContainer}>
                           <Box
                             component="img"
                             src={event.bannerUrl || 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image'}
                             alt={event.title}
+                            className="event-image"
                             sx={styles.image}
                             draggable={false}
                             onError={(e) => {
@@ -392,71 +446,19 @@ function PromotionSection() {
                             }}
                           />
                         </Box>
-                        <Typography sx={{ ...styles.title, textAlign: 'center' }}>
+                        <Typography sx={styles.title}>
                           {event.title}
                         </Typography>
                       </Card>
-                    </Box>
+                    </Grid>
                   ))}
-                </Box>
-
-                {/* Hint swipe - hiển thị nhẹ ở lần đầu */}
-                {allEvents.length > 1 && (
-                  <Typography
-                    sx={{
-                      textAlign: 'center',
-                      color: '#999',
-                      fontSize: '0.75rem',
-                      mt: 1,
-                      fontStyle: 'italic'
-                    }}
-                  >
-                    ← Vuốt để xem thêm →
-                  </Typography>
-                )}
-              </Box>
-            ) : (
-              /* Desktop: Grid 4 cards */
-              <Grid
-                container
-                spacing={3}
-                sx={{
-                  ...styles.gridContainer,
-                  opacity: isAnimating ? 0 : 1
-                }}
-              >
-                {visibleEvents.map((event) => (
-                  <Grid item xs={6} sm={6} md={3} key={event._id}>
-                    <Card
-                      sx={styles.card}
-                      onClick={() => handleEventClick(event._id)}
-                    >
-                      <Box sx={styles.imageContainer}>
-                        <Box
-                          component="img"
-                          src={event.bannerUrl || 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image'}
-                          alt={event.title}
-                          className="event-image"
-                          sx={styles.image}
-                          draggable={false}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image';
-                          }}
-                        />
-                      </Box>
-                      <Typography sx={styles.title}>
-                        {event.title}
-                      </Typography>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            )}
-          </>
-        )}
-      </Container>
-    </Box>
+                </Grid>
+              )}
+            </>
+          )
+        }
+      </Container >
+    </Box >
   );
 }
 
