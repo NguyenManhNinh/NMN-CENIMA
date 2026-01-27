@@ -1,6 +1,6 @@
 const Promotion = require('../models/Promotion');
 const PromotionRedeem = require('../models/PromotionRedeem');
-const Voucher = require('../models/Voucher');
+// const Voucher = require('../models/Voucher'); // Không sử dụng - đã comment
 const UserVoucher = require('../models/UserVoucher');
 
 // PUBLIC APIs
@@ -16,7 +16,9 @@ const getPromotions = async (req, res) => {
       keyword,
       applyMode,
       type,
-      sort = 'newest'
+      sort = 'newest',
+      displayPosition,  // NEW: LIST | BOTTOM_BANNER
+      featuredOnly      // NEW: true để lọc isFeatured
     } = req.query;
 
     const now = new Date();
@@ -47,12 +49,25 @@ const getPromotions = async (req, res) => {
       query.type = type;
     }
 
+    // Filter by displayPosition (LIST, BOTTOM_BANNER)
+    if (displayPosition) {
+      query.displayPosition = displayPosition;
+    }
+
+    // Filter by isFeatured
+    if (featuredOnly === 'true') {
+      query.isFeatured = true;
+    }
+
     // Sort options
     let sortOption = { createdAt: -1 };
     if (sort === 'featured') {
       sortOption = { isFeatured: -1, priority: -1, createdAt: -1 };
     } else if (sort === 'ending') {
       sortOption = { endAt: 1 };
+    } else if (sort === 'banner') {
+      // Sort cho bottom banner theo thứ tự bannerOrder
+      sortOption = { bannerOrder: 1, priority: -1, createdAt: -1 };
     }
 
     // Execute query
@@ -634,10 +649,110 @@ const getAllPromotionsAdmin = async (req, res) => {
     });
   }
 };
+/**
+ * GET /api/v1/promotions/home
+ * Endpoint tổng hợp: trả cả danh sách LIST + BOTTOM_BANNER trong 1 request
+ * FE chỉ cần gọi 1 lần, atomic response
+ */
+const getPromotionsHome = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 20,
+      keyword,
+      applyMode,
+      type,
+      sort = 'newest',
+      bannerLimit = 2 // Số lượng banner tối đa
+    } = req.query;
+
+    const now = new Date();
+
+    // Base query cho promotions đang active
+    const baseQuery = {
+      status: 'ACTIVE',
+      publishAt: { $lte: now },
+      startAt: { $lte: now },
+      endAt: { $gte: now }
+    };
+
+    // ========== QUERY 1: Danh sách LIST (paginate) ==========
+    const listQuery = { ...baseQuery, displayPosition: 'LIST' };
+
+    // Filter by keyword
+    if (keyword) {
+      listQuery.$or = [
+        { title: { $regex: keyword, $options: 'i' } },
+        { excerpt: { $regex: keyword, $options: 'i' } }
+      ];
+    }
+
+    // Filter by applyMode
+    if (applyMode) {
+      listQuery.applyMode = applyMode;
+    }
+
+    // Filter by type
+    if (type) {
+      listQuery.type = type;
+    }
+
+    // Sort options cho LIST
+    let sortOption = { createdAt: -1 };
+    if (sort === 'featured') {
+      sortOption = { isFeatured: -1, priority: -1, createdAt: -1 };
+    } else if (sort === 'ending') {
+      sortOption = { endAt: 1 };
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // ========== QUERY 2: Banners BOTTOM_BANNER (limit, sort bannerOrder) ==========
+    const bannerQuery = { ...baseQuery, displayPosition: 'BOTTOM_BANNER' };
+    const bannerSortOption = { bannerOrder: 1, priority: -1, createdAt: -1 };
+
+    // Execute cả 3 queries song song
+    const [promotions, total, banners] = await Promise.all([
+      Promotion.find(listQuery)
+        .select('title slug thumbnailUrl coverUrl startAt endAt isFeatured priority createdAt')
+        .sort(sortOption)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Promotion.countDocuments(listQuery),
+      Promotion.find(bannerQuery)
+        .select('title slug thumbnailUrl coverUrl bannerOrder priority createdAt')
+        .sort(bannerSortOption)
+        .limit(parseInt(bannerLimit))
+        .lean()
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        promotions,
+        banners
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('getPromotionsHome error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server khi lấy trang ưu đãi'
+    });
+  }
+};
 
 module.exports = {
   // Public
   getPromotions,
+  getPromotionsHome, // NEW
   getPromotionBySlug,
   claimPromotion,
   offlineClaimPromotion,

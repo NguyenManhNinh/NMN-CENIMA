@@ -62,9 +62,16 @@ router.post('/staff/redeem',
 );
 //PUBLIC ROUTES
 /**
+ * GET /api/v1/promotions/home
+ * Endpoint tổng hợp: trả cả LIST + BOTTOM_BANNER trong 1 request
+ * Response: { data: { promotions: [], banners: [] }, pagination: {...} }
+ */
+router.get('/home', promotionController.getPromotionsHome);
+
+/**
  * GET /api/v1/promotions
  * Lấy danh sách ưu đãi đang active
- * Query: page, limit, keyword, applyMode, type, sort
+ * Query: page, limit, keyword, applyMode, type, sort, displayPosition
  */
 router.get('/', promotionController.getPromotions);
 

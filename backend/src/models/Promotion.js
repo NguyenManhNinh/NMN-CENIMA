@@ -56,6 +56,19 @@ const promotionSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // Vị trí hiển thị: LIST = danh sách thường, BOTTOM_BANNER = banner lớn dưới grid
+  displayPosition: {
+    type: String,
+    enum: ['LIST', 'BOTTOM_BANNER'],
+    default: 'LIST',
+    index: true
+  },
+  // Thứ tự hiển thị banner (1, 2, ...)
+  bannerOrder: {
+    type: Number,
+    default: 0,
+    index: true
+  },
 
   //THỜI GIAN
   publishAt: {
