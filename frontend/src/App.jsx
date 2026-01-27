@@ -21,7 +21,7 @@ import OAuthCallback from './pages/Client/OAuthCallback/OAuthCallback';
 import { GenresPage, GenresDetailPage } from './pages/Client/Genre';
 import { ActorsPage, ActorDetailPage } from './pages/Client/Actor';
 import { FilmDirectorPage, FilmDirectorDetailPage } from './pages/Client/FilmDirector';
-import { PromotionListPage } from './pages/Client/Promotion';
+import { PromotionListPage, PromotionDetailPage } from './pages/Client/Promotion';
 
 function App() {
   return (
@@ -75,8 +75,7 @@ function App() {
 
             {/* Ưu đãi - Sự kiện */}
             <Route path="uu-dai" element={<PromotionListPage />} />
-            <Route path="uu-dai/:slug" element={<PromotionListPage />} />
-            {/* <Route path="uu-dai/:slug" element={<PromotionDetailPage />} /> */}
+            <Route path="uu-dai/:slug" element={<PromotionDetailPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
