@@ -330,7 +330,7 @@ const blogMenuItems = [
 
 // SỰ KIỆN MENU ITEMS
 const eventMenuItems = [
-  { label: 'Ưu đãi-Sự kiện', path: '/uu-dai-sự-kien' },
+  { label: 'Ưu đãi-Sự kiện', path: '/uu-dai' },
   { label: 'Phim hay hàng tháng', path: '/phim-hay-hang-thang' }
 ];
 // SỰ KIỆN GIÁ VÉ ITEMS
@@ -991,19 +991,19 @@ function Header() {
         }}>
           <ListItem
             component={Link}
-            to="/khuyen-mai"
+            to="/uu-dai"
             onClick={toggleMobileMenu}
             sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
           >
-            <ListItemText primary="Khuyến mãi" />
+            <ListItemText primary="Ưu đãi-Sự kiện" />
           </ListItem>
           <ListItem
             component={Link}
-            to="/su-kien-dac-biet"
+            to="/phim-hay-hang-thang"
             onClick={toggleMobileMenu}
             sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
           >
-            <ListItemText primary="Sự kiện đặc biệt" />
+            <ListItemText primary="Phim hay hàng tháng" />
           </ListItem>
         </Box>
         <Divider />
