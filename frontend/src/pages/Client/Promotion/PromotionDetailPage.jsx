@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box,
@@ -16,66 +16,17 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import BottomBannerSection from './BottomBannerSection';
+import { toast } from 'react-toastify';
+import DOMPurify from 'dompurify';
 
-// API imports - TẠM THỜI COMMENT LẠI
-// import { getPromotionBySlugAPI } from '../../../apis/promotionApi';
+// API imports
+import {
+  getPromotionBySlugAPI,
+  getPromotionsHomeAPI,
+  toggleLikeAPI
+} from '../../../apis/promotionApi';
 
-// =============================================
-// MOCK DATA - Dữ liệu mẫu để phát triển UI
-// =============================================
-const MOCK_PROMOTIONS = {
-  'uu-dai-tet-2026': {
-    _id: 'mock-2',
-    title: 'TẾT RỘN RÀNG - ƯU ĐÃI NGẬP TRÀN TẠI LOTTE CINEMA',
-    slug: 'uu-dai-tet-2026',
-    content: `
-      <p>Du xuân xem phim hay, lại còn được nhận ngay ưu đãi "khủng" từ sự kết hợp của Lotte Cinema & Lotte Mart!</p>
-      <p>✨ <strong>ƯU ĐÃI ĐẶC BIỆT:</strong> <span style="color: #e71a0f; font-weight: bold;">GIẢM NGAY 10%</span> cho Hotfood Combo.</p>
-      <p><strong>Cách thức nhận ưu đãi cực đơn giản:</strong> Chỉ cần mang theo hóa đơn mua sắm bất kỳ tại Lotte Mart đến quầy vé Lotte Cinema là bạn sẽ được áp dụng giảm giá ngay lập tức.</p>
-      <p><strong>Thời gian:</strong> Duy nhất từ ngày 18-24/02/2026.</p>
-    `,
-    notes: `Áp dụng tại các cụm rạp Lotte Cinema x Lotte Mart:
-- Lotte Cinema Nam Sài Gòn (Tầng 3 Lotte Mart Quận 7)
-- Lotte Cinema Gò Vấp (Tầng 3 Lotte Mart Gò Vấp)
-- Lotte Cinema Cộng Hòa (Tầng 4, Pico Plaza)
-- Lotte Cinema Bình Dương (Tầng 2, Lotte Mart Bình Dương)
-- Lotte Cinema Vũng Tàu (Tầng 3, Lotte Mart Vũng Tàu)
-- Lotte Cinema Đồng Nai (Tầng 5, Lotte Mart Đồng Nai)
-- Lotte Cinema Cần Thơ (Tầng 3, Lotte Mart Cần Thơ)
-- Lotte Cinema Phan Thiết (Tầng 5, Lotte Mart Phan Thiết)
-- Lotte Cinema Đà Nẵng (Tầng 5&6, Lotte Mart Đà Nẵng)
-- Lotte Cinema West Lake (Tầng 4, Lotte Mall West Lake)`,
-    thumbnailUrl: 'https://media.lottecinemavn.com/Media/Event/52232691628d44f48e910a6dc834a70a.jpg',
-    coverUrl: 'https://media.lottecinemavn.com/Media/Event/52232691628d44f48e910a6dc834a70a.jpg',
-    viewCount: 856,
-    likeCount: 45
-  },
-};
-
-// Default mock nếu slug không tìm thấy
-const DEFAULT_MOCK = MOCK_PROMOTIONS['uu-dai-tet-2026'];
-
-// MOCK BANNERS - 2 banner hiển thị bên dưới
-const MOCK_BANNERS = [
-  {
-    _id: 'banner-1',
-    title: 'QUYỀN LỢI THÀNH VIÊN NĂM 2026',
-    slug: 'quyen-loi-thanh-vien-2026',
-    coverUrl: 'https://media.lottecinemavn.com/Media/WebAdmin/686ec4448f6642769e44371129e4f68c.jpg',
-    bannerOrder: 1
-  },
-  {
-    _id: 'banner-2',
-    title: 'MERCHANDISE MÙI PHỞ',
-    slug: 'merchandise-mui-pho',
-    coverUrl: 'https://media.lottecinemavn.com/Media/WebAdmin/e82257ea7d14466f934cb90de5d22ab3.jpg',
-    bannerOrder: 2
-  }
-];
-
-// =============================================
-// STYLES - Theo template Lotte Cinema
-// =============================================
+// STYLES
 const styles = {
   page: {
     minHeight: '60vh',
@@ -86,7 +37,6 @@ const styles = {
     maxWidth: 900,
     px: { xs: 2, md: 3 }
   },
-  // Header section - White background với title + actions
   headerBox: {
     bgcolor: '#fff',
     p: { xs: 2, md: 2.5 },
@@ -104,7 +54,7 @@ const styles = {
     fontWeight: 700,
     color: 'hsla(0, 0%, 4%, 1.00)',
     lineHeight: 1.4,
-    mb: 0
+    mb: 0.5
   },
   actionsBox: {
     display: 'flex',
@@ -126,7 +76,6 @@ const styles = {
     p: 0.8,
     color: '#e71a0f',
   },
-  // Banner - hiển thị đúng tỉ lệ gốc, không crop
   bannerWrapper: {
     width: '100%',
     bgcolor: '#f5f5f5'
@@ -136,7 +85,6 @@ const styles = {
     height: 'auto',
     display: 'block'
   },
-  // Content section
   contentBox: {
     bgcolor: '#fff',
     p: { xs: 2, md: 3 }
@@ -148,7 +96,6 @@ const styles = {
     '& p': { mb: 1.5 },
     '& strong': { fontWeight: 600 }
   },
-  // Notes section
   notesBox: {
     bgcolor: '#f5f5dc',
     p: { xs: 2, md: 2.5 },
@@ -171,7 +118,6 @@ const styles = {
     color: '#555',
     whiteSpace: 'pre-line'
   },
-  // Loading state styles
   loadingOverlay: {
     position: 'fixed',
     top: 0,
@@ -204,18 +150,15 @@ const styles = {
   }
 };
 
-// =============================================
 // HELPERS
-// =============================================
 const formatCount = (count) => {
-  if (!count) return '0';
+  if (count == null) return '';
+  if (count === 0) return '0';
   if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
   return count.toString();
 };
 
-// =============================================
 // COMPONENT
-// =============================================
 function PromotionDetailPage() {
   const { slug } = useParams();
 
@@ -224,34 +167,86 @@ function PromotionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [promotion, setPromotion] = useState(null);
   const [error, setError] = useState(null);
+  const [banners, setBanners] = useState([]);
 
-  // Simulate loading (TODO: thay bằng API call thực tế)
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      const data = MOCK_PROMOTIONS[slug] || DEFAULT_MOCK;
+  // Fetch promotion data
+  const fetchPromotion = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const data = await getPromotionBySlugAPI(slug);
+
+      if (!data) {
+        setError('Không tìm thấy ưu đãi');
+        return;
+      }
+
       setPromotion(data);
-      setLoading(false);
-    }, 800); // Giả lập delay 800ms
+      setLiked(!!data.liked);
 
-    return () => clearTimeout(timer);
+    } catch (err) {
+      console.error('Error fetching promotion:', err);
+      setError(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
+    } finally {
+      setLoading(false);
+    }
   }, [slug]);
 
-  // Handler: Like
-  const handleLike = () => {
-    setLiked(!liked);
-    // TODO: Call API to toggle like
-  };
+  // Fetch banners
+  const fetchBanners = useCallback(async () => {
+    try {
+      const data = await getPromotionsHomeAPI();
+      setBanners(data?.banners || []);
+    } catch (err) {
+      console.error('Error fetching banners:', err);
+    }
+  }, []);
+
+  // Track view trong session để tránh gọi API nhiều lần
+  useEffect(() => {
+    const viewedKey = `promo_viewed_${slug}`;
+    const alreadyViewed = sessionStorage.getItem(viewedKey);
+
+    if (!alreadyViewed) {
+      sessionStorage.setItem(viewedKey, '1');
+    }
+    fetchPromotion();
+    fetchBanners();
+  }, [slug, fetchPromotion, fetchBanners]);
 
   // Handler: Share
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: promotion?.title,
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: promotion?.title,
+          url: window.location.href
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Đã copy link!');
+      }
+    } catch {
+      toast.error('Không thể chia sẻ lúc này');
+    }
+  };
+
+  // Handler: Toggle like/unlike
+  const handleLike = async () => {
+    try {
+      const response = await toggleLikeAPI(promotion._id);
+      if (response.success) {
+        setLiked(response.liked);
+        setPromotion(prev => ({
+          ...prev,
+          likeCount: response.likeCount
+        }));
+        toast.success(response.message);
+      }
+    } catch (err) {
+      console.error('Like error:', err);
+      toast.error('Không thể thích ưu đãi lúc này');
     }
   };
 
@@ -287,7 +282,6 @@ function PromotionDetailPage() {
     );
   }
 
-  // Get banner image
   const bannerUrl = promotion?.coverUrl || promotion?.thumbnailUrl;
 
   // Main render
@@ -324,7 +318,7 @@ function PromotionDetailPage() {
               </IconButton>
             </Tooltip>
             <Typography sx={styles.actionCount}>
-              {formatCount(promotion?.likeCount + (liked ? 1 : 0))}
+              {formatCount(promotion?.likeCount ?? 0)}
             </Typography>
 
             {/* Share button */}
@@ -348,12 +342,17 @@ function PromotionDetailPage() {
           </Box>
         )}
 
-        {/* CONTENT */}
+        {/* CONTENT - XSS sanitization */}
         {promotion?.content && (
           <Box sx={styles.contentBox}>
             <Box
               sx={styles.content}
-              dangerouslySetInnerHTML={{ __html: promotion.content }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(promotion.content, {
+                  FORBID_TAGS: ['form', 'input', 'textarea', 'button', 'select', 'option', 'label'],
+                  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onchange', 'onsubmit']
+                })
+              }}
             />
           </Box>
         )}
@@ -377,9 +376,9 @@ function PromotionDetailPage() {
         )}
       </Container>
 
-      {/* BOTTOM BANNERS - Full width như PromotionListPage */}
+      {/* BOTTOM BANNERS */}
       <Container maxWidth={false} sx={{ maxWidth: 1320, px: { xs: 2, md: 3 } }}>
-        <BottomBannerSection banners={MOCK_BANNERS} />
+        <BottomBannerSection banners={banners} />
       </Container>
     </Box>
   );

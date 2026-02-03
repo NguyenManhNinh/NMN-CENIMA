@@ -13,11 +13,12 @@ const formatDateRange = (startAt, endAt) => {
     return '';
   }
 
+  // Dùng UTC để tránh lệch timezone (VD: 2026-12-31T23:59Z -> 2027-01-01 ở GMT+7)
   const formatDate = (dateStr, showYear = true) => {
     const date = new Date(dateStr);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const year = date.getUTCFullYear();
     return showYear ? `${day}/${month}/${year}` : `${day}/${month}`;
   };
 
@@ -28,8 +29,8 @@ const formatDateRange = (startAt, endAt) => {
     return `Từ ${formatDate(startAt)}`;
   }
 
-  // Rút gọn nếu cùng năm
-  if (start.getFullYear() === end.getFullYear()) {
+  // Rút gọn nếu cùng năm (dùng UTC)
+  if (start.getUTCFullYear() === end.getUTCFullYear()) {
     return `${formatDate(startAt, false)} - ${formatDate(endAt)}`;
   }
 

@@ -116,7 +116,7 @@ function PaymentResultPage() {
     return new Intl.NumberFormat('vi-VN').format(price || 0) + ' vnđ';
   };
 
-  // Format ngày giờ 
+  // Format ngày giờ
   const formatDate = (date) => {
     const d = date ? new Date(date) : new Date();
     const dateStr = d.toLocaleDateString('vi-VN', {
@@ -146,7 +146,9 @@ function PaymentResultPage() {
 
   useEffect(() => {
     const fetchOrderData = async () => {
-      if (!orderNo || !isSuccess) {
+      // Fetch order data for BOTH success and failed cases
+      // Failed case needs data for "Thử lại" button
+      if (!orderNo) {
         setLoading(false);
         return;
       }
@@ -334,7 +336,69 @@ function PaymentResultPage() {
               <Button
                 variant="contained"
                 sx={styles.btnPrimary}
-                onClick={() => navigate(-3)}
+                onClick={() => {
+                  // Navigate to PaymentConfirmPage with order data
+                  // This allows user to retry payment without re-selecting seats
+                  if (orderData && showtime?._id) {
+                    console.log('[PaymentResult] Retry - reconstructing data from order:', order);
+
+                    // Reconstruct state for PaymentConfirmPage
+                    const selectedSeats = order.seats?.map(s => ({
+                      id: s.seatCode,
+                      seatCode: s.seatCode,
+                      price: s.price || 0,
+                      type: s.isVip ? 'vip' : 'standard'
+                    })) || [];
+
+                    const seatPrice = order.seats?.reduce((sum, s) => sum + (s.price || 0), 0) || 0;
+
+                    // Reconstruct combos - NOTE: Order schema uses "unitPrice", not "price"
+                    const combos = order.combos?.map(c => ({
+                      _id: c.comboId || c._id,
+                      name: c.name,
+                      price: c.unitPrice || c.price || 0, // Order schema uses unitPrice
+                      quantity: c.quantity || 1
+                    })) || [];
+                    const comboPrice = combos.reduce((sum, c) => sum + ((c.price || 0) * (c.quantity || 0)), 0);
+
+                    // Build showtime info
+                    const showtimeInfo = {
+                      _id: showtime._id,
+                      movieTitle: movie.title,
+                      posterUrl: movie.posterUrl,
+                      cinemaName: cinema.name,
+                      roomName: room.name,
+                      time: new Date(showtime.startAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }),
+                      date: new Date(showtime.startAt).toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+                      ageRating: movie.ageRating,
+                      format: movie.format
+                    };
+
+                    // Use order.totalAmount directly to avoid recalculation issues
+                    const totalPrice = order.totalAmount || (seatPrice + comboPrice);
+
+                    console.log('[PaymentResult] Retry state:', { seatPrice, comboPrice, totalPrice, selectedSeats, combos });
+
+                    navigate('/thanh-toan', {
+                      state: {
+                        showtime: showtimeInfo,
+                        selectedSeats,
+                        seatPrice,
+                        combos,
+                        comboPrice,
+                        totalPrice
+                      }
+                    });
+                  } else {
+                    // Fallback to seat selection if no order data
+                    const showtimeId = showtime?._id;
+                    if (showtimeId) {
+                      navigate(`/chon-ghe/${showtimeId}`);
+                    } else {
+                      navigate('/');
+                    }
+                  }
+                }}
               >
                 Thử lại
               </Button>

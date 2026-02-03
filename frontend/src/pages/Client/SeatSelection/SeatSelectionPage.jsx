@@ -25,7 +25,7 @@ import LoginModal from '../../../components/Common/AuthModals/LoginModal';
 
 // API
 import { getShowtimeByIdAPI } from '../../../apis/showtimeApi';
-import { getHoldsByShowtimeAPI, createHoldAPI, releaseHoldAPI, verifyHoldAPI } from '../../../apis/seatHoldApi';
+import { getHoldsByShowtimeAPI, createHoldAPI, releaseHoldAPI, verifyHoldAPI, releaseAllHoldsAPI } from '../../../apis/seatHoldApi';
 
 // Socket.io - Real-time seat updates
 import {
@@ -72,22 +72,22 @@ const styles = {
     display: 'block',
     mb: { xs: 2, md: 4 }
   },
-  // Container cho sơ đồ ghế - cho phép cuộn ngang trên mobile
+  // Container cho sơ đồ ghế - không scroll ngang, chunk theo dòng
   seatContainer: {
-    maxWidth: 700,
+    width: '100%',
     mx: 'auto',
     px: { xs: 0.5, sm: 1, md: 2 },
-    overflowX: { xs: 'auto', md: 'visible' },
+    overflowX: 'hidden',
     pb: { xs: 2, md: 0 }
   },
-  // Row chứa các ghế
+  // Row chứa các ghế - mỗi dòng tối đa 10 ghế, căn giữa
   seatRow: {
     display: 'flex',
+    flexWrap: 'nowrap',
     justifyContent: 'center',
     alignItems: 'center',
     gap: { xs: '2px', sm: '3px', md: '4px' },
-    mb: { xs: '3px', sm: '5px', md: '6px' },
-    minWidth: { xs: 'max-content', md: 'auto' }
+    mb: { xs: '4px', sm: '6px', md: '8px' }
   },
   // Container cho từng ghế (bao gồm ảnh + label)
   seatWrapper: {
@@ -117,8 +117,8 @@ const styles = {
   },
   // Ghế đôi rộng hơn
   coupleSeatImage: {
-    width: { xs: 64, sm: 84, md: 110 },
-    height: { xs: 32, sm: 42, md: 55 }
+    width: { xs: 70, sm: 84, md: 110 },
+    height: { xs: 40, sm: 42, md: 55 }
   },
   // Label số ghế - căn giữa ghế
   seatLabel: {
@@ -196,9 +196,10 @@ const styles = {
 
 // Hàm lấy ảnh ghế theo loại và trạng thái
 const getSeatImage = (seat, isSelected) => {
-  // Ghế đã bán hoặc đang được giữ bởi người khác
-  if (seat.status === 'sold' || seat.status === 'reserved') return gheDaBan;
+  // ƯU TIÊN 1: Ghế đang được chọn bởi user → hiện vàng (dù status gì)
   if (isSelected) return gheDangChon;
+  // ƯU TIÊN 2: Ghế đã bán hoặc đang được giữ bởi người khác
+  if (seat.status === 'sold' || seat.status === 'reserved') return gheDaBan;
 
   // Kiểm tra loại ghế (hỗ trợ cả lowercase từ DB và uppercase)
   const type = seat.type?.toLowerCase();
@@ -213,7 +214,7 @@ function SeatSelectionPage() {
   const { showtimeId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth(); // Lấy user để restore ghế đang giữ
 
   const [loading, setLoading] = useState(true);
   const [seats, setSeats] = useState([]);
@@ -221,6 +222,7 @@ function SeatSelectionPage() {
   const [showtime, setShowtime] = useState(null);
   const [warningOpen, setWarningOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false); // Modal đăng nhập
+  const [maxSeatsWarningOpen, setMaxSeatsWarningOpen] = useState(false); // Modal cảnh báo vượt 8 ghế
 
   // Timer đếm ngược (chỉ hiển thị khi có reservationStartTime từ trang combo)
   const RESERVATION_TIME = 15 * 60; // 15 phút
@@ -305,9 +307,14 @@ function SeatSelectionPage() {
   };
 
   // Load dữ liệu ghế và suất chiếu
+  // Re-run khi showtimeId thay đổi HOẶC auth state thay đổi (login/logout)
   useEffect(() => {
     loadData();
-  }, [showtimeId]);
+    // Xóa selectedSeats khi logout (vì ghế của user cũ không còn valid)
+    if (!isAuthenticated) {
+      setSelectedSeats([]);
+    }
+  }, [showtimeId, isAuthenticated]);
 
   // Verify hold với server khi có reservationStartTime (sync timer)
   // Đảm bảo hold vẫn còn hiệu lực khi quay lại trang hoặc reload
@@ -350,14 +357,19 @@ function SeatSelectionPage() {
     connectSocket();
     joinShowtime(showtimeId);
 
-    // Lấy userId hiện tại để phân biệt ghế của mình vs người khác
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserId = currentUser._id || currentUser.id;
+    // Helper: Lấy userId hiện tại (re-read mỗi lần để handle case login sau khi mount)
+    const getCurrentUserId = () => {
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      return storedUser._id || storedUser.id || null;
+    };
 
     // 2. Lắng nghe khi ghế được giữ bởi NGƯỜI KHÁC
     onSeatHeld((data) => {
+      // Re-read userId mỗi lần có event (vì user có thể login sau khi mount)
+      const currentUserId = getCurrentUserId();
+
       // Bỏ qua nếu là ghế do chính mình giữ
-      if (data.userId === currentUserId) {
+      if (currentUserId && data.userId === currentUserId) {
         return;
       }
 
@@ -378,14 +390,41 @@ function SeatSelectionPage() {
           return { ...seat, status: 'available' };
         }
         return seat;
-      }));
+      }))
     });
 
-    // 4. Cleanup khi rời trang - QUAN TRỌNG: Giải phóng ghế đã giữ
+    // 4.1 Phát hiện F5/Reload: Set flag khi beforeunload
+    const handleBeforeUnload = () => {
+      sessionStorage.setItem('isPageReloading', 'true');
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // 4.2 Cleanup khi rời trang
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       leaveShowtime(showtimeId);
       offEvent('seat:held');
       offEvent('seat:released');
+
+      // AUTO-RELEASE: Chỉ nhả ghế khi NAVIGATE AWAY (không phải F5/reload)
+      const isReloading = sessionStorage.getItem('isPageReloading');
+      const hasReservation = sessionStorage.getItem('reservationStartTime');
+
+      // Xóa flag reload sau khi check
+      sessionStorage.removeItem('isPageReloading');
+
+      // Không release nếu: đang reload HOẶC đi đến combo
+      if (isReloading || hasReservation) {
+        console.log('[SeatSelection] Keeping holds (reload/combo)');
+        return;
+      }
+
+      // Navigate away → release tất cả ghế
+      if (showtimeId) {
+        releaseAllHoldsAPI(showtimeId).catch((err) => {
+          console.log('[SeatSelection] Release all holds on leave:', err?.message || 'failed');
+        });
+      }
     };
   }, [showtimeId]);
   const loadData = async () => {
@@ -402,9 +441,25 @@ function SeatSelectionPage() {
       const heldSeatCodes = heldSeats.map(h => h.seatCode);
       const soldSeatCodes = holdsResponse.data?.soldSeats || []; // Ghế đã thanh toán
 
+      // 2.1 Lấy userId từ localStorage (vì useAuth context có thể chưa ready khi reload)
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const currentUserId = storedUser._id || storedUser.id || null;
+
       // 3. Xử lý seatMap từ phòng thành danh sách ghế
       const room = showtimeData.roomId;
       const seatMap = room.seatMap || [];
+
+      // Helper: Normalize seat type để thống nhất uppercase
+      const normalizeSeatType = (t) => {
+        const v = String(t || 'standard').toLowerCase();
+        if (v === 'vip') return 'VIP';
+        if (v === 'couple') return 'COUPLE';
+        return 'STANDARD';
+      };
+
+      // Duplicate detection
+      const seatCodeSet = new Set();
+      const duplicates = new Set();
 
       // Chuyển đổi seatMap thành danh sách phẳng
       const processedSeats = [];
@@ -413,13 +468,28 @@ function SeatSelectionPage() {
         rowData.seats.forEach(seat => {
           const seatCode = `${row}${seat.number.toString().padStart(2, '0')}`;
 
+          // Check duplicate seatCode
+          if (seatCodeSet.has(seatCode)) {
+            duplicates.add(seatCode);
+          } else {
+            seatCodeSet.add(seatCode);
+          }
+
           // Xác định trạng thái ghế (Ưu tiên: sold > reserved > available)
+          // LƯU Ý: Ghế của CHÍNH USER đang giữ → không đánh dấu reserved
+          const isMyHold = currentUserId && heldSeats.some(h => h.seatCode === seatCode && h.userId === currentUserId);
+          const isOtherHold = heldSeatCodes.includes(seatCode) && !isMyHold;
+
           let status = 'available';
           if (seat.isBooked || soldSeatCodes.includes(seatCode)) {
             status = 'sold'; // Đã thanh toán/bán
-          } else if (heldSeatCodes.includes(seatCode)) {
-            status = 'reserved'; // Đang được giữ bởi người khác
+          } else if (isOtherHold) {
+            status = 'reserved'; // Đang được giữ bởi NGƯỜI KHÁC
           }
+          // Ghế của user đang giữ → status = 'available' (sẽ được add vào selectedSeats ở bước sau)
+
+          // Normalize seat type
+          const seatType = normalizeSeatType(seat.type);
 
           // Tính giá theo loại ghế
           // Standard: giá gốc
@@ -427,9 +497,9 @@ function SeatSelectionPage() {
           // Couple: (giá gốc + phụ thu 10,000đ) x 2 người
           const basePrice = showtimeData.basePrice || 75000;
           let price = basePrice;
-          if (seat.type === 'vip') {
+          if (seatType === 'VIP') {
             price = basePrice + 5000; // VIP: +5,000đ phụ thu
-          } else if (seat.type === 'couple') {
+          } else if (seatType === 'COUPLE') {
             price = (basePrice + 10000) * 2; // Couple: giá cho 2 người
           }
 
@@ -437,13 +507,19 @@ function SeatSelectionPage() {
             id: seatCode,
             row: row,
             number: seat.number,
-            type: seat.type || 'standard',
+            type: seatType,
             status: status,
             price: Math.round(price),
             seatCode: seatCode
           });
         });
       });
+
+      // Fail-fast: throw error nếu có duplicate seatCode
+      if (duplicates.size > 0) {
+        console.error('[SeatMap] DUPLICATE seatCodes detected:', Array.from(duplicates));
+        throw new Error(`Lỗi dữ liệu: Trùng mã ghế (${Array.from(duplicates).join(', ')})`);
+      }
 
       // 4. Format thông tin showtime để hiển thị
       const movie = showtimeData.movieId;
@@ -481,6 +557,20 @@ function SeatSelectionPage() {
 
       setSeats(processedSeats);
       setShowtime(formattedShowtime);
+
+      // 5. RESTORE: Khôi phục ghế của user đang giữ (khi F5/reload)
+      if (currentUserId) {
+        const myHeldSeatCodes = heldSeats
+          .filter(h => h.userId === currentUserId)
+          .map(h => h.seatCode);
+
+        if (myHeldSeatCodes.length > 0) {
+          const myHeldSeats = processedSeats.filter(s => myHeldSeatCodes.includes(s.seatCode));
+          setSelectedSeats(myHeldSeats);
+          console.log('[SeatSelection] Restored user\'s held seats:', myHeldSeatCodes);
+        }
+      }
+
       setLoading(false);
 
     } catch (error) {
@@ -502,6 +592,13 @@ function SeatSelectionPage() {
     }
 
     const isSelected = selectedSeats.find(s => s.id === seat.id);
+
+    // CLIENT-SIDE CHECK: Giới hạn tối đa 8 ghế (check ngay lập tức, không chờ API)
+    const MAX_SEATS = 8;
+    if (!isSelected && selectedSeats.length >= MAX_SEATS) {
+      setMaxSeatsWarningOpen(true);
+      return; // Chặn ngay, không gọi API
+    }
 
     try {
       if (isSelected) {
@@ -525,8 +622,11 @@ function SeatSelectionPage() {
           }
           return s;
         }));
+      } else if (error.response?.status === 400) {
+        // Lỗi giới hạn số ghế - hiện modal cảnh báo
+        setMaxSeatsWarningOpen(true);
       } else if (error.response?.status === 401) {
-        alert('Vui lòng đăng nhập để chọn ghế!');
+        setLoginModalOpen(true);
       } else {
         alert('Có lỗi xảy ra. Vui lòng thử lại!');
       }
@@ -623,43 +723,53 @@ function SeatSelectionPage() {
                 sx={styles.screenImage}
               />
 
-              {/* Sơ đồ ghế - dùng ảnh */}
+              {/* Sơ đồ ghế - chunk 10 ghế / 1 dòng */}
               <Box sx={styles.seatContainer}>
-                {Object.keys(seatsByRow).map(row => (
-                  <Box key={row} sx={styles.seatRow}>
-                    {seatsByRow[row].map(seat => (
-                      <Box
-                        key={seat.id}
-                        onClick={() => handleSeatClick(seat)}
-                        sx={{
-                          ...styles.seatWrapper,
-                          ...(seat.status === 'sold' ? styles.soldSeatWrapper : {})
-                        }}
-                        title={`${seat.id} - ${formatPrice(seat.price)}`}
-                      >
-                        {/* Ảnh ghế */}
-                        <Box
-                          component="img"
-                          src={getSeatImage(seat, isSeatSelected(seat.id))}
-                          alt={seat.id}
-                          sx={{
-                            ...styles.seatImage,
-                            ...(seat.type === 'COUPLE' ? styles.coupleSeatImage : {})
-                          }}
-                        />
-                        {/* Label số ghế */}
-                        <Typography
-                          sx={{
-                            ...styles.seatLabel,
-                            ...(seat.type === 'COUPLE' ? styles.coupleSeatLabel : {})
-                          }}
-                        >
-                          {seat.id}
-                        </Typography>
+                {(() => {
+                  // Helper: chia mảng thành các chunk
+                  const chunkArray = (arr, size) => {
+                    const res = [];
+                    for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size));
+                    return res;
+                  };
+                  const maxPerLine = 12; // Tối đa 12 ghế / dòng
+
+                  return Object.keys(seatsByRow).sort().map(row => {
+                    const lines = chunkArray(seatsByRow[row], maxPerLine);
+
+                    return (
+                      <Box key={row} sx={{ mb: { xs: 0.5, md: 1 } }}>
+                        {lines.map((lineSeats, idx) => (
+                          <Box key={`${row}-${idx}`} sx={styles.seatRow}>
+                            {lineSeats.map(seat => (
+                              <Box
+                                key={seat.id}
+                                onClick={() => handleSeatClick(seat)}
+                                sx={{
+                                  ...styles.seatWrapper,
+                                  ...(seat.status === 'sold' ? styles.soldSeatWrapper : {})
+                                }}
+                                title={`${seat.id} - ${formatPrice(seat.price)}`}
+                              >
+                                {/* Ảnh ghế */}
+                                <Box
+                                  component="img"
+                                  src={getSeatImage(seat, isSeatSelected(seat.id))}
+                                  alt={seat.id}
+                                  sx={styles.seatImage}
+                                />
+                                {/* Label số ghế */}
+                                <Typography sx={styles.seatLabel}>
+                                  {seat.id}
+                                </Typography>
+                              </Box>
+                            ))}
+                          </Box>
+                        ))}
                       </Box>
-                    ))}
-                  </Box>
-                ))}
+                    );
+                  });
+                })()}
 
                 {/* Legend - Chú thích bằng ảnh */}
                 <Box sx={styles.legend}>
@@ -913,10 +1023,58 @@ function SeatSelectionPage() {
         </Dialog>
       </Box>
 
+      {/* Modal Cảnh báo vượt quá 8 ghế */}
+      <Dialog
+        open={maxSeatsWarningOpen}
+        onClose={() => setMaxSeatsWarningOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            width: 300,
+            textAlign: 'center',
+            py: 2
+          }
+        }}
+      >
+        <DialogContent sx={{ px: 1, py: 3 }}>
+          <WarningAmberIcon sx={{ fontSize: 60, color: '#F5A623', mb: 1 }} />
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: '#333' }}>
+            Thông báo
+          </Typography>
+          <Typography color="text.secondary">
+            Số lượng ghế tối đa được đặt là 8 ghế
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button
+            variant="contained"
+            onClick={() => setMaxSeatsWarningOpen(false)}
+            sx={{
+              bgcolor: '#F5A623',
+              color: '#fff',
+              fontWeight: 600,
+              px: 6,
+              py: 1,
+              borderRadius: 1,
+              textTransform: 'none',
+              '&:hover': {
+                bgcolor: '#E09612'
+              }
+            }}
+          >
+            Đóng
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Modal Đăng nhập khi chưa đăng nhập mà chọn ghế */}
       <LoginModal
         open={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
+        onSuccess={() => {
+          // Reload data sau khi đăng nhập thành công để cập nhật trạng thái ghế
+          loadData();
+        }}
       />
     </>
   );

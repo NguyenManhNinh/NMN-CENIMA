@@ -251,8 +251,8 @@ function PaymentConfirmPage() {
 
   /**
    * Effect: Verify hold với server khi mount (sync timer)
-   * - Đảm bảo hold vẫn còn hiệu lực
-   * - Sync timer với server time
+   * - Nếu còn valid → sync timer
+   * - Nếu expired → chỉ log warning (backend có thể reuse PENDING order)
    */
   useEffect(() => {
     const verifyHoldWithServer = async () => {
@@ -268,22 +268,21 @@ function PaymentConfirmPage() {
           setTimeLeft(remainingSeconds);
           console.log('[PaymentConfirmPage] Timer synced with server:', remainingSeconds, 'seconds');
         } else {
-          // Hold đã hết hạn ở server
-          console.log('[PaymentConfirmPage] Hold expired on server');
-          sessionStorage.removeItem('reservationStartTime');
-          alert('Phiên giữ ghế đã hết hạn. Vui lòng chọn lại!');
-          navigate('/');
+          // Hold đã hết hạn ở server - KHÔNG redirect
+          // Backend có thể có PENDING order và cho phép thanh toán lại
+          console.warn('[PaymentConfirmPage] Hold expired on server, but may have PENDING order');
         }
       } catch (error) {
-        // Bỏ qua lỗi 401 (chưa đăng nhập)
+        // Bỏ qua lỗi verify - cho phép tiếp tục
+        // Backend sẽ validate và trả về lỗi rõ ràng nếu không hợp lệ
         if (error.response?.status !== 401) {
-          console.error('[PaymentConfirmPage] Verify hold failed:', error);
+          console.warn('[PaymentConfirmPage] Verify hold failed, continuing anyway:', error.message);
         }
       }
     };
 
     verifyHoldWithServer();
-  }, [showtime?._id, navigate]);
+  }, [showtime?._id]);
   // HELPER FUNCTIONS
   /**
    * Format thời gian dạng mm:ss
@@ -403,7 +402,32 @@ function PaymentConfirmPage() {
     setVoucherError('');
   };
   // PAYMENT HANDLER - Mở modal xác nhận trước khi thanh toán
-  const handleOpenConfirmModal = () => {
+  // Verify hold trước khi mở modal - chỉ để sync timer, không block
+  // Backend sẽ handle trường hợp reuse PENDING order
+  const handleOpenConfirmModal = async () => {
+    const showtimeId = showtime?._id;
+    if (showtimeId) {
+      try {
+        const response = await verifyHoldAPI(showtimeId);
+        const { valid, remainingSeconds } = response.data;
+
+        if (!valid || remainingSeconds <= 0) {
+          // Hold hết hạn - nhưng có thể có PENDING order ở backend
+          // Cho phép tiếp tục, backend sẽ handle
+          console.warn('[Payment] Hold expired, but may have PENDING order');
+        } else {
+          // Sync timer với server
+          setTimeLeft(remainingSeconds);
+        }
+      } catch (error) {
+        // Bỏ qua lỗi verify - cho phép tiếp tục thanh toán
+        // Backend sẽ validate và trả về lỗi rõ ràng nếu không hợp lệ
+        if (error.response?.status !== 401) {
+          console.warn('[Payment] Verify hold failed, continuing anyway:', error.message);
+        }
+      }
+    }
+
     setConfirmModalOpen(true);
     setTermsAccepted(false); // Reset checkbox mỗi lần mở
   };
@@ -480,7 +504,24 @@ function PaymentConfirmPage() {
     } catch (error) {
       console.error('[Payment] Error:', error);
       const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại!';
+
+      // Xử lý các lỗi cụ thể
+      if (errorMessage.includes('hết hạn') || errorMessage.includes('chọn lại ghế')) {
+        // Đơn hàng/hold đã hết hạn → redirect về trang chọn ghế
+        alert(errorMessage);
+        sessionStorage.removeItem('reservationStartTime');
+        const showtimeId = showtime?._id;
+        if (showtimeId) {
+          navigate(`/chon-ghe/${showtimeId}`);
+        } else {
+          navigate('/');
+        }
+        return;
+      }
+
+      // Lỗi khác → hiện message
       alert(errorMessage);
+      console.error('[Payment] Backend error message:', errorMessage);
       setLoading(false);
     }
   };

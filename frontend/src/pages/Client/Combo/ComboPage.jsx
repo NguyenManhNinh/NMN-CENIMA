@@ -249,6 +249,7 @@ function ComboPage() {
   }, [navigate, showtime?._id]);
 
   // Verify hold với server khi mount (sync timer)
+  // Không redirect nếu expired - backend có thể reuse PENDING order
   useEffect(() => {
     const verifyHoldWithServer = async () => {
       const showtimeId = showtime?._id;
@@ -263,22 +264,21 @@ function ComboPage() {
           setTimeLeft(remainingSeconds);
           console.log('[ComboPage] Timer synced with server:', remainingSeconds, 'seconds');
         } else {
-          // Hold đã hết hạn ở server
-          console.log('[ComboPage] Hold expired on server');
-          sessionStorage.removeItem('reservationStartTime');
-          alert('Phiên giữ ghế đã hết hạn. Vui lòng chọn lại!');
-          navigate('/');
+          // Hold đã hết hạn ở server - KHÔNG redirect
+          // Backend có thể có PENDING order và cho phép thanh toán lại
+          console.warn('[ComboPage] Hold expired on server, but may have PENDING order');
         }
       } catch (error) {
-        // Bỏ qua lỗi 401 (chưa đăng nhập)
+        // Bỏ qua lỗi verify - cho phép tiếp tục
+        // Backend sẽ validate và trả về lỗi rõ ràng nếu không hợp lệ
         if (error.response?.status !== 401) {
-          console.error('[ComboPage] Verify hold failed:', error);
+          console.warn('[ComboPage] Verify hold failed, continuing anyway:', error.message);
         }
       }
     };
 
     verifyHoldWithServer();
-  }, [showtime?._id, navigate]);
+  }, [showtime?._id]);
 
 
   // Format thời gian mm:ss

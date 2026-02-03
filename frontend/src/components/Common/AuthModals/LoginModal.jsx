@@ -190,7 +190,7 @@ const styles = {
   }
 };
 
-function LoginModal({ open, onClose, onSwitchToRegister, onForgotPassword }) {
+function LoginModal({ open, onClose, onSwitchToRegister, onForgotPassword, onSuccess }) {
   const { login, error, clearError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -222,6 +222,7 @@ function LoginModal({ open, onClose, onSwitchToRegister, onForgotPassword }) {
     setLoading(false);
 
     if (result.success) {
+      onSuccess?.(); // Callback để parent reload data nếu cần
       handleClose();
     } else {
       setLocalError(result.message);

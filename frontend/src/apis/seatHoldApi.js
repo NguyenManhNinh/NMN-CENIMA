@@ -45,4 +45,14 @@ export const verifyHoldAPI = async (showtimeId) => {
   return response.data;
 };
 
+/**
+ * Nhả TẤT CẢ ghế của user cho 1 suất chiếu
+ * - Dùng khi rời trang chọn ghế (không đi combo)
+ * @param {string} showtimeId - ID suất chiếu
+ */
+export const releaseAllHoldsAPI = async (showtimeId) => {
+  const response = await axiosInstance.delete(`/holds/release-all/${showtimeId}`);
+  return response.data;
+};
+
 export default axiosInstance;

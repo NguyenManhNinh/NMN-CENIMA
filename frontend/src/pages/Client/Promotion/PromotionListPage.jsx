@@ -133,19 +133,19 @@ function PromotionListPage() {
     }
 
     try {
-      const response = await getPromotionsHomeAPI({
+      // API đã unwrap, trả về { promotions, banners } trực tiếp
+      const data = await getPromotionsHomeAPI({
         page,
         limit: ITEMS_PER_PAGE,
         sort: 'newest'
       });
 
-      // Validate response shape: { success, data: { promotions, banners }, pagination }
-      if (!response?.data?.success || !response.data.data) {
+      // Validate response shape
+      if (!data || !Array.isArray(data.promotions)) {
         throw new Error('API trả về dữ liệu không hợp lệ');
       }
 
-      const { promotions: apiPromotions, banners: apiBanners } = response.data.data;
-      const pagination = response.data.pagination;
+      const { promotions: apiPromotions, banners: apiBanners, pagination } = data;
 
       if (append) {
         // Load more: merge và dedupe theo _id
