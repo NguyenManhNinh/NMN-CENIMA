@@ -98,51 +98,62 @@ const promotionSchema = new mongoose.Schema({
     ref: 'Voucher',
     default: null
   },
-  claimPolicy: {
-    type: String,
-    enum: ['ONCE_PER_USER', 'LIMITED_N_TIMES'],
-    default: 'ONCE_PER_USER'
-  },
   quantityPerUser: {
     type: Number,
     default: 1,
     min: 1
   },
 
-  //OFFLINE REDEEM (nếu OFFLINE_ONLY)
-  redeemPolicy: {
-    type: String,
-    enum: ['ONCE_PER_USER', 'MULTI'],
-    default: 'ONCE_PER_USER'
-  },
-
-  //RÀNG BUỘC (MỞ RỘNG)
-  allowedCinemaIds: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Cinema'
-  }],
+  //RÀNG BUỘC
   allowedUserRanks: [{
     type: String,
     enum: ['MEMBER', 'VIP', 'VVIP']
   }],
-  requiredGateway: {
-    type: String,
-    enum: ['VNPAY', 'MOMO', 'SHOPEEPAY', null],
-    default: null
-  },
-  minOrderAmount: {
-    type: Number,
-    default: 0
-  },
 
   //THỐNG KÊ
   viewCount: {
     type: Number,
     default: 0
   },
+  likeCount: {
+    type: Number,
+    default: 0
+  },
+  likedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  likedByIPs: [{
+    type: String  // For anonymous likes (IP tracking)
+  }],
   claimCount: {
     type: Number,
     default: 0
+  },
+
+  //QUOTA MANAGEMENT
+  totalRedeemsLimit: {
+    type: Number,
+    default: null,  // null = không giới hạn
+    min: 0
+  },
+  redeemCount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+
+  //OFFLINE MODE (chỉ dùng khi applyMode = OFFLINE_ONLY)
+  offlineMode: {
+    type: String,
+    enum: ['INFO_ONLY', 'QR_REDEEM'],
+    default: 'QR_REDEEM'
+  },
+
+  //LƯU Ý (hiển thị trên FE)
+  notes: {
+    type: String,
+    trim: true
   },
 
   //SEO
@@ -174,6 +185,12 @@ promotionSchema.virtual('isActive').get(function () {
   return this.status === 'ACTIVE' &&
     this.startAt <= now &&
     this.endAt >= now;
+});
+
+//VIRTUAL: remainingRedeems (còn lại bao nhiêu lượt)
+promotionSchema.virtual('remainingRedeems').get(function () {
+  if (typeof this.totalRedeemsLimit !== 'number') return null;
+  return Math.max(0, this.totalRedeemsLimit - (this.redeemCount || 0));
 });
 
 // Ensure virtuals are included in JSON

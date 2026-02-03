@@ -12,6 +12,9 @@ const router = express.Router();
  *   description: Quản lý người dùng
  */
 
+// PUBLIC: Hủy đăng ký nhận email (từ link trong email)
+router.get('/unsubscribe', userController.unsubscribeNewsletter);
+
 // Tất cả các route bên dưới đều yêu cầu đăng nhập
 router.use(authMiddleware.protect);
 
@@ -85,6 +88,31 @@ router.patch('/updateMe', userController.updateMe);
  *         description: Xóa thành công
  */
 router.delete('/deleteMe', userController.deleteMe);
+
+/**
+ * @swagger
+ * /users/me/newsletter:
+ *   patch:
+ *     summary: Bật/tắt nhận email thông báo ưu đãi
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - subscribed
+ *             properties:
+ *               subscribed:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ */
+router.patch('/me/newsletter', userController.updateNewsletterSubscription);
 
 /**
  * @swagger

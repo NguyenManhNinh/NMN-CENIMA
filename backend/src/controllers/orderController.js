@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const Order = require('../models/Order');
 const SeatHold = require('../models/SeatHold');
 const Showtime = require('../models/Showtime');
@@ -9,6 +10,73 @@ const { VIP_SEAT_SURCHARGE } = require('../config/constants');
 exports.createOrder = catchAsync(async (req, res, next) => {
   const { showtimeId, seats, combos, voucherCode } = req.body; // seats: ['A1', 'B2']
   const userId = req.user.id;
+
+  console.log('[Order] createOrder called:', { userId, showtimeId, seats: seats?.length });
+
+  // P0-6 Fix: Kiểm tra nếu có order PENDING cho user+showtime → dùng lại
+  // Trường hợp user quay lại từ VNPay và muốn thanh toán lại
+  const existingPendingOrder = await Order.findOne({
+    userId,
+    showtimeId,
+    status: 'PENDING'
+  }).sort({ createdAt: -1 }); // Lấy order mới nhất
+
+  if (existingPendingOrder) {
+    console.log('[Order] Found existing PENDING order:', existingPendingOrder.orderNo);
+
+    // Kiểm tra order chưa quá 15 phút (còn valid)
+    const orderAge = Date.now() - new Date(existingPendingOrder.createdAt).getTime();
+    const MAX_ORDER_AGE = 15 * 60 * 1000; // 15 minutes
+
+    // So sánh seats: lấy seatCode từ order và so với seats từ request
+    const orderSeatCodes = existingPendingOrder.seats.map(s => s.seatCode).sort();
+    const requestSeatCodes = [...seats].sort();
+    const seatsMatch = JSON.stringify(orderSeatCodes) === JSON.stringify(requestSeatCodes);
+
+    console.log('[Order] Checking PENDING order:', {
+      orderNo: existingPendingOrder.orderNo,
+      orderAge: Math.round(orderAge / 1000) + 's',
+      maxAge: '900s',
+      seatsMatch,
+      orderSeats: orderSeatCodes,
+      requestSeats: requestSeatCodes
+    });
+
+    if (orderAge < MAX_ORDER_AGE && seatsMatch) {
+      // Order còn valid → tạo payment URL mới và trả về
+      console.log('[Order] ✅ Reusing existing PENDING order:', existingPendingOrder.orderNo);
+      const paymentUrl = paymentController.createPaymentUrl(req, existingPendingOrder);
+
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          order: existingPendingOrder,
+          paymentUrl,
+          reused: true // Flag để client biết đây là order được dùng lại
+        }
+      });
+    } else {
+      console.log('[Order] ❌ PENDING order not valid for reuse:', {
+        expired: orderAge >= MAX_ORDER_AGE,
+        seatsMismatch: !seatsMatch
+      });
+
+      // PENDING order quá hạn hoặc ghế khác → trả về lỗi rõ ràng
+      // Không tiếp tục check SeatHold vì hold đã bị xóa khi tạo order lần đầu
+      if (orderAge >= MAX_ORDER_AGE) {
+        // Mark old order as EXPIRED
+        existingPendingOrder.status = 'EXPIRED';
+        await existingPendingOrder.save();
+
+        return next(new AppError('Đơn hàng đã hết hạn! Vui lòng chọn lại ghế và đặt vé mới.', 400));
+      }
+
+      // Seats mismatch → cũng không thể tiếp tục
+      if (!seatsMatch) {
+        return next(new AppError('Ghế đã thay đổi! Vui lòng chọn lại ghế.', 400));
+      }
+    }
+  }
 
   // 1. Kiểm tra Showtime
   const showtime = await Showtime.findById(showtimeId);
@@ -123,11 +191,11 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   //giữ để lưu vào Order
   let voucherIdToSave = null;
   let userVoucherIdToSave = null;
+  let promotionIdToSave = null; // Phase 3: Promotion quota
 
   // VOUCHER LOGIC - Validate + tính discount (KHÔNG consume)
   if (voucherCode) {
     const Voucher = require('../models/Voucher');
-    const UserVoucher = require('../models/UserVoucher');
 
     const codeUpper = voucherCode.toUpperCase();
     const voucher = await Voucher.findOne({ code: codeUpper });
@@ -144,24 +212,20 @@ exports.createOrder = catchAsync(async (req, res, next) => {
       return next(new AppError('Mã giảm giá đã hết hạn hoặc chưa có hiệu lực!', 400));
     }
 
-    const userVoucher = await UserVoucher.findOne({
+    // Check global usage limit
+    if (voucher.usageLimit && voucher.usageCount >= voucher.usageLimit) {
+      return next(new AppError('Mã giảm giá đã hết lượt sử dụng!', 400));
+    }
+
+    // Check if user already used this voucher (PAID orders only)
+    const usedOrder = await Order.findOne({
       userId: userId,
       voucherId: voucher._id,
-      status: 'ACTIVE'
+      status: 'PAID'
     });
 
-    if (!userVoucher) {
-      return next(new AppError('Bạn chưa được cấp mã giảm giá này!', 400));
-    }
-
-    if (userVoucher.usedCount >= userVoucher.quantity) {
-      return next(new AppError('Bạn đã sử dụng hết lượt của mã giảm giá này!', 400));
-    }
-
-    if (userVoucher.expiresAt && nowDate > userVoucher.expiresAt) {
-      userVoucher.status = 'EXPIRED';
-      await userVoucher.save();
-      return next(new AppError('Mã giảm giá của bạn đã hết hạn!', 400));
+    if (usedOrder) {
+      return next(new AppError('Bạn đã sử dụng mã giảm giá này rồi!', 400));
     }
 
     // Tính discount
@@ -177,15 +241,27 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     // không giảm quá tổng
     if (discount > totalAmount) discount = totalAmount;
 
-    // ✅ lưu liên kết để payment success consume đúng
+    // ✅ lưu voucherId để increment usageCount sau khi payment success
     voucherIdToSave = voucher._id;
-    userVoucherIdToSave = userVoucher._id;
   }
 
   totalAmount -= discount;
 
+  // P0-5 Fix: Atomic consume SeatHolds để tránh double order cùng ghế
+  const holdIds = holds.map(h => h._id);
+  const consumeResult = await SeatHold.deleteMany({
+    _id: { $in: holdIds },
+    userId: userId,
+    showtimeId: showtimeId
+  });
+
+  if (consumeResult.deletedCount !== seats.length) {
+    return next(new AppError('Ghế đã được đặt bởi người khác! Vui lòng chọn lại.', 409));
+  }
+
   // 4. Tạo Order PENDING
-  const orderNo = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  // P0-4 Fix: Dùng crypto để tránh trùng orderNo
+  const orderNo = `ORD-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
   const newOrder = await Order.create({
     orderNo,
@@ -206,6 +282,10 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     voucherConsumed: false,
     voucherConsumeState: 'NONE',
     voucherConsumedAt: null,
+
+    // Phase 3: Promotion quota
+    promotionId: promotionIdToSave,
+    promotionReserveState: 'NONE',
 
     status: 'PENDING'
   });

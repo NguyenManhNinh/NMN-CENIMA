@@ -5,6 +5,7 @@ const Order = require('../models/Order');
 const Payment = require('../models/Payment');
 const Voucher = require('../models/Voucher');
 const UserVoucher = require('../models/UserVoucher');
+const Promotion = require('../models/Promotion');
 const ticketController = require('./ticketController');
 const catchAsync = require('../utils/catchAsync');
 const {
@@ -12,6 +13,51 @@ const {
   VIP_THRESHOLD,
   VVIP_THRESHOLD
 } = require('../config/constants');
+
+/**
+ * Phase 3: Reserve promotion quota khi order vào PROCESSING (idempotent)
+ * P0-1 Fix: Dùng state machine để track đúng trạng thái reserve
+ */
+async function reservePromotionQuota(orderId) {
+  // 1) Lock order - chỉ process nếu NONE (chưa reserve)
+  const order = await Order.findOne({
+    _id: orderId,
+    promotionId: { $ne: null },
+    promotionReserveState: 'NONE'
+  });
+
+  if (!order) return; // Đã reserve hoặc không có promotion
+
+  try {
+    // 2) Atomic quota increment với limit check
+    const updated = await Promotion.findOneAndUpdate(
+      {
+        _id: order.promotionId,
+        $or: [
+          { totalRedeemsLimit: null },
+          { totalRedeemsLimit: { $exists: false } },
+          { $expr: { $lt: ['$redeemCount', '$totalRedeemsLimit'] } }
+        ]
+      },
+      { $inc: { redeemCount: 1 } },
+      { new: true }
+    );
+
+    if (updated) {
+      // 3a) Reserve thành công - set RESERVED
+      await Order.findByIdAndUpdate(orderId, { promotionReserveState: 'RESERVED' });
+      console.log(`[Promotion Quota] Reserved for order ${orderId}, promotion ${order.promotionId}`);
+    } else {
+      // 3b) Quota hết - set EXCEEDED (soft cap, order vẫn có discount)
+      await Order.findByIdAndUpdate(orderId, { promotionReserveState: 'EXCEEDED' });
+      console.warn(`[Promotion Quota] Exceeded for promotion ${order.promotionId}, order ${orderId}`);
+    }
+  } catch (err) {
+    console.error('[Promotion Quota] Error:', err.message);
+    // Set FAILED để có thể retry sau
+    await Order.findByIdAndUpdate(orderId, { promotionReserveState: 'FAILED' });
+  }
+}
 
 /**
  * Helper consume voucher sau khi thanh toán thành công (idempotent)
@@ -81,8 +127,20 @@ async function consumeVoucherAfterPaid(orderId) {
       await updated.save();
     }
 
-    // 4) Tăng usageCount voucher global
-    await Voucher.findByIdAndUpdate(lockedOrder.voucherId, { $inc: { usageCount: 1 } });
+    // 4) Tăng usageCount voucher global (P0-C Fix: enforce usageLimit)
+    const voucherUpdated = await Voucher.findOneAndUpdate(
+      {
+        _id: lockedOrder.voucherId,
+        status: 'ACTIVE',
+        $expr: { $lt: ['$usageCount', '$usageLimit'] }
+      },
+      { $inc: { usageCount: 1 } },
+      { new: true }
+    );
+
+    if (!voucherUpdated) {
+      console.warn('[Voucher Consume] Voucher usageLimit exceeded, skipping global count');
+    }
 
     // 5) Mark order consumed DONE
     await Order.findByIdAndUpdate(orderId, {
@@ -189,34 +247,64 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
     const originalOrderNo = req.query.vnp_TxnRef;
     const amount = parseInt(req.query.vnp_Amount) / 100;
 
-    const order = await Order.findOne({ orderNo: originalOrderNo });
+    //Lock giống Return để tránh double finalize
+    const order = await Order.findOneAndUpdate(
+      {
+        orderNo: originalOrderNo,
+        status: { $in: ['PENDING', 'PROCESSING'] }
+      },
+      {
+        $set: {
+          status: 'PROCESSING',
+          processedAt: new Date()
+        }
+      },
+      { new: false }
+    );
+
     if (!order) {
-      return res.status(200).json({ RspCode: '01', Message: 'Order not found' });
+      // Check xem order có tồn tại và đã PAID chưa
+      const existingOrder = await Order.findOne({ orderNo: originalOrderNo });
+      if (!existingOrder) {
+        return res.status(200).json({ RspCode: '01', Message: 'Order not found' });
+      }
+      if (existingOrder.status === 'PAID') {
+        return res.status(200).json({ RspCode: '02', Message: 'Order already confirmed' });
+      }
+      return res.status(200).json({ RspCode: '02', Message: 'Order already processed' });
     }
 
     if (order.totalAmount !== amount) {
       return res.status(200).json({ RspCode: '04', Message: 'Invalid amount' });
     }
 
-    if (order.status === 'PAID') {
-      return res.status(200).json({ RspCode: '02', Message: 'Order already confirmed' });
-    }
-
     if (rspCode === '00') {
+      // Phase 3: Reserve promotion quota ngay khi PROCESSING
+      await reservePromotionQuota(order._id);
+
       await ticketController.finalizeTransaction(order);
 
       //consume voucher sau khi PAID (idempotent)
       await consumeVoucherAfterPaid(order._id);
 
-      await Payment.create({
-        orderId: order._id,
-        gateway: 'VNPAY',
-        txnRef: originalOrderNo,
-        bankTranNo: req.query.vnp_BankTranNo,
-        amount: amount,
-        state: 'SUCCESS',
-        rawPayload: req.query
-      });
+      // P0-3 Fix: Upsert để tránh duplicate khi IPN + Return đều fire
+      await Payment.findOneAndUpdate(
+        { txnRef: originalOrderNo },
+        {
+          $setOnInsert: {
+            orderId: order._id,
+            gateway: 'VNPAY',
+            txnRef: originalOrderNo,
+            amount: amount
+          },
+          $set: {
+            bankTranNo: req.query.vnp_BankTranNo,
+            state: 'SUCCESS',
+            rawPayload: req.query
+          }
+        },
+        { upsert: true, new: true }
+      );
 
       // LOYALTY LOGIC
       try {
@@ -240,16 +328,31 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
 
       return res.status(200).json({ RspCode: '00', Message: 'Success' });
     } else {
-      order.status = 'FAILED';
-      await order.save();
-      await Payment.create({
-        orderId: order._id,
-        gateway: 'VNPAY',
-        txnRef: originalOrderNo,
-        amount: amount,
-        state: 'FAIL',
-        rawPayload: req.query
-      });
+      // FAILED: Dùng CAS để tránh set FAILED khi đã PAID
+      await Order.findOneAndUpdate(
+        {
+          orderNo: originalOrderNo,
+          status: { $in: ['PENDING', 'PROCESSING'] }
+        },
+        { $set: { status: 'FAILED' } }
+      );
+      // P0-3 Fix: Upsert
+      await Payment.findOneAndUpdate(
+        { txnRef: originalOrderNo },
+        {
+          $setOnInsert: {
+            orderId: order._id,
+            gateway: 'VNPAY',
+            txnRef: originalOrderNo,
+            amount: amount
+          },
+          $set: {
+            state: 'FAIL',
+            rawPayload: req.query
+          }
+        },
+        { upsert: true }
+      );
       return res.status(200).json({ RspCode: '00', Message: 'Success' });
     }
   } else {
@@ -330,22 +433,33 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
           return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=error&message=amount_mismatch`);
         }
 
+        // Phase 3: Reserve promotion quota ngay khi PROCESSING
+        await reservePromotionQuota(order._id);
+
         // Xử lý đơn hàng: Tạo Ticket, cập nhật Order status thành PAID
         await ticketController.finalizeTransaction(order);
 
         // ✅ NEW: consume voucher sau khi PAID (idempotent)
         await consumeVoucherAfterPaid(order._id);
 
-        // Tạo Payment record
-        await Payment.create({
-          orderId: order._id,
-          gateway: 'VNPAY',
-          txnRef: orderNo,
-          bankTranNo: req.query.vnp_BankTranNo || '',
-          amount: amount,
-          state: 'SUCCESS',
-          rawPayload: req.query
-        });
+        // P0-3 Fix: Upsert Payment record
+        await Payment.findOneAndUpdate(
+          { txnRef: orderNo },
+          {
+            $setOnInsert: {
+              orderId: order._id,
+              gateway: 'VNPAY',
+              txnRef: orderNo,
+              amount: amount
+            },
+            $set: {
+              bankTranNo: req.query.vnp_BankTranNo || '',
+              state: 'SUCCESS',
+              rawPayload: req.query
+            }
+          },
+          { upsert: true, new: true }
+        );
 
         // LOYALTY LOGIC - Cộng điểm thưởng (non-blocking)
         try {
@@ -378,7 +492,13 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
         if (err.code === 11000) {
           console.log('[VNPay Return] Duplicate ticket detected, treating as success:', orderNo);
           // Đảm bảo order status = PAID
-          await Order.findOneAndUpdate({ orderNo }, { status: 'PAID' });
+          const existingOrder = await Order.findOneAndUpdate({ orderNo }, { status: 'PAID' }, { new: true });
+          if (existingOrder) {
+            // P1 Fix: Reserve quota nếu chưa
+            await reservePromotionQuota(existingOrder._id);
+            // P0-B Fix: Consume voucher nếu chưa consume
+            await consumeVoucherAfterPaid(existingOrder._id);
+          }
           return res.redirect(`${frontendUrl}/ket-qua-thanh-toan?status=success&orderNo=${orderNo}`);
         }
         console.error('[VNPay Return] Processing error:', err);
@@ -391,22 +511,32 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
       // ========== THANH TOÁN THẤT BẠI/HỦY ==========
       console.log('[VNPay Return] Payment FAILED:', orderNo, 'Code:', responseCode);
 
-      // Cập nhật Order status thành FAILED
+      // P0-7 FIX: KHÔNG set order thành FAILED ngay
+      // Giữ PENDING để user có thể retry trong 15 phút
+      // Chỉ tạo Payment record với state=FAIL để tracking
       try {
         const order = await Order.findOne({ orderNo });
         if (order && order.status === 'PENDING') {
-          order.status = 'FAILED';
-          await order.save();
+          // KHÔNG thay đổi order.status - giữ PENDING cho phép retry
+          console.log('[VNPay Return] Keeping order PENDING for retry:', orderNo);
 
-          // Tạo Payment record với state FAIL
-          await Payment.create({
-            orderId: order._id,
-            gateway: 'VNPAY',
-            txnRef: orderNo,
-            amount: amount,
-            state: 'FAIL',
-            rawPayload: req.query
-          });
+          // P0-3 Fix: Upsert Payment record - chỉ payment là FAIL
+          await Payment.findOneAndUpdate(
+            { txnRef: orderNo },
+            {
+              $setOnInsert: {
+                orderId: order._id,
+                gateway: 'VNPAY',
+                txnRef: orderNo,
+                amount: amount
+              },
+              $set: {
+                state: 'FAIL',
+                rawPayload: req.query
+              }
+            },
+            { upsert: true }
+          );
         }
       } catch (err) {
         console.error('[VNPay Return] Failed order update error:', err);

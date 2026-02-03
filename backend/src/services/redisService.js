@@ -23,7 +23,7 @@ const initRedis = () => {
     // Reconnect strategy
     retryStrategy: (times) => {
       if (times > 10) {
-        console.error('❌ Redis: Quá nhiều lần thử kết nối lại');
+        console.error(' Redis: Quá nhiều lần thử kết nối lại');
         return null;
       }
       return Math.min(times * 100, 3000);
@@ -31,27 +31,27 @@ const initRedis = () => {
   });
 
   client.on('connect', () => {
-    console.log('🔗 Redis: Đang kết nối...');
+    console.log('Redis: Đang kết nối...');
   });
 
   client.on('ready', () => {
     isConnected = true;
-    console.log('✅ Redis: Đã sẵn sàng');
+    console.log('Redis: Đã sẵn sàng');
   });
 
   client.on('error', (err) => {
     isConnected = false;
-    console.error('❌ Redis Error:', err.message);
+    console.error('Redis Error:', err.message);
   });
 
   client.on('close', () => {
     isConnected = false;
-    console.log('🔌 Redis: Đã ngắt kết nối');
+    console.log('Redis: Đã ngắt kết nối');
   });
 
   // Connect
   client.connect().catch((err) => {
-    console.error('❌ Redis: Không thể kết nối -', err.message);
+    console.error('Redis: Không thể kết nối -', err.message);
   });
 
   return client;

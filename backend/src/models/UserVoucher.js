@@ -56,9 +56,12 @@ const userVoucherSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound index: Mỗi user có thể được cấp cùng 1 voucher nhiều lần (nếu admin muốn)
-// Nhưng mỗi lần cấp là 1 record riêng
-userVoucherSchema.index({ userId: 1, voucherId: 1 });
+// P0 Fix: Unique partial index để chống race claim - chỉ 1 ACTIVE per user+voucher
+// (Thay thế index cũ { userId:1, voucherId:1 } - đã đủ cho query và chống race)
+userVoucherSchema.index(
+  { userId: 1, voucherId: 1, status: 1 },
+  { unique: true, partialFilterExpression: { status: 'ACTIVE' } }
+);
 
 // Virtual: Còn lại bao nhiêu lượt
 userVoucherSchema.virtual('remainingUses').get(function () {

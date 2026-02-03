@@ -103,7 +103,8 @@ exports.deleteVoucher = catchAsync(async (req, res, next) => {
 });
 
 // --- USER: Apply Voucher ---
-// Logic mới: Kiểm tra UserVoucher (ví voucher của user)
+// Logic: Cho phép user nhập mã voucher trực tiếp (copy từ promotion content)
+// Không yêu cầu claim trước - kiểm tra trực tiếp trong Voucher collection
 exports.applyVoucher = catchAsync(async (req, res, next) => {
   const { code, totalAmount } = req.body;
   const userId = req.user?.id;
@@ -123,42 +124,35 @@ exports.applyVoucher = catchAsync(async (req, res, next) => {
     return next(new AppError('Mã giảm giá không tồn tại!', 404));
   }
 
-  // 2. Check voucher status và thời hạn
+  // 2. Check voucher status
   if (voucher.status !== 'ACTIVE') {
     return next(new AppError('Mã giảm giá không khả dụng!', 400));
   }
 
+  // 3. Check thời hạn
   const now = new Date();
   if (now < voucher.validFrom || now > voucher.validTo) {
     return next(new AppError('Mã giảm giá đã hết hạn hoặc chưa có hiệu lực!', 400));
   }
 
-  // 3. Kiểm tra UserVoucher - user có voucher này trong ví không?
-  const UserVoucher = require('../models/UserVoucher');
-  const userVoucher = await UserVoucher.findOne({
+  // 4. Check usage limit (global)
+  if (voucher.usageLimit && voucher.usageCount >= voucher.usageLimit) {
+    return next(new AppError('Mã giảm giá đã hết lượt sử dụng!', 400));
+  }
+
+  // 5. Check if user already used this voucher (PAID orders only)
+  const Order = require('../models/Order');
+  const usedOrder = await Order.findOne({
     userId: userId,
     voucherId: voucher._id,
-    status: 'ACTIVE'
+    status: 'PAID'
   });
 
-  if (!userVoucher) {
-    // User chưa được cấp voucher này
-    return next(new AppError('Bạn chưa được cấp mã giảm giá này! Vui lòng liên hệ admin để nhận mã.', 400));
+  if (usedOrder) {
+    return next(new AppError('Bạn đã sử dụng mã giảm giá này rồi!', 400));
   }
 
-  // 4. Kiểm tra còn lượt dùng không
-  if (userVoucher.usedCount >= userVoucher.quantity) {
-    return next(new AppError('Bạn đã sử dụng hết lượt của mã giảm giá này!', 400));
-  }
-
-  // 5. Kiểm tra expiresAt của UserVoucher (nếu có)
-  if (userVoucher.expiresAt && now > userVoucher.expiresAt) {
-    userVoucher.status = 'EXPIRED';
-    await userVoucher.save();
-    return next(new AppError('Mã giảm giá của bạn đã hết hạn!', 400));
-  }
-
-  // 6. Tính số tiền giảm
+  // 5. Tính số tiền giảm
   let discountAmount = 0;
   if (voucher.type === 'FIXED') {
     discountAmount = voucher.value;
@@ -172,7 +166,7 @@ exports.applyVoucher = catchAsync(async (req, res, next) => {
   // Không giảm quá tổng tiền
   if (discountAmount > totalAmount) discountAmount = totalAmount;
 
-  // 7. Trả kết quả (chưa trừ lượt - chỉ trừ khi thanh toán thành công)
+  // 6. Trả kết quả (chưa trừ lượt - chỉ trừ khi thanh toán thành công)
   res.status(200).json({
     status: 'success',
     data: {
@@ -181,7 +175,8 @@ exports.applyVoucher = catchAsync(async (req, res, next) => {
       finalAmount: totalAmount - discountAmount,
       type: voucher.type,
       value: voucher.value,
-      remainingUses: userVoucher.quantity - userVoucher.usedCount // Còn lại bao nhiêu lượt
+      maxDiscount: voucher.maxDiscount,
+      remainingUses: voucher.usageLimit ? voucher.usageLimit - voucher.usageCount : null
     }
   });
 });

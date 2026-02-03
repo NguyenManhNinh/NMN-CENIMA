@@ -1,7 +1,45 @@
+const mongoose = require('mongoose');
 const Promotion = require('../models/Promotion');
 const PromotionRedeem = require('../models/PromotionRedeem');
 // const Voucher = require('../models/Voucher'); // Không sử dụng - đã comment
 const UserVoucher = require('../models/UserVoucher');
+const redisService = require('../services/redisService');
+
+// =============================================
+// HELPER: Quota Management
+// =============================================
+/**
+ * Tăng redeemCount atomic với quota check
+ * @param {ObjectId} promotionId - ID của promotion
+ * @param {ClientSession} session - MongoDB session (optional)
+ * @throws Error nếu hết quota (statusCode: 409)
+ */
+const incRedeemCountOrFail = async (promotionId, session = null) => {
+  const query = {
+    _id: promotionId,
+    $or: [
+      { totalRedeemsLimit: null },
+      { totalRedeemsLimit: { $exists: false } },
+      { $expr: { $lt: ['$redeemCount', '$totalRedeemsLimit'] } }
+    ]
+  };
+
+  const opts = { new: true };
+  if (session) opts.session = session;
+
+  const updated = await Promotion.findOneAndUpdate(
+    query,
+    { $inc: { redeemCount: 1 } },
+    opts
+  ).lean();
+
+  if (!updated) {
+    const err = new Error('Ưu đãi đã hết lượt sử dụng');
+    err.statusCode = 409;
+    throw err;
+  }
+  return updated;
+};
 
 // PUBLIC APIs
 /**
@@ -122,8 +160,32 @@ const getPromotionBySlug = async (req, res) => {
       });
     }
 
-    // Tăng view count
-    await Promotion.findByIdAndUpdate(promotion._id, { $inc: { viewCount: 1 } });
+    // Tăng view count với 24h cooldown
+    // Sử dụng userId hoặc IP để track
+    const viewerId = req.user?._id?.toString() || req.ip || req.headers['x-forwarded-for'];
+    const viewKey = `promo_view:${promotion._id}:${viewerId}`;
+
+    // Check Redis để xem user đã view trong 24h chưa
+    let shouldIncrement = true;
+
+    if (redisService.isReady()) {
+      try {
+        const redis = redisService.getClient();
+        const exists = await redis.get(viewKey);
+        if (!exists) {
+          // Chưa view - set key với TTL 24h (86400 seconds)
+          await redis.setex(viewKey, 86400, '1');
+        } else {
+          shouldIncrement = false;
+        }
+      } catch (err) {
+        console.warn('[ViewCount] Redis error, falling back to no cooldown:', err.message);
+      }
+    }
+
+    if (shouldIncrement) {
+      await Promotion.findByIdAndUpdate(promotion._id, { $inc: { viewCount: 1 } });
+    }
 
     // Tính toán claimState
     const now = new Date();
@@ -165,12 +227,33 @@ const getPromotionBySlug = async (req, res) => {
       }
     }
 
+    // Tính remainingRedeems (vì .lean() không có virtuals)
+    const remainingRedeems = typeof promotion.totalRedeemsLimit === 'number'
+      ? Math.max(0, promotion.totalRedeemsLimit - (promotion.redeemCount || 0))
+      : null;
+
+    // Check quota hết
+    if (remainingRedeems === 0 && claimState === 'ELIGIBLE') {
+      claimState = 'QUOTA_EXHAUSTED';
+    }
+
+    // Check nếu user đã like (logged-in: by userId, anonymous: by IP)
+    const clientIP = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+    let hasLiked = false;
+    if (userId && promotion.likedBy) {
+      hasLiked = promotion.likedBy.some(uid => uid.toString() === userId.toString());
+    } else if (promotion.likedByIPs) {
+      hasLiked = promotion.likedByIPs.includes(clientIP);
+    }
+
     res.json({
       success: true,
       data: {
         ...promotion,
+        remainingRedeems,
         claimState,
         canClaim: claimState === 'ELIGIBLE',
+        liked: hasLiked,
         userVoucher: userVoucher ? {
           quantity: userVoucher.quantity,
           usedCount: userVoucher.usedCount,
@@ -178,6 +261,7 @@ const getPromotionBySlug = async (req, res) => {
         } : null,
         redeemToken: redeemToken ? {
           token: redeemToken.token,
+          qrData: redeemToken.qrData,
           expiresAt: redeemToken.expiresAt,
           status: redeemToken.status
         } : null
@@ -253,6 +337,15 @@ const claimPromotion = async (req, res) => {
       }
     }
 
+    // P0-3: Check quota exhausted trước khi claim (UX tốt hơn)
+    if (typeof promotion.totalRedeemsLimit === 'number' &&
+      (promotion.redeemCount || 0) >= promotion.totalRedeemsLimit) {
+      return res.status(409).json({
+        success: false,
+        message: 'Ưu đãi đã hết lượt sử dụng'
+      });
+    }
+
     // Check IDEMPOTENT: đã claim chưa?
     const existingVoucher = await UserVoucher.findOne({
       userId,
@@ -313,14 +406,17 @@ const claimPromotion = async (req, res) => {
 
 /**
  * POST /api/v1/promotions/:id/offline-claim
- * Lấy token/QR để dùng tại quầy (OFFLINE_ONLY)
+ * Lấy token/QR để dùng tại quầy (OFFLINE_ONLY + QR_REDEEM)
+ * Quota được trừ ngay khi phát token (đảm bảo có token = dùng được)
  */
 const offlineClaimPromotion = async (req, res) => {
+  const session = await mongoose.startSession();
+
   try {
     const { id } = req.params;
     const userId = req.user._id;
 
-    // Lấy promotion
+    // Pre-validation (ngoài transaction để fail nhanh)
     const promotion = await Promotion.findById(id);
 
     if (!promotion) {
@@ -330,7 +426,6 @@ const offlineClaimPromotion = async (req, res) => {
       });
     }
 
-    // Validate
     const now = new Date();
 
     if (promotion.status !== 'ACTIVE') {
@@ -354,6 +449,25 @@ const offlineClaimPromotion = async (req, res) => {
       });
     }
 
+    // Reject nếu offlineMode là INFO_ONLY (không cần token)
+    if (promotion.offlineMode === 'INFO_ONLY') {
+      return res.status(400).json({
+        success: false,
+        message: 'Ưu đãi này chỉ cần đến quầy, không cần mã'
+      });
+    }
+
+    // P0-4: Check rank constraint (copy từ claimPromotion)
+    if (promotion.allowedUserRanks && promotion.allowedUserRanks.length > 0) {
+      const user = req.user;
+      if (!promotion.allowedUserRanks.includes(user.rank || 'MEMBER')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Ưu đãi chỉ dành cho hạng thành viên: ' + promotion.allowedUserRanks.join(', ')
+        });
+      }
+    }
+
     // Check IDEMPOTENT: đã claim chưa?
     const existingRedeem = await PromotionRedeem.findOne({
       promotionId: promotion._id,
@@ -375,22 +489,36 @@ const offlineClaimPromotion = async (req, res) => {
       });
     }
 
-    // Tạo token mới
-    const token = PromotionRedeem.generateToken();
-    const qrData = PromotionRedeem.generateQRData(token, promotion._id);
+    // === TRANSACTION: Quota + Tạo token ===
+    let redeem;
 
-    const redeem = await PromotionRedeem.create({
-      promotionId: promotion._id,
-      userId,
-      token,
-      qrData,
-      status: 'ISSUED',
-      issuedAt: now,
-      expiresAt: promotion.endAt
+    await session.withTransaction(async () => {
+      // 1) Quota check + increment (atomic)
+      await incRedeemCountOrFail(promotion._id, session);
+
+      // 2) Tạo token mới
+      const token = PromotionRedeem.generateToken();
+      const qrData = PromotionRedeem.generateQRData(token, promotion._id);
+
+      redeem = await PromotionRedeem.create([{
+        promotionId: promotion._id,
+        userId,
+        token,
+        qrData,
+        status: 'ISSUED',
+        issuedAt: now,
+        expiresAt: promotion.endAt
+      }], { session });
+
+      redeem = redeem[0]; // create với array trả về array
+
+      // 3) Tăng claimCount (thống kê)
+      await Promotion.findByIdAndUpdate(
+        id,
+        { $inc: { claimCount: 1 } },
+        { session }
+      );
     });
-
-    // Tăng claimCount
-    await Promotion.findByIdAndUpdate(id, { $inc: { claimCount: 1 } });
 
     res.status(201).json({
       success: true,
@@ -403,19 +531,55 @@ const offlineClaimPromotion = async (req, res) => {
         status: redeem.status
       }
     });
+
   } catch (error) {
+    // Handle quota exceeded
+    if (error.statusCode === 409) {
+      return res.status(409).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    // P0-1: Handle race condition - duplicate key from unique index
+    if (error.code === 11000) {
+      // User đã claim trong transaction song song, fetch lại và trả 200
+      const existingRedeem = await PromotionRedeem.findOne({
+        promotionId: id,
+        userId: req.user._id,
+        status: 'ISSUED'
+      });
+
+      if (existingRedeem) {
+        return res.status(200).json({
+          success: true,
+          message: 'Bạn đã lấy mã rồi',
+          alreadyClaimed: true,
+          redeem: {
+            token: existingRedeem.token,
+            qrData: existingRedeem.qrData,
+            expiresAt: existingRedeem.expiresAt,
+            status: existingRedeem.status
+          }
+        });
+      }
+    }
+
     console.error('offlineClaimPromotion error:', error);
     res.status(500).json({
       success: false,
       message: 'Lỗi server khi lấy mã'
     });
+  } finally {
+    session.endSession();
   }
 };
 
 // STAFF APIs
 /**
  * POST /api/v1/staff/promotions/redeem
- * Staff quét token để redeem
+ * Staff quét token để redeem (OFFLINE_ONLY + QR_REDEEM)
+ * Quota đã được trừ ở offlineClaimPromotion, ở đây chỉ đổi status
  */
 const staffRedeemPromotion = async (req, res) => {
   try {
@@ -429,12 +593,56 @@ const staffRedeemPromotion = async (req, res) => {
       });
     }
 
-    // Tìm và update atomic
+    // Polish #2: Normalize token
+    const normToken = String(token).trim().toUpperCase();
+
+    // Polish #1: Pre-check trước khi update (tránh trạng thái REDEEMED thoáng qua)
+    const existingRedeem = await PromotionRedeem.findOne({
+      token: normToken
+    }).populate('promotionId', 'title offlineMode');
+
+    if (!existingRedeem) {
+      return res.status(404).json({
+        success: false,
+        message: 'Mã không tồn tại'
+      });
+    }
+
+    if (existingRedeem.status === 'REDEEMED') {
+      return res.status(400).json({
+        success: false,
+        message: 'Mã đã được sử dụng trước đó',
+        redeemedAt: existingRedeem.redeemedAt
+      });
+    }
+
+    if (existingRedeem.expiresAt < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mã đã hết hạn'
+      });
+    }
+
+    if (existingRedeem.status !== 'ISSUED') {
+      return res.status(400).json({
+        success: false,
+        message: 'Mã không hợp lệ'
+      });
+    }
+
+    // Check INFO_ONLY trước khi update
+    if (existingRedeem.promotionId?.offlineMode === 'INFO_ONLY') {
+      return res.status(400).json({
+        success: false,
+        message: 'Ưu đãi này không cần mã, vui lòng check điều kiện khác'
+      });
+    }
+
+    // Update atomic (KHÔNG tăng redeemCount - đã trừ ở claim)
     const redeem = await PromotionRedeem.findOneAndUpdate(
       {
-        token: token.toUpperCase(),
-        status: 'ISSUED',
-        expiresAt: { $gte: new Date() }
+        _id: existingRedeem._id,
+        status: 'ISSUED'
       },
       {
         $set: {
@@ -444,37 +652,13 @@ const staffRedeemPromotion = async (req, res) => {
         }
       },
       { new: true }
-    ).populate('promotionId', 'title');
+    );
 
     if (!redeem) {
-      // Check xem token có tồn tại không
-      const existingRedeem = await PromotionRedeem.findOne({ token: token.toUpperCase() });
-
-      if (!existingRedeem) {
-        return res.status(404).json({
-          success: false,
-          message: 'Mã không tồn tại'
-        });
-      }
-
-      if (existingRedeem.status === 'REDEEMED') {
-        return res.status(400).json({
-          success: false,
-          message: 'Mã đã được sử dụng trước đó',
-          redeemedAt: existingRedeem.redeemedAt
-        });
-      }
-
-      if (existingRedeem.expiresAt < new Date()) {
-        return res.status(400).json({
-          success: false,
-          message: 'Mã đã hết hạn'
-        });
-      }
-
+      // Race condition: đã bị redeem bởi staff khác
       return res.status(400).json({
         success: false,
-        message: 'Mã không hợp lệ'
+        message: 'Mã đã được sử dụng bởi nhân viên khác'
       });
     }
 
@@ -483,7 +667,7 @@ const staffRedeemPromotion = async (req, res) => {
       message: 'Xác nhận ưu đãi thành công!',
       redeem: {
         token: redeem.token,
-        promotionTitle: redeem.promotionId?.title,
+        promotionTitle: existingRedeem.promotionId?.title,
         redeemedAt: redeem.redeemedAt
       }
     });
@@ -499,16 +683,59 @@ const staffRedeemPromotion = async (req, res) => {
 /**
  * POST /api/v1/admin/promotions
  * Tạo promotion mới
+ * Body: { ...promotionData, sendNotification: true/false }
  */
 const createPromotion = async (req, res) => {
   try {
-    const promotionData = req.body;
+    const { sendNotification = false, ...promotionData } = req.body;
 
     const promotion = await Promotion.create(promotionData);
 
+    // Nếu admin chọn gửi email thông báo và promotion đang ACTIVE
+    if (sendNotification && promotion.status === 'ACTIVE') {
+      // Chạy async, không block response
+      setImmediate(async () => {
+        try {
+          const User = require('../models/User');
+          const emailService = require('../services/emailService');
+          const Voucher = require('../models/Voucher');
+          const logger = require('../utils/logger');
+
+          // TODO: Đổi lại 24 * 60 * 60 * 1000 sau khi test xong và nếu muốn test đổi lại 30 * 1000 là 30s
+          const emailCooldown = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24h
+
+          // Lấy users: đã subscribe, không bị deactive, chưa nhận email trong cooldown
+          const users = await User.find({
+            newsletterSubscribed: true,
+            isActive: { $ne: false },  // Bao gồm users chưa set hoặc set true
+            $or: [
+              { lastPromotionEmailAt: null },
+              { lastPromotionEmailAt: { $exists: false } },
+              { lastPromotionEmailAt: { $lt: emailCooldown } }
+            ]
+          }).select('email name _id').lean();
+
+          if (users.length > 0) {
+            // Lấy voucher code nếu có
+            let voucherCode = null;
+            if (promotion.voucherId) {
+              const voucher = await Voucher.findById(promotion.voucherId).select('code').lean();
+              if (voucher) voucherCode = voucher.code;
+            }
+
+            const result = await emailService.sendBulkPromotionEmails(promotion, users, voucherCode);
+            logger.info(`Promotion notification: sent to ${result.sentCount} users for "${promotion.title}"`);
+          }
+        } catch (emailError) {
+          const logger = require('../utils/logger');
+          logger.error('Failed to send promotion notification emails:', emailError);
+        }
+      });
+    }
+
     res.status(201).json({
       success: true,
-      message: 'Tạo ưu đãi thành công',
+      message: sendNotification ? 'Tạo ưu đãi thành công. Email thông báo đang được gửi...' : 'Tạo ưu đãi thành công',
       data: promotion
     });
   } catch (error) {
@@ -749,13 +976,147 @@ const getPromotionsHome = async (req, res) => {
   }
 };
 
+// =============================================
+// LIKE FEATURE
+// =============================================
+/**
+ * POST /api/v1/promotions/:id/like
+ * Toggle like/unlike cho promotion
+ * - Logged-in users: track by userId
+ * - Anonymous users: track by IP address
+ */
+const toggleLike = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID không hợp lệ!'
+      });
+    }
+
+    const promotion = await Promotion.findById(id);
+    if (!promotion) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy ưu đãi!'
+      });
+    }
+
+    // Khởi tạo arrays nếu chưa có (document cũ)
+    if (!promotion.likedBy) promotion.likedBy = [];
+    if (!promotion.likedByIPs) promotion.likedByIPs = [];
+    if (typeof promotion.likeCount !== 'number') promotion.likeCount = 0;
+
+    const userId = req.user?._id;
+    const clientIP = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+
+    let hasLiked = false;
+    let isAnonymous = !userId;
+
+    if (userId) {
+      // Logged-in user: check by userId
+      hasLiked = promotion.likedBy.some(uid => uid.toString() === userId.toString());
+
+      if (hasLiked) {
+        // Unlike
+        promotion.likedBy = promotion.likedBy.filter(uid => uid.toString() !== userId.toString());
+        promotion.likeCount = Math.max(0, promotion.likeCount - 1);
+      } else {
+        // Like
+        promotion.likedBy.push(userId);
+        promotion.likeCount = promotion.likeCount + 1;
+      }
+    } else {
+      // Anonymous: check by IP
+      hasLiked = promotion.likedByIPs.includes(clientIP);
+
+      if (hasLiked) {
+        // Unlike
+        promotion.likedByIPs = promotion.likedByIPs.filter(ip => ip !== clientIP);
+        promotion.likeCount = Math.max(0, promotion.likeCount - 1);
+      } else {
+        // Like
+        promotion.likedByIPs.push(clientIP);
+        promotion.likeCount = promotion.likeCount + 1;
+      }
+    }
+
+    await promotion.save();
+
+    res.status(200).json({
+      success: true,
+      liked: !hasLiked,
+      likeCount: promotion.likeCount,
+      message: hasLiked ? 'Đã bỏ thích!' : 'Đã thích!'
+    });
+  } catch (error) {
+    console.error('toggleLike error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server khi thích ưu đãi'
+    });
+  }
+};
+
+/**
+ * GET /api/v1/promotions/:id/like-status
+ * Kiểm tra trạng thái like của user (logged-in hoặc anonymous)
+ */
+const getLikeStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID không hợp lệ!'
+      });
+    }
+
+    const userId = req.user?._id;
+    const clientIP = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+    const promotion = await Promotion.findById(id).select('likeCount likedBy likedByIPs').lean();
+
+    if (!promotion) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy ưu đãi!'
+      });
+    }
+
+    let hasLiked = false;
+    if (userId) {
+      hasLiked = (promotion.likedBy || []).some(uid => uid.toString() === userId.toString());
+    } else {
+      hasLiked = (promotion.likedByIPs || []).includes(clientIP);
+    }
+
+    res.status(200).json({
+      success: true,
+      liked: hasLiked,
+      likeCount: promotion.likeCount || 0
+    });
+  } catch (error) {
+    console.error('getLikeStatus error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server'
+    });
+  }
+};
+
 module.exports = {
   // Public
   getPromotions,
-  getPromotionsHome, // NEW
+  getPromotionsHome,
   getPromotionBySlug,
   claimPromotion,
   offlineClaimPromotion,
+  toggleLike,
+  getLikeStatus,
   // Staff
   staffRedeemPromotion,
   // Admin

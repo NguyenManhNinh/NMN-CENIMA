@@ -70,7 +70,6 @@ async function seedPromotions() {
         endAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         applyMode: 'ONLINE_VOUCHER',
         voucherId: voucher._id,
-        claimPolicy: 'ONCE_PER_USER',
         quantityPerUser: 1,
         metaTitle: 'Giảm 20% cho khách hàng mới - NMN Cinema',
         metaDescription: 'Đăng ký ngay để nhận mã giảm giá 20% cho lần đặt vé đầu tiên tại NMN Cinema'
@@ -106,7 +105,6 @@ async function seedPromotions() {
         startAt: new Date(),
         endAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
         applyMode: 'OFFLINE_ONLY',
-        redeemPolicy: 'ONCE_PER_USER',
         metaTitle: 'Thứ 4 Vui Vẻ - Combo giảm 30% tại NMN Cinema',
         metaDescription: 'Mua combo bắp nước vào thứ 4 được giảm 30% tại quầy NMN Cinema'
       },
@@ -135,7 +133,6 @@ async function seedPromotions() {
         startAt: new Date(),
         endAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         applyMode: 'OFFLINE_ONLY',
-        redeemPolicy: 'MULTI',
         allowedUserRanks: ['VIP', 'VVIP'],
         metaTitle: 'VIP Mua 1 Tặng 1 - NMN Cinema',
         metaDescription: 'Đặc quyền thành viên VIP tại NMN Cinema - Mua 1 vé tặng 1 vé miễn phí'

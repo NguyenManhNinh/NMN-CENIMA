@@ -110,5 +110,36 @@ router.post('/:id/offline-claim',
   promotionController.offlineClaimPromotion
 );
 
-module.exports = router;
+/**
+ * POST /api/v1/promotions/:id/like
+ * Toggle like/unlike cho promotion
+ * Optional auth - anonymous users can like (tracked by IP)
+ */
+router.post('/:id/like',
+  (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      return protect(req, res, next);
+    }
+    next();
+  },
+  promotionController.toggleLike
+);
 
+/**
+ * GET /api/v1/promotions/:id/like-status
+ * Kiểm tra trạng thái like của user hiện tại
+ * Optional auth - anonymous users check by IP
+ */
+router.get('/:id/like-status',
+  (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      return protect(req, res, next);
+    }
+    next();
+  },
+  promotionController.getLikeStatus
+);
+
+module.exports = router;

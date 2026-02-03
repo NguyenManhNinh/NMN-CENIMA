@@ -4,9 +4,18 @@ const AppError = require('../utils/AppError');
 const socketService = require('../services/socketService');
 
 // Tạo giữ ghế (Hold)
+// Giới hạn tối đa số ghế 1 user có thể giữ cho 1 suất chiếu
+const MAX_SEATS_PER_USER = 8;
+
 exports.createHold = catchAsync(async (req, res, next) => {
   const { showtimeId, seatCode, groupId } = req.body;
   const userId = req.user.id; // Lấy từ authMiddleware
+
+  // 0. KIỂM TRA GIỚI HẠN SỐ GHẾ (Chống spam-lock)
+  const userHoldCount = await SeatHold.countDocuments({ showtimeId, userId });
+  if (userHoldCount >= MAX_SEATS_PER_USER) {
+    return next(new AppError(`Bạn chỉ được giữ tối đa ${MAX_SEATS_PER_USER} ghế!`, 400));
+  }
 
   // 1. KIỂM TRA CHỦ ĐỘNG (Lớp bảo vệ 1): Xử lý độ trễ của TTL MongoDB
   // Nếu ghế đang có người giữ nhưng đã hết hạn (mà MongoDB chưa kịp xóa), t sẽ xóa thủ công.
@@ -162,3 +171,32 @@ exports.verifyHold = catchAsync(async (req, res, next) => {
   });
 });
 
+/**
+ * Release all holds của user cho 1 suất chiếu
+ * - Dùng khi user rời trang chọn ghế (không đi combo)
+ * - Giải phóng tất cả ghế đang giữ cùng lúc
+ */
+exports.releaseAllHolds = catchAsync(async (req, res, next) => {
+  const { showtimeId } = req.params;
+  const userId = req.user.id;
+
+  // 1. Tìm tất cả ghế đang giữ
+  const holds = await SeatHold.find({ showtimeId, userId });
+
+  if (holds.length > 0) {
+    // 2. Xóa tất cả
+    await SeatHold.deleteMany({ showtimeId, userId });
+
+    // 3. Emit socket cho từng ghế để client khác cập nhật UI
+    holds.forEach(hold => {
+      socketService.emitSeatReleased(showtimeId, hold.seatCode);
+    });
+
+    console.log(`[SeatHold] Released ${holds.length} seats for user ${userId} in showtime ${showtimeId}`);
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
+});

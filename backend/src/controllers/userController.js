@@ -169,3 +169,86 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
     data: null
   });
 });
+
+/**
+ * GET /api/v1/users/unsubscribe
+ * Hủy đăng ký nhận email thông báo (public - từ link trong email)
+ */
+exports.unsubscribeNewsletter = catchAsync(async (req, res, next) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).send(`
+      <html>
+        <head><title>Lỗi</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h2>❌ Thiếu thông tin email</h2>
+          <p>Link không hợp lệ.</p>
+        </body>
+      </html>
+    `);
+  }
+
+  const user = await User.findOneAndUpdate(
+    { email: email.toLowerCase() },
+    { newsletterSubscribed: false }
+  );
+
+  if (!user) {
+    return res.status(404).send(`
+      <html>
+        <head><title>Không tìm thấy</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h2>❌ Email không tồn tại trong hệ thống</h2>
+        </body>
+      </html>
+    `);
+  }
+
+  res.send(`
+    <html>
+      <head>
+        <title>Hủy đăng ký thành công</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial; text-align: center; padding: 50px; background: #f5f5f5; }
+          .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+          h2 { color: #1a3a5c; }
+          p { color: #666; }
+          .success { color: #28a745; font-size: 48px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="success">✓</div>
+          <h2>Hủy đăng ký thành công!</h2>
+          <p>Bạn sẽ không nhận được email thông báo ưu đãi từ NMN Cinema nữa.</p>
+          <p style="margin-top: 20px; font-size: 14px; color: #999;">
+            Nếu thay đổi ý, bạn có thể bật lại trong phần Cài đặt tài khoản.
+          </p>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
+/**
+ * PATCH /api/v1/users/me/newsletter
+ * Cập nhật cài đặt newsletter (authenticated user)
+ */
+exports.updateNewsletterSubscription = catchAsync(async (req, res, next) => {
+  const { subscribed } = req.body;
+
+  if (typeof subscribed !== 'boolean') {
+    return next(new AppError('Vui lòng cung cấp giá trị subscribed (true/false)', 400));
+  }
+
+  await User.findByIdAndUpdate(req.user.id, {
+    newsletterSubscribed: subscribed
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: subscribed ? 'Đã bật nhận thông báo email' : 'Đã tắt nhận thông báo email',
+    data: { newsletterSubscribed: subscribed }
+  });
+});

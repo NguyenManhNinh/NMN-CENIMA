@@ -53,10 +53,6 @@ const promotionRedeemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
-  },
-  redeemNote: {
-    type: String,
-    trim: true
   }
 }, {
   timestamps: true

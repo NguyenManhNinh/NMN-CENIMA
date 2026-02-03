@@ -98,6 +98,15 @@ const userSchema = new mongoose.Schema(
       select: false
     },
     passwordChangedAt: Date,
+    // === Newsletter Subscription ===
+    newsletterSubscribed: {
+      type: Boolean,
+      default: true  // Mặc định bật, user có thể tắt
+    },
+    lastPromotionEmailAt: {
+      type: Date,
+      default: null  // Track để không gửi quá nhiều email
+    },
     // === Chat Ban ===
     // Thời điểm hết hạn ban chat (null = không bị ban)
     chatBanUntil: {

@@ -85,14 +85,29 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: null // Timestamp khi bắt đầu xử lý payment
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    index: true // Để job dọn dẹp đơn treo quét
+  // Phase 3: Promotion quota tracking
+  promotionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Promotion',
+    default: null,
+    index: true // Để query orders by promotion
+  },
+  // P0-1 Fix: State machine thay vì boolean để track đúng
+  promotionReserveState: {
+    type: String,
+    enum: ['NONE', 'RESERVED', 'EXCEEDED', 'FAILED'],
+    default: 'NONE'
   }
+  // P0 Fix: Removed manual createdAt - timestamps:true already creates it
 }, {
   timestamps: true
 });
+
+// Index on createdAt for cleanup job (timestamps:true tự tạo createdAt)
+orderSchema.index({ createdAt: 1 });
+// P1: Additional indexes for common query patterns
+orderSchema.index({ userId: 1, createdAt: -1 });
+orderSchema.index({ status: 1, createdAt: 1 });
 
 const Order = mongoose.model('Order', orderSchema);
 module.exports = Order;

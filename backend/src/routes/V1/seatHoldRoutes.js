@@ -167,4 +167,25 @@ router.post('/release', validate(releaseHoldSchema), seatHoldController.releaseH
  */
 router.get('/verify/:showtimeId', seatHoldController.verifyHold);
 
+/**
+ * @swagger
+ * /holds/release-all/{showtimeId}:
+ *   delete:
+ *     summary: Nhả TẤT CẢ ghế của user cho 1 suất chiếu
+ *     tags: [SeatHolds]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: showtimeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID suất chiếu
+ *     responses:
+ *       204:
+ *         description: Đã nhả tất cả ghế thành công
+ */
+router.delete('/release-all/:showtimeId', seatHoldController.releaseAllHolds);
+
 module.exports = router;

@@ -295,9 +295,131 @@ exports.sendWelcome = async (email, name) => {
   });
 };
 
+// --- Ưu đãi thông báo Email ---
+
+exports.sendPromotionNotification = async (email, userName, promotion, voucherCode = null) => {
+  const frontendUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const unsubscribeUrl = `${frontendUrl}/unsubscribe?email=${encodeURIComponent(email)}`;
+  const promotionUrl = `${frontendUrl}/uu-dai/${promotion.slug}`;
+
+  // Format dates
+  const formatDate = (date) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  await sendEmail({
+    email,
+    subject: `${promotion.title} - NMN Cinema`,
+    message: `Ưu đãi mới: ${promotion.title}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.8; color: #333; margin: 0; padding: 20px; background: #f9f9f9; }
+          .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 4px; }
+          .greeting { margin-bottom: 20px; }
+          .promo-title { font-size: 20px; font-weight: 600; color: #222; margin: 20px 0 10px; }
+          .promo-content { color: #555; margin-bottom: 20px; }
+          .voucher-section { background: #fafafa; border-left: 3px solid #1a3a5c; padding: 15px 20px; margin: 25px 0; }
+          .voucher-code { font-size: 18px; font-weight: 600; color: #1a3a5c; letter-spacing: 2px; margin-top: 5px; }
+          .time-info { color: #666; font-size: 14px; margin: 20px 0; }
+          .cta-link { color: #1a3a5c; font-weight: 600; text-decoration: none; }
+          .cta-link:hover { text-decoration: underline; }
+          .signature { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #999; }
+          .unsubscribe { margin-top: 10px; }
+          .unsubscribe a { color: #999; text-decoration: underline; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="greeting">
+            <p>Kính gửi Quý khách <strong>${userName}</strong>,</p>
+          </div>
+
+          <p>NMN Cinema trân trọng thông báo đến Quý khách chương trình ưu đãi mới:</p>
+
+          <div class="promo-title">${promotion.title}</div>
+          <div class="promo-content">${promotion.excerpt || ''}</div>
+
+          ${voucherCode ? `
+          <div class="voucher-section">
+            <div style="color: #666; font-size: 13px;">Mã ưu đãi:</div>
+            <div class="voucher-code">${voucherCode}</div>
+          </div>
+          ` : ''}
+
+          <div class="time-info">
+            <strong>Thời gian áp dụng:</strong> ${formatDate(promotion.startAt)} - ${formatDate(promotion.endAt)}
+          </div>
+
+          <p>
+            <a href="${promotionUrl}" class="cta-link">Xem chi tiết chương trình →</a>
+          </p>
+
+          <div class="signature">
+            <p>Trân trọng,<br><strong>NMN Cinema</strong></p>
+          </div>
+
+        <div class="footer">
+            <p>Email: support@nmncinema.com | Hotline: 0849045706</p>
+            <p>© 2026 NMN Cinema. Đồ án tốt nghiệp - Nguyễn Mạnh Ninh</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  });
+};
+
+// Gửi email hàng loạt (batch) - Anti-spam
+exports.sendBulkPromotionEmails = async (promotion, users, voucherCode = null) => {
+  const BATCH_SIZE = 50;
+  const DELAY_BETWEEN_BATCHES = 2000; // 2 giây
+
+  let sentCount = 0;
+  let failedCount = 0;
+
+  for (let i = 0; i < users.length; i += BATCH_SIZE) {
+    const batch = users.slice(i, i + BATCH_SIZE);
+
+    const results = await Promise.allSettled(
+      batch.map(user =>
+        exports.sendPromotionNotification(user.email, user.name, promotion, voucherCode)
+      )
+    );
+
+    results.forEach(r => {
+      if (r.status === 'fulfilled') sentCount++;
+      else failedCount++;
+    });
+
+    // Delay để tránh rate limit
+    if (i + BATCH_SIZE < users.length) {
+      await new Promise(r => setTimeout(r, DELAY_BETWEEN_BATCHES));
+    }
+  }
+
+  // Update lastPromotionEmailAt cho users đã gửi thành công
+  const User = require('../models/User');
+  const userIds = users.map(u => u._id);
+  await User.updateMany(
+    { _id: { $in: userIds } },
+    { lastPromotionEmailAt: new Date() }
+  );
+
+  logger.info(`Promotion emails sent: ${sentCount} success, ${failedCount} failed`);
+  return { sentCount, failedCount };
+};
+
 module.exports = {
   sendEmail,
   sendOTP: exports.sendOTP,
   sendTicket: exports.sendTicket,
-  sendWelcome: exports.sendWelcome
+  sendWelcome: exports.sendWelcome,
+  sendPromotionNotification: exports.sendPromotionNotification,
+  sendBulkPromotionEmails: exports.sendBulkPromotionEmails
 };
