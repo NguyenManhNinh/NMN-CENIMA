@@ -19,39 +19,45 @@ const styles = {
     pb: { xs: 2, md: 4 },
     fontFamily: '"Nunito Sans", sans-serif'
   },
-  // Thanh stepper - giống QuickBookingPage
+  // Thanh stepper - giống QuickBookingPage (responsive)
   stepperContainer: {
     display: 'flex',
     justifyContent: 'center',
     bgcolor: '#fff',
-    py: 2,
+    py: { xs: 1.5, md: 2 },
     mb: 3,
     boxShadow: 'none',
     width: '100vw',
     ml: 'calc(-50vw + 50%)',
-    position: 'relative'
+    position: 'relative',
+    // Mobile: cho phép scroll ngang
+    overflowX: { xs: 'auto', md: 'visible' },
+    '&::-webkit-scrollbar': { display: 'none' },
+    scrollbarWidth: 'none'
   },
   stepperInner: {
     display: 'inline-flex',
-    gap: { xs: 2, md: 3 },
-    flexWrap: 'wrap',
+    gap: { xs: 0, md: 3 },
+    flexWrap: 'nowrap', // Không wrap xuống dòng
     borderBottom: '2px solid #e0e0e0',
-    pb: 0
+    pb: 0,
+    px: { xs: 1, md: 0 } // Padding cho mobile
   },
   stepperItem: {
     display: 'flex',
     alignItems: 'center',
-    px: { xs: 1, md: 2 },
-    py: 1.5,
+    px: { xs: 1.5, md: 2 },
+    py: { xs: 1, md: 1.5 },
     borderBottom: '3px solid transparent',
     mb: '-1px',
-    cursor: 'default'
+    cursor: 'default',
+    flexShrink: 0 // Không co lại
   },
   stepperItemActive: {
     borderBottomColor: '#00405d'
   },
   stepText: {
-    fontSize: { xs: '0.75rem', md: '0.9rem' },
+    fontSize: { xs: '0.7rem', md: '0.9rem' },
     color: '#999',
     whiteSpace: 'nowrap',
     fontWeight: 500
@@ -141,11 +147,11 @@ function BookingFallbackPage() {
         <Box sx={styles.stepperContainer}>
           <Box sx={styles.stepperInner}>
             {[
-              { id: 1, label: 'Chọn phim / Rạp / Suất' },
-              { id: 2, label: 'Chọn ghế' },
-              { id: 3, label: 'Chọn thức ăn' },
-              { id: 4, label: 'Thanh toán' },
-              { id: 5, label: 'Xác nhận' }
+              { id: 1, label: 'Chọn phim / Rạp / Suất', mobileLabel: 'Phim/Rạp' },
+              { id: 2, label: 'Chọn ghế', mobileLabel: 'Ghế' },
+              { id: 3, label: 'Chọn thức ăn', mobileLabel: 'Đồ ăn' },
+              { id: 4, label: 'Thanh toán', mobileLabel: 'Thanh toán' },
+              { id: 5, label: 'Xác nhận', mobileLabel: 'Xác nhận' }
             ].map((step, index) => (
               <Box
                 key={step.id}
@@ -160,7 +166,13 @@ function BookingFallbackPage() {
                     ...(index === 0 ? styles.stepTextActive : {})
                   }}
                 >
-                  {step.label}
+                  {/* Hiển thị label ngắn trên mobile */}
+                  <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                    {step.label}
+                  </Box>
+                  <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
+                    {step.mobileLabel}
+                  </Box>
                 </Typography>
               </Box>
             ))}

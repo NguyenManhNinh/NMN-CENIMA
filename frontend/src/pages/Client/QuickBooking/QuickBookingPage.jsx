@@ -12,7 +12,9 @@ import {
   Button,
   CircularProgress,
   Collapse,
-  IconButton
+  IconButton,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -61,35 +63,41 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     bgcolor: '#fff',
-    py: 2,
+    py: { xs: 1.5, md: 2 },
     mb: 3,
     boxShadow: 'none',
     // Full viewport width
     width: '100vw',
     ml: 'calc(-50vw + 50%)',
-    position: 'relative'
+    position: 'relative',
+    // Mobile: cho phép scroll ngang
+    overflowX: { xs: 'auto', md: 'visible' },
+    '&::-webkit-scrollbar': { display: 'none' },
+    scrollbarWidth: 'none'
   },
   stepperInner: {
     display: 'inline-flex',
-    gap: { xs: 2, md: 3 },
-    flexWrap: 'wrap',
+    gap: { xs: 0, md: 3 },
+    flexWrap: 'nowrap', // Không wrap xuống dòng
     borderBottom: '2px solid #e0e0e0',
-    pb: 0
+    pb: 0,
+    px: { xs: 1, md: 0 } // Padding cho mobile
   },
   stepperItem: {
     display: 'flex',
     alignItems: 'center',
-    px: { xs: 1, md: 2 },
-    py: 1.5,
+    px: { xs: 1.5, md: 2 },
+    py: { xs: 1, md: 1.5 },
     borderBottom: '3px solid transparent',
     mb: '-1px',
-    cursor: 'default'
+    cursor: 'default',
+    flexShrink: 0 // Không co lại
   },
   stepperItemActive: {
     borderBottomColor: '#00405d'
   },
   stepText: {
-    fontSize: { xs: '0.75rem', md: '0.9rem' },
+    fontSize: { xs: '0.7rem', md: '0.9rem' },
     color: '#999',
     whiteSpace: 'nowrap',
     fontWeight: 500
@@ -490,11 +498,11 @@ function QuickBookingPage() {
         <Box sx={styles.stepperContainer}>
           <Box sx={styles.stepperInner}>
             {[
-              { id: 1, label: 'Chọn phim / Rạp / Suất' },
-              { id: 2, label: 'Chọn ghế' },
-              { id: 3, label: 'Chọn thức ăn' },
-              { id: 4, label: 'Thanh toán' },
-              { id: 5, label: 'Xác nhận' }
+              { id: 1, label: 'Chọn phim / Rạp / Suất', mobileLabel: 'Phim/Rạp' },
+              { id: 2, label: 'Chọn ghế', mobileLabel: 'Ghế' },
+              { id: 3, label: 'Chọn thức ăn', mobileLabel: 'Đồ ăn' },
+              { id: 4, label: 'Thanh toán', mobileLabel: 'Thanh toán' },
+              { id: 5, label: 'Xác nhận', mobileLabel: 'Xác nhận' }
             ].map((step, index) => (
               <Box
                 key={step.id}
@@ -509,7 +517,13 @@ function QuickBookingPage() {
                     ...(index === 0 ? styles.stepTextActive : {})
                   }}
                 >
-                  {step.label}
+                  {/* Hiển thị label ngắn trên mobile */}
+                  <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                    {step.label}
+                  </Box>
+                  <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
+                    {step.mobileLabel}
+                  </Box>
                 </Typography>
               </Box>
             ))}
@@ -612,23 +626,43 @@ function QuickBookingPage() {
                     <Typography sx={{ fontWeight: 600, fontSize: '1rem', mb: 0.5 }}>
                       {selectedMovieData.title}
                     </Typography>
-                    {selectedMovieData.ageRating && (
-                      <Box
-                        sx={{
-                          display: 'inline-block',
-                          bgcolor: '#F5A623',
-                          color: '#fff',
-                          px: 1,
-                          py: 0.25,
-                          borderRadius: 0.5,
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          mt: 0.5
-                        }}
-                      >
-                        {selectedMovieData.ageRating}
-                      </Box>
-                    )}
+                    {/* Format + Subtitle + Rating + AgeRating */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {selectedMovieData.format || '2D'}{selectedMovieData.subtitle ? ` ${selectedMovieData.subtitle}` : ' Phụ đề'}
+                      </Typography>
+                      {/* Star Rating */}
+                      {selectedMovieData.rating > 0 && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                          <Box component="span" sx={{ color: '#F5A623', fontSize: '0.85rem' }}>★</Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {selectedMovieData.rating?.toFixed(1) || '0.0'}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            ({selectedMovieData.ratingCount || 0} đánh giá)
+                          </Typography>
+                        </Box>
+                      )}
+                      {/* Age Rating */}
+                      {selectedMovieData.ageRating && (
+                        <Box
+                          sx={{
+                            bgcolor: selectedMovieData.ageRating === 'P' ? '#4caf50' :
+                              selectedMovieData.ageRating === 'C13' ? '#ff9800' :
+                                selectedMovieData.ageRating === 'C16' ? '#f44336' :
+                                  selectedMovieData.ageRating === 'C18' ? '#d32f2f' : '#757575',
+                            color: '#fff',
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: 0.5,
+                            fontSize: '0.7rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          {selectedMovieData.ageRating}
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
                 </Box>
               ) : (
@@ -639,7 +673,7 @@ function QuickBookingPage() {
 
               {/* Showtime Info - hiển thị khi đã chọn suất */}
               {selectedShowtimeData && (
-                <Box sx={{ mb: 2, pb: 2, borderBottom: '1px dashed #e0e0e0' }}>
+                <Box sx={{ mb: 2 }}>
                   <Typography sx={{ fontWeight: 600, fontSize: '0.9rem', color: '#333', mb: 0.5 }}>
                     {selectedShowtimeData.cinemaId?.name || 'NMN Cinema'}
                     {selectedShowtimeData.format && ` - ${selectedShowtimeData.format}`}

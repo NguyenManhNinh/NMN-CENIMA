@@ -11,7 +11,9 @@ import {
   CircularProgress,
   Dialog,
   DialogContent,
-  DialogActions
+  DialogActions,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import StarIcon from '@mui/icons-material/Star';
@@ -215,6 +217,11 @@ function SeatSelectionPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user } = useAuth(); // Lấy user để restore ghế đang giữ
+
+  // Responsive: Desktop 12 ghế/dòng, Mobile 10 ghế/dòng
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const maxSeatsPerLine = isMobile ? 10 : 12;
 
   const [loading, setLoading] = useState(true);
   const [seats, setSeats] = useState([]);
@@ -732,7 +739,8 @@ function SeatSelectionPage() {
                     for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size));
                     return res;
                   };
-                  const maxPerLine = 12; // Tối đa 12 ghế / dòng
+                  // Responsive: Desktop 12 ghế/dòng, Mobile 10 ghế/dòng
+                  const maxPerLine = maxSeatsPerLine;
 
                   return Object.keys(seatsByRow).sort().map(row => {
                     const lines = chunkArray(seatsByRow[row], maxPerLine);
