@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -21,7 +21,7 @@ import { useCombos } from '../../../hooks/useCombos';
 import useSeatTimer from '../../../hooks/useSeatTimer';
 
 // API - Release seat holds when timer expires
-import { releaseHoldAPI, verifyHoldAPI } from '../../../apis/seatHoldApi';
+import { releaseHoldAPI } from '../../../apis/seatHoldApi';
 
 // Styles - Responsive design
 const styles = {
@@ -157,28 +157,40 @@ function ComboPage() {
   const selectedSeats = stateData.selectedSeats || [];
   const seatPrice = stateData.totalPrice || 0;
 
-  // Lấy từ state, sessionStorage, hoặc tạo mới
-  const getStartTime = () => {
-    if (stateData.reservationStartTime) return stateData.reservationStartTime;
-    const stored = sessionStorage.getItem('reservationStartTime');
-    if (stored) return parseInt(stored, 10);
-    return Date.now();
-  };
-
-  // Dùng useRef để cache thời điểm bắt đầu, tránh re-render
-  const startTimeRef = useRef(getStartTime());
-
-  // Lưu vào sessionStorage để giữ khi back/forward browser
-  useEffect(() => {
-    sessionStorage.setItem('reservationStartTime', startTimeRef.current.toString());
-  }, []);
-
   // Custom hook lấy danh sách combo từ API
   const { combos, loading, error: comboError } = useCombos();
   const [selectedCombos, setSelectedCombos] = useState({});
 
   // Modal xác nhận độ tuổi
   const [ageConfirmOpen, setAgeConfirmOpen] = useState(false);
+
+  // Timer hook - tự động sync với sessionStorage và server
+  const {
+    timeLeft,
+    formattedTime,
+    isExpired
+  } = useSeatTimer(showtime?._id, {
+    enabled: !!showtime?._id,
+    shouldVerifyOnMount: true,
+    redirectPath: showtime?.movie?.slug ? `/dat-ve/${showtime.movie.slug}` : '/',
+    onExpire: () => {
+      // Giải phóng ghế khi hết thời gian
+      const releaseAllSeats = async () => {
+        try {
+          if (showtime?._id && selectedSeats.length > 0) {
+            await Promise.all(
+              selectedSeats.map(seat =>
+                releaseHoldAPI(showtime._id, seat.seatCode).catch(() => { })
+              )
+            );
+          }
+        } catch (error) {
+          console.error('Lỗi giải phóng ghế:', error);
+        }
+      };
+      releaseAllSeats();
+    }
+  });
 
   // Redirect về trang chủ nếu không có dữ liệu từ trang chọn ghế
   useEffect(() => {
@@ -188,101 +200,9 @@ function ComboPage() {
     }
   }, [showtime, selectedSeats, navigate]);
 
-  // Đếm ngược thời gian giữ ghế (15 phút = 900 giây)
-  const RESERVATION_TIME = 15 * 60;
-  const [timeLeft, setTimeLeft] = useState(RESERVATION_TIME);
-
-  // Timer đếm ngược - dùng useRef để tránh dependency loop
-  useEffect(() => {
-    const startTime = startTimeRef.current;
-
-    // Tính thời gian còn lại
-    const calculateTimeLeft = () => {
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const remaining = RESERVATION_TIME - elapsed;
-      return remaining > 0 ? remaining : 0;
-    };
-
-    // Set initial value
-    setTimeLeft(calculateTimeLeft());
-
-    // Interval mỗi giây
-    const timer = setInterval(() => {
-      const remaining = calculateTimeLeft();
-      setTimeLeft(remaining);
-
-      if (remaining <= 0) {
-        clearInterval(timer);
-
-        // Giải phóng tất cả ghế đang giữ khi hết thời gian
-        const releaseAllSeats = async () => {
-          try {
-            const showtimeId = showtime?._id;
-            if (showtimeId && selectedSeats.length > 0) {
-              // Gọi API release cho từng ghế
-              await Promise.all(
-                selectedSeats.map(seat =>
-                  releaseHoldAPI(showtimeId, seat.seatCode).catch(() => { })
-                )
-              );
-            }
-          } catch (error) {
-            console.error('Lỗi giải phóng ghế:', error);
-          }
-        };
-
-        releaseAllSeats();
-
-        sessionStorage.removeItem('reservationStartTime');
-        alert('Hết thời gian giữ ghế! Vui lòng chọn lại suất chiếu.');
-        // Redirect về trang đặt vé của phim hoặc trang chủ
-        const movieSlug = showtime?.movie?.slug || showtime?.movieSlug;
-        if (movieSlug) {
-          navigate(`/dat-ve/${movieSlug}`);
-        } else {
-          navigate('/');
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [navigate, showtime?._id]);
-
-  // Verify hold với server khi mount (sync timer)
-  // Không redirect nếu expired - backend có thể reuse PENDING order
-  useEffect(() => {
-    const verifyHoldWithServer = async () => {
-      const showtimeId = showtime?._id;
-      if (!showtimeId) return;
-
-      try {
-        const response = await verifyHoldAPI(showtimeId);
-        const { valid, remainingSeconds } = response.data;
-
-        if (valid && remainingSeconds > 0) {
-          // Sync timer với server time
-          setTimeLeft(remainingSeconds);
-          console.log('[ComboPage] Timer synced with server:', remainingSeconds, 'seconds');
-        } else {
-          // Hold đã hết hạn ở server - KHÔNG redirect
-          // Backend có thể có PENDING order và cho phép thanh toán lại
-          console.warn('[ComboPage] Hold expired on server, but may have PENDING order');
-        }
-      } catch (error) {
-        // Bỏ qua lỗi verify - cho phép tiếp tục
-        // Backend sẽ validate và trả về lỗi rõ ràng nếu không hợp lệ
-        if (error.response?.status !== 401) {
-          console.warn('[ComboPage] Verify hold failed, continuing anyway:', error.message);
-        }
-      }
-    };
-
-    verifyHoldWithServer();
-  }, [showtime?._id]);
-
-
-  // Format thời gian mm:ss
+  // Format thời gian mm:ss (dùng cho hiển thị, hook đã có formattedTime)
   const formatTime = (seconds) => {
+    if (seconds === null) return '--:--';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -344,6 +264,7 @@ function ComboPage() {
       }));
 
     setAgeConfirmOpen(false); // Đóng modal
+    // Timer đã được lưu trong sessionStorage bởi hook
     navigate('/thanh-toan', {
       state: {
         showtime,
@@ -352,15 +273,15 @@ function ComboPage() {
         combos: selectedComboItems,
         comboPrice: comboTotalPrice,
         totalPrice: grandTotal
+        // reservationStartTime giờ được lấy từ sessionStorage bởi useSeatTimer
       }
     });
   };
 
   // Quay lại trang chọn ghế
   const handleBack = () => {
-    navigate(`/chon-ghe/${showtime?._id || 'test'}`, {
-      state: { reservationStartTime: startTimeRef.current }
-    });
+    // Timer đã được lưu trong sessionStorage bởi hook
+    navigate(`/chon-ghe/${showtime?._id || 'test'}`);
   };
 
   // Lấy thông tin độ tuổi để hiển thị trong modal
@@ -602,9 +523,7 @@ function ComboPage() {
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <Button
                     variant="text"
-                    onClick={() => navigate(`/chon-ghe/${showtime?._id || 'test'}`, {
-                      state: { reservationStartTime: startTimeRef.current }
-                    })}
+                    onClick={() => navigate(`/chon-ghe/${showtime?._id || 'test'}`)}
                     sx={{
                       flex: 1,
                       py: 1.5,

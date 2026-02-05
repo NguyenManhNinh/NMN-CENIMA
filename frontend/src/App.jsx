@@ -8,6 +8,7 @@ import theme from './theme';
 
 // Layouts
 import ClientLayout from './components/Layout/ClientLayout';
+import BookingLayout from './components/Layout/BookingLayout/BookingLayout';
 
 // Pages - Client
 import HomePage from './pages/Client/HomePage';
@@ -22,6 +23,8 @@ import { GenresPage, GenresDetailPage } from './pages/Client/Genre';
 import { ActorsPage, ActorDetailPage } from './pages/Client/Actor';
 import { FilmDirectorPage, FilmDirectorDetailPage } from './pages/Client/FilmDirector';
 import { PromotionListPage, PromotionDetailPage } from './pages/Client/Promotion';
+import QuickBookingPage from './pages/Client/QuickBooking';
+import { BookingFallbackPage } from './pages/Client/BookingFallback';
 
 function App() {
   return (
@@ -35,7 +38,17 @@ function App() {
           {/* OAuth Callback - không cần layout */}
           <Route path="/oauth-callback" element={<OAuthCallback />} />
 
-          {/* CLIENT ROUTES*/}
+          {/* BOOKING FLOW - Layout đặc biệt (chỉ logo + timer + cancel) */}
+          <Route element={<BookingLayout />}>
+            {/* Đặt combo */}
+            <Route path="dat-ve-combo" element={<ComboPage />} />
+            {/* Thanh toán */}
+            <Route path="thanh-toan" element={<PaymentConfirmPage />} />
+            {/* Kết quả thanh toán */}
+            <Route path="ket-qua-thanh-toan" element={<PaymentResultPage />} />
+          </Route>
+
+          {/* CLIENT ROUTES - Layout đầy đủ với navigation */}
           <Route path="/" element={<ClientLayout />}>
             {/* Trang chủ */}
             <Route index element={<HomePage />} />
@@ -43,16 +56,14 @@ function App() {
             <Route path="phim-dang-chieu" element={<MoviesPage />} />
             {/* Phim sắp chiếu */}
             <Route path="phim-sap-chieu" element={<MoviesPage />} />
-            {/* Đặt vé - sử dụng slug thay vì id */}
+            {/* Đặt vé - trang quick booking (dropdown) */}
+            <Route path="dat-ve" element={<QuickBookingPage />} />
+            {/* Trang fallback khi back browser */}
+            <Route path="dat-ve-fallback" element={<BookingFallbackPage />} />
+            {/* Đặt vé - sử dụng slug để xem chi tiết phim */}
             <Route path="dat-ve/:slug" element={<BookingPage />} />
             {/* Chọn ghế */}
             <Route path="chon-ghe/:showtimeId" element={<SeatSelectionPage />} />
-            {/* Đặt combo */}
-            <Route path="dat-ve-combo" element={<ComboPage />} />
-            {/* Thanh toán */}
-            <Route path="thanh-toan" element={<PaymentConfirmPage />} />
-            {/* Kết quả thanh toán */}
-            <Route path="ket-qua-thanh-toan" element={<PaymentResultPage />} />
 
             {/* GÓC ĐIỆN ẢNH - Thể loại phim */}
             <Route path="the-loai-phim" element={<GenresPage />} />

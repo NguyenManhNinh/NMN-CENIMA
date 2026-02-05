@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -35,12 +35,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 // API - Vouchers
 import { getAvailableVouchersAPI, applyVoucherAPI } from '../../../apis/voucherApi';
-// API - Verify seat hold
-import { verifyHoldAPI } from '../../../apis/seatHoldApi';
 // API - Order
 import { createOrderAPI } from '../../../apis/orderApi';
 // Auth Context
 import { useAuth } from '../../../contexts/AuthContext';
+// Timer Hook
+import useSeatTimer from '../../../hooks/useSeatTimer';
 // STYLES - Responsive theo layout Rio Cinemas
 const styles = {
   // Container chính
@@ -139,6 +139,35 @@ const styles = {
     fontSize: '1rem',
     bgcolor: '#DC2626',
     '&:hover': { bgcolor: '#B91C1C' }
+  },
+  // Loading screen
+  loadingOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    bgcolor: '#1a1a2e',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999
+  },
+  loadingLogo: {
+    width: 200,
+    height: 200,
+    mb: 1.5,
+    objectFit: 'contain'
+  },
+  loadingSpinner: {
+    color: '#F5A623',
+    mb: 2
+  },
+  loadingText: {
+    color: '#FFA500',
+    fontSize: '1.2rem',
+    fontWeight: 600
   }
 };
 // COMPONENT CHÍNH
@@ -146,14 +175,16 @@ function PaymentConfirmPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  // LẤY DỮ LIỆU TỪ TRANG TRƯỚC (ComboPage)
+  // LẤY DỮ LIỆU TỪ TRANG TRƯỚC (ComboPage hoặc PaymentResultPage retry)
   const {
     showtime = {},      // Thông tin suất chiếu
     selectedSeats = [], // Danh sách ghế đã chọn
     seatPrice = 0,      // Tổng tiền vé
     combos = [],        // Danh sách combo đã chọn
     comboPrice = 0,     // Tổng tiền combo
-    totalPrice = 0      // Tổng tiền (không dùng, tính lại ở đây)
+    totalPrice = 0,     // Tổng tiền (không dùng, tính lại ở đây)
+    forceTimerSync = false, // Flag từ PaymentResultPage retry
+    reservationStartTime: stateStartTime // Timer start time từ ComboPage
   } = location.state || {};
   // THÔNG TIN NGƯỜI DÙNG - Từ AuthContext
   const userInfo = {
@@ -161,18 +192,23 @@ function PaymentConfirmPage() {
     email: user?.email || '',
     phone: user?.phone || ''
   };
-  // TIMER ĐẾM NGƯỢC GIỮ GHẾ (15 phút)
-  const RESERVATION_TIME = 15 * 60; // 15 phút = 900 giây
-  /**
-   * Lấy thời điểm bắt đầu từ sessionStorage
-   * Đảm bảo timer đồng bộ giữa các trang
-   */
-  const getStartTime = () => {
-    const stored = sessionStorage.getItem('reservationStartTime');
-    return stored ? parseInt(stored, 10) : Date.now();
-  };
-  const startTimeRef = useRef(getStartTime());
-  const [timeLeft, setTimeLeft] = useState(RESERVATION_TIME);
+
+  // TIMER HOOK - Sử dụng useSeatTimer thay vì logic thủ công
+  const {
+    timeLeft,
+    formattedTime,
+    isExpired,
+    isLoading: timerLoading
+  } = useSeatTimer(showtime?._id, {
+    enabled: !!showtime?._id,
+    shouldVerifyOnMount: true,
+    forceSync: forceTimerSync, // Từ PaymentResultPage retry
+    redirectPath: '/',
+    onExpire: () => {
+      alert('Hết thời gian giữ ghế! Vui lòng đặt vé lại.');
+    }
+  });
+
   // STATE QUẢN LÝ VOUCHER
   const [voucherOpen, setVoucherOpen] = useState(false);        // Mở/đóng section nhập mã
   const [voucherCode, setVoucherCode] = useState('');           // Mã voucher đang nhập
@@ -184,41 +220,12 @@ function PaymentConfirmPage() {
   // STATE THANH TOÁN
   const [paymentMethod, setPaymentMethod] = useState('vnpay');  // Phương thức thanh toán
   const [loading, setLoading] = useState(false);                // Đang xử lý thanh toán
+  const [isPageLoading, setIsPageLoading] = useState(true);     // Loading khi vào trang
   // STATE MODAL XÁC NHẬN THANH TOÁN
   const [confirmModalOpen, setConfirmModalOpen] = useState(false); // Mở/đóng modal xác nhận
   const [termsAccepted, setTermsAccepted] = useState(false);       // Checkbox đồng ý điều khoản
-  // EFFECTS
-  /**
-   * Effect: Timer đếm ngược
-   * - Tính thời gian còn lại dựa trên startTime
-   * - Cập nhật mỗi giây
-   * - Redirect về trang chủ khi hết giờ
-   */
-  useEffect(() => {
-    const startTime = startTimeRef.current;
-    const calculateTimeLeft = () => {
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const remaining = RESERVATION_TIME - elapsed;
-      return remaining > 0 ? remaining : 0;
-    };
-    // Set giá trị ban đầu
-    setTimeLeft(calculateTimeLeft());
-    // Interval cập nhật mỗi giây
-    const timer = setInterval(() => {
-      const remaining = calculateTimeLeft();
-      setTimeLeft(remaining);
-      // Hết giờ → Alert và redirect
-      if (remaining <= 0) {
-        clearInterval(timer);
-        alert('Hết thời gian giữ ghế! Vui lòng đặt vé lại.');
-        sessionStorage.removeItem('reservationStartTime');
-        navigate('/');
-      }
-    }, 1000);
-    // Cleanup khi unmount
-    return () => clearInterval(timer);
-  }, [navigate]);
 
+  // EFFECTS
   /**
    * Effect: Fetch danh sách voucher từ API
    */
@@ -233,6 +240,7 @@ function PaymentConfirmPage() {
         console.error('[Voucher] Error loading vouchers:', error);
       } finally {
         setLoadingVouchers(false);
+        setIsPageLoading(false); // Tắt loading sau khi fetch xong
       }
     };
     fetchVouchers();
@@ -249,47 +257,14 @@ function PaymentConfirmPage() {
     }
   }, [location.state, selectedSeats, navigate]);
 
-  /**
-   * Effect: Verify hold với server khi mount (sync timer)
-   * - Nếu còn valid → sync timer
-   * - Nếu expired → chỉ log warning (backend có thể reuse PENDING order)
-   */
-  useEffect(() => {
-    const verifyHoldWithServer = async () => {
-      const showtimeId = showtime?._id;
-      if (!showtimeId) return;
-
-      try {
-        const response = await verifyHoldAPI(showtimeId);
-        const { valid, remainingSeconds } = response.data;
-
-        if (valid && remainingSeconds > 0) {
-          // Sync timer với server time
-          setTimeLeft(remainingSeconds);
-          console.log('[PaymentConfirmPage] Timer synced with server:', remainingSeconds, 'seconds');
-        } else {
-          // Hold đã hết hạn ở server - KHÔNG redirect
-          // Backend có thể có PENDING order và cho phép thanh toán lại
-          console.warn('[PaymentConfirmPage] Hold expired on server, but may have PENDING order');
-        }
-      } catch (error) {
-        // Bỏ qua lỗi verify - cho phép tiếp tục
-        // Backend sẽ validate và trả về lỗi rõ ràng nếu không hợp lệ
-        if (error.response?.status !== 401) {
-          console.warn('[PaymentConfirmPage] Verify hold failed, continuing anyway:', error.message);
-        }
-      }
-    };
-
-    verifyHoldWithServer();
-  }, [showtime?._id]);
   // HELPER FUNCTIONS
   /**
-   * Format thời gian dạng mm:ss
+   * Format thời gian dạng mm:ss (fallback, hook có sẵn formattedTime)
    * @param {number} seconds - Số giây
    * @returns {string} - Chuỗi thời gian "MM:SS"
    */
   const formatTime = (seconds) => {
+    if (seconds === null) return '--:--';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -402,32 +377,13 @@ function PaymentConfirmPage() {
     setVoucherError('');
   };
   // PAYMENT HANDLER - Mở modal xác nhận trước khi thanh toán
-  // Verify hold trước khi mở modal - chỉ để sync timer, không block
-  // Backend sẽ handle trường hợp reuse PENDING order
-  const handleOpenConfirmModal = async () => {
-    const showtimeId = showtime?._id;
-    if (showtimeId) {
-      try {
-        const response = await verifyHoldAPI(showtimeId);
-        const { valid, remainingSeconds } = response.data;
-
-        if (!valid || remainingSeconds <= 0) {
-          // Hold hết hạn - nhưng có thể có PENDING order ở backend
-          // Cho phép tiếp tục, backend sẽ handle
-          console.warn('[Payment] Hold expired, but may have PENDING order');
-        } else {
-          // Sync timer với server
-          setTimeLeft(remainingSeconds);
-        }
-      } catch (error) {
-        // Bỏ qua lỗi verify - cho phép tiếp tục thanh toán
-        // Backend sẽ validate và trả về lỗi rõ ràng nếu không hợp lệ
-        if (error.response?.status !== 401) {
-          console.warn('[Payment] Verify hold failed, continuing anyway:', error.message);
-        }
-      }
+  // Timer đã được sync bởi useSeatTimer hook
+  const handleOpenConfirmModal = () => {
+    // Kiểm tra timer - nếu đã expired thì không cho phép
+    if (isExpired) {
+      alert('Hết thời gian giữ ghế! Vui lòng đặt vé lại.');
+      return;
     }
-
     setConfirmModalOpen(true);
     setTermsAccepted(false); // Reset checkbox mỗi lần mở
   };
@@ -526,7 +482,25 @@ function PaymentConfirmPage() {
     }
   };
 
-  // RENDER
+  // RENDER: Loading state khi vào trang
+  if (isPageLoading) {
+    return (
+      <Box sx={styles.loadingOverlay}>
+        <Box
+          component="img"
+          src="/NMN_CENIMA_LOGO.png"
+          alt="NMN Cinema"
+          sx={styles.loadingLogo}
+        />
+        <CircularProgress size={40} thickness={2} sx={styles.loadingSpinner} />
+        <Typography sx={styles.loadingText}>
+          Chờ tôi xíu nhé
+        </Typography>
+      </Box>
+    );
+  }
+
+  // RENDER: Main content
   return (
     <Box sx={styles.wrapper}>
       <Container maxWidth="lg">

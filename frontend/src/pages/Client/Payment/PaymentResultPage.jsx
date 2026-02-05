@@ -377,7 +377,23 @@ function PaymentResultPage() {
                     // Use order.totalAmount directly to avoid recalculation issues
                     const totalPrice = order.totalAmount || (seatPrice + comboPrice);
 
-                    console.log('[PaymentResult] Retry state:', { seatPrice, comboPrice, totalPrice, selectedSeats, combos });
+                    // Tính reservationStartTime từ order.createdAt
+                    // Timer 15 phút bắt đầu từ khi tạo order
+                    const orderCreatedAt = new Date(order.createdAt).getTime();
+                    const reservationStartTime = orderCreatedAt;
+                    const elapsed = Math.floor((Date.now() - reservationStartTime) / 1000);
+                    const remaining = 900 - elapsed;
+
+                    console.log('🟠 [PaymentResultPage] RETRY - calculating timer:');
+                    console.log('   - order.createdAt:', order.createdAt);
+                    console.log('   - reservationStartTime:', reservationStartTime, '| Date:', new Date(reservationStartTime).toLocaleTimeString());
+                    console.log('   - elapsed:', elapsed, 's | remaining:', remaining, 's');
+
+                    // Cũng update sessionStorage để các effect khác có thể đọc
+                    sessionStorage.setItem('reservationStartTime', reservationStartTime.toString());
+                    console.log('🟠 [PaymentResultPage] Saved to sessionStorage:', reservationStartTime);
+
+                    console.log('[PaymentResult] Retry state:', { seatPrice, comboPrice, totalPrice, selectedSeats, combos, reservationStartTime });
 
                     navigate('/thanh-toan', {
                       state: {
@@ -386,7 +402,9 @@ function PaymentResultPage() {
                         seatPrice,
                         combos,
                         comboPrice,
-                        totalPrice
+                        totalPrice,
+                        forceTimerSync: true, // Flag để force sync timer với server
+                        reservationStartTime // Truyền startTime đúng từ order
                       }
                     });
                   } else {
