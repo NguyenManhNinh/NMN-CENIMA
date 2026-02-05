@@ -71,9 +71,12 @@ exports.createOrder = catchAsync(async (req, res, next) => {
         return next(new AppError('Đơn hàng đã hết hạn! Vui lòng chọn lại ghế và đặt vé mới.', 400));
       }
 
-      // Seats mismatch → cũng không thể tiếp tục
+      // Seats mismatch → mark old order as EXPIRED and continue to create new order
       if (!seatsMatch) {
-        return next(new AppError('Ghế đã thay đổi! Vui lòng chọn lại ghế.', 400));
+        console.log('[Order] Seats mismatch - expiring old order and creating new one');
+        existingPendingOrder.status = 'EXPIRED';
+        await existingPendingOrder.save();
+        // Continue to create new order below (don't return error)
       }
     }
   }
