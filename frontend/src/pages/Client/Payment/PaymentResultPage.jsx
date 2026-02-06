@@ -20,15 +20,55 @@ const styles = {
   wrapper: {
     minHeight: '100vh',
     bgcolor: '#f5f5f5',
-    py: 4,
+    pt: 1,
+    pb: 4,
     fontFamily: '"Nunito Sans", sans-serif'
   },
-  title: {
-    textAlign: 'center',
-    fontWeight: 700,
-    fontSize: { xs: '1.3rem', md: '1.6rem' },
-    color: '#1a3a5c',
-    mb: 3
+  // Thanh stepper hiển thị các bước
+  stepperContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    bgcolor: '#fff',
+    py: { xs: 1.5, md: 2 },
+    mb: 3,
+    boxShadow: 'none',
+    width: '100vw',
+    ml: 'calc(-50vw + 50%)',
+    position: 'relative',
+    overflowX: { xs: 'auto', md: 'visible' },
+    '&::-webkit-scrollbar': { display: 'none' },
+    scrollbarWidth: 'none'
+  },
+  stepperInner: {
+    display: 'inline-flex',
+    gap: { xs: 0, md: 3 },
+    flexWrap: 'nowrap',
+    borderBottom: '2px solid #e0e0e0',
+    pb: 0,
+    px: { xs: 1, md: 0 }
+  },
+  stepperItem: {
+    display: 'flex',
+    alignItems: 'center',
+    px: { xs: 1.5, md: 2 },
+    py: { xs: 1, md: 1.5 },
+    borderBottom: '3px solid transparent',
+    mb: '-1px',
+    cursor: 'default',
+    flexShrink: 0
+  },
+  stepperItemActive: {
+    borderBottomColor: '#00405d'
+  },
+  stepText: {
+    fontSize: { xs: '0.7rem', md: '0.9rem' },
+    color: '#999',
+    whiteSpace: 'nowrap',
+    fontWeight: 500
+  },
+  stepTextActive: {
+    color: '#00405d',
+    fontWeight: 700
   },
   tableHeader: {
     bgcolor: '#1a3a5c',
@@ -199,12 +239,42 @@ function PaymentResultPage() {
 
   return (
     <Box sx={styles.wrapper}>
-      <Container maxWidth="md">
-        {/* Tiêu đề */}
-        <Typography sx={styles.title}>
-          Bước 4: Kết thúc đặt vé
-        </Typography>
+      {/* THANH STEPPER */}
+      <Box sx={styles.stepperContainer}>
+        <Box sx={styles.stepperInner}>
+          {[
+            { id: 1, label: 'Chọn phim / Rạp / Suất', mobileLabel: 'Phim/Rạp' },
+            { id: 2, label: 'Chọn ghế', mobileLabel: 'Ghế' },
+            { id: 3, label: 'Chọn thức ăn', mobileLabel: 'Đồ ăn' },
+            { id: 4, label: 'Thanh toán', mobileLabel: 'Thanh toán' },
+            { id: 5, label: 'Xác nhận', mobileLabel: 'Xác nhận' }
+          ].map((step, index) => (
+            <Box
+              key={step.id}
+              sx={{
+                ...styles.stepperItem,
+                ...(index === 4 ? styles.stepperItemActive : {}) // Step 5 active (Xác nhận)
+              }}
+            >
+              <Typography
+                sx={{
+                  ...styles.stepText,
+                  ...(index === 4 ? styles.stepTextActive : {})
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                  {step.label}
+                </Box>
+                <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
+                  {step.mobileLabel}
+                </Box>
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
 
+      <Container maxWidth="md">
         {/* Bảng thông tin đặt vé */}
         <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e0e0e0' }}>
           {/* Header */}
@@ -382,7 +452,7 @@ function PaymentResultPage() {
                     const orderCreatedAt = new Date(order.createdAt).getTime();
                     const reservationStartTime = orderCreatedAt;
                     const elapsed = Math.floor((Date.now() - reservationStartTime) / 1000);
-                    const remaining = 900 - elapsed;
+                    const remaining = 120 - elapsed; // 2 phút (testing, change to 900 for prod)
 
                     console.log('🟠 [PaymentResultPage] RETRY - calculating timer:');
                     console.log('   - order.createdAt:', order.createdAt);

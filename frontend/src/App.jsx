@@ -44,12 +44,12 @@ function App() {
             <Route path="dat-ve-combo" element={<ComboPage />} />
             {/* Thanh toán */}
             <Route path="thanh-toan" element={<PaymentConfirmPage />} />
-            {/* Kết quả thanh toán */}
-            <Route path="ket-qua-thanh-toan" element={<PaymentResultPage />} />
           </Route>
 
           {/* CLIENT ROUTES - Layout đầy đủ với navigation */}
           <Route path="/" element={<ClientLayout />}>
+            {/* Kết quả thanh toán - Dùng full header */}
+            <Route path="ket-qua-thanh-toan" element={<PaymentResultPage />} />
             {/* Trang chủ */}
             <Route index element={<HomePage />} />
             {/* Phim đang chiếu */}

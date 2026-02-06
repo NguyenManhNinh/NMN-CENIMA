@@ -84,6 +84,28 @@ function BookingLayout() {
     }
   }, [showtimeId, selectedSeats, navigate]);
 
+  // Click logo về trang chủ - reset timer và giải phóng ghế
+  const handleLogoClick = useCallback(async () => {
+    try {
+      // Giải phóng tất cả ghế đang giữ
+      if (showtimeId && selectedSeats.length > 0) {
+        await Promise.all(
+          selectedSeats.map(seat =>
+            releaseHoldAPI(showtimeId, seat.seatCode).catch(() => { })
+          )
+        );
+      }
+      // Xóa timer khỏi sessionStorage
+      sessionStorage.removeItem('reservationStartTime');
+      // Redirect về trang chủ
+      navigate('/');
+    } catch (error) {
+      console.error('Lỗi khi về trang chủ:', error);
+      sessionStorage.removeItem('reservationStartTime');
+      navigate('/');
+    }
+  }, [showtimeId, selectedSeats, navigate]);
+
   return (
     <Box sx={styles.root}>
       {/* Header đơn giản - theo Galaxy Cinema */}
@@ -96,7 +118,7 @@ function BookingLayout() {
               src="/NMN_CENIMA_LOGO.png"
               alt="NMN Cinema"
               sx={styles.logo}
-              onClick={() => navigate('/')}
+              onClick={handleLogoClick}
             />
 
             {/* Nút Huỷ giao dịch */}

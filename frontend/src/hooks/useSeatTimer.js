@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { verifyHoldAPI } from '../apis/seatHoldApi';
 
 const RESERVATION_TIME = 900; // 15 minutes in seconds
+// const RESERVATION_TIME = 120; // 2 minutes (for testing)
 const POLL_INTERVAL = 30000; // Poll server every 30 seconds
 
 /**
@@ -23,7 +24,9 @@ const useSeatTimer = (showtimeId, options = {}) => {
     forceSync = false,
     onExpire = null,
     redirectPath = '/',
-    enablePolling = false
+    enablePolling = false,
+    // Mới: Bỏ qua showtimeId - timer persist qua các showtime khác nhau
+    ignoreShowtimeId = false
   } = options;
 
   const [timeLeft, setTimeLeft] = useState(null); // null = chưa init
@@ -34,6 +37,7 @@ const useSeatTimer = (showtimeId, options = {}) => {
   const timerRef = useRef(null);
   const pollRef = useRef(null);
   const startTimeRef = useRef(null);
+  const isInitializedRef = useRef(false); // Tránh re-init khi chuyển trang
 
   // Lấy startTime từ sessionStorage hoặc tính từ remainingSeconds
   const getStoredStartTime = useCallback(() => {
@@ -63,11 +67,14 @@ const useSeatTimer = (showtimeId, options = {}) => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (pollRef.current) clearInterval(pollRef.current);
 
+    // LUÔN xóa timer khỏi sessionStorage trước
+    sessionStorage.removeItem('reservationStartTime');
+    isInitializedRef.current = false;
+
     if (onExpire && typeof onExpire === 'function') {
       onExpire();
     } else {
       alert('Hết thời gian giữ ghế! Vui lòng chọn lại.');
-      sessionStorage.removeItem('reservationStartTime');
       navigate(redirectPath);
     }
   }, [onExpire, navigate, redirectPath]);
@@ -152,7 +159,13 @@ const useSeatTimer = (showtimeId, options = {}) => {
 
   // Initialize timer từ sessionStorage hoặc server
   useEffect(() => {
-    if (!enabled || !showtimeId) return;
+    if (!enabled) return;
+
+    // Tránh re-init nếu đã initialized (khi chuyển trang)
+    if (isInitializedRef.current && timeLeft !== null && timeLeft > 0) {
+      console.log('[useSeatTimer] Already initialized, skipping re-init');
+      return;
+    }
 
     const initializeTimer = async () => {
       setIsLoading(true);
@@ -167,6 +180,7 @@ const useSeatTimer = (showtimeId, options = {}) => {
           startTimeRef.current = storedStartTime;
           setTimeLeft(remaining);
           setIsLoading(false);
+          isInitializedRef.current = true;
 
           // Background sync với server (không block UI)
           if (shouldVerifyOnMount) {
@@ -200,25 +214,41 @@ const useSeatTimer = (showtimeId, options = {}) => {
     };
   }, [enabled, enablePolling, showtimeId, syncWithServer]);
 
-  // Countdown logic
+  // Countdown logic - tính từ startTime để tránh drift và nhảy giá trị
   useEffect(() => {
-    if (!enabled || timeLeft === null || timeLeft <= 0) return;
+    if (!enabled) return;
 
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          handleExpire();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    // Chỉ chạy interval khi có startTime
+    const storedStartTime = getStoredStartTime();
+    if (!storedStartTime) return;
+
+    // Clear interval cũ trước
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    // Tính và cập nhật mỗi giây dựa trên startTime
+    const tick = () => {
+      const remaining = calculateRemainingFromStartTime(storedStartTime);
+      if (remaining <= 0) {
+        clearInterval(timerRef.current);
+        handleExpire();
+        setTimeLeft(0);
+      } else {
+        setTimeLeft(remaining);
+      }
+    };
+
+    // Tick ngay lập tức
+    tick();
+
+    // Sau đó tick mỗi giây
+    timerRef.current = setInterval(tick, 1000);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [enabled, timeLeft > 0, handleExpire]);
+  }, [enabled, getStoredStartTime, calculateRemainingFromStartTime, handleExpire]);
 
   // Format time mm:ss
   const formatTime = useCallback(() => {
@@ -237,6 +267,27 @@ const useSeatTimer = (showtimeId, options = {}) => {
     setIsLoading(false);
   }, [saveStartTime]);
 
+  // Kiểm tra timer đã tồn tại chưa
+  const hasExistingTimer = useCallback(() => {
+    const stored = getStoredStartTime();
+    if (!stored) return false;
+    const remaining = calculateRemainingFromStartTime(stored);
+    return remaining > 0;
+  }, [getStoredStartTime, calculateRemainingFromStartTime]);
+
+  // Bắt đầu timer mới (chỉ khi chưa có)
+  const startNewTimer = useCallback(() => {
+    // Nếu đã có timer đang chạy → không reset
+    if (hasExistingTimer()) {
+      console.log('[useSeatTimer] Timer already exists, keeping it');
+      return false;
+    }
+    // Tạo timer mới
+    console.log('[useSeatTimer] Starting new timer');
+    initTimer(RESERVATION_TIME);
+    return true;
+  }, [hasExistingTimer, initTimer]);
+
   return {
     timeLeft,
     formattedTime: formatTime(),
@@ -246,7 +297,9 @@ const useSeatTimer = (showtimeId, options = {}) => {
     lastSyncTime,
     initTimer,
     verifyHold,
-    syncWithServer: () => syncWithServer(true) // Force sync
+    syncWithServer: () => syncWithServer(true), // Force sync
+    hasExistingTimer,
+    startNewTimer
   };
 };
 

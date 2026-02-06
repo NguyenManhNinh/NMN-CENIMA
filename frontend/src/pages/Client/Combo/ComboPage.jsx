@@ -28,16 +28,55 @@ const styles = {
   wrapper: {
     minHeight: '100vh',
     bgcolor: '#f5f5f5',
-    py: { xs: 2, md: 4 },
-    pb: { xs: 10, md: 4 }, // Extra padding bottom for mobile fixed footer
+    pt: 1,
+    pb: { xs: 10, md: 4 },
     fontFamily: '"Nunito Sans", sans-serif'
   },
-  stepTitle: {
-    textAlign: 'center',
-    fontWeight: 700,
-    fontSize: { xs: '1.2rem', sm: '1.35rem', md: '1.5rem' },
-    color: '#1a3a5c',
-    mb: { xs: 2, md: 4 }
+  // Thanh stepper hiển thị các bước
+  stepperContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    bgcolor: '#fff',
+    py: { xs: 1.5, md: 2 },
+    mb: 3,
+    boxShadow: 'none',
+    width: '100vw',
+    ml: 'calc(-50vw + 50%)',
+    position: 'relative',
+    overflowX: { xs: 'auto', md: 'visible' },
+    '&::-webkit-scrollbar': { display: 'none' },
+    scrollbarWidth: 'none'
+  },
+  stepperInner: {
+    display: 'inline-flex',
+    gap: { xs: 0, md: 3 },
+    flexWrap: 'nowrap',
+    borderBottom: '2px solid #e0e0e0',
+    pb: 0,
+    px: { xs: 1, md: 0 }
+  },
+  stepperItem: {
+    display: 'flex',
+    alignItems: 'center',
+    px: { xs: 1.5, md: 2 },
+    py: { xs: 1, md: 1.5 },
+    borderBottom: '3px solid transparent',
+    mb: '-1px',
+    cursor: 'default',
+    flexShrink: 0
+  },
+  stepperItemActive: {
+    borderBottomColor: '#00405d'
+  },
+  stepText: {
+    fontSize: { xs: '0.7rem', md: '0.9rem' },
+    color: '#999',
+    whiteSpace: 'nowrap',
+    fontWeight: 500
+  },
+  stepTextActive: {
+    color: '#00405d',
+    fontWeight: 700
   },
   // Combo card - responsive layout
   comboCard: {
@@ -315,15 +354,45 @@ function ComboPage() {
 
   return (
     <Box sx={styles.wrapper}>
+      {/* THANH STEPPER */}
+      <Box sx={styles.stepperContainer}>
+        <Box sx={styles.stepperInner}>
+          {[
+            { id: 1, label: 'Chọn phim / Rạp / Suất', mobileLabel: 'Phim/Rạp' },
+            { id: 2, label: 'Chọn ghế', mobileLabel: 'Ghế' },
+            { id: 3, label: 'Chọn thức ăn', mobileLabel: 'Đồ ăn' },
+            { id: 4, label: 'Thanh toán', mobileLabel: 'Thanh toán' },
+            { id: 5, label: 'Xác nhận', mobileLabel: 'Xác nhận' }
+          ].map((step, index) => (
+            <Box
+              key={step.id}
+              sx={{
+                ...styles.stepperItem,
+                ...(index === 2 ? styles.stepperItemActive : {}) // Step 3 active
+              }}
+            >
+              <Typography
+                sx={{
+                  ...styles.stepText,
+                  ...(index === 2 ? styles.stepTextActive : {})
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                  {step.label}
+                </Box>
+                <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
+                  {step.mobileLabel}
+                </Box>
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+
       <Container maxWidth="xl">
         <Grid container spacing={4}>
           {/* Danh sách combo */}
           <Grid item xs={12} md={8}>
-
-            {/* Tiêu đề */}
-            <Typography sx={styles.stepTitle}>
-              Bước 2: Chọn Combo
-            </Typography>
 
             {/* Grid combo */}
             <Grid container spacing={2}>

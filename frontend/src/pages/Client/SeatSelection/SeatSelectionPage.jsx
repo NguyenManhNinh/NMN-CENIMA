@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -39,6 +39,9 @@ import {
   offEvent
 } from '../../../services/socketService';
 
+// Timer hook
+import useSeatTimer from '../../../hooks/useSeatTimer';
+
 // Ảnh màn hình
 import screenImage from '../../../assets/images/manhinhled.png';
 
@@ -57,6 +60,52 @@ const styles = {
     py: { xs: 2, md: 4 },
     px: { xs: 1, md: 0 },
     fontFamily: '"Nunito Sans", sans-serif'
+  },
+  // Thanh stepper hiển thị các bước
+  stepperContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    bgcolor: '#fff',
+    py: { xs: 1.5, md: 2 },
+    mb: 3,
+    boxShadow: 'none',
+    width: '100vw',
+    ml: 'calc(-50vw + 50%)',
+    position: 'relative',
+    overflowX: { xs: 'auto', md: 'visible' },
+    '&::-webkit-scrollbar': { display: 'none' },
+    scrollbarWidth: 'none'
+  },
+  stepperInner: {
+    display: 'inline-flex',
+    gap: { xs: 0, md: 3 },
+    flexWrap: 'nowrap',
+    borderBottom: '2px solid #e0e0e0',
+    pb: 0,
+    px: { xs: 1, md: 0 }
+  },
+  stepperItem: {
+    display: 'flex',
+    alignItems: 'center',
+    px: { xs: 1.5, md: 2 },
+    py: { xs: 1, md: 1.5 },
+    borderBottom: '3px solid transparent',
+    mb: '-1px',
+    cursor: 'default',
+    flexShrink: 0
+  },
+  stepperItemActive: {
+    borderBottomColor: '#00405d'
+  },
+  stepText: {
+    fontSize: { xs: '0.7rem', md: '0.9rem' },
+    color: '#999',
+    whiteSpace: 'nowrap',
+    fontWeight: 500
+  },
+  stepTextActive: {
+    color: '#00405d',
+    fontWeight: 700
   },
   screenTitle: {
     color: '#1a3a5c',
@@ -231,87 +280,40 @@ function SeatSelectionPage() {
   const [loginModalOpen, setLoginModalOpen] = useState(false); // Modal đăng nhập
   const [maxSeatsWarningOpen, setMaxSeatsWarningOpen] = useState(false); // Modal cảnh báo vượt 8 ghế
 
-  // Timer đếm ngược (chỉ hiển thị khi có reservationStartTime từ trang combo)
-  const RESERVATION_TIME = 15 * 60; // 15 phút
-  const [timeLeft, setTimeLeft] = useState(RESERVATION_TIME);
-
-  // Lấy từ sessionStorage hoặc location.state
-  const getInitialStartTime = () => {
-    const stored = sessionStorage.getItem('reservationStartTime');
-    return stored ? parseInt(stored, 10) : null;
-  };
-  const [reservationStartTime, setReservationStartTime] = useState(getInitialStartTime);
-
-  // Sync reservationStartTime từ location.state hoặc sessionStorage
-  useEffect(() => {
-    const stateData = location.state || {};
-
-    // Ưu tiên từ location.state (khi navigate với state)
-    if (stateData.reservationStartTime) {
-      setReservationStartTime(stateData.reservationStartTime);
-      sessionStorage.setItem('reservationStartTime', stateData.reservationStartTime.toString());
-    } else if (!reservationStartTime) {
-      // Fallback: lấy từ sessionStorage (khi back/forward browser)
-      const stored = sessionStorage.getItem('reservationStartTime');
-      if (stored) {
-        setReservationStartTime(parseInt(stored, 10));
+  // Timer hook - đồng bộ với sessionStorage và persist qua các trang
+  const {
+    timeLeft,
+    formattedTime,
+    isExpired,
+    hasExistingTimer,
+    startNewTimer,
+    initTimer
+  } = useSeatTimer(showtimeId, {
+    enabled: true,
+    ignoreShowtimeId: true, // Timer persist qua các showtime khác nhau
+    onExpire: () => {
+      // Giải phóng ghế đã giữ khi hết thời gian
+      if (showtimeId && selectedSeats.length > 0) {
+        Promise.all(
+          selectedSeats.map(seat =>
+            releaseHoldAPI(showtimeId, seat.seatCode).catch(() => { })
+          )
+        );
       }
-    }
-  }, [location.state]);
-
-  const hasReservation = !!reservationStartTime;
-
-  // Timer effect - chỉ chạy khi có reservation
-  useEffect(() => {
-    if (!reservationStartTime) return;
-
-    const calculateTimeLeft = () => {
-      const elapsed = Math.floor((Date.now() - reservationStartTime) / 1000);
-      const remaining = RESERVATION_TIME - elapsed;
-      return remaining > 0 ? remaining : 0;
-    };
-
-    setTimeLeft(calculateTimeLeft());
-
-    const timer = setInterval(() => {
-      const remaining = calculateTimeLeft();
-      setTimeLeft(remaining);
-
-      if (remaining <= 0) {
-        clearInterval(timer);
-
-        // Giải phóng ghế đã giữ khi hết thời gian
-        if (showtimeId && selectedSeats.length > 0) {
-          Promise.all(
-            selectedSeats.map(seat =>
-              releaseHoldAPI(showtimeId, seat.seatCode).catch(() => { })
-            )
-          );
-        }
-
-        sessionStorage.removeItem('reservationStartTime');
-        setReservationStartTime(null);
-        setSelectedSeats([]);
-        alert('Hết thời gian giữ ghế! Vui lòng chọn lại suất chiếu.');
-        // Redirect về trang đặt vé của phim hoặc trang chủ
-        const movieSlug = showtime?.movie?.slug || showtime?.movieSlug;
-        if (movieSlug) {
-          navigate(`/dat-ve/${movieSlug}`);
-        } else {
-          navigate('/');
-        }
+      setSelectedSeats([]);
+      alert('Hết thời gian giữ ghế! Vui lòng chọn lại suất chiếu.');
+      const movieSlug = showtime?.movie?.slug || showtime?.movieSlug;
+      if (movieSlug) {
+        navigate(`/dat-ve/${movieSlug}`);
+      } else {
+        navigate('/');
       }
-    }, 1000);
+    },
+    redirectPath: '/'
+  });
 
-    return () => clearInterval(timer);
-  }, [reservationStartTime]);
-
-  // Format thời gian mm:ss
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  // Kiểm tra có timer đang chạy không
+  const hasReservation = hasExistingTimer() || (timeLeft !== null && timeLeft > 0);
 
   // Load dữ liệu ghế và suất chiếu
   // Re-run khi showtimeId thay đổi HOẶC auth state thay đổi (login/logout)
@@ -322,38 +324,6 @@ function SeatSelectionPage() {
       setSelectedSeats([]);
     }
   }, [showtimeId, isAuthenticated]);
-
-  // Verify hold với server khi có reservationStartTime (sync timer)
-  // Đảm bảo hold vẫn còn hiệu lực khi quay lại trang hoặc reload
-  useEffect(() => {
-    const verifyHoldWithServer = async () => {
-      if (!reservationStartTime || !showtimeId) return;
-
-      try {
-        const response = await verifyHoldAPI(showtimeId);
-        const { valid, remainingSeconds } = response.data;
-
-        if (valid && remainingSeconds > 0) {
-          // Sync timer với server time
-          setTimeLeft(remainingSeconds);
-          console.log('[SeatSelection] Timer synced with server:', remainingSeconds, 'seconds');
-        } else {
-          // Hold đã hết hạn ở server -> Clear session
-          console.log('[SeatSelection] Hold expired on server, clearing session');
-          sessionStorage.removeItem('reservationStartTime');
-          setReservationStartTime(null);
-          setSelectedSeats([]);
-        }
-      } catch (error) {
-        // Lỗi 401 = chưa đăng nhập, bỏ qua
-        if (error.response?.status !== 401) {
-          console.error('[SeatSelection] Verify hold failed:', error);
-        }
-      }
-    };
-
-    verifyHoldWithServer();
-  }, [showtimeId, reservationStartTime]);
 
   // REAL-TIME SOCKET.IO
   // Kết nối Socket.io để đồng bộ trạng thái ghế real-time
@@ -713,6 +683,41 @@ function SeatSelectionPage() {
   return (
     <>
       <Box sx={styles.wrapper}>
+        {/* THANH STEPPER */}
+        <Box sx={styles.stepperContainer}>
+          <Box sx={styles.stepperInner}>
+            {[
+              { id: 1, label: 'Chọn phim / Rạp / Suất', mobileLabel: 'Phim/Rạp' },
+              { id: 2, label: 'Chọn ghế', mobileLabel: 'Ghế' },
+              { id: 3, label: 'Chọn thức ăn', mobileLabel: 'Đồ ăn' },
+              { id: 4, label: 'Thanh toán', mobileLabel: 'Thanh toán' },
+              { id: 5, label: 'Xác nhận', mobileLabel: 'Xác nhận' }
+            ].map((step, index) => (
+              <Box
+                key={step.id}
+                sx={{
+                  ...styles.stepperItem,
+                  ...(index === 1 ? styles.stepperItemActive : {}) // Step 2 active
+                }}
+              >
+                <Typography
+                  sx={{
+                    ...styles.stepText,
+                    ...(index === 1 ? styles.stepTextActive : {})
+                  }}
+                >
+                  <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                    {step.label}
+                  </Box>
+                  <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
+                    {step.mobileLabel}
+                  </Box>
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
         <Container maxWidth="xl">
           <Grid container spacing={4}>
             {/* Sơ đồ ghế */}
@@ -813,11 +818,11 @@ function SeatSelectionPage() {
                   <Typography sx={{ color: '#666', fontSize: '1rem' }}>
                     Thời gian giữ ghế: {' '}
                     <Box component="span" sx={{
-                      color: timeLeft <= 60 ? '#DC2626' : '#F5A623',
+                      color: (timeLeft || 0) <= 60 ? '#DC2626' : '#F5A623',
                       fontWeight: 700,
                       fontSize: '1.3rem'
                     }}>
-                      {formatTime(timeLeft)}
+                      {formattedTime}
                     </Box>
                   </Typography>
                 </Box>
