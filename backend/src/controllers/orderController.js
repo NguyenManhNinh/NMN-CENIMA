@@ -26,7 +26,8 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 
     // Kiểm tra order chưa quá 15 phút (còn valid)
     const orderAge = Date.now() - new Date(existingPendingOrder.createdAt).getTime();
-    const MAX_ORDER_AGE = 15 * 60 * 1000; // 15 minutes
+    const MAX_ORDER_AGE = 15 * 60 * 1000; // Gía trị thời gian realtime thật 15 phút 15 * 60 * 1000
+    // const MAX_ORDER_AGE = 2 * 60 * 1000; // Gía trị thời gian realtime để test là 2p 2 * 60 * 1000
 
     // So sánh seats: lấy seatCode từ order và so với seats từ request
     const orderSeatCodes = existingPendingOrder.seats.map(s => s.seatCode).sort();
@@ -61,18 +62,17 @@ exports.createOrder = catchAsync(async (req, res, next) => {
         seatsMismatch: !seatsMatch
       });
 
-      // PENDING order quá hạn hoặc ghế khác → trả về lỗi rõ ràng
-      // Không tiếp tục check SeatHold vì hold đã bị xóa khi tạo order lần đầu
+      // PENDING order quá hạn hoặc ghế khác → mark as EXPIRED and continue to create new order
       if (orderAge >= MAX_ORDER_AGE) {
         // Mark old order as EXPIRED
+        console.log('[Order] PENDING order expired - marking as EXPIRED and allowing new order');
         existingPendingOrder.status = 'EXPIRED';
         await existingPendingOrder.save();
-
-        return next(new AppError('Đơn hàng đã hết hạn! Vui lòng chọn lại ghế và đặt vé mới.', 400));
+        // Continue to create new order below (don't return error)
       }
 
       // Seats mismatch → mark old order as EXPIRED and continue to create new order
-      if (!seatsMatch) {
+      if (!seatsMatch && orderAge < MAX_ORDER_AGE) {
         console.log('[Order] Seats mismatch - expiring old order and creating new one');
         existingPendingOrder.status = 'EXPIRED';
         await existingPendingOrder.save();

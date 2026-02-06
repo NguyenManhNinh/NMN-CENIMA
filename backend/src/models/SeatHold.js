@@ -24,7 +24,8 @@ const seatHoldSchema = new mongoose.Schema({
   // Thời điểm hết hạn (TTL)
   expiredAt: {
     type: Date,
-    default: () => new Date(Date.now() + 15 * 60 * 1000), // Mặc định 15 phút từ lúc tạo
+    default: () => new Date(Date.now() + 15 * 60 * 1000), // thời gian reatltime thật 15 phút
+    // default: () => new Date(Date.now() + 2 * 60 * 1000), // thời gian realitme để tét 2 phút
     index: { expires: 0 } // TTL Index: MongoDB tự xóa khi thời gian hiện tại >= expiredAt
   }
 }, {
