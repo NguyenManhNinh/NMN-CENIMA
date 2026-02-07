@@ -100,6 +100,10 @@ const defaultRoutes = [
   {
     path: '/promotions',
     route: require('./promotionRoutes')
+  },
+  {
+    path: '/featured',
+    route: require('../featuredRoutes')
   }
 ];
 
