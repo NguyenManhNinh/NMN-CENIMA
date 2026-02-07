@@ -331,7 +331,7 @@ const blogMenuItems = [
 // SỰ KIỆN MENU ITEMS
 const eventMenuItems = [
   { label: 'Ưu đãi-Sự kiện', path: '/uu-dai' },
-  { label: 'Phim hay hàng tháng', path: '/phim-hay-hang-thang' }
+  { label: 'Phim hay hàng tháng', path: '/phim-hay' }
 ];
 // SỰ KIỆN GIÁ VÉ ITEMS
 const eventTicketMenuItems = [

@@ -274,6 +274,20 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     py: 2
+  },
+  // Loading overlay toàn trang (giống ComboPage)
+  loadingScreen: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    bgcolor: '#1a1a2e',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999
   }
 };
 
@@ -328,6 +342,7 @@ function QuickBookingPage() {
   const [loadingMovies, setLoadingMovies] = useState(false);
   const [loadingCinemas, setLoadingCinemas] = useState(false);
   const [loadingShowtimes, setLoadingShowtimes] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true); // Loading ban đầu
 
   // Load movies and cities on mount
   useEffect(() => {
@@ -373,7 +388,7 @@ function QuickBookingPage() {
       }
     };
 
-    loadInitialData();
+    loadInitialData().finally(() => setInitialLoading(false));
     setDates(generateDates());
   }, []);
 
@@ -490,6 +505,24 @@ function QuickBookingPage() {
 
   // Get selected area name - selectedArea giờ đã là tên thành phố trực tiếp
   const selectedAreaName = selectedArea || '';
+
+  // RENDER: Loading state
+  if (initialLoading) {
+    return (
+      <Box sx={styles.loadingScreen}>
+        <Box
+          component="img"
+          src="/NMN_CENIMA_LOGO.png"
+          alt="NMN Cinema"
+          sx={{ width: 200, height: 200, mb: 1.5, objectFit: 'contain' }}
+        />
+        <CircularProgress size={40} thickness={2} sx={{ color: '#F5A623', mb: 2 }} />
+        <Typography sx={{ color: '#FFA500', fontSize: '1.2rem', fontWeight: 600 }}>
+          Chờ tôi xíu nhé
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={styles.wrapper}>

@@ -25,6 +25,7 @@ import { FilmDirectorPage, FilmDirectorDetailPage } from './pages/Client/FilmDir
 import { PromotionListPage, PromotionDetailPage } from './pages/Client/Promotion';
 import QuickBookingPage from './pages/Client/QuickBooking';
 import { BookingFallbackPage } from './pages/Client/BookingFallback';
+import { FeaturedPage, FeaturedDetailPage } from './pages/Client/Featured';
 
 function App() {
   return (
@@ -87,6 +88,10 @@ function App() {
             {/* Ưu đãi - Sự kiện */}
             <Route path="uu-dai" element={<PromotionListPage />} />
             <Route path="uu-dai/:slug" element={<PromotionDetailPage />} />
+
+            {/* Phim hay tháng */}
+            <Route path="phim-hay" element={<FeaturedPage />} />
+            <Route path="phim-hay/:slug" element={<FeaturedDetailPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
