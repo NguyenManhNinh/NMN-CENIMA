@@ -45,6 +45,28 @@ const handleImageError = (e) => {
   e.target.src = FALLBACK_IMAGE;
 };
 
+// Convert any YouTube URL to embed format
+const getYoutubeEmbedUrl = (url) => {
+  if (!url) return null;
+
+  // Already embed format
+  if (url.includes('/embed/')) return url;
+
+  let videoId = null;
+
+  // Format: https://youtu.be/VIDEO_ID or https://youtu.be/VIDEO_ID?si=xxx
+  if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0];
+  }
+  // Format: https://www.youtube.com/watch?v=VIDEO_ID
+  else if (url.includes('youtube.com/watch')) {
+    const urlParams = new URL(url).searchParams;
+    videoId = urlParams.get('v');
+  }
+
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+};
+
 function FeaturedDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -115,9 +137,9 @@ function FeaturedDetailPage() {
           console.error('Lỗi tải phim đang chiếu:', err);
         }
 
-        // Fetch 5 newest genres for "Tin liên quan"
+        // Fetch 4 newest genres for "Tin liên quan" từ trang thể loại
         try {
-          const genresRes = await getAllGenresAPI({ limit: 5, sortBy: 'newest' });
+          const genresRes = await getAllGenresAPI({ limit: 4, sortBy: 'newest' });
           setRelatedGenres(genresRes?.data?.genres || []);
         } catch (err) {
           console.error('Lỗi tải tin liên quan:', err);
@@ -319,16 +341,17 @@ function FeaturedDetailPage() {
               {/* Excerpt/Description - hiển thị trước video */}
               {article.excerpt && (
                 <Typography
+                  component="div"
                   sx={{
                     mb: 3,
                     lineHeight: 1.8,
                     fontSize: '15px',
                     color: COLORS.text,
-                    textAlign: 'justify'
+                    textAlign: 'justify',
+                    '& strong': { color: COLORS.primary, fontWeight: 700 }
                   }}
-                >
-                  {article.excerpt}
-                </Typography>
+                  dangerouslySetInnerHTML={{ __html: article.excerpt }}
+                />
               )}
 
               {/* Video Embed OR Thumbnail */}
@@ -336,7 +359,7 @@ function FeaturedDetailPage() {
                 <Box sx={{ mb: 3, overflow: 'hidden', position: 'relative' }}>
                   <Box
                     component="iframe"
-                    src={article.videoUrl}
+                    src={getYoutubeEmbedUrl(article.videoUrl)}
                     title={article.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -500,12 +523,12 @@ function FeaturedDetailPage() {
                 dangerouslySetInnerHTML={{ __html: article.content || article.excerpt || '' }}
               />
 
-              {/* TIN LIÊN QUAN */}
+              {/* TIN LIÊN QUAN - Lấy từ Thể loại phim */}
               {relatedGenres.length > 0 && (
                 <Box sx={{ mt: 5 }}>
                   <Typography sx={{
                     fontWeight: 700,
-                    fontSize: '16px',
+                    fontSize: '1.3rem',
                     color: COLORS.primary,
                     mb: 2,
                     pl: 1.5,
@@ -517,43 +540,44 @@ function FeaturedDetailPage() {
 
                   <Box sx={{
                     display: 'grid',
-                    gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' },
+                    gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' },
                     gap: 2
                   }}>
-                    {relatedGenres.slice(0, 5).map((genre) => (
+                    {relatedGenres.slice(0, 4).map((genre) => (
                       <Link
                         key={genre._id}
-                        to={`/phim/${genre.slug}`}
+                        to={`/the-loai-phim/${genre.slug}`}
                         style={{ textDecoration: 'none' }}
                       >
                         <Box sx={{
-                          borderRadius: 1,
                           overflow: 'hidden',
                           transition: 'transform 0.2s',
                           '&:hover': { transform: 'translateY(-4px)' }
                         }}>
                           <Box
                             component="img"
-                            src={genre.thumbnail || genre.posterUrl}
-                            alt={genre.title || genre.name}
+                            src={genre.imageUrl}
+                            alt={genre.name}
                             onError={handleImageError}
                             sx={{
                               width: '100%',
                               aspectRatio: '16/9',
-                              objectFit: 'cover'
+                              objectFit: 'cover',
+                              borderRadius: '8px'
                             }}
                           />
                           <Typography sx={{
-                            fontSize: '12px',
+                            fontSize: '14px',
                             color: COLORS.text,
-                            mt: 1,
-                            fontWeight: 500,
+                            mt: 1.5,
+                            fontWeight: 600,
+                            lineHeight: 1.4,
                             display: '-webkit-box',
-                            WebkitLineClamp: 2,
+                            WebkitLineClamp: 3,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden'
                           }}>
-                            {genre.title || genre.name}
+                            {genre.name}
                           </Typography>
                         </Box>
                       </Link>
