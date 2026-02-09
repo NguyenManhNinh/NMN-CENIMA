@@ -104,6 +104,10 @@ const defaultRoutes = [
   {
     path: '/featured',
     route: require('../featuredRoutes')
+  },
+  {
+    path: '/ticket-pricing',
+    route: require('./ticketPricingRoutes')
   }
 ];
 
