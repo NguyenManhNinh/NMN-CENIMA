@@ -23,7 +23,7 @@ import LogoNMNCinema from '../../../../assets/images/NMN_CENIMA_LOGO.png';
 // STYLES
 const styles = {
   footer: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#333333',
     color: '#fff',
     pt: 5,
     pb: 3,

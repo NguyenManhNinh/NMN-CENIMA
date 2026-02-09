@@ -26,6 +26,7 @@ import { PromotionListPage, PromotionDetailPage } from './pages/Client/Promotion
 import QuickBookingPage from './pages/Client/QuickBooking';
 import { BookingFallbackPage } from './pages/Client/BookingFallback';
 import { FeaturedPage, FeaturedDetailPage } from './pages/Client/Featured';
+import TicketPricingPage from './pages/Client/TicketPricing/TicketPricingPage';
 
 function App() {
   return (
@@ -92,6 +93,9 @@ function App() {
             {/* Phim hay tháng */}
             <Route path="phim-hay" element={<FeaturedPage />} />
             <Route path="phim-hay/:slug" element={<FeaturedDetailPage />} />
+
+            {/* Giá vé */}
+            <Route path="gia-ve" element={<TicketPricingPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

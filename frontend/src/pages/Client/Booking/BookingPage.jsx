@@ -410,29 +410,48 @@ function BookingPage() {
       <Box sx={{
         position: 'relative',
         width: '100%',
-        maxWidth: 1585.6,
-        height: { xs: 280, md: 850 },
-        mx: 'auto',
-        background: `linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url(${movie.bannerUrl || movie.posterUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        bgcolor: '#000',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        {/* Play Button*/}
-        <IconButton
-          onClick={() => movie?.trailerUrl && setOpenTrailerModal(true)}
+        {/* Banner Image - contain full image */}
+        <Box
+          component="img"
+          src={movie.bannerUrl || movie.posterUrl}
+          alt={movie.title}
           sx={{
-            width: { xs: 60, md: 80 },
-            height: { xs: 60, md: 80 },
-            transition: 'all 0.3s',
-            cursor: movie?.trailerUrl ? 'pointer' : 'default',
-            '&:hover': { transform: 'scale(1.1)' }
+            width: '100%',
+            maxHeight: { xs: 280, md: 500 },
+            objectFit: 'contain'
           }}
-        >
-          <PlayIcon sx={{ fontSize: 64, color: 'white' }} />
-        </IconButton>
+        />
+        {/* Dark overlay for play button visibility */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          {/* Play Button*/}
+          <IconButton
+            onClick={() => movie?.trailerUrl && setOpenTrailerModal(true)}
+            sx={{
+              width: { xs: 60, md: 80 },
+              height: { xs: 60, md: 80 },
+              transition: 'all 0.3s',
+              cursor: movie?.trailerUrl ? 'pointer' : 'default',
+              '&:hover': { transform: 'scale(1.1)' }
+            }}
+          >
+            <PlayIcon sx={{ fontSize: 64, color: 'white' }} />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* ==================== MAIN CONTENT SECTION ==================== */}

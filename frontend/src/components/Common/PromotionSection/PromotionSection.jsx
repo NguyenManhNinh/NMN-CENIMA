@@ -15,7 +15,7 @@ import {
 import { getAllEventsAPI } from '../../../apis/cmsApi';
 
 // Background image
-import filmBackground from '../../../assets/images/bg-header.jpg';
+import filmBackground from '../../../assets/images/background-uudai.png';
 
 // CONSTANTS
 const EVENTS_PER_PAGE = 4;
@@ -314,13 +314,13 @@ function PromotionSection() {
       <Container maxWidth="lg">
         {/* Header */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h5" component="h2" sx={{ ...styles.sectionTitle, color: 'white' }}>
+          <Typography variant="h5" component="h2" sx={{ ...styles.sectionTitle, color: '#1a1a2e' }}>
             ƯU ĐÃI
           </Typography>
           <Typography
             sx={{
               fontSize: '1.1rem',
-              color: 'hsla(0, 18%, 93%, 1.00)',
+              color: '#1A1A2E',
               mt: 1,
               maxWidth: 700,
               mx: 'auto',
@@ -406,7 +406,7 @@ function PromotionSection() {
                     <Typography
                       sx={{
                         textAlign: 'center',
-                        color: '#999',
+                        color: '#1c1919ff',
                         fontSize: '0.75rem',
                         mt: 1,
                         fontStyle: 'italic'
