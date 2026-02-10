@@ -27,6 +27,7 @@ import QuickBookingPage from './pages/Client/QuickBooking';
 import { BookingFallbackPage } from './pages/Client/BookingFallback';
 import { FeaturedPage, FeaturedDetailPage } from './pages/Client/Featured';
 import TicketPricingPage from './pages/Client/TicketPricing/TicketPricingPage';
+import MembershipPage from './pages/Client/Membership/MembershipPage';
 
 function App() {
   return (
@@ -96,6 +97,9 @@ function App() {
 
             {/* Giá vé */}
             <Route path="gia-ve" element={<TicketPricingPage />} />
+
+            {/* Thành viên */}
+            <Route path="thanh-vien" element={<MembershipPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

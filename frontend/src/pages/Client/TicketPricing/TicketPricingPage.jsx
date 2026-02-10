@@ -11,32 +11,31 @@ import {
   Skeleton
 } from '@mui/material';
 
-// ============================================================
-// STYLE TOKENS - Dark Theme (TouchCinema Style)
-// ============================================================
+// API
+import { getTicketPricingAPI } from '../../../apis/ticketPricingApi';
+
+// STYLE TOKENS - Hệ thống màu sắc & typography
 const tokens = {
   colors: {
     page: {
-      background: 'rgba(233, 233, 245, 1)'
+      background: 'rgba(233, 233, 245, 1)'     // Nền trang tổng thể
     },
     wrapper: {
-      background: '#1A1A2E'
+      background: '#1A1A2E'                      // Nền wrapper chính (tối)
     },
-    accent: 'rgb(255 215 0)',
-    accentHover: 'none',
+    accent: 'rgb(255 215 0)',                     // Màu vàng cho tab active
     text: {
-      primary: '#FFFFFF',
-      secondary: 'rgba(255, 255, 255, 0.85)',
-      muted: 'rgba(255, 255, 255, 0.7)'
+      primary: '#FFFFFF',                         // Tiêu đề, text chính
+      secondary: 'rgba(255, 255, 255, 0.85)',     // Nội dung ghi chú
+      muted: 'rgba(255, 255, 255, 0.7)'          // Text phụ, placeholder
     },
     border: {
-      inactive: 'rgba(255, 255, 255, 0.3)',
-
+      inactive: 'rgba(255, 255, 255, 0.3)'       // Viền tab không active
     },
     card: {
-      background: 'rgba(255, 255, 255, 0.06)'
+      background: 'rgba(255, 255, 255, 0.06)'    // Nền fallback khi ảnh lỗi
     },
-    skeleton: 'rgba(255, 255, 255, 0.06)'
+    skeleton: 'rgba(255, 255, 255, 0.06)'         // Nền skeleton loading
   },
   spacing: {
     wrapper: { xs: '16px', md: '32px' }
@@ -66,78 +65,48 @@ const tokens = {
   }
 };
 
-// ============================================================
-// MOCK DATA
-// ============================================================
-const MOCK_PRICING_DATA = {
-  title: 'Giá Vé rạp NMN Cinema - Hà Nội',
-  tabs: [
-    {
-      name: 'GIÁ VÉ 2D',
-      slug: '2D-price',
-      imageUrl: 'https://touchcinema.com/storage/slider-tv/z4045880677164-1ba77b4619d45e773581092b6319ac62.jpg',
-      sortOrder: 1
-    },
-    {
-      name: 'GIÁ VÉ 3D',
-      slug: '3D-price',
-      imageUrl: 'https://touchcinema.com/storage/slider-app/z4986572984860-008d90891c78bc2a0b13b8acd84f9e88.jpg',
-      sortOrder: 2
-    },
-    {
-      name: 'NGÀY LỄ',
-      slug: 'holiday-price',
-      imageUrl: 'https://touchcinema.com/storage/slider-tv/z4103264955341-3bb1395fb3108359cda4af45aee336f4-1724913363.jpg',
-      sortOrder: 3
-    }
-  ],
-  notes: `
-    <p><strong>Ghi chú:</strong></p>
-    <ul style="padding-left: 20px; margin: 0;">
-      <li>Bảng giá trên áp dụng cho khách hàng có thẻ thành viên, khách hàng không có thẻ thành viên phụ thu 10.000đ/vé đối với ghế thường, 20.000đ/vé đối với ghế đôi.</li>
-      <li>Bảng giá trên áp dụng cho suất chiếu thông thường, suất chiếu sớm (suất chiếu đặc biệt, suất chiếu sneakshow) phụ thu 10.000đ/vé đối với ghế thường, 20.000đ/vé đối với ghế đôi.</li>
-      <li>Giá vé khi đặt vé trực tuyến trên website và ứng dụng NMN Cinema là giá vé người lớn.</li>
-      <li>Giá vé học sinh, sinh viên được áp dụng cho người từ 22 tuổi trở xuống khi mua vé tại quầy.</li>
-      <li>Giá vé trẻ em, người cao tuổi, đối tượng ưu tiên áp dụng cho trẻ em, người từ 60 tuổi trở lên, người có công với cách mạng, người có hoàn cảnh đặc biệt khó khăn và các đối tượng khác theo quy định của pháp luật khi mua vé tại quầy.</li>
-      <li>Người khuyết tật đặc biệt nặng được miễn giá vé, người khuyết tật nặng được giảm 50% giá vé khi mua vé tại quầy.</li>
-      <li>Khách hàng khi đến rạp xem phim vui lòng chứng thực được độ tuổi phù hợp với phim, được quy định căn cứ vào Thông tư số 12/2015/TT-BVHTTDL của Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch có hiệu lực thi hành từ ngày 01/01/2017. NMN Cinema có quyền từ chối việc bán vé hoặc vào phòng chiếu nếu khách hàng không tuân thủ đúng theo quy định.</li>
-      <li>Khách hàng khi đến rạp xem phim vui lòng chứng thực được độ tuổi phù hợp với phim, được quy định căn cứ vào Thông tư số 12/2015/TT-BVHTTDL của Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch có hiệu lực thi hành từ ngày 01/01/2017. NMN Cinema có quyền từ chối việc bán vé hoặc vào phòng chiếu nếu khách hàng không tuân thủ đúng theo quy định.</li>
-      <li>Khách hàng khi đến rạp xem phim vui lòng chứng thực được độ tuổi phù hợp với phim, được quy định căn cứ vào Thông tư số 12/2015/TT-BVHTTDL của Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch có hiệu lực thi hành từ ngày 01/01/2017. NMN Cinema có quyền từ chối việc bán vé hoặc vào phòng chiếu nếu khách hàng không tuân thủ đúng theo quy định.</li>
-      <li>Khách hàng khi đến rạp xem phim vui lòng chứng thực được độ tuổi phù hợp với phim, được quy định căn cứ vào Thông tư số 12/2015/TT-BVHTTDL của Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch có hiệu lực thi hành từ ngày 01/01/2017. NMN Cinema có quyền từ chối việc bán vé hoặc vào phòng chiếu nếu khách hàng không tuân thủ đúng theo quy định.</li>
-      <li>Khách hàng khi đến rạp xem phim vui lòng chứng thực được độ tuổi phù hợp với phim, được quy định căn cứ vào Thông tư số 12/2015/TT-BVHTTDL của Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch có hiệu lực thi hành từ ngày 01/01/2017. NMN Cinema có quyền từ chối việc bán vé hoặc vào phòng chiếu nếu khách hàng không tuân thủ đúng theo quy định.</li>
-      <li>Khách hàng khi đến rạp xem phim vui lòng chứng thực được độ tuổi phù hợp với phim, được quy định căn cứ vào Thông tư số 12/2015/TT-BVHTTDL của Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch có hiệu lực thi hành từ ngày 01/01/2017. NMN Cinema có quyền từ chối việc bán vé hoặc vào phòng chiếu nếu khách hàng không tuân thủ đúng theo quy định.</li>
-      <li>Khách hàng khi đến rạp xem phim vui lòng chứng thực được độ tuổi phù hợp với phim, được quy định căn cứ vào Thông tư số 12/2015/TT-BVHTTDL của Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch có hiệu lực thi hành từ ngày 01/01/2017. NMN Cinema có quyền từ chối việc bán vé hoặc vào phòng chiếu nếu khách hàng không tuân thủ đúng theo quy định.</li>
-      <li>Khách hàng khi đến rạp xem phim vui lòng chứng thực được độ tuổi phù hợp với phim, được quy định căn cứ vào Thông tư số 12/2015/TT-BVHTTDL của Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch có hiệu lực thi hành từ ngày 01/01/2017. NMN Cinema có quyền từ chối việc bán vé hoặc vào phòng chiếu nếu khách hàng không tuân thủ đúng theo quy định.</li>
-
-    </ul>
-  `,
-  status: 'active'
-};
-
-// ============================================================
-// COMPONENT
-// ============================================================
+// COMPONENT CHÍNH
 const TicketPricingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // State
-  const [pricingData, setPricingData] = useState(null);
-  const [activeTab, setActiveTab] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [imageLoading, setImageLoading] = useState(true);
-  const [imageError, setImageError] = useState(false);
+  // ========== STATE ==========
+  const [pricingData, setPricingData] = useState(null);   // Dữ liệu bảng giá từ API
+  const [activeTab, setActiveTab] = useState(0);          // Index tab đang chọn
+  const [loading, setLoading] = useState(true);           // Trạng thái đang tải dữ liệu
+  const [error, setError] = useState(null);               // Thông báo lỗi (nếu có)
+  const [imageLoading, setImageLoading] = useState(true); // Trạng thái đang tải ảnh
+  const [imageError, setImageError] = useState(false);    // Ảnh bị lỗi không tải được
 
-  // Load data
+  // EFFECT: Gọi API lấy bảng giá
   useEffect(() => {
-    // TODO: Replace with API call
-    setTimeout(() => {
-      setPricingData(MOCK_PRICING_DATA);
-      setLoading(false);
-    }, 300);
+    const fetchPricing = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getTicketPricingAPI();
+        if (response?.success && response?.data) {
+          setPricingData(response.data);
+        } else {
+          setError('Không tải được bảng giá vé');
+        }
+      } catch (err) {
+        if (err.response?.status === 404) {
+          // API trả về 404 = chưa có bảng giá nào
+          setPricingData(null);
+        } else {
+          setError('Không tải được bảng giá vé. Vui lòng thử lại sau.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPricing();
   }, []);
 
-  // Handle URL hash to set active tab
+  // EFFECT: Đồng bộ URL hash với tab đang chọn
+  // VD: URL /gia-ve#3D-price → tự động chuyển đến tab "GIÁ VÉ 3D"
   useEffect(() => {
     if (!pricingData) return;
 
@@ -150,26 +119,30 @@ const TicketPricingPage = () => {
     }
   }, [location.hash, pricingData]);
 
-  // Reset image states when tab changes
+  // EFFECT: Reset trạng thái ảnh khi chuyển tab
   useEffect(() => {
     setImageLoading(true);
     setImageError(false);
   }, [activeTab]);
 
-  // Handle tab click
+  // HANDLERS
+
+  /** Xử lý khi nhấn chọn tab */
   const handleTabClick = (index, slug) => {
     setActiveTab(index);
     navigate(`/gia-ve#${slug}`, { replace: true });
   };
 
-  // Handle image load/error
+  /** Xử lý khi ảnh tải thành công */
   const handleImageLoad = () => setImageLoading(false);
+
+  /** Xử lý khi ảnh tải thất bại */
   const handleImageError = () => {
     setImageLoading(false);
     setImageError(true);
   };
 
-  // Loading state - fullscreen overlay with NMN Cinema logo
+  // RENDER: Trạng thái Loading (toàn màn hình)
   if (loading) {
     return (
       <Box sx={{
@@ -185,7 +158,7 @@ const TicketPricingPage = () => {
         justifyContent: 'center',
         zIndex: 9999
       }}>
-        {/* Logo */}
+        {/* Logo NMN Cinema */}
         <Box
           component="img"
           src="/NMN_CENIMA_LOGO.png"
@@ -193,17 +166,14 @@ const TicketPricingPage = () => {
           sx={{ width: 200, height: 200, mb: 1.5, objectFit: 'contain' }}
         />
 
-        {/* Spinning Loader */}
+        {/* Vòng xoay loading */}
         <CircularProgress
           size={40}
           thickness={2}
-          sx={{
-            color: '#F5A623',
-            mb: 2
-          }}
+          sx={{ color: '#F5A623', mb: 2 }}
         />
 
-        {/* Loading Text */}
+        {/* Text chờ */}
         <Typography
           sx={{
             color: '#FFA500',
@@ -218,8 +188,32 @@ const TicketPricingPage = () => {
       </Box>
     );
   }
-
-  // No data state
+  // RENDER: Trạng thái lỗi
+  if (error) {
+    return (
+      <Box sx={{
+        minHeight: '100vh',
+        background: tokens.colors.page.background,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 2
+      }}>
+        <Typography sx={{ color: '#333', fontSize: '1.1rem' }}>
+          {error}
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => window.location.reload()}
+          sx={{ borderColor: '#999', color: '#333' }}
+        >
+          Thử lại
+        </Button>
+      </Box>
+    );
+  }
+  // RENDER: Chưa có dữ liệu (API trả 404)
   if (!pricingData) {
     return (
       <Box sx={{
@@ -229,15 +223,17 @@ const TicketPricingPage = () => {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-        <Typography sx={{ color: tokens.colors.text.primary }}>
+        <Typography sx={{ color: '#333' }}>
           Chưa có dữ liệu bảng giá
         </Typography>
       </Box>
     );
   }
 
+  // Tab hiện tại đang được chọn
   const currentTab = pricingData.tabs[activeTab];
 
+  // RENDER: Nội dung chính
   return (
     <Box sx={{
       minHeight: '100vh',
@@ -245,7 +241,7 @@ const TicketPricingPage = () => {
       p: 0
     }}>
       <Container maxWidth="lg">
-        {/* ========== MAIN WRAPPER - Dark Background ========== */}
+        {/* WRAPPER CHÍNH - Nền tối */}
         <Box sx={{
           bgcolor: tokens.colors.wrapper.background,
           borderRadius: `${tokens.radius.wrapper}px`,
@@ -253,7 +249,7 @@ const TicketPricingPage = () => {
           p: { xs: 2, md: 4 }
         }}>
 
-          {/* ========== 1) TITLE ========== */}
+          {/* TIÊU ĐỀ */}
           <Typography
             component="h1"
             sx={{
@@ -266,7 +262,7 @@ const TicketPricingPage = () => {
             {pricingData.title}
           </Typography>
 
-          {/* ========== 2) TABS ========== */}
+          {/* DANH SÁCH TABS */}
           <Box sx={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -288,11 +284,11 @@ const TicketPricingPage = () => {
                     textTransform: 'uppercase',
                     borderRadius: `${tokens.radius.button}px`,
                     transition: 'all 0.2s ease',
-                    // Active state
+                    // Trạng thái active: nền vàng | inactive: viền trắng mờ
                     bgcolor: isActive ? tokens.colors.accent : 'transparent',
                     color: tokens.colors.text.primary,
                     border: isActive ? 'none' : `1px solid ${tokens.colors.border.inactive}`,
-                    // Disable hover and focus effects
+                    // Tắt hiệu ứng hover và focus
                     '&:hover': {
                       bgcolor: isActive ? tokens.colors.accent : 'transparent',
                       borderColor: isActive ? 'transparent' : tokens.colors.border.inactive
@@ -309,7 +305,7 @@ const TicketPricingPage = () => {
             })}
           </Box>
 
-          {/* ========== 3) PRICE IMAGE (16:9 aspect ratio) ========== */}
+          {/* ẢNH BẢNG GIÁ (tỷ lệ 16:9) */}
           <Box sx={{
             mb: 3,
             borderRadius: 0,
@@ -320,7 +316,7 @@ const TicketPricingPage = () => {
             border: 'none',
             boxShadow: 'none'
           }}>
-            {/* Loading skeleton */}
+            {/* Skeleton loading khi ảnh đang tải */}
             {imageLoading && !imageError && (
               <Skeleton
                 variant="rectangular"
@@ -336,26 +332,41 @@ const TicketPricingPage = () => {
               />
             )}
 
-            {/* Error fallback - placeholder image */}
+            {/* Fallback khi ảnh bị lỗi */}
             {imageError && (
-              <Box
-                component="img"
-                src="https://placehold.co/1920x1080/1A1A2E/666666?text=Bảng+giá+vé"
-                alt="Bảng giá vé"
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain'
-                }}
-              />
+              <Box sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: tokens.colors.card.background,
+                gap: 1
+              }}>
+                <Typography sx={{
+                  color: tokens.colors.text.muted,
+                  fontSize: { xs: '0.9rem', md: '1.1rem' }
+                }}>
+                  Ảnh đang được cập nhật
+                </Typography>
+                <Typography sx={{
+                  color: tokens.colors.text.muted,
+                  fontSize: { xs: '0.8rem', md: '0.9rem' },
+                  opacity: 0.7
+                }}>
+                  Vui lòng quay lại sau
+                </Typography>
+              </Box>
             )}
 
-            {/* Actual image - always render, visibility controlled by opacity */}
+            {/* Ảnh bảng giá - luôn render, dùng opacity để chuyển trạng thái mượt */}
             {!imageError && currentTab?.imageUrl && (
               <Box
                 component="img"
                 src={currentTab.imageUrl}
                 alt={currentTab?.name}
+                referrerPolicy="no-referrer"
                 onLoad={handleImageLoad}
                 onError={handleImageError}
                 sx={{
@@ -369,29 +380,31 @@ const TicketPricingPage = () => {
             )}
           </Box>
 
-          {/* ========== 4) NOTES (no separate card) ========== */}
-          <Box
-            sx={{
-              mt: 3,
-              fontSize: tokens.typography.body.fontSize,
-              lineHeight: tokens.typography.body.lineHeight,
-              color: tokens.colors.text.secondary,
-              '& p': {
-                mb: 1.5
-              },
-              '& ul': {
-                pl: 2.5,
-                m: 0,
-                '& li': {
+          {/* GHI CHÚ (HTML content) */}
+          {pricingData.notes && (
+            <Box
+              sx={{
+                mt: 3,
+                fontSize: tokens.typography.body.fontSize,
+                lineHeight: tokens.typography.body.lineHeight,
+                color: tokens.colors.text.secondary,
+                '& p': {
                   mb: 1.5
+                },
+                '& ul': {
+                  pl: 2.5,
+                  m: 0,
+                  '& li': {
+                    mb: 1.5
+                  }
+                },
+                '& strong': {
+                  color: tokens.colors.text.primary
                 }
-              },
-              '& strong': {
-                color: tokens.colors.text.primary
-              }
-            }}
-            dangerouslySetInnerHTML={{ __html: pricingData.notes }}
-          />
+              }}
+              dangerouslySetInnerHTML={{ __html: pricingData.notes }}
+            />
+          )}
 
         </Box>
       </Container>
