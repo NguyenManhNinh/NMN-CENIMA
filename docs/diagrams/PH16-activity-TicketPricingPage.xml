@@ -1,0 +1,203 @@
+<mxfile host="app.diagrams.net" modified="2026-02-10T11:00:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Activity - Xem bảng giá vé" id="activity-ticketpricing">
+    <mxGraphModel dx="1100" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="&lt;b&gt;ACTIVITY DIAGRAM – LUỒNG XEM BẢNG GIÁ VÉ&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="250" y="10" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== SWIMLANES ==================== -->
+        <!-- User Lane -->
+        <mxCell id="lane-user" value="&lt;b&gt;Người dùng (Browser)&lt;/b&gt;" style="shape=mxgraph.flowchart.swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="250" height="1050" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Lane -->
+        <mxCell id="lane-frontend" value="&lt;b&gt;Frontend (React)&lt;/b&gt;" style="shape=mxgraph.flowchart.swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="50" width="280" height="1050" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Lane -->
+        <mxCell id="lane-backend" value="&lt;b&gt;Backend (Node.js)&lt;/b&gt;" style="shape=mxgraph.flowchart.swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="580" y="50" width="250" height="1050" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== START ==================== -->
+        <mxCell id="start" value="" style="ellipse;html=1;shape=mxgraph.flowchart.start_2;fillColor=#000000;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="155" y="100" width="40" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- A1: User truy cập -->
+        <mxCell id="a1" value="Truy cập trang&lt;br&gt;/gia-ve" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="110" y="170" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-start-a1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="start" target="a1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A2: Hiển thị loading -->
+        <mxCell id="a2" value="Hiển thị Loading&lt;br&gt;(logo + spinner)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="365" y="170" width="150" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-a1-a2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a1" target="a2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A3: Gọi API -->
+        <mxCell id="a3" value="Gọi API&lt;br&gt;GET /api/v1/ticket-pricing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="355" y="245" width="170" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-a2-a3" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a2" target="a3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A4: Backend xử lý -->
+        <mxCell id="a4" value="findOne({status:active})&lt;br&gt;.lean()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="630" y="245" width="150" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-a3-a4" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a3" target="a4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: API response -->
+        <mxCell id="d1" value="API&lt;br&gt;Response?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="660" y="330" width="90" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f-a4-d1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a4" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Branch: 404 - No data -->
+        <mxCell id="a-404" value="Hiển thị&lt;br&gt;&quot;Chưa có dữ liệu&lt;br&gt;bảng giá&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="355" y="340" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="f-d1-404" value="404" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1" source="d1" target="a-404">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Branch: Error -->
+        <mxCell id="a-err" value="Hiển thị lỗi +&lt;br&gt;nút &quot;Thử lại&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="110" y="340" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="f-d1-err" value="500/Lỗi" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1" source="d1" target="a-err">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Branch: Success 200 -->
+        <mxCell id="a5" value="Sort tabs theo&lt;br&gt;sortOrder,&lt;br&gt;trả JSON response" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="630" y="445" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="f-d1-200" value="200 OK" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1" source="d1" target="a5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A6: setPricingData -->
+        <mxCell id="a6" value="setState&lt;br&gt;(pricingData, loading=false)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="355" y="450" width="170" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-a5-a6" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a5" target="a6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: URL hash? -->
+        <mxCell id="d2" value="URL&lt;br&gt;hash?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="395" y="530" width="90" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="f-a6-d2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a6" target="d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Hash: Yes -->
+        <mxCell id="a-hash" value="Tìm tab có slug&lt;br&gt;khớp → setActiveTab" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="310" y="630" width="150" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-d2-hash" value="Có hash" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1" source="d2" target="a-hash">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Hash: No -->
+        <mxCell id="a-nohash" value="Kích hoạt tab&lt;br&gt;đầu tiên (index 0)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="490" y="630" width="140" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-d2-nohash" value="Không" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1" source="d2" target="a-nohash">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Merge -->
+        <mxCell id="merge1" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="425" y="710" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="f-hash-merge" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a-hash" target="merge1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f-nohash-merge" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a-nohash" target="merge1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A7: Render tabs + ảnh + skeleton -->
+        <mxCell id="a7" value="Render tabs + skeleton&lt;br&gt;+ load ảnh bảng giá" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="355" y="770" width="170" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-merge-a7" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="merge1" target="a7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: Image load -->
+        <mxCell id="d3" value="Ảnh&lt;br&gt;load?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="395" y="845" width="90" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="f-a7-d3" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a7" target="d3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Image OK -->
+        <mxCell id="a-imgok" value="Ẩn skeleton,&lt;br&gt;hiển thị ảnh&lt;br&gt;(opacity transition)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="310" y="940" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="f-d3-ok" value="Thành công" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1" source="d3" target="a-imgok">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Image Error -->
+        <mxCell id="a-imgerr" value="Hiển thị fallback&lt;br&gt;&quot;Ảnh đang được&lt;br&gt;cập nhật&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="500" y="940" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="f-d3-err" value="Lỗi" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1" source="d3" target="a-imgerr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Merge 2 -->
+        <mxCell id="merge2" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="160" y="1010" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="f-imgok-merge2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a-imgok" target="merge2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f-imgerr-merge2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a-imgerr" target="merge2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A8: User xem bảng giá -->
+        <mxCell id="a8" value="Người dùng xem&lt;br&gt;bảng giá + ghi chú" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="110" y="1060" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="f-merge2-a8" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="merge2" target="a8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- END -->
+        <mxCell id="end" value="" style="ellipse;html=1;shape=mxgraph.flowchart.terminate;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="317" y="1070" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="f-a8-end" value="" style="endArrow=block;endFill=1;html=1;" edge="1" parent="1" source="a8" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

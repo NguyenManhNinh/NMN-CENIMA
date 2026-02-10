@@ -1,0 +1,219 @@
+<mxfile host="app.diagrams.net" modified="2026-01-21T03:44:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Activity-FilmDirectorPage" id="activity-diagram">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title1" value="Hình 3.49. Sơ đồ Activity Diagram – Luồng xem và lọc danh sách đạo diễn" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="300" y="10" width="500" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lane1" value="FRONTEND (ReactJS)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#01579b;startSize=30;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="40" y="50" width="460" height="720" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lane2" value="BACKEND (Express)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#2e7d32;startSize=30;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="500" y="50" width="260" height="720" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lane3" value="DATABASE (MongoDB)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c2185b;startSize=30;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="760" y="50" width="220" height="720" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="start1" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="225" y="70" width="30" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act1" value="Truy cập /dao-dien" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="180" y="120" width="120" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act2" value="Đọc URL params&#xa;(quoc-tich, sap-xep, page)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="165" y="175" width="150" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="fork1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="100" y="235" width="280" height="5" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act3a" value="getNationalitiesAPI&#xa;({role: director})" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="60" y="260" width="110" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act3b" value="getDirectorsAPI&#xa;(params)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="185" y="260" width="110" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act3c" value="getNowShowingMoviesAPI&#xa;(limit=3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="310" y="260" width="130" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="beAct1" value="Nhận request&#xa;GET /persons/directors" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="555" y="260" width="140" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="beAct2" value="Xử lý query params&#xa;(page, limit, sort, nationality)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="545" y="320" width="160" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="dbAct1" value="Query persons.find({&#xa;  role: {$in: [director, both]},&#xa;  isActive: true&#xa;})" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8bbd9;strokeColor=#c2185b;fontSize=9;align=left;spacingLeft=5;" parent="1" vertex="1">
+          <mxGeometry x="805" y="310" width="150" height="65" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="dbAct2" value="Return documents" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8bbd9;strokeColor=#c2185b;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="820" y="395" width="120" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="beAct3" value="Trả JSON response&#xa;{data, total, totalPages}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="545" y="395" width="160" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="join1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="100" y="460" width="280" height="5" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act4" value="Hiển thị danh sách đạo diễn&#xa;+ bộ lọc + sidebar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="165" y="485" width="150" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="dec1" value="Thay đổi&#xa;bộ lọc?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="195" y="545" width="90" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act5" value="Cập nhật URL&#xa;Reset page=1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="60" y="555" width="100" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="dec2" value="Chuyển&#xa;trang?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="195" y="625" width="90" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act6" value="Cập nhật page&#xa;Scroll top" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="60" y="635" width="100" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="dec3" value="Click&#xa;đạo diễn?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="195" y="700" width="90" height="55" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="act7" value="Navigate&#xa;/dao-dien-chi-tiet/:slug" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="320" y="705" width="130" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="end1" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="370" y="760" width="30" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="start1" target="act1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e2" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="act1" target="act2" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e3" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="act2" target="fork1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e4a" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="fork1" target="act3a" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e4b" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="fork1" target="act3b" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e4c" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="fork1" target="act3c" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e5" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#2e7d32;strokeWidth=2;dashed=1;" parent="1" source="act3b" target="beAct1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e6" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="beAct1" target="beAct2" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e7" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#c2185b;strokeWidth=2;dashed=1;" parent="1" source="beAct2" target="dbAct1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e8" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="dbAct1" target="dbAct2" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e9" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#c2185b;strokeWidth=2;dashed=1;" parent="1" source="dbAct2" target="beAct3" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e10" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#2e7d32;strokeWidth=2;dashed=1;" parent="1" source="beAct3" target="join1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e11a" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="act3a" target="join1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e11c" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="act3c" target="join1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e12" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="join1" target="act4" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e13" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="act4" target="dec1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e14" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="dec1" target="act5" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lb1" value="Có" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="160" y="560" width="30" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e15" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="dec1" target="dec2" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lb2" value="Không" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="245" y="605" width="40" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e16" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="dec2" target="act6" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lb3" value="Có" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="160" y="640" width="30" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e17" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="dec2" target="dec3" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lb4" value="Không" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="245" y="685" width="40" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e18" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="dec3" target="act7" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lb5" value="Có" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="290" y="710" width="30" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e19" style="edgeStyle=none;rounded=0;html=1;endArrow=classic;strokeColor=#000000;" parent="1" source="act7" target="end1" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

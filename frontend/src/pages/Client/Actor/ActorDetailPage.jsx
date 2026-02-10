@@ -345,11 +345,11 @@ function ActorDetailPage() {
 
   //MAIN RENDE
   return (
-    <Box sx={{ bgcolor: COLORS.bgLight, minHeight: '100vh' }}>
+    <Box sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed', minHeight: '100vh', py: 1 }}>
 
       {/* NỘI DUNG CHÍNH */}
-      <Box sx={{ bgcolor: COLORS.white, pb: 5 }}>
-        <Container maxWidth="lg">
+      <Container maxWidth="lg">
+        <Box sx={{ bgcolor: COLORS.white, borderRadius: 0, p: { xs: 2, md: 3 }, pb: 5 }}>
 
           {/*BREADCRUMBS */}
           <Box sx={{ py: 2 }}>
@@ -948,8 +948,8 @@ function ActorDetailPage() {
             </Grid>
 
           </Grid>
-        </Container>
-      </Box>
+        </Box>
+      </Container>
 
       {/*GALLERY MODAL */}
       <Dialog

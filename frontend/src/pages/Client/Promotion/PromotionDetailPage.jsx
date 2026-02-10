@@ -30,8 +30,8 @@ import {
 const styles = {
   page: {
     minHeight: '60vh',
-    bgcolor: '#f5f5f5',
-    py: { xs: 2, md: 3 }
+    background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed',
+    py: 1
   },
   mainContainer: {
     maxWidth: 900,
@@ -288,92 +288,95 @@ function PromotionDetailPage() {
   return (
     <Box sx={styles.page}>
       <Container maxWidth="md" sx={styles.mainContainer}>
+        <Box sx={{ bgcolor: '#fff', borderRadius: 0, p: { xs: 2, md: 3 } }}>
 
-        {/* HEADER: Title + Actions */}
-        <Box sx={styles.headerBox}>
-          <Box sx={styles.titleSection}>
-            <Typography component="h1" sx={styles.title}>
-              {promotion?.title}
-            </Typography>
-          </Box>
-
-          <Box sx={styles.actionsBox}>
-            {/* View count */}
-            <Tooltip title="Lượt xem">
-              <IconButton sx={styles.actionButton} disableRipple>
-                <VisibilityIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Typography sx={styles.actionCount}>
-              {formatCount(promotion?.viewCount)}
-            </Typography>
-
-            {/* Like button */}
-            <Tooltip title={liked ? 'Bỏ thích' : 'Thích'}>
-              <IconButton
-                sx={liked ? styles.likedButton : styles.actionButton}
-                onClick={handleLike}
-              >
-                {liked ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
-              </IconButton>
-            </Tooltip>
-            <Typography sx={styles.actionCount}>
-              {formatCount(promotion?.likeCount ?? 0)}
-            </Typography>
-
-            {/* Share button */}
-            <Tooltip title="Chia sẻ">
-              <IconButton sx={styles.actionButton} onClick={handleShare}>
-                <ShareIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-
-        {/* BANNER */}
-        {bannerUrl && (
-          <Box sx={styles.bannerWrapper}>
-            <Box
-              component="img"
-              src={bannerUrl}
-              alt={promotion?.title}
-              sx={styles.bannerImage}
-            />
-          </Box>
-        )}
-
-        {/* CONTENT - XSS sanitization */}
-        {promotion?.content && (
-          <Box sx={styles.contentBox}>
-            <Box
-              sx={styles.content}
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(promotion.content, {
-                  FORBID_TAGS: ['form', 'input', 'textarea', 'button', 'select', 'option', 'label'],
-                  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onchange', 'onsubmit']
-                })
-              }}
-            />
-          </Box>
-        )}
-
-        {/* NOTES */}
-        {promotion?.notes && (
-          <Box sx={styles.notesBox}>
-            <Box sx={styles.notesHeader}>
-              <Typography sx={{ ...styles.notesTitle, fontSize: '1rem' }}>
-                <WarningAmberIcon
-                  fontSize="inherit"
-                  sx={{ color: 'error.main' }}
-                />
-                Lưu ý
+          {/* HEADER: Title + Actions */}
+          <Box sx={styles.headerBox}>
+            <Box sx={styles.titleSection}>
+              <Typography component="h1" sx={styles.title}>
+                {promotion?.title}
               </Typography>
             </Box>
-            <Typography sx={styles.notesContent}>
-              {promotion.notes}
-            </Typography>
+
+            <Box sx={styles.actionsBox}>
+              {/* View count */}
+              <Tooltip title="Lượt xem">
+                <IconButton sx={styles.actionButton} disableRipple>
+                  <VisibilityIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Typography sx={styles.actionCount}>
+                {formatCount(promotion?.viewCount)}
+              </Typography>
+
+              {/* Like button */}
+              <Tooltip title={liked ? 'Bỏ thích' : 'Thích'}>
+                <IconButton
+                  sx={liked ? styles.likedButton : styles.actionButton}
+                  onClick={handleLike}
+                >
+                  {liked ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+                </IconButton>
+              </Tooltip>
+              <Typography sx={styles.actionCount}>
+                {formatCount(promotion?.likeCount ?? 0)}
+              </Typography>
+
+              {/* Share button */}
+              <Tooltip title="Chia sẻ">
+                <IconButton sx={styles.actionButton} onClick={handleShare}>
+                  <ShareIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
-        )}
+
+          {/* BANNER */}
+          {bannerUrl && (
+            <Box sx={styles.bannerWrapper}>
+              <Box
+                component="img"
+                src={bannerUrl}
+                alt={promotion?.title}
+                sx={styles.bannerImage}
+              />
+            </Box>
+          )}
+
+          {/* CONTENT - XSS sanitization */}
+          {promotion?.content && (
+            <Box sx={styles.contentBox}>
+              <Box
+                sx={styles.content}
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(promotion.content, {
+                    FORBID_TAGS: ['form', 'input', 'textarea', 'button', 'select', 'option', 'label'],
+                    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onchange', 'onsubmit']
+                  })
+                }}
+              />
+            </Box>
+          )}
+
+          {/* NOTES */}
+          {promotion?.notes && (
+            <Box sx={styles.notesBox}>
+              <Box sx={styles.notesHeader}>
+                <Typography sx={{ ...styles.notesTitle, fontSize: '1rem' }}>
+                  <WarningAmberIcon
+                    fontSize="inherit"
+                    sx={{ color: 'error.main' }}
+                  />
+                  Lưu ý
+                </Typography>
+              </Box>
+              <Typography sx={styles.notesContent}>
+                {promotion.notes}
+              </Typography>
+            </Box>
+          )}
+
+        </Box>
       </Container>
 
       {/* BOTTOM BANNERS */}

@@ -253,7 +253,7 @@ const MembershipPage = () => {
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
-      p: 0
+      py: 1
     }}>
       <Container maxWidth="lg">
         {/* WRAPPER CHÍNH - Nền tối */}

@@ -1,0 +1,241 @@
+<mxfile host="app.diagrams.net" modified="2026-01-21T04:30:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Sequence-ViewCount" id="seq-view">
+    <mxGraphModel dx="1200" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title1" value="Hình 3.55. Sequence Diagram – Tăng view count với cooldown 24h" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="320" y="15" width="450" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="brHead" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="55" y="60" width="30" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="brLbl" value="Browser" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="40" y="95" width="60" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="brLine" style="endArrow=none;html=1;rounded=0;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70" y="115" as="sourcePoint"/>
+            <mxPoint x="70" y="780" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="pgBox" value="FilmDirectorDetailPage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="130" y="60" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="pgLine" style="endArrow=none;html=1;rounded=0;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="195" y="100" as="sourcePoint"/>
+            <mxPoint x="195" y="780" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="refBox" value="viewIncremented&#xa;Ref" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="290" y="60" width="90" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="refLine" style="endArrow=none;html=1;rounded=0;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="335" y="100" as="sourcePoint"/>
+            <mxPoint x="335" y="780" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="lsBox" value="localStorage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="410" y="60" width="90" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="lsLine" style="endArrow=none;html=1;rounded=0;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="455" y="100" as="sourcePoint"/>
+            <mxPoint x="455" y="780" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="apiBox" value="personApi" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="530" y="60" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="apiLine" style="endArrow=none;html=1;rounded=0;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="570" y="100" as="sourcePoint"/>
+            <mxPoint x="570" y="780" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="ctrlBox" value="PersonController" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="640" y="60" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ctrlLine" style="endArrow=none;html=1;rounded=0;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="690" y="100" as="sourcePoint"/>
+            <mxPoint x="690" y="780" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="dbBox" value="Person&#xa;(MongoDB)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8bbd9;strokeColor=#c2185b;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="770" y="60" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dbLine" style="endArrow=none;html=1;rounded=0;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="810" y="100" as="sourcePoint"/>
+            <mxPoint x="810" y="780" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="pgAct" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="190" y="140" width="10" height="600" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="msg1" value="1. navigate /dao-dien-chi-tiet/:slug" style="endArrow=classic;html=1;rounded=0;fontSize=9;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70" y="150" as="sourcePoint"/>
+            <mxPoint x="190" y="150" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg2" value="2. useEffect[director._id] triggered" style="endArrow=classic;html=1;rounded=0;fontSize=9;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="180" as="sourcePoint"/>
+            <mxPoint x="270" y="180" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="240" y="180"/>
+              <mxPoint x="240" y="200"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg3" value="3. get(director_view_{id})" style="endArrow=classic;html=1;rounded=0;fontSize=9;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="220" as="sourcePoint"/>
+            <mxPoint x="450" y="220" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg4" value="4. lastViewTime" style="endArrow=open;html=1;rounded=0;fontSize=9;dashed=1;endFill=0;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="450" y="245" as="sourcePoint"/>
+            <mxPoint x="200" y="245" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="note1" value="diff = now - lastViewTime" style="shape=note;whiteSpace=wrap;html=1;fillColor=#ffffc0;strokeColor=#999999;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="215" y="255" width="120" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="alt1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;strokeWidth=2;dashed=1;" parent="1" vertex="1">
+          <mxGeometry x="130" y="300" width="200" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="alt1Lbl" value="alt [diff &lt;= 24h]" style="text;html=1;strokeColor=none;fillColor=#f8cecc;align=left;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="130" y="300" width="80" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="note2" value="Đã xem gần đây - không tăng view" style="shape=note;whiteSpace=wrap;html=1;fillColor=#ffffc0;strokeColor=#999999;fontSize=9;" parent="1" vertex="1">
+          <mxGeometry x="150" y="325" width="160" height="25" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="alt2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;strokeWidth=2;dashed=1;" parent="1" vertex="1">
+          <mxGeometry x="130" y="380" width="720" height="350" as="geometry"/>
+        </mxCell>
+        <mxCell id="alt2Lbl" value="alt [diff &gt; 24h hoặc chưa xem]" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;align=left;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="130" y="380" width="150" height="18" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="msg5" value="5. check current[id]" style="endArrow=classic;html=1;rounded=0;fontSize=9;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="420" as="sourcePoint"/>
+            <mxPoint x="330" y="420" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg6" value="6. false/undefined" style="endArrow=open;html=1;rounded=0;fontSize=9;dashed=1;endFill=0;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="445" as="sourcePoint"/>
+            <mxPoint x="200" y="445" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg7" value="7. set current[id] = true" style="endArrow=classic;html=1;rounded=0;fontSize=9;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="475" as="sourcePoint"/>
+            <mxPoint x="330" y="475" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg8" value="8. set(director_view_{id}, now)" style="endArrow=classic;html=1;rounded=0;fontSize=9;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="505" as="sourcePoint"/>
+            <mxPoint x="450" y="505" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg9" value="9. setDirector(viewCount + 1) [Optimistic]" style="endArrow=classic;html=1;rounded=0;fontSize=9;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="540" as="sourcePoint"/>
+            <mxPoint x="270" y="540" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg10" value="10. incrementPersonViewAPI(id)" style="endArrow=classic;html=1;rounded=0;fontSize=9;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="575" as="sourcePoint"/>
+            <mxPoint x="565" y="575" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="apiAct" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="565" y="573" width="10" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="msg11" value="11. POST /persons/:id/view" style="endArrow=classic;html=1;rounded=0;fontSize=9;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="575" y="600" as="sourcePoint"/>
+            <mxPoint x="685" y="600" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="ctrlAct" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;" parent="1" vertex="1">
+          <mxGeometry x="685" y="598" width="10" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="msg12" value="12. findByIdAndUpdate($inc viewCount)" style="endArrow=classic;html=1;rounded=0;fontSize=9;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="695" y="620" as="sourcePoint"/>
+            <mxPoint x="805" y="620" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="dbAct" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8bbd9;strokeColor=#c2185b;" parent="1" vertex="1">
+          <mxGeometry x="805" y="618" width="10" height="25" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="msg13" value="13. updated doc" style="endArrow=open;html=1;rounded=0;fontSize=9;dashed=1;endFill=0;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="650" as="sourcePoint"/>
+            <mxPoint x="695" y="650" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg14" value="14. {success, data: {viewCount}}" style="endArrow=open;html=1;rounded=0;fontSize=9;dashed=1;endFill=0;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="685" y="675" as="sourcePoint"/>
+            <mxPoint x="575" y="675" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg15" value="15. response" style="endArrow=open;html=1;rounded=0;fontSize=9;dashed=1;endFill=0;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="565" y="700" as="sourcePoint"/>
+            <mxPoint x="200" y="700" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg16" value="16. sync viewCount from server" style="endArrow=classic;html=1;rounded=0;fontSize=9;dashed=1;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="725" as="sourcePoint"/>
+            <mxPoint x="270" y="725" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

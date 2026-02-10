@@ -1,0 +1,260 @@
+<mxfile host="app.diagrams.net" modified="2026-02-08T16:40:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Sequence - Claim Voucher" id="sequence-promotion-claim">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="&lt;b&gt;SEQUENCE DIAGRAM – NHẬN VOUCHER (ONLINE_VOUCHER)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LIFELINES ==================== -->
+        <!-- User -->
+        <mxCell id="user-box" value="&lt;b&gt;:User&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="user-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="130" y="110" as="sourcePoint" />
+            <mxPoint x="130" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- PromotionDetailPage (Frontend) -->
+        <mxCell id="fe-box" value="&lt;b&gt;:PromotionDetailPage&lt;/b&gt;&lt;br&gt;(Frontend)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="280" y="70" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="fe-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="350" y="110" as="sourcePoint" />
+            <mxPoint x="350" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- promotionController (Backend) -->
+        <mxCell id="be-box" value="&lt;b&gt;:promotionController&lt;/b&gt;&lt;br&gt;(Backend)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="520" y="70" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="be-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="110" as="sourcePoint" />
+            <mxPoint x="590" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Promotion (Model) -->
+        <mxCell id="promo-box" value="&lt;b&gt;:Promotion&lt;/b&gt;&lt;br&gt;(Model)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="740" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="promo-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="790" y="110" as="sourcePoint" />
+            <mxPoint x="790" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- UserVoucher (Model) -->
+        <mxCell id="uv-box" value="&lt;b&gt;:UserVoucher&lt;/b&gt;&lt;br&gt;(Model)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="920" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="uv-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="970" y="110" as="sourcePoint" />
+            <mxPoint x="970" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Redis -->
+        <mxCell id="redis-box" value="&lt;b&gt;:Redis&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="70" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="redis-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1140" y="110" as="sourcePoint" />
+            <mxPoint x="1140" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== MESSAGES ==================== -->
+        <!-- 1. User opens detail page -->
+        <mxCell id="msg1" value="1. Mở trang chi tiết ưu đãi" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="130" y="150" as="sourcePoint" />
+            <mxPoint x="350" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. Frontend calls API -->
+        <mxCell id="msg2" value="2. GET /api/v1/promotions/:slug" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="350" y="180" as="sourcePoint" />
+            <mxPoint x="590" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Backend finds promotion -->
+        <mxCell id="msg3" value="3. findOne({ slug })" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="210" as="sourcePoint" />
+            <mxPoint x="790" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. Return promotion data -->
+        <mxCell id="msg4" value="4. promotion data" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="790" y="240" as="sourcePoint" />
+            <mxPoint x="590" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. Check Redis for view cooldown -->
+        <mxCell id="msg5" value="5. GET promo_view:{id}:{viewerId}" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="270" as="sourcePoint" />
+            <mxPoint x="1140" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Redis returns null (not viewed) -->
+        <mxCell id="msg6" value="6. null (chưa view trong 24h)" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1140" y="300" as="sourcePoint" />
+            <mxPoint x="590" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7. Increment view count -->
+        <mxCell id="msg7" value="7. findByIdAndUpdate({ $inc: viewCount })" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="330" as="sourcePoint" />
+            <mxPoint x="790" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8. Set Redis key with 24h TTL -->
+        <mxCell id="msg8" value="8. SETEX promo_view:{id}:{viewerId} 86400 '1'" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="360" as="sourcePoint" />
+            <mxPoint x="1140" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. Return response with claimState -->
+        <mxCell id="msg9" value="9. { promotion, claimState: 'ELIGIBLE', canClaim: true }" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="400" as="sourcePoint" />
+            <mxPoint x="350" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 10. Render detail page -->
+        <mxCell id="msg10" value="10. Hiển thị chi tiết + nút 'Nhận ngay'" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="350" y="430" as="sourcePoint" />
+            <mxPoint x="130" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== ALT BOX: User clicks claim ==================== -->
+        <mxCell id="alt-box" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="460" width="950" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="alt-label" value="&lt;b&gt;alt&lt;/b&gt; [User clicks 'Nhận ngay']" style="text;html=1;strokeColor=none;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="100" y="460" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 11. User clicks claim button -->
+        <mxCell id="msg11" value="11. Click 'Nhận ngay'" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="130" y="500" as="sourcePoint" />
+            <mxPoint x="350" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 12. Frontend calls claim API -->
+        <mxCell id="msg12" value="12. POST /api/v1/promotions/:id/claim" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="350" y="530" as="sourcePoint" />
+            <mxPoint x="590" y="530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13. Backend finds promotion -->
+        <mxCell id="msg13" value="13. findById(id).populate('voucherId')" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="560" as="sourcePoint" />
+            <mxPoint x="790" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14. Return promotion -->
+        <mxCell id="msg14" value="14. promotion + voucher" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="790" y="590" as="sourcePoint" />
+            <mxPoint x="590" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 15. Check existing voucher (idempotent) -->
+        <mxCell id="msg15" value="15. findOne({ userId, voucherId, status: 'ACTIVE' })" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="620" as="sourcePoint" />
+            <mxPoint x="970" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 16. Return null (not claimed yet) -->
+        <mxCell id="msg16" value="16. null (chưa claim)" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="970" y="650" as="sourcePoint" />
+            <mxPoint x="590" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 17. Create UserVoucher -->
+        <mxCell id="msg17" value="17. create({ userId, voucherId, quantity, status: 'ACTIVE' })" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="680" as="sourcePoint" />
+            <mxPoint x="970" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 18. Return new UserVoucher -->
+        <mxCell id="msg18" value="18. userVoucher created" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="970" y="710" as="sourcePoint" />
+            <mxPoint x="590" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 19. Increment claimCount -->
+        <mxCell id="msg19" value="19. findByIdAndUpdate({ $inc: claimCount })" style="endArrow=block;endFill=1;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="740" as="sourcePoint" />
+            <mxPoint x="790" y="740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 20. Return success response -->
+        <mxCell id="msg20" value="20. { success: true, userVoucher, message: 'Nhận thành công' }" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="780" as="sourcePoint" />
+            <mxPoint x="350" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 21. Show success + voucher code -->
+        <mxCell id="msg21" value="21. Hiển thị mã voucher + thông báo thành công" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="350" y="810" as="sourcePoint" />
+            <mxPoint x="130" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

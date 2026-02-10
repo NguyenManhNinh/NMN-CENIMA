@@ -1,0 +1,179 @@
+<mxfile host="app.diagrams.net" modified="2026-02-08T16:45:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Class Diagram - Promotion Module" id="class-promotion">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="&lt;b&gt;CLASS DIAGRAM – PROMOTION MODULE&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PROMOTION CLASS ==================== -->
+        <mxCell id="promotion" value="&lt;b&gt;Promotion&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="280" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="promo-attrs" value="&lt;div style=&quot;text-align: left;&quot;&gt;+ _id: ObjectId&lt;br&gt;+ title: String &lt;i&gt;(required)&lt;/i&gt;&lt;br&gt;+ slug: String &lt;i&gt;(unique)&lt;/i&gt;&lt;br&gt;+ excerpt: String&lt;br&gt;+ content: String &lt;i&gt;(HTML)&lt;/i&gt;&lt;br&gt;+ thumbnailUrl: String&lt;br&gt;+ coverUrl: String&lt;br&gt;&lt;br&gt;+ status: Enum['DRAFT','ACTIVE','INACTIVE','EXPIRED']&lt;br&gt;+ type: Enum['PROMOTION','EVENT']&lt;br&gt;&lt;br&gt;+ applyMode: Enum['ONLINE_VOUCHER',&lt;br&gt;  'OFFLINE_ONLY','PAYMENT_METHOD_ONLY']&lt;br&gt;+ offlineMode: Enum['INFO_ONLY','QR_REDEEM']&lt;br&gt;&lt;br&gt;+ displayPosition: Enum['LIST','BOTTOM_BANNER']&lt;br&gt;+ bannerOrder: Number&lt;br&gt;+ isFeatured: Boolean&lt;br&gt;+ priority: Number&lt;br&gt;&lt;br&gt;+ publishAt: Date&lt;br&gt;+ startAt: Date &lt;i&gt;(required)&lt;/i&gt;&lt;br&gt;+ endAt: Date &lt;i&gt;(required)&lt;/i&gt;&lt;br&gt;&lt;br&gt;+ voucherId: ObjectId &lt;i&gt;(ref: Voucher)&lt;/i&gt;&lt;br&gt;+ quantityPerUser: Number&lt;br&gt;+ allowedUserRanks: String[]&lt;br&gt;&lt;br&gt;+ totalRedeemsLimit: Number &lt;i&gt;(nullable)&lt;/i&gt;&lt;br&gt;+ redeemCount: Number&lt;br&gt;+ viewCount: Number&lt;br&gt;+ likeCount: Number&lt;br&gt;+ claimCount: Number&lt;br&gt;+ likedBy: ObjectId[]&lt;br&gt;+ likedByIPs: String[]&lt;br&gt;&lt;br&gt;+ notes: String&lt;br&gt;+ metaTitle: String&lt;br&gt;+ metaDescription: String&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="promotion">
+          <mxGeometry y="30" width="280" height="370" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PROMOTION REDEEM CLASS ==================== -->
+        <mxCell id="redeem" value="&lt;b&gt;PromotionRedeem&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="420" y="80" width="240" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="redeem-attrs" value="&lt;div style=&quot;text-align: left;&quot;&gt;+ _id: ObjectId&lt;br&gt;+ promotionId: ObjectId &lt;i&gt;(ref: Promotion)&lt;/i&gt;&lt;br&gt;+ userId: ObjectId &lt;i&gt;(ref: User)&lt;/i&gt;&lt;br&gt;&lt;br&gt;+ token: String &lt;i&gt;(unique)&lt;/i&gt;&lt;br&gt;+ qrData: String&lt;br&gt;&lt;br&gt;+ status: Enum['ISSUED','REDEEMED','EXPIRED']&lt;br&gt;+ issuedAt: Date&lt;br&gt;+ redeemedAt: Date&lt;br&gt;+ expiresAt: Date&lt;br&gt;&lt;br&gt;+ redeemedByStaffId: ObjectId &lt;i&gt;(ref: User)&lt;/i&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="redeem">
+          <mxGeometry y="30" width="240" height="170" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== USER VOUCHER CLASS ==================== -->
+        <mxCell id="uservoucher" value="&lt;b&gt;UserVoucher&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="720" y="80" width="240" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="uv-attrs" value="&lt;div style=&quot;text-align: left;&quot;&gt;+ _id: ObjectId&lt;br&gt;+ userId: ObjectId &lt;i&gt;(ref: User)&lt;/i&gt;&lt;br&gt;+ voucherId: ObjectId &lt;i&gt;(ref: Voucher)&lt;/i&gt;&lt;br&gt;&lt;br&gt;+ quantity: Number&lt;br&gt;+ usedCount: Number&lt;br&gt;&lt;br&gt;+ status: Enum['ACTIVE','USED','EXPIRED']&lt;br&gt;+ expiresAt: Date&lt;br&gt;&lt;br&gt;+ source: Enum['PROMOTION','ADMIN','REWARD']&lt;br&gt;+ sourceId: ObjectId&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="uservoucher">
+          <mxGeometry y="30" width="240" height="170" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== VOUCHER CLASS ==================== -->
+        <mxCell id="voucher" value="&lt;b&gt;Voucher&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="80" width="220" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="voucher-attrs" value="&lt;div style=&quot;text-align: left;&quot;&gt;+ _id: ObjectId&lt;br&gt;+ code: String &lt;i&gt;(unique)&lt;/i&gt;&lt;br&gt;&lt;br&gt;+ type: Enum['PERCENT','FIXED']&lt;br&gt;+ value: Number&lt;br&gt;+ maxDiscount: Number&lt;br&gt;&lt;br&gt;+ validFrom: Date&lt;br&gt;+ validTo: Date&lt;br&gt;&lt;br&gt;+ minOrderValue: Number&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="voucher">
+          <mxGeometry y="30" width="220" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== USER CLASS ==================== -->
+        <mxCell id="user" value="&lt;b&gt;User&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="420" y="340" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="user-attrs" value="&lt;div style=&quot;text-align: left;&quot;&gt;+ _id: ObjectId&lt;br&gt;+ email: String&lt;br&gt;+ name: String&lt;br&gt;+ rank: Enum['MEMBER','VIP','VVIP']&lt;br&gt;+ role: Enum['user','staff','admin']&lt;br&gt;+ ...&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="user">
+          <mxGeometry y="30" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PROMOTION CONTROLLER ==================== -->
+        <mxCell id="controller" value="&lt;b&gt;promotionController&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Controller)&lt;/i&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="80" y="520" width="280" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="controller-methods" value="&lt;div style=&quot;text-align: left;&quot;&gt;+ getPromotions(req, res)&lt;br&gt;+ getPromotionsHome(req, res)&lt;br&gt;+ getPromotionBySlug(req, res)&lt;br&gt;+ claimPromotion(req, res)&lt;br&gt;+ offlineClaimPromotion(req, res)&lt;br&gt;+ toggleLike(req, res)&lt;br&gt;+ getLikeStatus(req, res)&lt;br&gt;+ staffRedeemPromotion(req, res)&lt;br&gt;+ createPromotion(req, res)&lt;br&gt;+ updatePromotion(req, res)&lt;br&gt;+ deletePromotion(req, res)&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="controller">
+          <mxGeometry y="40" width="280" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== FRONTEND COMPONENTS ==================== -->
+        <mxCell id="fe-list" value="&lt;b&gt;PromotionListPage&lt;/b&gt;&lt;br&gt;&lt;i&gt;(React Component)&lt;/i&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="420" y="520" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="fe-list-methods" value="&lt;div style=&quot;text-align: left;&quot;&gt;+ fetchPromotions()&lt;br&gt;+ handleSort()&lt;br&gt;+ handlePageChange()&lt;br&gt;+ handleLike()&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="fe-list">
+          <mxGeometry y="40" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fe-detail" value="&lt;b&gt;PromotionDetailPage&lt;/b&gt;&lt;br&gt;&lt;i&gt;(React Component)&lt;/i&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="660" y="520" width="220" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="fe-detail-methods" value="&lt;div style=&quot;text-align: left;&quot;&gt;+ fetchPromotionDetail()&lt;br&gt;+ handleClaimVoucher()&lt;br&gt;+ handleClaimOffline()&lt;br&gt;+ handleLike()&lt;br&gt;+ renderClaimState()&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="fe-detail">
+          <mxGeometry y="40" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== RELATIONSHIPS ==================== -->
+        <!-- Promotion -> Voucher (optional) -->
+        <mxCell id="rel1" value="0..1" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="promotion" target="voucher">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1130" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel1-label" value="voucherId" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="950" y="255" width="60" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Promotion 1--* PromotionRedeem -->
+        <mxCell id="rel2" value="1" style="endArrow=none;html=1;rounded=0;strokeWidth=1;startArrow=none;startFill=0;" edge="1" parent="1" source="promotion" target="redeem">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel2-end" value="*" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="140" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- User 1--* PromotionRedeem -->
+        <mxCell id="rel3" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1" source="user" target="redeem">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel3-start" value="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="510" y="300" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="rel3-end" value="*" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="530" y="280" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- User 1--* UserVoucher -->
+        <mxCell id="rel4" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1" source="user" target="uservoucher">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4-start" value="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="310" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4-end" value="*" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="710" y="280" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Voucher 1--* UserVoucher -->
+        <mxCell id="rel5" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1" source="voucher" target="uservoucher">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel5-start" value="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="150" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="rel5-end" value="*" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="150" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Controller uses Promotion -->
+        <mxCell id="rel6" value="&lt;i&gt;uses&lt;/i&gt;" style="endArrow=open;endFill=0;html=1;rounded=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="controller" target="promotion">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LEGEND ==================== -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="940" y="340" width="180" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="&lt;b&gt;CHÚ THÍCH&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="940" y="345" width="180" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="955" y="370" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1-text" value="Model chính (Promotion)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="367" width="130" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="955" y="390" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2-text" value="Model phụ (Redeem)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="387" width="130" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="955" y="410" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3-text" value="Controller" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="407" width="130" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="955" y="430" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4-text" value="Frontend Component" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="427" width="130" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5-line" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="955" y="460" as="sourcePoint" />
+            <mxPoint x="975" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg5-text" value="1 -- * : One to Many" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="450" width="130" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

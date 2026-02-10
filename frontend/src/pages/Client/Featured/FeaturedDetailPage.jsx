@@ -261,12 +261,12 @@ function FeaturedDetailPage() {
   }
 
   return (
-    <Box sx={{ bgcolor: COLORS.bgLight, minHeight: '100vh' }}>
-      <Box sx={{ bgcolor: COLORS.white, pb: 5 }}>
-        <Container maxWidth="lg">
+    <Box sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed', minHeight: '100vh', py: 1 }}>
+      <Container maxWidth="lg">
 
+        <Box sx={{ bgcolor: '#fff', borderRadius: 0, p: { xs: 2, md: 3 } }}>
           {/* Breadcrumbs */}
-          <Box sx={{ py: 2 }}>
+          <Box sx={{ pb: 2 }}>
             <Breadcrumbs separator="/">
               <Link to="/" style={{ textDecoration: 'none', color: COLORS.textMuted, fontSize: '14px' }}>
                 Trang chủ
@@ -743,9 +743,9 @@ function FeaturedDetailPage() {
               </Paper>
             </Grid>
           </Grid>
+        </Box>
 
-        </Container>
-      </Box>
+      </Container>
     </Box>
   );
 }

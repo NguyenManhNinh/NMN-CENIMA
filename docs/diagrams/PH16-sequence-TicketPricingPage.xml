@@ -1,0 +1,234 @@
+<mxfile host="app.diagrams.net" modified="2026-02-10T11:00:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Sequence - Tải bảng giá vé" id="sequence-ticketpricing-load">
+    <mxGraphModel dx="1100" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="&lt;b&gt;SEQUENCE DIAGRAM – TẢI VÀ HIỂN THỊ BẢNG GIÁ VÉ&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="200" y="10" width="550" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LIFELINES ==================== -->
+        <!-- User -->
+        <mxCell id="user-box" value="&lt;b&gt;User&lt;/b&gt;&lt;br&gt;(Browser)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="user-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="90" as="sourcePoint" />
+            <mxPoint x="100" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- TicketPricingPage -->
+        <mxCell id="page-box" value="&lt;b&gt;TicketPricingPage&lt;/b&gt;&lt;br&gt;(React Component)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="50" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="page-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="90" as="sourcePoint" />
+            <mxPoint x="300" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ticketPricingApi -->
+        <mxCell id="api-box" value="&lt;b&gt;ticketPricingApi&lt;/b&gt;&lt;br&gt;(Axios Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="440" y="50" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="api-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="90" as="sourcePoint" />
+            <mxPoint x="505" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Controller -->
+        <mxCell id="ctrl-box" value="&lt;b&gt;TicketPricing&lt;br&gt;Controller&lt;/b&gt;&lt;br&gt;(Express)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="640" y="50" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ctrl-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="90" as="sourcePoint" />
+            <mxPoint x="700" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- MongoDB -->
+        <mxCell id="db-box" value="&lt;b&gt;MongoDB&lt;/b&gt;&lt;br&gt;(TicketPricing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="50" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="db-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="90" as="sourcePoint" />
+            <mxPoint x="900" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== MESSAGES ==================== -->
+        <!-- 1. User truy cập -->
+        <mxCell id="m1" value="1. Truy cập /gia-ve" style="endArrow=block;endFill=1;html=1;fontSize=11;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="120" as="sourcePoint" />
+            <mxPoint x="300" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. setState loading -->
+        <mxCell id="m2" value="2. setState(loading=true)" style="endArrow=block;endFill=1;html=1;fontSize=10;strokeWidth=1;dashed=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="155" as="sourcePoint" />
+            <mxPoint x="300" y="170" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="155" />
+              <mxPoint x="340" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Gọi API -->
+        <mxCell id="m3" value="3. getTicketPricingAPI()" style="endArrow=block;endFill=1;html=1;fontSize=11;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="200" as="sourcePoint" />
+            <mxPoint x="505" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. HTTP Request -->
+        <mxCell id="m4" value="4. GET /api/v1/ticket-pricing" style="endArrow=block;endFill=1;html=1;fontSize=11;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="240" as="sourcePoint" />
+            <mxPoint x="700" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. DB Query -->
+        <mxCell id="m5" value="5. findOne({status:&apos;active&apos;}).lean()" style="endArrow=block;endFill=1;html=1;fontSize=10;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="280" as="sourcePoint" />
+            <mxPoint x="900" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. DB Response -->
+        <mxCell id="m6" value="6. pricing document" style="endArrow=open;endFill=0;html=1;fontSize=10;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="320" as="sourcePoint" />
+            <mxPoint x="700" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT FRAME: Success -->
+        <mxCell id="alt-frame" value="&lt;b&gt;alt&lt;/b&gt; [pricing tồn tại]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=1;dashed=1;verticalAlign=top;align=left;spacingTop=5;spacingLeft=10;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="350" width="900" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- 7. Sort tabs -->
+        <mxCell id="m7" value="7. Sort tabs by sortOrder" style="endArrow=block;endFill=1;html=1;fontSize=10;strokeWidth=1;dashed=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="380" as="sourcePoint" />
+            <mxPoint x="700" y="395" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="740" y="380" />
+              <mxPoint x="740" y="395" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8. JSON Response -->
+        <mxCell id="m8" value="8. 200 {success:true, data:pricing}" style="endArrow=open;endFill=0;html=1;fontSize=10;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="420" as="sourcePoint" />
+            <mxPoint x="505" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. Return data -->
+        <mxCell id="m9" value="9. response.data" style="endArrow=open;endFill=0;html=1;fontSize=10;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="450" as="sourcePoint" />
+            <mxPoint x="300" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 10. setState pricingData -->
+        <mxCell id="m10" value="10. setState(pricingData, loading=false)" style="endArrow=block;endFill=1;html=1;fontSize=10;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="480" as="sourcePoint" />
+            <mxPoint x="300" y="495" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="480" />
+              <mxPoint x="340" y="495" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. Check hash -->
+        <mxCell id="m11" value="11. Check location.hash → setActiveTab" style="endArrow=block;endFill=1;html=1;fontSize=10;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="515" as="sourcePoint" />
+            <mxPoint x="300" y="530" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="515" />
+              <mxPoint x="340" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT separator -->
+        <mxCell id="alt-sep" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="560" as="sourcePoint" />
+            <mxPoint x="960" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt-label2" value="[pricing = null (404)]" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="70" y="565" width="150" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 404 branch message -->
+        <mxCell id="m-404a" value="404 {success:false}" style="endArrow=open;endFill=0;html=1;fontSize=10;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="600" as="sourcePoint" />
+            <mxPoint x="300" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 12. Render -->
+        <mxCell id="m12" value="12. Render tabs + ảnh bảng giá + ghi chú" style="endArrow=open;endFill=0;html=1;fontSize=10;strokeWidth=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="640" as="sourcePoint" />
+            <mxPoint x="100" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== TAB CLICK INTERACTION ==================== -->
+        <mxCell id="opt-frame" value="&lt;b&gt;opt&lt;/b&gt; [User click tab khác]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#0066CC;strokeWidth=1;dashed=1;verticalAlign=top;align=left;spacingTop=5;spacingLeft=10;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="670" width="500" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- 13. Click tab -->
+        <mxCell id="m13" value="13. Click tab (index, slug)" style="endArrow=block;endFill=1;html=1;fontSize=10;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="710" as="sourcePoint" />
+            <mxPoint x="300" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14. Update state + URL -->
+        <mxCell id="m14" value="14. setActiveTab + navigate(#slug)" style="endArrow=block;endFill=1;html=1;fontSize=10;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="740" as="sourcePoint" />
+            <mxPoint x="300" y="755" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="740" />
+              <mxPoint x="340" y="755" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

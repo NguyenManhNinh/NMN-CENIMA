@@ -1,0 +1,419 @@
+<mxfile host="app.diagrams.net" modified="2026-01-16T09:01:03.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Activity - ActorDetailPage" id="activity-actor-detail-page">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="&lt;b&gt;ACTIVITY DIAGRAM – LUỒNG XEM CHI TIẾT VÀ TĂNG VIEW&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== SWIMLANES ==================== -->
+        <!-- User Lane -->
+        <mxCell id="lane-user" value="&lt;b&gt;User&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="160" height="980" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Lane -->
+        <mxCell id="lane-frontend" value="&lt;b&gt;Frontend&lt;br&gt;(ActorDetailPage)&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="200" y="70" width="280" height="980" as="geometry" />
+        </mxCell>
+
+        <!-- localStorage Lane -->
+        <mxCell id="lane-storage" value="&lt;b&gt;localStorage&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="480" y="70" width="150" height="980" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Lane -->
+        <mxCell id="lane-backend" value="&lt;b&gt;Backend&lt;br&gt;(API)&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="630" y="70" width="160" height="980" as="geometry" />
+        </mxCell>
+
+        <!-- Database Lane -->
+        <mxCell id="lane-db" value="&lt;b&gt;MongoDB&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="790" y="70" width="140" height="980" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== START ==================== -->
+        <mxCell id="start" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="105" y="100" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== USER ACTIONS ==================== -->
+        <!-- A1: Truy cập trang -->
+        <mxCell id="a1" value="Truy cập&lt;br&gt;/dien-vien-chi-tiet/:slug" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="55" y="150" width="130" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: start -> a1 -->
+        <mxCell id="arr-start-a1" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="start" target="a1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== FRONTEND: LOADING ==================== -->
+        <mxCell id="a2" value="Hiển thị&lt;br&gt;Loading Spinner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="280" y="150" width="110" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a1-a2" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="a1" target="a2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- A3: Call getPersonBySlugAPI -->
+        <mxCell id="a3" value="Gọi&lt;br&gt;getPersonBySlugAPI(slug)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="265" y="215" width="140" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a2-a3" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="a2" target="a3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== BACKEND: QUERY ==================== -->
+        <mxCell id="b1" value="Xử lý request&lt;br&gt;getPersonBySlug()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="215" width="100" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a3-b1" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="a3" target="b1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D1: MongoDB query -->
+        <mxCell id="d1" value="findOne&lt;br&gt;({slug})" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="820" y="215" width="80" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-b1-d1" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="b1" target="d1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-d1-b1" value="person data" style="endArrow=classic;html=1;rounded=0;dashed=1;fontSize=9;" edge="1" parent="1" source="d1" target="b1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="280" />
+              <mxPoint x="710" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== DECISION: FOUND? ==================== -->
+        <mxCell id="dec1" value="Tìm thấy&lt;br&gt;person?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="295" y="310" width="80" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-b1-dec1" value="response" style="endArrow=classic;html=1;rounded=0;dashed=1;fontSize=9;" edge="1" parent="1" source="b1" target="dec1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 404 PATH -->
+        <mxCell id="a404" value="Hiển thị 404&lt;br&gt;+ Nút quay lại" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="395" y="320" width="80" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-dec1-404" value="No" style="endArrow=classic;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="dec1" target="a404">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="end-404" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="420" y="390" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="end-404-inner" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="425" y="395" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-404-end" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="a404" target="end-404">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== SUCCESS PATH: VIEW COOLDOWN ==================== -->
+        <!-- Check viewIncrementedRef -->
+        <mxCell id="a4" value="Check&lt;br&gt;viewIncrementedRef" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="275" y="400" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-dec1-a4" value="Yes" style="endArrow=classic;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="dec1" target="a4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Get lastViewTime from localStorage -->
+        <mxCell id="a5" value="getItem&lt;br&gt;(&quot;actor_view_{id}&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="510" y="400" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a4-a5" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="a4" target="a5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Calculate time diff -->
+        <mxCell id="a6" value="Tính&lt;br&gt;now - lastViewTime" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="275" y="460" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a5-a6" value="lastViewTime" style="endArrow=classic;html=1;rounded=0;dashed=1;fontSize=9;" edge="1" parent="1" source="a5" target="a6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: > 24h? -->
+        <mxCell id="dec2" value="> 24h&lt;br&gt;hoặc null?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="295" y="520" width="80" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a6-dec2" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="a6" target="dec2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- YES: Update view -->
+        <mxCell id="a7" value="setItem&lt;br&gt;(&quot;actor_view_{id}&quot;, now)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="510" y="530" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-dec2-a7" value="Yes" style="endArrow=classic;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="dec2" target="a7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a8" value="incrementPersonViewAPI(id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="265" y="600" width="140" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a7-a8" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="a7" target="a8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="580" />
+              <mxPoint x="470" y="580" />
+              <mxPoint x="470" y="617" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Backend: increment view -->
+        <mxCell id="b2" value="$inc: {viewCount: 1}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="655" y="600" width="110" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a8-b2" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="a8" target="b2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- MongoDB update -->
+        <mxCell id="d2" value="Update&lt;br&gt;viewCount" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="820" y="600" width="80" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-b2-d2" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="b2" target="d2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- NO: Skip view increment -->
+        <mxCell id="skip-note" value="&lt;i&gt;SKIP - không tăng view&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=#ffffcc;align=center;verticalAlign=middle;fontSize=9;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="580" width="100" height="18" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-dec2-skip" value="No" style="endArrow=none;html=1;rounded=0;fontSize=9;dashed=1;" edge="1" parent="1" source="dec2" target="skip-note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== FORK: PARALLEL TASKS ==================== -->
+        <mxCell id="fork1" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#000000;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="325" y="660" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a8-fork" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="a8" target="fork1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="335" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Fork branch 1: Get sidebar movies -->
+        <mxCell id="fork-a1" value="Gọi&lt;br&gt;getNowShowingMoviesAPI()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="230" y="700" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-fork-a1" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="fork1" target="fork-a1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Fork branch 2: Init like state -->
+        <mxCell id="fork-a2" value="getItem&lt;br&gt;(&quot;actor_liked_{id}&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="510" y="700" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-fork-a2" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="fork1" target="fork-a2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Init like state in Frontend -->
+        <mxCell id="fork-a3" value="Khởi tạo&lt;br&gt;isLiked state" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="700" width="90" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-fork-a2-a3" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="fork-a2" target="fork-a3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- JOIN -->
+        <mxCell id="join1" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#000000;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="325" y="770" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-fork-a1-join" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="fork-a1" target="join1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-fork-a3-join" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="fork-a3" target="join1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== RENDER UI ==================== -->
+        <mxCell id="render" value="&lt;b&gt;Render giao diện&lt;/b&gt;&lt;br&gt;Thông tin + Gallery +&lt;br&gt;Filmography + Sidebar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="260" y="810" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-join-render" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="join1" target="render">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== USER ACTIONS ==================== -->
+        <mxCell id="dec3" value="User&lt;br&gt;action?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="90" y="890" width="60" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-render-dec3" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="render" target="dec3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="837" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Action: Mở Gallery -->
+        <mxCell id="u-gallery" value="Mở&lt;br&gt;Gallery" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="55" y="970" width="50" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-dec3-gallery" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="dec3" target="u-gallery">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f-lightbox" value="Hiển thị&lt;br&gt;Lightbox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="280" y="970" width="80" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-gallery-lightbox" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="u-gallery" target="f-lightbox">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Loop back to render -->
+        <mxCell id="arr-lightbox-render" value="&lt;i&gt;Close&lt;/i&gt;" style="endArrow=classic;html=1;rounded=0;dashed=1;fontSize=9;" edge="1" parent="1" source="f-lightbox" target="render">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="990" />
+              <mxPoint x="400" y="837" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Action: Click Like -->
+        <mxCell id="u-like" value="Click&lt;br&gt;Like" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="115" y="970" width="45" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-dec3-like" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="dec3" target="u-like">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f-like" value="«subprocess»&lt;br&gt;Toggle Like" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="385" y="970" width="80" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-like-sub" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="u-like" target="f-like">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Action: Click phim -->
+        <mxCell id="u-movie" value="Click&lt;br&gt;phim" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="170" y="970" width="50" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-dec3-movie" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="dec3" target="u-movie">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f-nav" value="Navigate&lt;br&gt;/phim/:slug" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="480" y="970" width="80" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-movie-nav" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="u-movie" target="f-nav">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== END ==================== -->
+        <mxCell id="end" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="495" y="1030" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="end-inner" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="500" y="1035" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-nav-end" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="f-nav" target="end">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LEGEND ==================== -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="80" width="170" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="&lt;b&gt;CHÚ THÍCH&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="85" width="170" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg1" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="975" y="110" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1-text" value="Start / End" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="995" y="107" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg2" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="975" y="135" width="18" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2-text" value="Decision" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="998" y="133" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg3" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#000000;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="975" y="162" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3-text" value="Fork / Join" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="998" y="160" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="975" y="187" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4-text" value="Subprocess" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="998" y="185" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="975" y="212" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5-text" value="Error / 404" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="998" y="210" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== NOTES ==================== -->
+        <mxCell id="note1" value="&lt;b&gt;VIEW_COOLDOWN_MS&lt;/b&gt;&lt;br&gt;= 86,400,000 ms&lt;br&gt;= 24 giờ" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#ffffcc;strokeColor=#999999;align=left;verticalAlign=top;spacing=5;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="960" y="290" width="120" height="60" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

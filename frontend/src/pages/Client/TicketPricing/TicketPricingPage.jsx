@@ -18,7 +18,7 @@ import { getTicketPricingAPI } from '../../../apis/ticketPricingApi';
 const tokens = {
   colors: {
     page: {
-      background: 'rgba(233, 233, 245, 1)'     // Nền trang tổng thể
+      background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed'  // Nền ảnh banner
     },
     wrapper: {
       background: '#1A1A2E'                      // Nền wrapper chính (tối)
@@ -238,7 +238,7 @@ const TicketPricingPage = () => {
     <Box sx={{
       minHeight: '100vh',
       background: tokens.colors.page.background,
-      p: 0
+      py: 1
     }}>
       <Container maxWidth="lg">
         {/* WRAPPER CHÍNH - Nền tối */}

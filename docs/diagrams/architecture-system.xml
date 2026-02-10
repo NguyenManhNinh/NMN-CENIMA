@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Kiến trúc tổng thể" id="architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- PRESENTATION LAYER -->
+        <mxCell id="presentation" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="100" y="40" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="presentation_title" value="&lt;b&gt;PRESENTATION LAYER&lt;/b&gt;&lt;br&gt;React + Vite + Material-UI" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="70" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 1 -->
+        <mxCell id="arrow1" value="REST API" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1">
+          <mxGeometry x="0.5" y="10" relative="1" as="geometry">
+            <mxPoint x="300" y="140" as="sourcePoint" />
+            <mxPoint x="300" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- BUSINESS LAYER -->
+        <mxCell id="business" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="100" y="180" width="400" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="business_title" value="&lt;b&gt;BUSINESS LAYER&lt;/b&gt;&lt;br&gt;Express.js + Socket.io + Redis" style="text;html=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="200" y="190" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Modules -->
+        <mxCell id="auth" value="Auth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="120" y="250" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="movie" value="Movie" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="210" y="250" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="booking" value="Booking" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="300" y="250" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="payment" value="Payment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="390" y="250" width="80" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 2 -->
+        <mxCell id="arrow2" value="" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="320" as="sourcePoint" />
+            <mxPoint x="300" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DATA LAYER -->
+        <mxCell id="data" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="100" y="360" width="400" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="data_title" value="&lt;b&gt;DATA LAYER&lt;/b&gt;&lt;br&gt;MongoDB (15 Collections)" style="text;html=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="200" y="380" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- EXTERNAL SERVICES -->
+        <mxCell id="external_title" value="&lt;b&gt;EXTERNAL SERVICES&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="150" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="vnpay" value="VNPay" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="80" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="google" value="Google OAuth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="140" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="gemini" value="Gemini AI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="200" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="smtp" value="SMTP Email" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="260" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows to external -->
+        <mxCell id="ext_arrow1" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="250" as="sourcePoint" />
+            <mxPoint x="560" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext_arrow2" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="250" as="sourcePoint" />
+            <mxPoint x="560" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext_arrow3" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="250" as="sourcePoint" />
+            <mxPoint x="560" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext_arrow4" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="250" as="sourcePoint" />
+            <mxPoint x="560" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

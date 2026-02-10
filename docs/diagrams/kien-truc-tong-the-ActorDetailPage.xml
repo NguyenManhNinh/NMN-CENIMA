@@ -1,0 +1,181 @@
+<mxfile host="app.diagrams.net" modified="2026-01-16T08:48:40.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Kiến trúc ActorDetailPage" id="architecture-actor-detail-page">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="&lt;b&gt;KIẾN TRÚC TỔNG THỂ PHÂN HỆ ACTORDETAILPAGE&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="320" y="20" width="450" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== TẦNG 1: FRONTEND ==================== -->
+        <mxCell id="frontend-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;dashed=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="540" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend-label" value="&lt;b&gt;FRONTEND (ReactJS)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#1e3a5f;" vertex="1" parent="1">
+          <mxGeometry x="50" y="75" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ActorDetailPage.jsx -->
+        <mxCell id="actor-detail-page" value="&lt;b&gt;ActorDetailPage.jsx&lt;/b&gt;&lt;hr&gt;- actor: Actor | null&lt;br&gt;- loading: boolean&lt;br&gt;- openGallery: boolean&lt;br&gt;- currentImageIndex&lt;br&gt;- isAutoPlay: boolean&lt;br&gt;- isLiked: boolean&lt;br&gt;- viewIncrementedRef" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="100" width="150" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- personApi.js -->
+        <mxCell id="person-api" value="&lt;b&gt;personApi.js&lt;/b&gt;&lt;hr&gt;+ getPersonBySlugAPI()&lt;br&gt;+ incrementPersonViewAPI()&lt;br&gt;+ togglePersonLikeAPI()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="230" y="100" width="160" height="85" as="geometry" />
+        </mxCell>
+
+        <!-- localStorage -->
+        <mxCell id="local-storage" value="&lt;b&gt;localStorage&lt;/b&gt;&lt;hr&gt;actor_view_{id} (cooldown)&lt;br&gt;actor_liked_{id} (like state)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;align=center;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="230" y="195" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- movieApi.js (sidebar) -->
+        <mxCell id="movie-api" value="&lt;b&gt;movieApi.js&lt;/b&gt;&lt;hr&gt;+ getNowShowingMoviesAPI()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="410" y="100" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows within Frontend -->
+        <mxCell id="arr-fe1" value="uses" style="endArrow=classic;html=1;rounded=0;fontSize=10;" edge="1" parent="1" source="actor-detail-page" target="person-api">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-fe2" value="read/write" style="endArrow=classic;startArrow=classic;html=1;rounded=0;fontSize=10;" edge="1" parent="1" source="actor-detail-page" target="local-storage">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-fe3" value="uses" style="endArrow=classic;html=1;rounded=0;fontSize=10;" edge="1" parent="1" source="actor-detail-page" target="movie-api">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== TẦNG 2: BACKEND ==================== -->
+        <mxCell id="backend-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;dashed=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="310" width="540" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-label" value="&lt;b&gt;BACKEND (Node.js/Express)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#2d5016;" vertex="1" parent="1">
+          <mxGeometry x="50" y="315" width="220" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- personRoutes.js -->
+        <mxCell id="person-routes" value="&lt;b&gt;personRoutes.js&lt;/b&gt;&lt;hr&gt;GET /:slug&lt;br&gt;POST /:id/view&lt;br&gt;POST /:id/like" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="340" width="130" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- personController.js -->
+        <mxCell id="person-controller" value="&lt;b&gt;personController.js&lt;/b&gt;&lt;hr&gt;+ getPersonBySlug()&lt;br&gt;+ incrementPersonView()&lt;br&gt;+ togglePersonLike()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="210" y="340" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- movieController (sidebar) -->
+        <mxCell id="movie-controller" value="&lt;b&gt;movieController.js&lt;/b&gt;&lt;hr&gt;+ getNowShowingMovies()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="400" y="340" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: personRoutes -> personController -->
+        <mxCell id="arr-be1" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1" source="person-routes" target="person-controller">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== TẦNG 3: DATABASE ==================== -->
+        <mxCell id="database-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="510" width="540" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="database-label" value="&lt;b&gt;DATABASE (MongoDB)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#7a1a1a;" vertex="1" parent="1">
+          <mxGeometry x="50" y="515" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- persons collection -->
+        <mxCell id="persons-collection" value="&lt;b&gt;persons&lt;/b&gt;&lt;hr&gt;name, slug, photoUrl&lt;br&gt;fullBio, shortBio, gallery&lt;br&gt;filmography, viewCount&lt;br&gt;likeCount, nationality" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fff;strokeColor=#b85450;align=center;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="100" y="540" width="150" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- movies collection -->
+        <mxCell id="movies-collection" value="&lt;b&gt;movies&lt;/b&gt;&lt;hr&gt;title, posterUrl, slug&lt;br&gt;rating, status" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fff;strokeColor=#b85450;align=center;verticalAlign=top;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="320" y="540" width="150" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ARROWS BETWEEN LAYERS ==================== -->
+        <!-- Frontend -> Backend -->
+        <mxCell id="api-arrow1" value="&lt;b&gt;HTTPS&lt;/b&gt;&lt;br&gt;REST API" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#0066cc;fontSize=10;entryX=0.5;entryY=0;exitX=0.5;exitY=1;" edge="1" parent="1" source="person-api" target="person-routes">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="api-arrow2" value="&lt;b&gt;HTTPS&lt;/b&gt;" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#0066cc;fontSize=10;entryX=0.5;entryY=0;exitX=0.5;exitY=1;" edge="1" parent="1" source="movie-api" target="movie-controller">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Backend -> Database -->
+        <mxCell id="db-arrow1" value="&lt;b&gt;Mongoose&lt;/b&gt;&lt;br&gt;Query" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#009933;fontSize=10;entryX=0.5;entryY=0;exitX=0.5;exitY=1;" edge="1" parent="1" source="person-controller" target="persons-collection">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-arrow2" value="&lt;b&gt;Mongoose&lt;/b&gt;" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#009933;fontSize=10;entryX=0.5;entryY=0;exitX=0.5;exitY=1;" edge="1" parent="1" source="movie-controller" target="movies-collection">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LEGEND ==================== -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="70" width="180" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="&lt;b&gt;CHÚ THÍCH&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="75" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="635" y="100" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1-text" value="Frontend Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="97" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="635" y="125" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2-text" value="Backend Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="122" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg3" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="635" y="150" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3-text" value="Database Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="147" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg4" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#0066cc;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="635" y="185" as="sourcePoint" />
+            <mxPoint x="655" y="185" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg4-text" value="REST API (HTTPS)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="177" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg5" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#009933;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="635" y="210" as="sourcePoint" />
+            <mxPoint x="655" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg5-text" value="Mongoose Query" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="202" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg6" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="635" y="230" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg6-text" value="localStorage (client)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="227" width="110" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== NOTE ==================== -->
+        <mxCell id="note1" value="&lt;b&gt;Đặc điểm chính:&lt;/b&gt;&lt;br&gt;• View Cooldown 24h&lt;br&gt;• Gallery Lightbox + Autoplay&lt;br&gt;• Optimistic Like Update&lt;br&gt;• Filmography Grid&lt;br&gt;• Sidebar phim đang chiếu" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#ffffcc;strokeColor=#999999;align=left;verticalAlign=top;spacing=5;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="620" y="300" width="180" height="110" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

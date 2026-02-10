@@ -350,577 +350,579 @@ function FilmDirectorDetailPage() {
   const age = calculateAge(director.birthDate);
 
   return (
-    <Box sx={{ bgcolor: '#fff', minHeight: '100vh', py: { xs: 2, md: 4 } }}>
+    <Box sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed', minHeight: '100vh', py: 1 }}>
       <Container maxWidth="lg">
-        {/* Breadcrumbs */}
-        <Breadcrumbs sx={{ mb: 3 }}>
-          <Link to="/" style={{ textDecoration: 'none', color: COLORS.textLight, fontSize: '14px' }}>
-            Trang chủ
-          </Link>
-          <Link to="/dao-dien" style={{ textDecoration: 'none', color: COLORS.textLight, fontSize: '14px' }}>
-            Đạo diễn
-          </Link>
-          <Typography sx={{ color: COLORS.text, fontSize: '14px' }}>{director.name}</Typography>
-        </Breadcrumbs>
+        <Box sx={{ bgcolor: '#fff', borderRadius: 0, p: { xs: 2, md: 3 } }}>
+          {/* Breadcrumbs */}
+          <Breadcrumbs sx={{ mb: 3 }}>
+            <Link to="/" style={{ textDecoration: 'none', color: COLORS.textLight, fontSize: '14px' }}>
+              Trang chủ
+            </Link>
+            <Link to="/dao-dien" style={{ textDecoration: 'none', color: COLORS.textLight, fontSize: '14px' }}>
+              Đạo diễn
+            </Link>
+            <Typography sx={{ color: COLORS.text, fontSize: '14px' }}>{director.name}</Typography>
+          </Breadcrumbs>
 
-        <Grid container spacing={4}>
-          {/* Main Content */}
-          <Grid item xs={12} md={8}>
-            {/* HEADER: Ảnh + Thông tin */}
-            <Grid container spacing={{ xs: 0, md: 3 }}>
-              {/* Ảnh đại diện */}
-              <Grid item xs={12} md={4}>
-                <Box sx={{
-                  display: 'flex',
-                  justifyContent: { xs: 'center', md: 'flex-start' },
-                  mb: { xs: 2, md: 0 }
-                }}>
-                  <Box
-                    sx={{
-                      width: { xs: 180, sm: 200, md: 280 },
-                      aspectRatio: '2 / 3',
-                      borderRadius: { xs: '10px', md: 0 },
-                      overflow: 'hidden',
-                      boxShadow: 'none',
-                      bgcolor: 'transparent',
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={director.photoUrl}
-                      alt={director.name}
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        objectPosition: 'center 20%',
-                        display: 'block',
-                      }}
-                      onError={handleImageError}
-                    />
-                  </Box>
-                </Box>
-              </Grid>
-
-              {/* Thông tin cá nhân - Responsive Layout */}
-              <Grid item xs={12} md={8}>
-                {/* Tên đạo diễn */}
-                <Typography sx={{
-                  fontWeight: 700,
-                  fontSize: { xs: '1.4rem', sm: '1.6rem', md: '2rem' },
-                  color: COLORS.dark,
-                  mb: 1.5,
-                  lineHeight: 1.2,
-                  textAlign: { xs: 'center', md: 'left' }
-                }}>
-                  {director.name}
-                </Typography>
-
-                {/* Hàng nút hành động: Like + View count */}
-                <Box sx={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  justifyContent: { xs: 'center', md: 'flex-start' },
-                  gap: 1,
-                  mb: 2
-                }}>
-                  {/* Nút Like */}
-                  <Button
-                    variant="contained"
-                    onClick={handleToggleLike}
-                    disabled={likeLoading}
-                    disableRipple
-                    disableElevation
-                    startIcon={<ThumbUpIcon sx={{ fontSize: 16 }} />}
-                    sx={{
-                      backgroundColor: bgColor,
-                      color: '#fff',
-                      textTransform: 'none',
-                      fontWeight: 500,
-                      fontSize: { xs: '12px', md: '13px' },
-                      px: { xs: 2, md: 2.4 },
-                      py: 0.5,
-                      minWidth: 'auto',
-                      height: { xs: '30px', md: '32px' },
-                      borderRadius: '4px',
-                      boxShadow: 'none',
-                      '&:hover': {
-                        backgroundColor: bgColor,
-                        boxShadow: 'none',
-                      },
-                      '&:active': {
-                        backgroundColor: bgColor,
-                        boxShadow: 'none',
-                      },
-                      '&:focus': {
-                        backgroundColor: bgColor,
-                      },
-                      '&.Mui-focusVisible': {
-                        backgroundColor: bgColor,
-                        boxShadow: 'none',
-                      },
-                      '&.Mui-disabled': {
-                        backgroundColor: bgColor,
-                        color: '#fff',
-                        opacity: 0.7,
-                      },
-                    }}
-                  >
-                    {formatNumber(director.likeCount || 0)}
-                  </Button>
-
-                  {/* Badge lượt xem */}
+          <Grid container spacing={4}>
+            {/* Main Content */}
+            <Grid item xs={12} md={8}>
+              {/* HEADER: Ảnh + Thông tin */}
+              <Grid container spacing={{ xs: 0, md: 3 }}>
+                {/* Ảnh đại diện */}
+                <Grid item xs={12} md={4}>
                   <Box sx={{
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.5,
-                    color: '#666',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    px: 1.5,
-                    fontSize: { xs: '12px', md: '13px' },
-                    height: { xs: '30px', md: '32px' },
-                    bgcolor: '#fff'
+                    justifyContent: { xs: 'center', md: 'flex-start' },
+                    mb: { xs: 2, md: 0 }
                   }}>
-                    <VisibilityIcon sx={{ fontSize: 18, color: '#666' }} />
-                    <Typography sx={{ fontSize: 'inherit', color: '#666', fontWeight: 500 }}>
-                      {formatNumber(director.viewCount || 0)}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Giới thiệu ngắn - Line clamp trên mobile */}
-                {director.shortBio && (
-                  <Typography sx={{
-                    fontStyle: 'italic',
-                    fontSize: { xs: '13px', md: '14px' },
-                    color: '#555',
-                    lineHeight: 1.7,
-                    mb: 2.5,
-                    textAlign: { xs: 'justify', md: 'left' },
-                    display: { xs: '-webkit-box', md: 'block' },
-                    WebkitLineClamp: { xs: 4, md: 'unset' },
-                    WebkitBoxOrient: 'vertical',
-                    overflow: { xs: 'hidden', md: 'visible' }
-                  }}>
-                    {director.shortBio}
-                  </Typography>
-                )}
-
-                {/* Thông tin chi tiết - Box có nền trên mobile */}
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 1,
-                  bgcolor: { xs: '#f8f9fa', md: 'transparent' },
-                  border: { xs: '1px solid #eee', md: 'none' },
-                  borderRadius: { xs: '8px', md: 0 },
-                  p: { xs: 2, md: 0 }
-                }}>
-                  {/* Ngày sinh */}
-                  {director.birthDate && (
-                    <Typography sx={{ fontSize: { xs: '13px', md: '14px' } }}>
-                      <Box component="span" sx={{ color: '#888' }}>Ngày sinh: </Box>
-                      <Box component="span" sx={{ color: '#333', fontWeight: 500 }}>
-                        {formatDate(director.birthDate)}
-                      </Box>
-                    </Typography>
-                  )}
-
-                  {/* Chiều cao */}
-                  {director.height && (
-                    <Typography sx={{ fontSize: { xs: '13px', md: '14px' } }}>
-                      <Box component="span" sx={{ color: '#888' }}>Chiều cao: </Box>
-                      <Box component="span" sx={{ color: '#333', fontWeight: 500 }}>
-                        {director.height}
-                      </Box>
-                    </Typography>
-                  )}
-
-                  {/* Quốc tịch */}
-                  {director.nationality && (
-                    <Typography sx={{ fontSize: { xs: '13px', md: '14px' } }}>
-                      <Box component="span" sx={{ color: '#888' }}>Quốc tịch: </Box>
-                      <Box component="span" sx={{ color: '#333', fontWeight: 500 }}>
-                        {director.nationality}
-                      </Box>
-                    </Typography>
-                  )}
-
-                  {/* Nơi sinh */}
-                  {director.birthPlace && (
-                    <Typography sx={{ fontSize: { xs: '13px', md: '14px' } }}>
-                      <Box component="span" sx={{ color: '#888' }}>Nơi sinh: </Box>
-                      <Box component="span" sx={{ color: '#333', fontWeight: 500 }}>
-                        {director.birthPlace}
-                      </Box>
-                    </Typography>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
-
-            {/* Gallery Section */}
-            <Box sx={{ mt: 4 }}>
-              <Typography sx={{
-                fontWeight: 700,
-                fontSize: '18px',
-                color: COLORS.primary,
-                mb: 2,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                '&::before': {
-                  content: '""',
-                  width: 4,
-                  height: 20,
-                  bgcolor: COLORS.primary,
-                  borderRadius: 1
-                }
-              }}>
-                HÌNH ẢNH ĐẠO DIỄN
-              </Typography>
-
-              {director.photos?.length > 0 ? (
-                <Box sx={{
-                  display: { xs: 'flex', sm: 'grid' },
-                  gridTemplateColumns: { sm: 'repeat(4, 1fr)' },
-                  overflowX: { xs: 'auto', sm: 'visible' },
-                  gap: 1.5,
-                  pb: { xs: 1, sm: 0 },
-                  '::-webkit-scrollbar': { display: 'none' },
-                  scrollbarWidth: 'none'
-                }}>
-                  {director.photos.map((photo, idx) => (
                     <Box
-                      key={idx}
-                      component="img"
-                      src={photo}
-                      alt={`${director.name} - ${idx + 1}`}
-                      onClick={() => handleOpenGallery(idx)}
-                      onError={handleImageError}
                       sx={{
-                        width: { xs: '200px', sm: '100%' },
-                        flexShrink: 0,
-                        aspectRatio: '16/9',
-                        objectFit: 'cover',
-                        cursor: 'pointer',
-                        transition: 'transform 0.3s',
-                        '&:hover': { transform: { sm: 'scale(1.05)' } }
-                      }}
-                    />
-                  ))}
-                </Box>
-              ) : (
-                <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
-                  Đang cập nhật
-                </Typography>
-              )}
-            </Box>
-
-            {/* SECTION: PHIM ĐÃ THAM GIA */}
-            <Box sx={{ mt: 4 }}>
-              <Typography sx={{
-                fontWeight: 700,
-                fontSize: '18px',
-                color: COLORS.primary,
-                mb: 2,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                '&::before': {
-                  content: '""',
-                  width: 4,
-                  height: 20,
-                  bgcolor: COLORS.primary,
-                  borderRadius: 1
-                }
-              }}>
-                PHIM ĐÃ THAM GIA
-              </Typography>
-
-              {director.filmography && director.filmography.length > 0 ? (
-                <Box sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
-                  gap: { xs: 2, md: 2.5 }
-                }}>
-                  {director.filmography.map((movie) => (
-                    <Box
-                      key={movie.slug || movie._id}
-                      component={Link}
-                      to={`/phim/${movie.slug}`}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        p: 1,
-                        borderRadius: 1,
-                        transition: 'all 0.2s',
+                        width: { xs: 180, sm: 200, md: 280 },
+                        aspectRatio: '2 / 3',
+                        borderRadius: { xs: '10px', md: 0 },
+                        overflow: 'hidden',
+                        boxShadow: 'none',
+                        bgcolor: 'transparent',
                       }}
                     >
                       <Box
                         component="img"
-                        src={movie.posterUrl}
-                        alt={movie.title}
-                        onError={handleImageError}
-                        sx={{
-                          width: { xs: 90, md: 100 },
-                          height: { xs: 60, md: 65 },
-                          objectFit: 'cover',
-                          borderRadius: '8px',
-                          flexShrink: 0,
-                          bgcolor: '#f0f0f0'
-                        }}
-                      />
-
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography
-                          className="movie-title"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '13px', md: '14px' },
-                            color: COLORS.text,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}
-                        >
-                          {movie.title}
-                        </Typography>
-
-                        <Typography sx={{
-                          fontSize: { xs: '12px', md: '13px' },
-                          color: movie.role ? COLORS.textLight : COLORS.textMuted,
-                          fontStyle: movie.role ? 'normal' : 'italic',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          mt: 0.25
-                        }}>
-                          {movie.role || 'Đang cập nhật'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-              ) : (
-                <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
-                  Đang cập nhật
-                </Typography>
-              )}
-            </Box>
-
-            {/*SECTION: TIỂU SỬ */}
-            <Box sx={{ mt: 4 }}>
-              <Typography sx={{
-                fontWeight: 700,
-                fontSize: '18px',
-                color: COLORS.primary,
-                mb: 2,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                '&::before': {
-                  content: '""',
-                  width: 4,
-                  height: 20,
-                  bgcolor: COLORS.primary,
-                  borderRadius: 1
-                }
-              }}>
-                TIỂU SỬ
-              </Typography>
-              <Typography sx={{
-                color: COLORS.text,
-                lineHeight: 1.8,
-                fontSize: '14px',
-                whiteSpace: 'pre-line',
-                textAlign: 'justify'
-              }}>
-                {director.fullBio || director.biography || 'Đang cập nhật tiểu sử.'}
-              </Typography>
-            </Box>
-          </Grid>
-
-          {/* Thanh bên - Phim đang chiếu */}
-          <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-            <Box sx={{ position: 'sticky', top: 100 }}>
-              {/* Tiêu đề */}
-              <Typography sx={{
-                fontWeight: 600,
-                fontSize: '18px',
-                color: '#4A4A4A',
-                mb: 2,
-                textTransform: 'uppercase'
-              }}>
-                Phim đang chiếu
-              </Typography>
-
-              {/* Thẻ phim - Dọc */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {sidebarMovies.slice(0, 3).map((movie) => (
-                  <Box
-                    key={movie._id}
-                    component={Link}
-                    to={`/dat-ve/${movie.slug}`}
-                    sx={{
-                      textDecoration: 'none',
-                      display: 'block',
-                      '&:hover .movie-overlay': {
-                        opacity: 1
-                      }
-                    }}
-                  >
-                    {/* Poster phim */}
-                    <Box sx={{
-                      position: 'relative',
-                      overflow: 'hidden',
-                      aspectRatio: '16/9',
-                      borderRadius: 1,
-                      bgcolor: '#f7f7f9ff',
-                    }}>
-                      {/* Ảnh Poster */}
-                      <Box
-                        component="img"
-                        src={movie.bannerUrl || movie.posterUrl}
-                        alt={movie.title}
+                        src={director.photoUrl}
+                        alt={director.name}
                         sx={{
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
-                          bgcolor: '#f7f7f9ff'
+                          objectPosition: 'center 20%',
+                          display: 'block',
+                        }}
+                        onError={handleImageError}
+                      />
+                    </Box>
+                  </Box>
+                </Grid>
+
+                {/* Thông tin cá nhân - Responsive Layout */}
+                <Grid item xs={12} md={8}>
+                  {/* Tên đạo diễn */}
+                  <Typography sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: '1.4rem', sm: '1.6rem', md: '2rem' },
+                    color: COLORS.dark,
+                    mb: 1.5,
+                    lineHeight: 1.2,
+                    textAlign: { xs: 'center', md: 'left' }
+                  }}>
+                    {director.name}
+                  </Typography>
+
+                  {/* Hàng nút hành động: Like + View count */}
+                  <Box sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: { xs: 'center', md: 'flex-start' },
+                    gap: 1,
+                    mb: 2
+                  }}>
+                    {/* Nút Like */}
+                    <Button
+                      variant="contained"
+                      onClick={handleToggleLike}
+                      disabled={likeLoading}
+                      disableRipple
+                      disableElevation
+                      startIcon={<ThumbUpIcon sx={{ fontSize: 16 }} />}
+                      sx={{
+                        backgroundColor: bgColor,
+                        color: '#fff',
+                        textTransform: 'none',
+                        fontWeight: 500,
+                        fontSize: { xs: '12px', md: '13px' },
+                        px: { xs: 2, md: 2.4 },
+                        py: 0.5,
+                        minWidth: 'auto',
+                        height: { xs: '30px', md: '32px' },
+                        borderRadius: '4px',
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: bgColor,
+                          boxShadow: 'none',
+                        },
+                        '&:active': {
+                          backgroundColor: bgColor,
+                          boxShadow: 'none',
+                        },
+                        '&:focus': {
+                          backgroundColor: bgColor,
+                        },
+                        '&.Mui-focusVisible': {
+                          backgroundColor: bgColor,
+                          boxShadow: 'none',
+                        },
+                        '&.Mui-disabled': {
+                          backgroundColor: bgColor,
+                          color: '#fff',
+                          opacity: 0.7,
+                        },
+                      }}
+                    >
+                      {formatNumber(director.likeCount || 0)}
+                    </Button>
+
+                    {/* Badge lượt xem */}
+                    <Box sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      color: '#666',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      px: 1.5,
+                      fontSize: { xs: '12px', md: '13px' },
+                      height: { xs: '30px', md: '32px' },
+                      bgcolor: '#fff'
+                    }}>
+                      <VisibilityIcon sx={{ fontSize: 18, color: '#666' }} />
+                      <Typography sx={{ fontSize: 'inherit', color: '#666', fontWeight: 500 }}>
+                        {formatNumber(director.viewCount || 0)}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Giới thiệu ngắn - Line clamp trên mobile */}
+                  {director.shortBio && (
+                    <Typography sx={{
+                      fontStyle: 'italic',
+                      fontSize: { xs: '13px', md: '14px' },
+                      color: '#555',
+                      lineHeight: 1.7,
+                      mb: 2.5,
+                      textAlign: { xs: 'justify', md: 'left' },
+                      display: { xs: '-webkit-box', md: 'block' },
+                      WebkitLineClamp: { xs: 4, md: 'unset' },
+                      WebkitBoxOrient: 'vertical',
+                      overflow: { xs: 'hidden', md: 'visible' }
+                    }}>
+                      {director.shortBio}
+                    </Typography>
+                  )}
+
+                  {/* Thông tin chi tiết - Box có nền trên mobile */}
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                    bgcolor: { xs: '#f8f9fa', md: 'transparent' },
+                    border: { xs: '1px solid #eee', md: 'none' },
+                    borderRadius: { xs: '8px', md: 0 },
+                    p: { xs: 2, md: 0 }
+                  }}>
+                    {/* Ngày sinh */}
+                    {director.birthDate && (
+                      <Typography sx={{ fontSize: { xs: '13px', md: '14px' } }}>
+                        <Box component="span" sx={{ color: '#888' }}>Ngày sinh: </Box>
+                        <Box component="span" sx={{ color: '#333', fontWeight: 500 }}>
+                          {formatDate(director.birthDate)}
+                        </Box>
+                      </Typography>
+                    )}
+
+                    {/* Chiều cao */}
+                    {director.height && (
+                      <Typography sx={{ fontSize: { xs: '13px', md: '14px' } }}>
+                        <Box component="span" sx={{ color: '#888' }}>Chiều cao: </Box>
+                        <Box component="span" sx={{ color: '#333', fontWeight: 500 }}>
+                          {director.height}
+                        </Box>
+                      </Typography>
+                    )}
+
+                    {/* Quốc tịch */}
+                    {director.nationality && (
+                      <Typography sx={{ fontSize: { xs: '13px', md: '14px' } }}>
+                        <Box component="span" sx={{ color: '#888' }}>Quốc tịch: </Box>
+                        <Box component="span" sx={{ color: '#333', fontWeight: 500 }}>
+                          {director.nationality}
+                        </Box>
+                      </Typography>
+                    )}
+
+                    {/* Nơi sinh */}
+                    {director.birthPlace && (
+                      <Typography sx={{ fontSize: { xs: '13px', md: '14px' } }}>
+                        <Box component="span" sx={{ color: '#888' }}>Nơi sinh: </Box>
+                        <Box component="span" sx={{ color: '#333', fontWeight: 500 }}>
+                          {director.birthPlace}
+                        </Box>
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {/* Gallery Section */}
+              <Box sx={{ mt: 4 }}>
+                <Typography sx={{
+                  fontWeight: 700,
+                  fontSize: '18px',
+                  color: COLORS.primary,
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  '&::before': {
+                    content: '""',
+                    width: 4,
+                    height: 20,
+                    bgcolor: COLORS.primary,
+                    borderRadius: 1
+                  }
+                }}>
+                  HÌNH ẢNH ĐẠO DIỄN
+                </Typography>
+
+                {director.photos?.length > 0 ? (
+                  <Box sx={{
+                    display: { xs: 'flex', sm: 'grid' },
+                    gridTemplateColumns: { sm: 'repeat(4, 1fr)' },
+                    overflowX: { xs: 'auto', sm: 'visible' },
+                    gap: 1.5,
+                    pb: { xs: 1, sm: 0 },
+                    '::-webkit-scrollbar': { display: 'none' },
+                    scrollbarWidth: 'none'
+                  }}>
+                    {director.photos.map((photo, idx) => (
+                      <Box
+                        key={idx}
+                        component="img"
+                        src={photo}
+                        alt={`${director.name} - ${idx + 1}`}
+                        onClick={() => handleOpenGallery(idx)}
+                        onError={handleImageError}
+                        sx={{
+                          width: { xs: '200px', sm: '100%' },
+                          flexShrink: 0,
+                          aspectRatio: '16/9',
+                          objectFit: 'cover',
+                          cursor: 'pointer',
+                          transition: 'transform 0.3s',
+                          '&:hover': { transform: { sm: 'scale(1.05)' } }
                         }}
                       />
+                    ))}
+                  </Box>
+                ) : (
+                  <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
+                    Đang cập nhật
+                  </Typography>
+                )}
+              </Box>
 
-                      {/* Badge đánh giá */}
-                      <Box sx={{
-                        position: 'absolute',
-                        bottom: 6,
-                        right: 6,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        bgcolor: 'rgba(0,0,0,0.7)',
-                        borderRadius: '4px',
-                        overflow: 'hidden'
-                      }}>
-                        {/* Độ tuổi */}
-                        <Box sx={{
-                          bgcolor: '#f5a623',
-                          px: 0.75,
-                          py: 0.25,
-                          display: 'flex',
-                          alignItems: 'center'
-                        }}>
-                          <Typography sx={{
-                            color: '#fff',
-                            fontWeight: 700,
-                            fontSize: '10px'
-                          }}>
-                            {movie.ageRating || 'P'}
-                          </Typography>
-                        </Box>
+              {/* SECTION: PHIM ĐÃ THAM GIA */}
+              <Box sx={{ mt: 4 }}>
+                <Typography sx={{
+                  fontWeight: 700,
+                  fontSize: '18px',
+                  color: COLORS.primary,
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  '&::before': {
+                    content: '""',
+                    width: 4,
+                    height: 20,
+                    bgcolor: COLORS.primary,
+                    borderRadius: 1
+                  }
+                }}>
+                  PHIM ĐÃ THAM GIA
+                </Typography>
 
-                        {/* Đánh giá sao */}
-                        <Box sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.25,
-                          px: 0.75,
-                          py: 0.25
-                        }}>
-                          <StarIcon sx={{ fontSize: 12, color: '#f5a623' }} />
-                          <Typography sx={{
-                            color: '#fff',
-                            fontWeight: 700,
-                            fontSize: '10px'
-                          }}>
-                            {movie.rating?.toFixed(1) || '0'}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      {/* Overlay khi hover */}
+                {director.filmography && director.filmography.length > 0 ? (
+                  <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+                    gap: { xs: 2, md: 2.5 }
+                  }}>
+                    {director.filmography.map((movie) => (
                       <Box
-                        className="movie-overlay"
+                        key={movie.slug || movie._id}
+                        component={Link}
+                        to={`/phim/${movie.slug}`}
                         sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          bgcolor: 'rgba(0,0,0,0.5)',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          opacity: 0,
-                          transition: 'opacity 0.3s'
+                          gap: 1.5,
+                          textDecoration: 'none',
+                          color: 'inherit',
+                          p: 1,
+                          borderRadius: 1,
+                          transition: 'all 0.2s',
                         }}
                       >
-                        <Button
-                          variant="contained"
-                          startIcon={<ConfirmationNumberIcon sx={{ fontSize: 14 }} />}
+                        <Box
+                          component="img"
+                          src={movie.posterUrl}
+                          alt={movie.title}
+                          onError={handleImageError}
                           sx={{
+                            width: { xs: 90, md: 100 },
+                            height: { xs: 60, md: 65 },
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            flexShrink: 0,
+                            bgcolor: '#f0f0f0'
+                          }}
+                        />
+
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography
+                            className="movie-title"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: '13px', md: '14px' },
+                              color: COLORS.text,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
+                            {movie.title}
+                          </Typography>
+
+                          <Typography sx={{
+                            fontSize: { xs: '12px', md: '13px' },
+                            color: movie.role ? COLORS.textLight : COLORS.textMuted,
+                            fontStyle: movie.role ? 'normal' : 'italic',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            mt: 0.25
+                          }}>
+                            {movie.role || 'Đang cập nhật'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                ) : (
+                  <Typography sx={{ color: COLORS.textMuted, fontStyle: 'italic' }}>
+                    Đang cập nhật
+                  </Typography>
+                )}
+              </Box>
+
+              {/*SECTION: TIỂU SỬ */}
+              <Box sx={{ mt: 4 }}>
+                <Typography sx={{
+                  fontWeight: 700,
+                  fontSize: '18px',
+                  color: COLORS.primary,
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  '&::before': {
+                    content: '""',
+                    width: 4,
+                    height: 20,
+                    bgcolor: COLORS.primary,
+                    borderRadius: 1
+                  }
+                }}>
+                  TIỂU SỬ
+                </Typography>
+                <Typography sx={{
+                  color: COLORS.text,
+                  lineHeight: 1.8,
+                  fontSize: '14px',
+                  whiteSpace: 'pre-line',
+                  textAlign: 'justify'
+                }}>
+                  {director.fullBio || director.biography || 'Đang cập nhật tiểu sử.'}
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* Thanh bên - Phim đang chiếu */}
+            <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Box sx={{ position: 'sticky', top: 100 }}>
+                {/* Tiêu đề */}
+                <Typography sx={{
+                  fontWeight: 600,
+                  fontSize: '18px',
+                  color: '#4A4A4A',
+                  mb: 2,
+                  textTransform: 'uppercase'
+                }}>
+                  Phim đang chiếu
+                </Typography>
+
+                {/* Thẻ phim - Dọc */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {sidebarMovies.slice(0, 3).map((movie) => (
+                    <Box
+                      key={movie._id}
+                      component={Link}
+                      to={`/dat-ve/${movie.slug}`}
+                      sx={{
+                        textDecoration: 'none',
+                        display: 'block',
+                        '&:hover .movie-overlay': {
+                          opacity: 1
+                        }
+                      }}
+                    >
+                      {/* Poster phim */}
+                      <Box sx={{
+                        position: 'relative',
+                        overflow: 'hidden',
+                        aspectRatio: '16/9',
+                        borderRadius: 1,
+                        bgcolor: '#f7f7f9ff',
+                      }}>
+                        {/* Ảnh Poster */}
+                        <Box
+                          component="img"
+                          src={movie.bannerUrl || movie.posterUrl}
+                          alt={movie.title}
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            bgcolor: '#f7f7f9ff'
+                          }}
+                        />
+
+                        {/* Badge đánh giá */}
+                        <Box sx={{
+                          position: 'absolute',
+                          bottom: 6,
+                          right: 6,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          bgcolor: 'rgba(0,0,0,0.7)',
+                          borderRadius: '4px',
+                          overflow: 'hidden'
+                        }}>
+                          {/* Độ tuổi */}
+                          <Box sx={{
                             bgcolor: '#f5a623',
-                            color: '#fff',
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            fontSize: '12px',
-                            px: 2,
-                            py: 0.5,
-                            '&:hover': {
-                              bgcolor: '#e09520'
-                            }
+                            px: 0.75,
+                            py: 0.25,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <Typography sx={{
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '10px'
+                            }}>
+                              {movie.ageRating || 'P'}
+                            </Typography>
+                          </Box>
+
+                          {/* Đánh giá sao */}
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.25,
+                            px: 0.75,
+                            py: 0.25
+                          }}>
+                            <StarIcon sx={{ fontSize: 12, color: '#f5a623' }} />
+                            <Typography sx={{
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '10px'
+                            }}>
+                              {movie.rating?.toFixed(1) || '0'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Overlay khi hover */}
+                        <Box
+                          className="movie-overlay"
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            bgcolor: 'rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            opacity: 0,
+                            transition: 'opacity 0.3s'
                           }}
                         >
-                          Mua vé
-                        </Button>
+                          <Button
+                            variant="contained"
+                            startIcon={<ConfirmationNumberIcon sx={{ fontSize: 14 }} />}
+                            sx={{
+                              bgcolor: '#f5a623',
+                              color: '#fff',
+                              fontWeight: 600,
+                              textTransform: 'none',
+                              fontSize: '12px',
+                              px: 2,
+                              py: 0.5,
+                              '&:hover': {
+                                bgcolor: '#e09520'
+                              }
+                            }}
+                          >
+                            Mua vé
+                          </Button>
+                        </Box>
                       </Box>
-                    </Box>
 
-                    {/* Tiêu đề phim */}
-                    <Typography sx={{
-                      mt: 0.75,
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      color: '#333333',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 1,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      {movie.title}
-                    </Typography>
-                  </Box>
-                ))}
+                      {/* Tiêu đề phim */}
+                      <Typography sx={{
+                        mt: 0.75,
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        color: '#333333',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}>
+                        {movie.title}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+                {/* Xem thêm button */}
+                <Button
+                  component={Link}
+                  to="/phim-dang-chieu"
+                  fullWidth
+                  disableRipple
+                  sx={{
+                    mt: 2,
+                    py: 1,
+                    color: '#1A3A5C',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    textTransform: 'none',
+                    '&:hover': {
+                      bgcolor: 'transparent'
+                    }
+                  }}
+                  endIcon={<ArrowForwardIosIcon sx={{ fontSize: 12 }} />}
+                >
+                  Xem thêm
+                </Button>
               </Box>
-              {/* Xem thêm button */}
-              <Button
-                component={Link}
-                to="/phim-dang-chieu"
-                fullWidth
-                disableRipple
-                sx={{
-                  mt: 2,
-                  py: 1,
-                  color: '#1A3A5C',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  textTransform: 'none',
-                  '&:hover': {
-                    bgcolor: 'transparent'
-                  }
-                }}
-                endIcon={<ArrowForwardIosIcon sx={{ fontSize: 12 }} />}
-              >
-                Xem thêm
-              </Button>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Container>
 
       {/* Gallery Dialog */}

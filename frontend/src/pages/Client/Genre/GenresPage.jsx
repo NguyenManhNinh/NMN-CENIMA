@@ -74,8 +74,8 @@ const styles = {
   // Container chính của trang
   wrapper: {
     minHeight: '100vh',
-    bgcolor: '#fff',
-    py: { xs: 2, md: 4 }
+    background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed',
+    py: 1
   },
 
   // Tiêu đề trang - "THẾ GIỚI ĐIỆN ẢNH"
@@ -92,7 +92,7 @@ const styles = {
   // Hàng bộ lọc (Thể loại, Quốc gia, Năm...) -> Desktop only
   filterRow: {
     display: { xs: 'none', md: 'flex' },
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     gap: 2,
     mb: 4,
     pb: 2,
@@ -101,7 +101,8 @@ const styles = {
 
   // Dropdown bộ lọc
   filterSelect: {
-    minWidth: 217,
+    flex: 1,
+    minWidth: 0,
     '& .MuiOutlinedInput-root': {
       bgcolor: '#fff',
       '& fieldset': { borderColor: '#ddd', borderRadius: 0 },
@@ -529,93 +530,195 @@ function GenresPage() {
   return (
     <Box sx={styles.wrapper}>
       <Container maxWidth="lg">
-        {/* Tiêu đề trang */}
-        <Typography sx={styles.pageTitle}>Thế giới phim ảnh</Typography>
+        <Box sx={{ bgcolor: '#fff', borderRadius: 0, p: { xs: 2, md: 3 } }}>
+          {/* Tiêu đề trang */}
+          <Typography sx={styles.pageTitle}>Thế giới phim ảnh</Typography>
 
-        {/* Mobile Filter Button */}
-        <Box sx={styles.mobileFilterBtn} onClick={() => setFilterDrawerOpen(true)}>
-          <FilterListIcon />
-          <Typography>Phân loại / Lọc</Typography>
-        </Box>
-
-        {/* Drawer for Mobile Filters */}
-        <Drawer
-          anchor="right"
-          open={filterDrawerOpen}
-          onClose={() => setFilterDrawerOpen(false)}
-          PaperProps={{
-            sx: { width: '85%', maxWidth: '360px', p: 2 }
-          }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h6" fontWeight={600}>Bộ lọc tìm kiếm</Typography>
-            <IconButton onClick={() => setFilterDrawerOpen(false)}>
-              <CloseIcon />
-            </IconButton>
+          {/* Mobile Filter Button */}
+          <Box sx={styles.mobileFilterBtn} onClick={() => setFilterDrawerOpen(true)}>
+            <FilterListIcon />
+            <Typography>Phân loại / Lọc</Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {/* Thể loại - từ API */}
-            <FormControl size="small" fullWidth>
+          {/* Drawer for Mobile Filters */}
+          <Drawer
+            anchor="right"
+            open={filterDrawerOpen}
+            onClose={() => setFilterDrawerOpen(false)}
+            PaperProps={{
+              sx: { width: '85%', maxWidth: '360px', p: 2 }
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" fontWeight={600}>Bộ lọc tìm kiếm</Typography>
+              <IconButton onClick={() => setFilterDrawerOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {/* Thể loại - từ API */}
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={selectedGenre}
+                  onChange={(e) => setSelectedGenre(e.target.value)}
+                  displayEmpty
+                  renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Thể Loại</span> : genres.find(g => g._id === selected)?.name || selected}
+                  sx={{
+                    borderRadius: '4px',
+                    bgcolor: '#fff',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ddd' },
+                    fontSize: '15px'
+                  }}
+                >
+                  <MenuItem value="">Tất cả</MenuItem>
+                  {genres.map((genre) => (
+                    <MenuItem key={genre._id} value={genre._id}>{genre.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Quốc gia - từ API */}
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={selectedCountry}
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  displayEmpty
+                  renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Quốc Gia</span> : selected}
+                  sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+                >
+                  <MenuItem value="">Tất cả</MenuItem>
+                  {countries.map((country) => (
+                    <MenuItem key={country} value={country}>{country}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Năm - từ API */}
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  displayEmpty
+                  renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Năm</span> : selected}
+                  sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+                >
+                  <MenuItem value="">Tất cả</MenuItem>
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>{year}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Trạng thái - static */}
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  displayEmpty
+                  renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Đang Chiếu/ Sắp Chiếu</span> : STATUS_OPTIONS.find(s => s.value === selected)?.label || selected}
+                  sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+                >
+                  {STATUS_OPTIONS.map((status) => (
+                    <MenuItem key={status.value || 'all'} value={status.value}>{status.label}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Sắp xếp - static */}
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={selectedSort}
+                  onChange={(e) => setSelectedSort(e.target.value)}
+                  displayEmpty
+                  renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Xem nhiều nhất'}
+                  sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+                >
+                  {SORT_OPTIONS.map((sort) => (
+                    <MenuItem key={sort.value} value={sort.value}>{sort.label}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  color="error"
+                  startIcon={<DeleteOutlineIcon />}
+                  onClick={() => {
+                    resetFilters();
+                    setFilterDrawerOpen(false);
+                  }}
+                >
+                  Xóa bộ lọc
+                </Button>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{ bgcolor: '#f5a623', color: '#fff', '&:hover': { bgcolor: '#e0961f' } }}
+                  onClick={() => setFilterDrawerOpen(false)}
+                >
+                  Áp dụng
+                </Button>
+              </Box>
+            </Box>
+          </Drawer>
+
+          {/* Hàng bộ lọc (Giao diện Desktop) */}
+          <Box sx={styles.filterRow}>
+            {/* Chọn thể loại */}
+            <FormControl sx={styles.filterSelect} size="small">
               <Select
                 value={selectedGenre}
                 onChange={(e) => setSelectedGenre(e.target.value)}
                 displayEmpty
-                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Thể Loại</span> : genres.find(g => g._id === selected)?.name || selected}
-                sx={{
-                  borderRadius: '4px',
-                  bgcolor: '#fff',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ddd' },
-                  fontSize: '15px'
-                }}
+                renderValue={(selected) => !selected ? 'Thể Loại' : genres.find(g => g._id === selected)?.name || 'Thể Loại'}
               >
-                <MenuItem value="">Tất cả</MenuItem>
+                <MenuItem value="">Thể Loại</MenuItem>
                 {genres.map((genre) => (
                   <MenuItem key={genre._id} value={genre._id}>{genre.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* Quốc gia - từ API */}
-            <FormControl size="small" fullWidth>
+            {/* Chọn quốc gia */}
+            <FormControl sx={styles.filterSelect} size="small">
               <Select
                 value={selectedCountry}
                 onChange={(e) => setSelectedCountry(e.target.value)}
                 displayEmpty
-                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Quốc Gia</span> : selected}
-                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+                renderValue={(selected) => selected || 'Quốc Gia'}
               >
-                <MenuItem value="">Tất cả</MenuItem>
+                <MenuItem value="">Quốc Gia</MenuItem>
                 {countries.map((country) => (
                   <MenuItem key={country} value={country}>{country}</MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* Năm - từ API */}
-            <FormControl size="small" fullWidth>
+            {/* Chọn năm */}
+            <FormControl sx={styles.filterSelect} size="small">
               <Select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
                 displayEmpty
-                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Năm</span> : selected}
-                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+                renderValue={(selected) => selected || 'Năm'}
               >
-                <MenuItem value="">Tất cả</MenuItem>
+                <MenuItem value="">Năm</MenuItem>
                 {years.map((year) => (
                   <MenuItem key={year} value={year}>{year}</MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* Trạng thái - static */}
-            <FormControl size="small" fullWidth>
+            {/* Chọn trạng thái */}
+            <FormControl sx={styles.filterSelect} size="small">
               <Select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 displayEmpty
-                renderValue={(selected) => !selected ? <span style={{ color: '#666' }}>Đang Chiếu/ Sắp Chiếu</span> : STATUS_OPTIONS.find(s => s.value === selected)?.label || selected}
-                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
+                renderValue={(selected) => STATUS_OPTIONS.find(s => s.value === selected)?.label || 'Tất cả'}
               >
                 {STATUS_OPTIONS.map((status) => (
                   <MenuItem key={status.value || 'all'} value={status.value}>{status.label}</MenuItem>
@@ -623,239 +726,169 @@ function GenresPage() {
               </Select>
             </FormControl>
 
-            {/* Sắp xếp - static */}
-            <FormControl size="small" fullWidth>
+            {/* Chọn sắp xếp */}
+            <FormControl sx={styles.filterSelect} size="small">
               <Select
                 value={selectedSort}
                 onChange={(e) => setSelectedSort(e.target.value)}
                 displayEmpty
                 renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Xem nhiều nhất'}
-                sx={{ borderRadius: '4px', bgcolor: '#fff', fontSize: '15px' }}
               >
                 {SORT_OPTIONS.map((sort) => (
                   <MenuItem key={sort.value} value={sort.value}>{sort.label}</MenuItem>
                 ))}
               </Select>
             </FormControl>
-
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-              <Button
-                variant="outlined"
-                fullWidth
-                color="error"
-                startIcon={<DeleteOutlineIcon />}
-                onClick={() => {
-                  resetFilters();
-                  setFilterDrawerOpen(false);
-                }}
-              >
-                Xóa bộ lọc
-              </Button>
-              <Button
-                variant="contained"
-                fullWidth
-                sx={{ bgcolor: '#f5a623', color: '#fff', '&:hover': { bgcolor: '#e0961f' } }}
-                onClick={() => setFilterDrawerOpen(false)}
-              >
-                Áp dụng
-              </Button>
-            </Box>
           </Box>
-        </Drawer>
 
-        {/* Hàng bộ lọc (Giao diện Desktop) */}
-        <Box sx={styles.filterRow}>
-          {/* Chọn thể loại */}
-          <FormControl sx={styles.filterSelect} size="small">
-            <Select
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => !selected ? 'Thể Loại' : genres.find(g => g._id === selected)?.name || 'Thể Loại'}
-            >
-              <MenuItem value="">Thể Loại</MenuItem>
-              {genres.map((genre) => (
-                <MenuItem key={genre._id} value={genre._id}>{genre.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Chọn quốc gia */}
-          <FormControl sx={styles.filterSelect} size="small">
-            <Select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => selected || 'Quốc Gia'}
-            >
-              <MenuItem value="">Quốc Gia</MenuItem>
-              {countries.map((country) => (
-                <MenuItem key={country} value={country}>{country}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Chọn năm */}
-          <FormControl sx={styles.filterSelect} size="small">
-            <Select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => selected || 'Năm'}
-            >
-              <MenuItem value="">Năm</MenuItem>
-              {years.map((year) => (
-                <MenuItem key={year} value={year}>{year}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Chọn trạng thái */}
-          <FormControl sx={styles.filterSelect} size="small">
-            <Select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => STATUS_OPTIONS.find(s => s.value === selected)?.label || 'Tất cả'}
-            >
-              {STATUS_OPTIONS.map((status) => (
-                <MenuItem key={status.value || 'all'} value={status.value}>{status.label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Chọn sắp xếp */}
-          <FormControl sx={styles.filterSelect} size="small">
-            <Select
-              value={selectedSort}
-              onChange={(e) => setSelectedSort(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => SORT_OPTIONS.find(s => s.value === selected)?.label || 'Xem nhiều nhất'}
-            >
-              {SORT_OPTIONS.map((sort) => (
-                <MenuItem key={sort.value} value={sort.value}>{sort.label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-
-        <Grid container spacing={3}>
-          {/* Nội dung chính */}
-          <Grid item xs={12} md={8}>
-            {/* Danh sách phim */}
-            {movies.length === 0 && !loading && (
-              <Typography sx={{ textAlign: 'center', color: '#999', py: 4 }}>
-                Không tìm thấy phim nào phù hợp với bộ lọc.
-              </Typography>
-            )}
-            {movies.map((movie) => (
-              <Card key={movie._id} sx={styles.movieCard}>
-                <Box
-                  component="img"
-                  sx={styles.moviePoster}
-                  src={movie.imageUrl || movie.bannerUrl}
-                  alt={movie.name}
-                  onError={handleImageError}
-                  onClick={() => handleMovieClick(movie.slug)}
-                />
-                <Box sx={styles.movieContent}>
-                  <Typography
-                    sx={styles.movieTitle}
+          <Grid container spacing={3}>
+            {/* Nội dung chính */}
+            <Grid item xs={12} md={8}>
+              {/* Danh sách phim */}
+              {movies.length === 0 && !loading && (
+                <Typography sx={{ textAlign: 'center', color: '#999', py: 4 }}>
+                  Không tìm thấy phim nào phù hợp với bộ lọc.
+                </Typography>
+              )}
+              {movies.map((movie) => (
+                <Card key={movie._id} sx={styles.movieCard}>
+                  <Box
+                    component="img"
+                    sx={styles.moviePoster}
+                    src={movie.imageUrl || movie.bannerUrl}
+                    alt={movie.name}
+                    onError={handleImageError}
                     onClick={() => handleMovieClick(movie.slug)}
-                  >
-                    {movie.name}
-                  </Typography>
-
-                  {/* Action Buttons */}
-                  <Box sx={styles.actionButtons}>
-                    <Button
-                      variant="contained"
-                      startIcon={<ThumbUpIcon />}
-                      sx={{
-                        ...styles.likeBtn,
-                        bgcolor: likeStates[movie._id]?.liked ? '#034EA2' : '#4285F4',
-                        '&:hover': {
-                          bgcolor: likeStates[movie._id]?.liked ? '#023B7A' : '#3367D6'
-                        }
-                      }}
-                      size="small"
-                      onClick={(e) => handleToggleLike(movie._id, e)}
+                  />
+                  <Box sx={styles.movieContent}>
+                    <Typography
+                      sx={styles.movieTitle}
+                      onClick={() => handleMovieClick(movie.slug)}
                     >
-                      {likeStates[movie._id]?.likeCount ?? movie.likeCount ?? 0}
-                    </Button>
-                    <Box sx={styles.viewCount}>
-                      <VisibilityIcon sx={{ fontSize: 18 }} />
-                      <span>{formatNumber(movie.viewCount || 0)}</span>
+                      {movie.name}
+                    </Typography>
+
+                    {/* Action Buttons */}
+                    <Box sx={styles.actionButtons}>
+                      <Button
+                        variant="contained"
+                        startIcon={<ThumbUpIcon />}
+                        sx={{
+                          ...styles.likeBtn,
+                          bgcolor: likeStates[movie._id]?.liked ? '#034EA2' : '#4285F4',
+                          '&:hover': {
+                            bgcolor: likeStates[movie._id]?.liked ? '#023B7A' : '#3367D6'
+                          }
+                        }}
+                        size="small"
+                        onClick={(e) => handleToggleLike(movie._id, e)}
+                      >
+                        {likeStates[movie._id]?.likeCount ?? movie.likeCount ?? 0}
+                      </Button>
+                      <Box sx={styles.viewCount}>
+                        <VisibilityIcon sx={{ fontSize: 18 }} />
+                        <span>{formatNumber(movie.viewCount || 0)}</span>
+                      </Box>
                     </Box>
+
+                    <Typography sx={styles.movieDescription}>
+                      {movie.description}
+                    </Typography>
+                  </Box>
+                </Card>
+              ))}
+
+              {/* Phân trang */}
+              {totalPages > 1 && (
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  mt: 3,
+                  mb: 2
+                }}>
+                  {/* Trang đầu */}
+                  <Box
+                    onClick={() => handlePageChange(1)}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: currentPage === 1 ? 'default' : 'pointer',
+                      color: currentPage === 1 ? '#ccc' : '#666',
+                      fontSize: '14px'
+                    }}
+                  >
+                    «
+                  </Box>
+                  {/* Trang trước */}
+                  <Box
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: currentPage === 1 ? 'default' : 'pointer',
+                      color: currentPage === 1 ? '#ccc' : '#666',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ‹
                   </Box>
 
-                  <Typography sx={styles.movieDescription}>
-                    {movie.description}
-                  </Typography>
-                </Box>
-              </Card>
-            ))}
+                  {/* Page Numbers */}
+                  {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = idx + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = idx + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + idx;
+                    } else {
+                      pageNum = currentPage - 2 + idx;
+                    }
 
-            {/* Phân trang */}
-            {totalPages > 1 && (
-              <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 0.5,
-                mt: 3,
-                mb: 2
-              }}>
-                {/* Trang đầu */}
-                <Box
-                  onClick={() => handlePageChange(1)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: currentPage === 1 ? 'default' : 'pointer',
-                    color: currentPage === 1 ? '#ccc' : '#666',
-                    fontSize: '14px'
-                  }}
-                >
-                  «
-                </Box>
-                {/* Trang trước */}
-                <Box
-                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: currentPage === 1 ? 'default' : 'pointer',
-                    color: currentPage === 1 ? '#ccc' : '#666',
-                    fontSize: '14px'
-                  }}
-                >
-                  ‹
-                </Box>
+                    return (
+                      <Box
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          bgcolor: currentPage === pageNum ? '#f5a623' : 'transparent',
+                          color: currentPage === pageNum ? '#fff' : '#666',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          fontWeight: currentPage === pageNum ? 600 : 400,
+                          '&:hover': {
+                            bgcolor: currentPage === pageNum ? '#f5a623' : '#f0f0f0'
+                          }
+                        }}
+                      >
+                        {pageNum}
+                      </Box>
+                    );
+                  })}
 
-                {/* Page Numbers */}
-                {[...Array(Math.min(5, totalPages))].map((_, idx) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = idx + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = idx + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + idx;
-                  } else {
-                    pageNum = currentPage - 2 + idx;
-                  }
+                  {/* Dấu ba chấm (...) */}
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <Box sx={{ px: 1, color: '#666' }}>...</Box>
+                  )}
 
-                  return (
+                  {/* Trang cuối cùng */}
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
                     <Box
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
+                      onClick={() => handlePageChange(totalPages)}
                       sx={{
                         width: 32,
                         height: 32,
@@ -863,28 +896,33 @@ function GenresPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        bgcolor: currentPage === pageNum ? '#f5a623' : 'transparent',
-                        color: currentPage === pageNum ? '#fff' : '#666',
+                        color: '#666',
                         borderRadius: '4px',
                         fontSize: '14px',
-                        fontWeight: currentPage === pageNum ? 600 : 400,
-                        '&:hover': {
-                          bgcolor: currentPage === pageNum ? '#f5a623' : '#f0f0f0'
-                        }
+                        '&:hover': { bgcolor: '#f0f0f0' }
                       }}
                     >
-                      {pageNum}
+                      {totalPages}
                     </Box>
-                  );
-                })}
+                  )}
 
-                {/* Dấu ba chấm (...) */}
-                {totalPages > 5 && currentPage < totalPages - 2 && (
-                  <Box sx={{ px: 1, color: '#666' }}>...</Box>
-                )}
-
-                {/* Trang cuối cùng */}
-                {totalPages > 5 && currentPage < totalPages - 2 && (
+                  {/* Trang sau */}
+                  <Box
+                    onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: currentPage === totalPages ? 'default' : 'pointer',
+                      color: currentPage === totalPages ? '#ccc' : '#666',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ›
+                  </Box>
+                  {/* Trang cuối */}
                   <Box
                     onClick={() => handlePageChange(totalPages)}
                     sx={{
@@ -893,232 +931,197 @@ function GenresPage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: 'pointer',
-                      color: '#666',
-                      borderRadius: '4px',
-                      fontSize: '14px',
-                      '&:hover': { bgcolor: '#f0f0f0' }
+                      cursor: currentPage === totalPages ? 'default' : 'pointer',
+                      color: currentPage === totalPages ? '#ccc' : '#666',
+                      fontSize: '14px'
                     }}
                   >
-                    {totalPages}
+                    »
                   </Box>
-                )}
-
-                {/* Trang sau */}
-                <Box
-                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: currentPage === totalPages ? 'default' : 'pointer',
-                    color: currentPage === totalPages ? '#ccc' : '#666',
-                    fontSize: '14px'
-                  }}
-                >
-                  ›
                 </Box>
-                {/* Trang cuối */}
-                <Box
-                  onClick={() => handlePageChange(totalPages)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: currentPage === totalPages ? 'default' : 'pointer',
-                    color: currentPage === totalPages ? '#ccc' : '#666',
-                    fontSize: '14px'
-                  }}
-                >
-                  »
-                </Box>
-              </Box>
-            )}
+              )}
 
-            {/* Trạng thái trống (đã xử lý ở trên) */}
-          </Grid>
+              {/* Trạng thái trống (đã xử lý ở trên) */}
+            </Grid>
 
-          {/* Thanh bên - Phim đang chiếu */}
-          <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-            <Box sx={{ position: 'sticky', top: 100 }}>
-              {/* Tiêu đề */}
-              <Typography sx={{
-                fontWeight: 600,
-                fontSize: '18px',
-                color: '#4A4A4A',
-                mb: 2,
-                textTransform: 'uppercase'
-              }}>
-                Phim đang chiếu
-              </Typography>
+            {/* Thanh bên - Phim đang chiếu */}
+            <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Box sx={{ position: 'sticky', top: 100 }}>
+                {/* Tiêu đề */}
+                <Typography sx={{
+                  fontWeight: 600,
+                  fontSize: '18px',
+                  color: '#4A4A4A',
+                  mb: 2,
+                  textTransform: 'uppercase'
+                }}>
+                  Phim đang chiếu
+                </Typography>
 
-              {/* Thẻ phim - Dọc */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {sidebarMovies.slice(0, 3).map((movie) => (
-                  <Box
-                    key={movie._id}
-                    component={Link}
-                    to={`/dat-ve/${movie.slug}`}
-                    sx={{
-                      textDecoration: 'none',
-                      display: 'block',
-                      '&:hover .movie-overlay': {
-                        opacity: 1
-                      }
-                    }}
-                  >
-                    {/* Poster phim */}
-                    <Box sx={{
-                      position: 'relative',
-                      overflow: 'hidden',
-                      aspectRatio: '16/9',
-                      borderRadius: 1,
-                      bgcolor: '#f7f7f9ff',
-                    }}>
-                      {/* Ảnh Poster */}
-                      <Box
-                        component="img"
-                        src={movie.bannerUrl || movie.posterUrl}
-                        alt={movie.title}
-                        onError={handleImageError}
-                        sx={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          bgcolor: '#f7f7f9ff'
-                        }}
-                      />
-
-                      {/* Badge đánh giá */}
+                {/* Thẻ phim - Dọc */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {sidebarMovies.slice(0, 3).map((movie) => (
+                    <Box
+                      key={movie._id}
+                      component={Link}
+                      to={`/dat-ve/${movie.slug}`}
+                      sx={{
+                        textDecoration: 'none',
+                        display: 'block',
+                        '&:hover .movie-overlay': {
+                          opacity: 1
+                        }
+                      }}
+                    >
+                      {/* Poster phim */}
                       <Box sx={{
-                        position: 'absolute',
-                        bottom: 6,
-                        right: 6,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        bgcolor: 'rgba(0,0,0,0.7)',
-                        borderRadius: '4px',
-                        overflow: 'hidden'
+                        position: 'relative',
+                        overflow: 'hidden',
+                        aspectRatio: '16/9',
+                        borderRadius: 1,
+                        bgcolor: '#f7f7f9ff',
                       }}>
-                        {/* Độ tuổi */}
-                        <Box sx={{
-                          bgcolor: '#f5a623',
-                          px: 0.75,
-                          py: 0.25,
-                          display: 'flex',
-                          alignItems: 'center'
-                        }}>
-                          <Typography sx={{
-                            color: '#fff',
-                            fontWeight: 700,
-                            fontSize: '10px'
-                          }}>
-                            {movie.ageRating || 'P'}
-                          </Typography>
-                        </Box>
-
-                        {/* Đánh giá sao */}
-                        <Box sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.25,
-                          px: 0.75,
-                          py: 0.25
-                        }}>
-                          <StarIcon sx={{ fontSize: 12, color: '#f5a623' }} />
-                          <Typography sx={{
-                            color: '#fff',
-                            fontWeight: 700,
-                            fontSize: '10px'
-                          }}>
-                            {movie.rating?.toFixed(1) || '0'}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      {/* Overlay khi hover */}
-                      <Box
-                        className="movie-overlay"
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          bgcolor: 'rgba(0,0,0,0.5)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          opacity: 0,
-                          transition: 'opacity 0.3s'
-                        }}
-                      >
-                        <Button
-                          variant="contained"
-                          startIcon={<ConfirmationNumberIcon sx={{ fontSize: 14 }} />}
+                        {/* Ảnh Poster */}
+                        <Box
+                          component="img"
+                          src={movie.bannerUrl || movie.posterUrl}
+                          alt={movie.title}
+                          onError={handleImageError}
                           sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            bgcolor: '#f7f7f9ff'
+                          }}
+                        />
+
+                        {/* Badge đánh giá */}
+                        <Box sx={{
+                          position: 'absolute',
+                          bottom: 6,
+                          right: 6,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          bgcolor: 'rgba(0,0,0,0.7)',
+                          borderRadius: '4px',
+                          overflow: 'hidden'
+                        }}>
+                          {/* Độ tuổi */}
+                          <Box sx={{
                             bgcolor: '#f5a623',
-                            color: '#fff',
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            fontSize: '12px',
-                            px: 2,
-                            py: 0.5,
-                            '&:hover': {
-                              bgcolor: '#e09520'
-                            }
+                            px: 0.75,
+                            py: 0.25,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <Typography sx={{
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '10px'
+                            }}>
+                              {movie.ageRating || 'P'}
+                            </Typography>
+                          </Box>
+
+                          {/* Đánh giá sao */}
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.25,
+                            px: 0.75,
+                            py: 0.25
+                          }}>
+                            <StarIcon sx={{ fontSize: 12, color: '#f5a623' }} />
+                            <Typography sx={{
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '10px'
+                            }}>
+                              {movie.rating?.toFixed(1) || '0'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Overlay khi hover */}
+                        <Box
+                          className="movie-overlay"
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            bgcolor: 'rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            opacity: 0,
+                            transition: 'opacity 0.3s'
                           }}
                         >
-                          Mua vé
-                        </Button>
+                          <Button
+                            variant="contained"
+                            startIcon={<ConfirmationNumberIcon sx={{ fontSize: 14 }} />}
+                            sx={{
+                              bgcolor: '#f5a623',
+                              color: '#fff',
+                              fontWeight: 600,
+                              textTransform: 'none',
+                              fontSize: '12px',
+                              px: 2,
+                              py: 0.5,
+                              '&:hover': {
+                                bgcolor: '#e09520'
+                              }
+                            }}
+                          >
+                            Mua vé
+                          </Button>
+                        </Box>
                       </Box>
-                    </Box>
 
-                    {/* Tiêu đề phim */}
-                    <Typography sx={{
-                      mt: 0.75,
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      color: '#333333',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 1,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      {movie.title}
-                    </Typography>
-                  </Box>
-                ))}
+                      {/* Tiêu đề phim */}
+                      <Typography sx={{
+                        mt: 0.75,
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        color: '#333333',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}>
+                        {movie.title}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+                {/* Xem thêm button */}
+                <Button
+                  component={Link}
+                  to="/phim-dang-chieu"
+                  fullWidth
+                  disableRipple
+                  sx={{
+                    mt: 2,
+                    py: 1,
+                    color: '#1A3A5C',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    textTransform: 'none',
+                    '&:hover': {
+                      bgcolor: 'transparent'
+                    }
+                  }}
+                  endIcon={<ArrowForwardIosIcon sx={{ fontSize: 12 }} />}
+                >
+                  Xem thêm
+                </Button>
               </Box>
-              {/* Xem thêm button */}
-              <Button
-                component={Link}
-                to="/phim-dang-chieu"
-                fullWidth
-                disableRipple
-                sx={{
-                  mt: 2,
-                  py: 1,
-                  color: '#1A3A5C',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  textTransform: 'none',
-                  '&:hover': {
-                    bgcolor: 'transparent'
-                  }
-                }}
-                endIcon={<ArrowForwardIosIcon sx={{ fontSize: 12 }} />}
-              >
-                Xem thêm
-              </Button>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );

@@ -37,8 +37,8 @@ const handleImageError = (e) => {
 const styles = {
   wrapper: {
     minHeight: '100vh',
-    bgcolor: '#fff',
-    py: { xs: 2, md: 4 }
+    background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed',
+    py: 1
   },
   pageTitle: {
     fontWeight: 400,
@@ -359,158 +359,190 @@ function FeaturedPage() {
   return (
     <Box sx={styles.wrapper}>
       <Container maxWidth="lg">
-        {/* Tiêu đề trang + đường kẻ */}
-        <Box sx={styles.titleBorder}>
-          <Typography sx={styles.pageTitle}>Phim hay tháng</Typography>
-        </Box>
+        <Box sx={{ bgcolor: '#fff', borderRadius: 0, p: { xs: 2, md: 3 } }}>
+          {/* Tiêu đề trang + đường kẻ */}
+          <Box sx={styles.titleBorder}>
+            <Typography sx={styles.pageTitle}>Phim hay tháng</Typography>
+          </Box>
 
-        {/* Main Content */}
-        <Grid container spacing={4}>
-          {/* Danh sách bài viết */}
-          <Grid item xs={12} md={8}>
-            {articles.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 8 }}>
-                <Typography sx={{ color: '#999', fontSize: '16px' }}>
-                  Chưa có bài viết nào
-                </Typography>
-              </Box>
-            ) : (
-              articles.map((article) => {
-                const liked = likeStates[article._id]?.liked || false;
-                const likeCount = likeStates[article._id]?.likeCount ?? article.likeCount ?? 0;
-                const isLoading = likeLoading[article._id] || false;
-                const bgColor = '#4285F4';
-
-                return (
-                  <Card key={article._id} sx={styles.articleCard}>
-                    {/* Ảnh bài viết */}
-                    <Box
-                      component="img"
-                      src={article.thumbnail}
-                      alt={article.title}
-                      sx={styles.articleThumb}
-                      onClick={() => handleArticleClick(article.slug)}
-                      onError={handleImageError}
-                    />
-
-                    {/* Nội dung */}
-                    <Box sx={styles.articleContent}>
-                      <Typography
-                        sx={styles.articleTitle}
-                        onClick={() => handleArticleClick(article.slug)}
-                      >
-                        {article.title}
-                      </Typography>
-
-                      {/* Nút Like + View */}
-                      <Box sx={styles.actionButtons}>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          startIcon={<ThumbUpIcon sx={{ fontSize: { xs: 12, md: 14 } }} />}
-                          onClick={(e) => handleToggleLike(article._id, e)}
-                          disabled={isLoading}
-                          disableRipple
-                          disableElevation
-                          sx={{
-                            bgcolor: bgColor,
-                            color: '#fff',
-                            textTransform: 'none',
-                            fontWeight: 500,
-                            fontSize: { xs: '10px', md: '12px' },
-                            px: { xs: 1.5, md: 2.4 },
-                            py: 0.5,
-                            minWidth: 'auto',
-                            height: { xs: '24px', md: '30px' },
-                            boxShadow: 'none',
-                            '&:hover': { bgcolor: bgColor, boxShadow: 'none' },
-                            '&:active': { bgcolor: bgColor, boxShadow: 'none' },
-                            '&:focus': { bgcolor: bgColor },
-                            '&.Mui-focusVisible': { bgcolor: bgColor, boxShadow: 'none' },
-                            '&.Mui-disabled': { bgcolor: bgColor, color: '#fff', opacity: 0.7 }
-                          }}
-                        >
-                          {formatNumber(likeCount)}
-                        </Button>
-
-                        <Box sx={styles.viewCount}>
-                          <VisibilityIcon sx={{ fontSize: { xs: 12, md: 14 } }} />
-                          <Typography sx={{ fontSize: 'inherit' }}>
-                            {formatNumber(article.viewCount || 0)}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      {/* Mô tả ngắn */}
-                      <Typography sx={styles.articleExcerpt}>
-                        {article.excerpt || 'Chưa có mô tả'}
-                      </Typography>
-                    </Box>
-                  </Card>
-                );
-              })
-            )}
-
-            {/* Phân trang */}
-            {totalPages > 1 && (
-              <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 0.5,
-                mt: 3,
-                mb: 2
-              }}>
-                {/* Trang đầu */}
-                <Box
-                  onClick={() => handlePageChange(1)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: currentPage === 1 ? 'default' : 'pointer',
-                    color: currentPage === 1 ? '#ccc' : '#666',
-                    fontSize: '14px'
-                  }}
-                >
-                  «
+          {/* Main Content */}
+          <Grid container spacing={4}>
+            {/* Danh sách bài viết */}
+            <Grid item xs={12} md={8}>
+              {articles.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 8 }}>
+                  <Typography sx={{ color: '#999', fontSize: '16px' }}>
+                    Chưa có bài viết nào
+                  </Typography>
                 </Box>
-                {/* Trang trước */}
-                <Box
-                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: currentPage === 1 ? 'default' : 'pointer',
-                    color: currentPage === 1 ? '#ccc' : '#666',
-                    fontSize: '14px'
-                  }}
-                >
-                  ‹
-                </Box>
-
-                {/* Page Numbers */}
-                {[...Array(Math.min(5, totalPages))].map((_, idx) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = idx + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = idx + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + idx;
-                  } else {
-                    pageNum = currentPage - 2 + idx;
-                  }
+              ) : (
+                articles.map((article) => {
+                  const liked = likeStates[article._id]?.liked || false;
+                  const likeCount = likeStates[article._id]?.likeCount ?? article.likeCount ?? 0;
+                  const isLoading = likeLoading[article._id] || false;
+                  const bgColor = '#4285F4';
 
                   return (
+                    <Card key={article._id} sx={styles.articleCard}>
+                      {/* Ảnh bài viết */}
+                      <Box
+                        component="img"
+                        src={article.thumbnail}
+                        alt={article.title}
+                        sx={styles.articleThumb}
+                        onClick={() => handleArticleClick(article.slug)}
+                        onError={handleImageError}
+                      />
+
+                      {/* Nội dung */}
+                      <Box sx={styles.articleContent}>
+                        <Typography
+                          sx={styles.articleTitle}
+                          onClick={() => handleArticleClick(article.slug)}
+                        >
+                          {article.title}
+                        </Typography>
+
+                        {/* Nút Like + View */}
+                        <Box sx={styles.actionButtons}>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<ThumbUpIcon sx={{ fontSize: { xs: 12, md: 14 } }} />}
+                            onClick={(e) => handleToggleLike(article._id, e)}
+                            disabled={isLoading}
+                            disableRipple
+                            disableElevation
+                            sx={{
+                              bgcolor: bgColor,
+                              color: '#fff',
+                              textTransform: 'none',
+                              fontWeight: 500,
+                              fontSize: { xs: '10px', md: '12px' },
+                              px: { xs: 1.5, md: 2.4 },
+                              py: 0.5,
+                              minWidth: 'auto',
+                              height: { xs: '24px', md: '30px' },
+                              boxShadow: 'none',
+                              '&:hover': { bgcolor: bgColor, boxShadow: 'none' },
+                              '&:active': { bgcolor: bgColor, boxShadow: 'none' },
+                              '&:focus': { bgcolor: bgColor },
+                              '&.Mui-focusVisible': { bgcolor: bgColor, boxShadow: 'none' },
+                              '&.Mui-disabled': { bgcolor: bgColor, color: '#fff', opacity: 0.7 }
+                            }}
+                          >
+                            {formatNumber(likeCount)}
+                          </Button>
+
+                          <Box sx={styles.viewCount}>
+                            <VisibilityIcon sx={{ fontSize: { xs: 12, md: 14 } }} />
+                            <Typography sx={{ fontSize: 'inherit' }}>
+                              {formatNumber(article.viewCount || 0)}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Mô tả ngắn */}
+                        <Typography sx={styles.articleExcerpt}>
+                          {article.excerpt || 'Chưa có mô tả'}
+                        </Typography>
+                      </Box>
+                    </Card>
+                  );
+                })
+              )}
+
+              {/* Phân trang */}
+              {totalPages > 1 && (
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  mt: 3,
+                  mb: 2
+                }}>
+                  {/* Trang đầu */}
+                  <Box
+                    onClick={() => handlePageChange(1)}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: currentPage === 1 ? 'default' : 'pointer',
+                      color: currentPage === 1 ? '#ccc' : '#666',
+                      fontSize: '14px'
+                    }}
+                  >
+                    «
+                  </Box>
+                  {/* Trang trước */}
+                  <Box
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: currentPage === 1 ? 'default' : 'pointer',
+                      color: currentPage === 1 ? '#ccc' : '#666',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ‹
+                  </Box>
+
+                  {/* Page Numbers */}
+                  {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = idx + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = idx + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + idx;
+                    } else {
+                      pageNum = currentPage - 2 + idx;
+                    }
+
+                    return (
+                      <Box
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          bgcolor: currentPage === pageNum ? '#f5a623' : 'transparent',
+                          color: currentPage === pageNum ? '#fff' : '#666',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          fontWeight: currentPage === pageNum ? 600 : 400,
+                          '&:hover': {
+                            bgcolor: currentPage === pageNum ? '#f5a623' : '#f0f0f0'
+                          }
+                        }}
+                      >
+                        {pageNum}
+                      </Box>
+                    );
+                  })}
+
+                  {/* Dấu ba chấm (...) */}
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <Box sx={{ px: 1, color: '#666' }}>...</Box>
+                  )}
+
+                  {/* Trang cuối cùng */}
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
                     <Box
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
+                      onClick={() => handlePageChange(totalPages)}
                       sx={{
                         width: 32,
                         height: 32,
@@ -518,28 +550,33 @@ function FeaturedPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        bgcolor: currentPage === pageNum ? '#f5a623' : 'transparent',
-                        color: currentPage === pageNum ? '#fff' : '#666',
+                        color: '#666',
                         borderRadius: '4px',
                         fontSize: '14px',
-                        fontWeight: currentPage === pageNum ? 600 : 400,
-                        '&:hover': {
-                          bgcolor: currentPage === pageNum ? '#f5a623' : '#f0f0f0'
-                        }
+                        '&:hover': { bgcolor: '#f0f0f0' }
                       }}
                     >
-                      {pageNum}
+                      {totalPages}
                     </Box>
-                  );
-                })}
+                  )}
 
-                {/* Dấu ba chấm (...) */}
-                {totalPages > 5 && currentPage < totalPages - 2 && (
-                  <Box sx={{ px: 1, color: '#666' }}>...</Box>
-                )}
-
-                {/* Trang cuối cùng */}
-                {totalPages > 5 && currentPage < totalPages - 2 && (
+                  {/* Trang sau */}
+                  <Box
+                    onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: currentPage === totalPages ? 'default' : 'pointer',
+                      color: currentPage === totalPages ? '#ccc' : '#666',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ›
+                  </Box>
+                  {/* Trang cuối */}
                   <Box
                     onClick={() => handlePageChange(totalPages)}
                     sx={{
@@ -548,229 +585,194 @@ function FeaturedPage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: 'pointer',
-                      color: '#666',
-                      borderRadius: '4px',
-                      fontSize: '14px',
-                      '&:hover': { bgcolor: '#f0f0f0' }
+                      cursor: currentPage === totalPages ? 'default' : 'pointer',
+                      color: currentPage === totalPages ? '#ccc' : '#666',
+                      fontSize: '14px'
                     }}
                   >
-                    {totalPages}
+                    »
                   </Box>
-                )}
-
-                {/* Trang sau */}
-                <Box
-                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: currentPage === totalPages ? 'default' : 'pointer',
-                    color: currentPage === totalPages ? '#ccc' : '#666',
-                    fontSize: '14px'
-                  }}
-                >
-                  ›
                 </Box>
-                {/* Trang cuối */}
-                <Box
-                  onClick={() => handlePageChange(totalPages)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: currentPage === totalPages ? 'default' : 'pointer',
-                    color: currentPage === totalPages ? '#ccc' : '#666',
-                    fontSize: '14px'
-                  }}
-                >
-                  »
-                </Box>
-              </Box>
-            )}
-          </Grid>
+              )}
+            </Grid>
 
-          {/* Thanh bên - Phim đang chiếu */}
-          <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-            <Box sx={{ position: 'sticky', top: 100 }}>
-              {/* Tiêu đề */}
-              <Typography sx={{
-                fontWeight: 600,
-                fontSize: '18px',
-                color: '#4A4A4A',
-                mb: 2,
-                textTransform: 'uppercase'
-              }}>
-                Phim đang chiếu
-              </Typography>
+            {/* Thanh bên - Phim đang chiếu */}
+            <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Box sx={{ position: 'sticky', top: 100 }}>
+                {/* Tiêu đề */}
+                <Typography sx={{
+                  fontWeight: 600,
+                  fontSize: '18px',
+                  color: '#4A4A4A',
+                  mb: 2,
+                  textTransform: 'uppercase'
+                }}>
+                  Phim đang chiếu
+                </Typography>
 
-              {/* Thẻ phim - Dọc */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {(Array.isArray(sidebarMovies) ? sidebarMovies : []).slice(0, 3).map((movie) => (
-                  <Box
-                    key={movie._id}
-                    component={Link}
-                    to={`/dat-ve/${movie.slug}`}
-                    sx={{
-                      textDecoration: 'none',
-                      display: 'block',
-                      '&:hover .movie-overlay': {
-                        opacity: 1
-                      }
-                    }}
-                  >
-                    {/* Poster phim */}
-                    <Box sx={{
-                      position: 'relative',
-                      overflow: 'hidden',
-                      aspectRatio: '16/9',
-                      borderRadius: 1,
-                      bgcolor: '#f7f7f9ff',
-                    }}>
-                      {/* Ảnh Poster */}
-                      <Box
-                        component="img"
-                        src={movie.bannerUrl || movie.posterUrl}
-                        alt={movie.title}
-                        sx={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          bgcolor: '#f7f7f9ff'
-                        }}
-                      />
-
-                      {/* Badge đánh giá */}
+                {/* Thẻ phim - Dọc */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {(Array.isArray(sidebarMovies) ? sidebarMovies : []).slice(0, 3).map((movie) => (
+                    <Box
+                      key={movie._id}
+                      component={Link}
+                      to={`/dat-ve/${movie.slug}`}
+                      sx={{
+                        textDecoration: 'none',
+                        display: 'block',
+                        '&:hover .movie-overlay': {
+                          opacity: 1
+                        }
+                      }}
+                    >
+                      {/* Poster phim */}
                       <Box sx={{
-                        position: 'absolute',
-                        bottom: 6,
-                        right: 6,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        bgcolor: 'rgba(0,0,0,0.7)',
-                        borderRadius: '4px',
-                        overflow: 'hidden'
+                        position: 'relative',
+                        overflow: 'hidden',
+                        aspectRatio: '16/9',
+                        borderRadius: 1,
+                        bgcolor: '#f7f7f9ff',
                       }}>
-                        {/* Độ tuổi */}
-                        <Box sx={{
-                          bgcolor: '#f5a623',
-                          px: 0.75,
-                          py: 0.25,
-                          display: 'flex',
-                          alignItems: 'center'
-                        }}>
-                          <Typography sx={{
-                            color: '#fff',
-                            fontWeight: 700,
-                            fontSize: '10px'
-                          }}>
-                            {movie.ageRating || 'P'}
-                          </Typography>
-                        </Box>
-
-                        {/* Đánh giá sao */}
-                        <Box sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.25,
-                          px: 0.75,
-                          py: 0.25
-                        }}>
-                          <StarIcon sx={{ fontSize: 12, color: '#f5a623' }} />
-                          <Typography sx={{
-                            color: '#fff',
-                            fontWeight: 700,
-                            fontSize: '10px'
-                          }}>
-                            {movie.rating?.toFixed(1) || '0'}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      {/* Overlay khi hover */}
-                      <Box
-                        className="movie-overlay"
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          bgcolor: 'rgba(0,0,0,0.5)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          opacity: 0,
-                          transition: 'opacity 0.3s'
-                        }}
-                      >
-                        <Button
-                          variant="contained"
-                          startIcon={<ConfirmationNumberIcon sx={{ fontSize: 14 }} />}
+                        {/* Ảnh Poster */}
+                        <Box
+                          component="img"
+                          src={movie.bannerUrl || movie.posterUrl}
+                          alt={movie.title}
                           sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            bgcolor: '#f7f7f9ff'
+                          }}
+                        />
+
+                        {/* Badge đánh giá */}
+                        <Box sx={{
+                          position: 'absolute',
+                          bottom: 6,
+                          right: 6,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          bgcolor: 'rgba(0,0,0,0.7)',
+                          borderRadius: '4px',
+                          overflow: 'hidden'
+                        }}>
+                          {/* Độ tuổi */}
+                          <Box sx={{
                             bgcolor: '#f5a623',
-                            color: '#fff',
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            fontSize: '12px',
-                            px: 2,
-                            py: 0.5,
-                            '&:hover': {
-                              bgcolor: '#e09520'
-                            }
+                            px: 0.75,
+                            py: 0.25,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <Typography sx={{
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '10px'
+                            }}>
+                              {movie.ageRating || 'P'}
+                            </Typography>
+                          </Box>
+
+                          {/* Đánh giá sao */}
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.25,
+                            px: 0.75,
+                            py: 0.25
+                          }}>
+                            <StarIcon sx={{ fontSize: 12, color: '#f5a623' }} />
+                            <Typography sx={{
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '10px'
+                            }}>
+                              {movie.rating?.toFixed(1) || '0'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Overlay khi hover */}
+                        <Box
+                          className="movie-overlay"
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            bgcolor: 'rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            opacity: 0,
+                            transition: 'opacity 0.3s'
                           }}
                         >
-                          Mua vé
-                        </Button>
+                          <Button
+                            variant="contained"
+                            startIcon={<ConfirmationNumberIcon sx={{ fontSize: 14 }} />}
+                            sx={{
+                              bgcolor: '#f5a623',
+                              color: '#fff',
+                              fontWeight: 600,
+                              textTransform: 'none',
+                              fontSize: '12px',
+                              px: 2,
+                              py: 0.5,
+                              '&:hover': {
+                                bgcolor: '#e09520'
+                              }
+                            }}
+                          >
+                            Mua vé
+                          </Button>
+                        </Box>
                       </Box>
-                    </Box>
 
-                    {/* Tiêu đề phim */}
-                    <Typography sx={{
-                      mt: 0.75,
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      color: '#333333',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 1,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      {movie.title}
-                    </Typography>
-                  </Box>
-                ))}
+                      {/* Tiêu đề phim */}
+                      <Typography sx={{
+                        mt: 0.75,
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        color: '#333333',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}>
+                        {movie.title}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+                {/* Xem thêm button */}
+                <Button
+                  component={Link}
+                  to="/phim-dang-chieu"
+                  fullWidth
+                  disableRipple
+                  sx={{
+                    mt: 2,
+                    py: 1,
+                    color: '#1A3A5C',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    textTransform: 'none',
+                    '&:hover': {
+                      bgcolor: 'transparent'
+                    }
+                  }}
+                  endIcon={<ArrowForwardIosIcon sx={{ fontSize: 12 }} />}
+                >
+                  Xem thêm
+                </Button>
               </Box>
-              {/* Xem thêm button */}
-              <Button
-                component={Link}
-                to="/phim-dang-chieu"
-                fullWidth
-                disableRipple
-                sx={{
-                  mt: 2,
-                  py: 1,
-                  color: '#1A3A5C',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  textTransform: 'none',
-                  '&:hover': {
-                    bgcolor: 'transparent'
-                  }
-                }}
-                endIcon={<ArrowForwardIosIcon sx={{ fontSize: 12 }} />}
-              >
-                Xem thêm
-              </Button>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );

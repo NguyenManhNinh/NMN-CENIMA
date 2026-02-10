@@ -1,0 +1,224 @@
+<mxfile host="app.diagrams.net" modified="2026-02-10T16:00:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Sequence - MembershipPage Load" id="sequence-membership-page">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="&lt;b&gt;SEQUENCE DIAGRAM – TẢI VÀ HIỂN THỊ THÔNG TIN THÀNH VIÊN&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="200" y="10" width="650" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LIFELINES ==================== -->
+        <!-- User -->
+        <mxCell id="user-box" value="&lt;b&gt;User&lt;/b&gt;&lt;br&gt;(Browser)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="user-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="90" as="sourcePoint" />
+            <mxPoint x="100" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- MembershipPage -->
+        <mxCell id="page-box" value="&lt;b&gt;MembershipPage&lt;/b&gt;&lt;br&gt;(React Component)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="230" y="50" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="page-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="90" as="sourcePoint" />
+            <mxPoint x="300" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- membershipInfoApi -->
+        <mxCell id="api-box" value="&lt;b&gt;membershipInfoApi&lt;/b&gt;&lt;br&gt;(Axios Client)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="440" y="50" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="api-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="90" as="sourcePoint" />
+            <mxPoint x="510" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Controller -->
+        <mxCell id="ctrl-box" value="&lt;b&gt;MembershipInfo&lt;br&gt;Controller&lt;/b&gt;&lt;br&gt;(Backend)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ctrl-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="710" y="90" as="sourcePoint" />
+            <mxPoint x="710" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- MembershipInfo Model -->
+        <mxCell id="model-box" value="&lt;b&gt;MembershipInfo&lt;/b&gt;&lt;br&gt;(MongoDB Model)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="850" y="50" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="model-line" value="" style="endArrow=none;html=1;rounded=0;dashed=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="910" y="90" as="sourcePoint" />
+            <mxPoint x="910" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== MESSAGES ==================== -->
+        <!-- 1. User → Page: Truy cập /thanh-vien -->
+        <mxCell id="m1" value="1. Truy cập /thanh-vien" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=11;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="120" as="sourcePoint" />
+            <mxPoint x="300" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. Page: setState(loading=true) -->
+        <mxCell id="m2" value="2. setState(loading=true)" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=10;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="150" as="sourcePoint" />
+            <mxPoint x="340" y="150" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Page → API: getMembershipInfoAPI() -->
+        <mxCell id="m3" value="3. getMembershipInfoAPI()" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=11;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="180" as="sourcePoint" />
+            <mxPoint x="510" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. API → Controller: GET /api/v1/membership-info -->
+        <mxCell id="m4" value="4. GET /api/v1/membership-info" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=11;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="210" as="sourcePoint" />
+            <mxPoint x="710" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. Controller → Model: findOne({status:'active'}).lean() -->
+        <mxCell id="m5" value="5. findOne({status:'active'}).lean()" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=11;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="710" y="240" as="sourcePoint" />
+            <mxPoint x="910" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Model → Controller: membership document -->
+        <mxCell id="m6" value="6. membership document (hoặc null)" style="endArrow=open;html=1;rounded=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="910" y="270" as="sourcePoint" />
+            <mxPoint x="710" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT BOX: membership tồn tại -->
+        <mxCell id="alt-box" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="290" width="880" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="alt-label" value="&lt;b&gt;[alt] membership tồn tại&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="290" width="150" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 7a. Controller: Sort sections by sortOrder -->
+        <mxCell id="m7a" value="7a. Sort sections by sortOrder" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=10;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="710" y="320" as="sourcePoint" />
+            <mxPoint x="750" y="320" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="750" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7b. Controller → API: 200 {success:true, data} -->
+        <mxCell id="m7b" value="7b. 200 {success:true, data:membership}" style="endArrow=open;html=1;rounded=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="710" y="350" as="sourcePoint" />
+            <mxPoint x="510" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7c. API → Page: response.data -->
+        <mxCell id="m7c" value="7c. response.data" style="endArrow=open;html=1;rounded=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="380" as="sourcePoint" />
+            <mxPoint x="300" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7d. Page: setState -->
+        <mxCell id="m7d" value="7d. setState(membershipData=data, loading=false)" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=10;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="410" as="sourcePoint" />
+            <mxPoint x="340" y="410" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7e. Page: Tạo sectionRefs -->
+        <mxCell id="m7e" value="7e. Tạo sectionRefs cho scroll navigation" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=10;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="440" as="sourcePoint" />
+            <mxPoint x="340" y="440" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7f. Page → User: Render -->
+        <mxCell id="m7f" value="7f. Render tiêu đề + sections + Quick Navigation" style="endArrow=open;html=1;rounded=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="470" as="sourcePoint" />
+            <mxPoint x="100" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT BOX 2: membership = null -->
+        <mxCell id="alt-box2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="510" width="700" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="alt-label2" value="&lt;b&gt;[alt] membership = null&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=#f8cecc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="510" width="150" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- 8a. Controller → API: 404 -->
+        <mxCell id="m8a" value="8a. 404 {success:false}" style="endArrow=open;html=1;rounded=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="710" y="550" as="sourcePoint" />
+            <mxPoint x="510" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8b. Page: setState null -->
+        <mxCell id="m8b" value="8b. setState(membershipData=null, loading=false)" style="endArrow=block;html=1;rounded=0;endFill=1;fontSize=10;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="575" as="sourcePoint" />
+            <mxPoint x="340" y="575" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="565" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8c. Page → User: Hiển thị trống -->
+        <mxCell id="m8c" value="8c. Hiển thị &quot;Chưa có thông tin thành viên&quot;" style="endArrow=open;html=1;rounded=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="600" as="sourcePoint" />
+            <mxPoint x="100" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

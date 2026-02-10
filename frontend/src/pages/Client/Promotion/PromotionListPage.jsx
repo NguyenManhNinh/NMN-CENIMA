@@ -21,8 +21,8 @@ const ITEMS_PER_PAGE = 20;
 const styles = {
   page: {
     minHeight: '60vh',
-    bgcolor: '#fff',
-    py: { xs: 3, md: 5 }
+    background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed',
+    py: 1
   },
   container: {
     maxWidth: 1320
@@ -229,74 +229,76 @@ function PromotionListPage() {
   return (
     <Box sx={styles.page}>
       <Container maxWidth={false} sx={styles.container}>
+        <Box sx={{ bgcolor: '#fff', borderRadius: 0, p: { xs: 2, md: 3 } }}>
 
-        {/* Error state */}
-        {error && (
-          <Box sx={styles.errorState}>
-            <Alert severity="error" sx={{ justifyContent: 'center', mb: 2 }}>
-              {error}
-            </Alert>
-            <Button variant="outlined" onClick={handleRetry} sx={styles.retryButton}>
-              Thử lại
-            </Button>
-          </Box>
-        )}
-
-        {/* Empty state */}
-        {!error && promotions.length === 0 && (
-          <Box sx={styles.emptyState}>
-            <Typography
-              sx={{
-                ...styles.emptyText,
-                fontSize: '1.2rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 0.8,
-              }}
-            >
-              <ErrorOutlineIcon
-                fontSize="inherit"
-                sx={{ color: 'error.main' }}
-              />
-              Không tìm thấy ưu đãi nào
-            </Typography>
-          </Box>
-        )}
-
-        {/* Promotions grid */}
-        {!error && promotions.length > 0 && (
-          <>
-            <Box sx={styles.grid}>
-              {promotions.map((promotion) => (
-                <PromotionCard
-                  key={promotion._id}
-                  promotion={promotion}
-                  onClick={() => handleCardClick(promotion)}
-                />
-              ))}
+          {/* Error state */}
+          {error && (
+            <Box sx={styles.errorState}>
+              <Alert severity="error" sx={{ justifyContent: 'center', mb: 2 }}>
+                {error}
+              </Alert>
+              <Button variant="outlined" onClick={handleRetry} sx={styles.retryButton}>
+                Thử lại
+              </Button>
             </Box>
+          )}
 
-            {/* Load more button */}
-            {canLoadMore && (
-              <Box sx={styles.loadMoreWrapper}>
-                <Button
-                  variant="outlined"
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                  sx={styles.loadMoreButton}
-                  startIcon={loadingMore ? <CircularProgress size={16} /> : null}
-                >
-                  {loadingMore ? 'Đang tải...' : 'Xem thêm'}
-                </Button>
+          {/* Empty state */}
+          {!error && promotions.length === 0 && (
+            <Box sx={styles.emptyState}>
+              <Typography
+                sx={{
+                  ...styles.emptyText,
+                  fontSize: '1.2rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 0.8,
+                }}
+              >
+                <ErrorOutlineIcon
+                  fontSize="inherit"
+                  sx={{ color: 'error.main' }}
+                />
+                Không tìm thấy ưu đãi nào
+              </Typography>
+            </Box>
+          )}
+
+          {/* Promotions grid */}
+          {!error && promotions.length > 0 && (
+            <>
+              <Box sx={styles.grid}>
+                {promotions.map((promotion) => (
+                  <PromotionCard
+                    key={promotion._id}
+                    promotion={promotion}
+                    onClick={() => handleCardClick(promotion)}
+                  />
+                ))}
               </Box>
-            )}
 
-            {/* Bottom banners - chỉ render khi có data */}
-            <BottomBannerSection banners={banners} />
-          </>
-        )}
+              {/* Load more button */}
+              {canLoadMore && (
+                <Box sx={styles.loadMoreWrapper}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    sx={styles.loadMoreButton}
+                    startIcon={loadingMore ? <CircularProgress size={16} /> : null}
+                  >
+                    {loadingMore ? 'Đang tải...' : 'Xem thêm'}
+                  </Button>
+                </Box>
+              )}
 
+              {/* Bottom banners - chỉ render khi có data */}
+              <BottomBannerSection banners={banners} />
+            </>
+          )}
+
+        </Box>
       </Container>
     </Box>
   );

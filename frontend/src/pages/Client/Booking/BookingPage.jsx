@@ -404,9 +404,9 @@ function BookingPage() {
   }
 
   return (
-    <Box className="booking-page" sx={{ bgcolor: COLORS.bgLight, minHeight: '100vh' }}>
+    <Box className="booking-page" sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed', minHeight: '100vh' }}>
 
-      {/* ==================== BANNER TRAILER SECTION ==================== */}
+      {/*BANNER TRAILER SECTION*/}
       <Box sx={{
         position: 'relative',
         width: '100%',
@@ -455,8 +455,8 @@ function BookingPage() {
       </Box>
 
       {/* ==================== MAIN CONTENT SECTION ==================== */}
-      <Box sx={{ bgcolor: COLORS.white, pb: 5 }}>
-        <Container maxWidth="lg">
+      <Container maxWidth="lg">
+        <Box sx={{ bgcolor: COLORS.white, borderRadius: 0, p: { xs: 2, md: 3 }, pb: 5 }}>
           <Grid container spacing={3} sx={{ py: 3, alignItems: 'flex-start' }}>
 
             {/* ===== LEFT COLUMN (8 cols): Poster + Info + Nội dung + Lịch chiếu ===== */}
@@ -1285,8 +1285,8 @@ function BookingPage() {
               </Paper>
             </Grid>
           </Grid>
-        </Container>
-      </Box>
+        </Box>
+      </Container>
 
       {/* ==================== RATING MODAL ==================== */}
       <Dialog

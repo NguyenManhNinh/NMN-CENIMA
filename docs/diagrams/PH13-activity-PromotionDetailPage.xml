@@ -1,0 +1,253 @@
+<mxfile host="app.diagrams.net" modified="2026-02-08T16:35:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram name="Activity - PromotionDetailPage Claim" id="activity-promotion-claim">
+    <mxGraphModel dx="1100" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="&lt;b&gt;ACTIVITY DIAGRAM – NHẬN ƯU ĐÃI (Claim Voucher/QR)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="280" y="20" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== SWIMLANES ==================== -->
+        <!-- User Swimlane -->
+        <mxCell id="lane-user" value="&lt;b&gt;User (Thành viên)&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="50" y="70" width="300" height="1100" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Swimlane -->
+        <mxCell id="lane-frontend" value="&lt;b&gt;Frontend&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="350" y="70" width="280" height="1100" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Swimlane -->
+        <mxCell id="lane-backend" value="&lt;b&gt;Backend API&lt;/b&gt;" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="630" y="70" width="350" height="1100" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== START ==================== -->
+        <mxCell id="start" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="180" y="100" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ACTIVITIES ==================== -->
+        <!-- A1: User click xem chi tiết -->
+        <mxCell id="a1" value="Click xem chi tiết&lt;br&gt;ưu đãi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="120" y="160" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A2: Frontend gọi API getPromotionBySlug -->
+        <mxCell id="a2" value="Gọi API&lt;br&gt;GET /promotions/:slug" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="410" y="160" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A3: Backend xử lý -->
+        <mxCell id="a3" value="Tăng viewCount&lt;br&gt;(cooldown 24h Redis)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="160" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A4: Backend tính claimState -->
+        <mxCell id="a4" value="Tính toán claimState&lt;br&gt;(check time, auth, quota...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="240" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A5: Frontend render detail -->
+        <mxCell id="a5" value="Hiển thị chi tiết&lt;br&gt;ưu đãi + claimState" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="410" y="320" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Decision 1: Check claimState -->
+        <mxCell id="d1" value="claimState?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="430" y="400" width="120" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- A6a: NOT_LOGGED_IN -->
+        <mxCell id="a6a" value="Hiển thị nút&lt;br&gt;'Đăng nhập để nhận'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="210" y="410" width="140" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A6b: ALREADY_CLAIMED -->
+        <mxCell id="a6b" value="Hiển thị voucher/&lt;br&gt;mã QR đã nhận" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="700" y="380" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A6c: ELIGIBLE -->
+        <mxCell id="a6c" value="Hiển thị nút&lt;br&gt;'Nhận ngay' / 'Lấy mã'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="410" y="520" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A6d: EXPIRED/QUOTA_EXHAUSTED -->
+        <mxCell id="a6d" value="Hiển thị thông báo&lt;br&gt;'Ưu đãi đã hết hạn/hết lượt'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="700" y="450" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A7: User click nhận -->
+        <mxCell id="a7" value="Click nút&lt;br&gt;'Nhận ngay' / 'Lấy mã'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="120" y="600" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Decision 2: Check applyMode -->
+        <mxCell id="d2" value="applyMode?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="430" y="600" width="120" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- A8a: ONLINE_VOUCHER path -->
+        <mxCell id="a8a" value="Gọi API&lt;br&gt;POST /promotions/:id/claim" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="260" y="720" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A8b: OFFLINE_ONLY path -->
+        <mxCell id="a8b" value="Gọi API&lt;br&gt;POST /promotions/:id/offline-claim" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="540" y="720" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A9a: Backend create UserVoucher -->
+        <mxCell id="a9a" value="Validate + Check idempotent&lt;br&gt;Tạo UserVoucher&lt;br&gt;Tăng claimCount" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="570" width="180" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- A9b: Backend create PromotionRedeem -->
+        <mxCell id="a9b" value="Validate + Check quota atomic&lt;br&gt;Tạo PromotionRedeem token&lt;br&gt;Tăng redeemCount + claimCount" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="680" width="200" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Decision 3: Result -->
+        <mxCell id="d3" value="Kết quả?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="430" y="820" width="120" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- A10a: Success -->
+        <mxCell id="a10a" value="Hiển thị thông báo thành công&lt;br&gt;+ Mã voucher / QR code" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="380" y="940" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A10b: Error -->
+        <mxCell id="a10b" value="Hiển thị thông báo lỗi&lt;br&gt;(Hết quota / Đã nhận / Lỗi server)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="700" y="820" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- A11: Update UI -->
+        <mxCell id="a11" value="Cập nhật UI&lt;br&gt;claimState = ALREADY_CLAIMED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="410" y="1020" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== END ==================== -->
+        <mxCell id="end" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="475" y="1100" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="end-circle" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="470" y="1095" width="40" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ARROWS ==================== -->
+        <mxCell id="arr-s-a1" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="start" target="a1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a1-a2" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a1" target="a2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a2-a3" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a2" target="a3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a3-a4" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a3" target="a4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a4-a5" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a4" target="a5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a5-d1" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a5" target="d1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision 1 arrows -->
+        <mxCell id="arr-d1-a6a" value="NOT_LOGGED_IN" style="endArrow=block;endFill=1;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="d1" target="a6a">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-d1-a6b" value="ALREADY_CLAIMED" style="endArrow=block;endFill=1;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="d1" target="a6b">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-d1-a6c" value="ELIGIBLE" style="endArrow=block;endFill=1;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="d1" target="a6c">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-d1-a6d" value="EXPIRED/QUOTA" style="endArrow=block;endFill=1;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="d1" target="a6d">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a6c-a7" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a6c" target="a7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a7-d2" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a7" target="d2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision 2 arrows -->
+        <mxCell id="arr-d2-a8a" value="ONLINE_VOUCHER" style="endArrow=block;endFill=1;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="d2" target="a8a">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-d2-a8b" value="OFFLINE_ONLY" style="endArrow=block;endFill=1;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="d2" target="a8b">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a8a-a9a" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a8a" target="a9a">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a8b-a9b" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a8b" target="a9b">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a9a-d3" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a9a" target="d3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a9b-d3" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a9b" target="d3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision 3 arrows -->
+        <mxCell id="arr-d3-a10a" value="Success" style="endArrow=block;endFill=1;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="d3" target="a10a">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-d3-a10b" value="Error" style="endArrow=block;endFill=1;html=1;rounded=0;fontSize=9;" edge="1" parent="1" source="d3" target="a10b">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr-a10a-a11" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a10a" target="a11">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-a11-end" value="" style="endArrow=block;endFill=1;html=1;rounded=0;" edge="1" parent="1" source="a11" target="end">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- End paths for terminal states -->
+        <mxCell id="arr-a6a-end" value="" style="endArrow=block;endFill=1;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="a6a" target="end">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="1115" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arr-a6b-end" value="" style="endArrow=block;endFill=1;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="a6b" target="end">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="1115" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arr-a6d-end" value="" style="endArrow=block;endFill=1;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="a6d" target="end">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="1115" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arr-a10b-end" value="" style="endArrow=block;endFill=1;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="a10b" target="end">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="1115" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
