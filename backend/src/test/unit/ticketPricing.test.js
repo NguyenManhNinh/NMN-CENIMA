@@ -53,7 +53,7 @@ describe('TicketPricing Controller', () => {
       };
 
       TicketPricing.findOne = jest.fn().mockReturnValue({
-        sort: jest.fn().mockResolvedValue(mockPricing)
+        lean: jest.fn().mockResolvedValue(mockPricing)
       });
 
       // Act
@@ -75,7 +75,7 @@ describe('TicketPricing Controller', () => {
     test('Nên trả về 404 nếu chưa có bảng giá', async () => {
       // Arrange
       TicketPricing.findOne = jest.fn().mockReturnValue({
-        sort: jest.fn().mockResolvedValue(null)
+        lean: jest.fn().mockResolvedValue(null)
       });
 
       // Act
@@ -108,7 +108,7 @@ describe('TicketPricing Controller', () => {
       };
 
       TicketPricing.findOne = jest.fn().mockReturnValue({
-        sort: jest.fn().mockResolvedValue(mockPricing)
+        lean: jest.fn().mockResolvedValue(mockPricing)
       });
 
       // Act

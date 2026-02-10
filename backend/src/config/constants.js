@@ -15,7 +15,7 @@ module.exports = {
   DEFAULT_SEATS_PER_ROOM: 50, // Số ghế mặc định/phòng (dùng cho tính occupancy)
 
   // === LOYALTY ===
-  POINTS_PER_VND: 10000, // Số VND để đổi 1 điểm (10,000 VND = 1 Point)
+  POINTS_PER_VND: 1000, // Số VND để đổi 1 điểm (1,000 VND = 1 Point)
   VIP_THRESHOLD: 1000,   // Điểm tối thiểu lên VIP
   VVIP_THRESHOLD: 5000,  // Điểm tối thiểu lên VVIP
 

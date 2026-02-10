@@ -108,6 +108,10 @@ const defaultRoutes = [
   {
     path: '/ticket-pricing',
     route: require('./ticketPricingRoutes')
+  },
+  {
+    path: '/membership-info',
+    route: require('./membershipInfoRoutes')
   }
 ];
 

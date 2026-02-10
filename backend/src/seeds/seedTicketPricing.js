@@ -28,19 +28,19 @@ const seedTicketPricing = async () => {
         {
           name: 'GIÁ VÉ 2D',
           slug: '2D-price',
-          imageUrl: '/images/pricing/gia-ve-2d.png',
+          imageUrl: 'https://touchcinema.com/storage/slider-tv/z4045880677164-1ba77b4619d45e773581092b6319ac62.jpg',
           sortOrder: 1
         },
         {
           name: 'GIÁ VÉ 3D',
           slug: '3D-price',
-          imageUrl: '/images/pricing/gia-ve-3d.png',
+          imageUrl: 'https://touchcinema.com/storage/slider-app/z4986572984860-008d90891c78bc2a0b13b8acd84f9e88.jpg',
           sortOrder: 2
         },
         {
           name: 'NGÀY LỄ',
           slug: 'holiday-price',
-          imageUrl: '/images/pricing/gia-ve-ngay-le.png',
+          imageUrl: 'https://touchcinema.com/storage/slider-tv/z4103264955341-3bb1395fb3108359cda4af45aee336f4-1724913363.jpg',
           sortOrder: 3
         }
       ],
