@@ -59,7 +59,7 @@ exports.sendMessage = catchAsync(async (req, res, next) => {
 
   // LẤY CONTEXT THỰC TỪ DATABASE
   const Cinema = require('../models/Cinema');
-  const Event = require('../models/Event');
+  const Promotion = require('../models/Promotion');
 
   // 1. Phim đang chiếu
   const nowShowingMovies = await Movie.find({ status: 'NOW' })
@@ -110,12 +110,12 @@ exports.sendMessage = catchAsync(async (req, res, next) => {
     .select('name address phone')
     .lean();
 
-  // 7. Sự kiện/Khuyến mãi
-  const events = await Event.find({
-    status: 'published',
+  // 7. Ưu đãi/Khuyến mãi (từ Promotion model)
+  const events = await Promotion.find({
+    status: 'ACTIVE',
     endAt: { $gte: new Date() }
   })
-    .select('title description startAt endAt')
+    .select('title excerpt startAt endAt')
     .limit(5)
     .lean();
 

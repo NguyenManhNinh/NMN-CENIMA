@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/banners', cmsController.getAllBanners);
 router.get('/articles', cmsController.getAllArticles);
 router.get('/articles/:slug', cmsController.getArticle);
-router.get('/events', cmsController.getAllEvents);
+
 
 // --- PROTECTED ROUTES (Admin/Manager) ---
 router.use(authMiddleware.protect);
@@ -24,9 +24,6 @@ router.post('/articles', cmsController.createArticle);
 router.patch('/articles/:id', cmsController.updateArticle);
 router.delete('/articles/:id', cmsController.deleteArticle);
 
-// Events
-router.post('/events', cmsController.createEvent);
-router.patch('/events/:id', cmsController.updateEvent);
-router.delete('/events/:id', cmsController.deleteEvent);
+
 
 module.exports = router;
