@@ -44,6 +44,7 @@ import { useTheme, useMediaQuery } from '@mui/material';
 import { TrailerModal } from '../../../components/Common';
 import CommentSection from '../../../components/Movie/CommentSection';
 import { useAuth } from '../../../contexts/AuthContext';
+import SidebarMovieList from '../../../components/Common/SidebarMovieList/SidebarMovieList';
 
 // MÀU SẮC - lấy từ BookingPage
 const COLORS = {
@@ -870,145 +871,7 @@ function GenresDetailPage() {
                   Phim đang chiếu
                 </Typography>
 
-                {/* genre Cards - Vertical Layout */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {otherMovies.slice(0, 3).map((otherMovie) => (
-                    <Box
-                      key={otherMovie._id}
-                      component={Link}
-                      to={`/dat-ve/${otherMovie.slug}`}
-                      sx={{
-                        textDecoration: 'none',
-                        display: 'block',
-                        '&:hover .genre-overlay': {
-                          opacity: 1
-                        }
-                      }}
-                    >
-                      {/* Poster Container with Overlay */}
-                      <Box sx={{
-                        position: "relative",
-                        overflow: "hidden",
-                        aspectRatio: "16/9",
-                        borderRadius: 1,
-                        bgcolor: "#f7f7f9ff",
-                      }}>
-                        {/* Poster Image */}
-                        <Box
-                          component="img"
-                          src={otherMovie.bannerUrl || otherMovie.posterUrl}
-                          alt={otherMovie.name}
-                          onError={handleImageError}
-                          sx={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            bgcolor: '#f7f7f9ff'
-                          }}
-                        />
-
-                        {/* Combined Rating Badge - Bottom Right */}
-                        <Box sx={{
-                          position: 'absolute',
-                          bottom: 6,
-                          right: 6,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          bgcolor: 'rgba(0,0,0,0.7)',
-                          borderRadius: '4px',
-                          overflow: 'hidden'
-                        }}>
-                          {/* Age Rating */}
-                          <Box sx={{
-                            bgcolor: COLORS.orange,
-                            px: 0.75,
-                            py: 0.25,
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
-                            <Typography sx={{
-                              color: '#fff',
-                              fontWeight: 700,
-                              fontSize: '10px'
-                            }}>
-                              {otherMovie.ageRating}
-                            </Typography>
-                          </Box>
-
-                          {/* Star Rating */}
-                          <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.25,
-                            px: 0.75,
-                            py: 0.25
-                          }}>
-                            <StarIcon sx={{ fontSize: 12, color: COLORS.orange }} />
-                            <Typography sx={{
-                              color: '#fff',
-                              fontWeight: 700,
-                              fontSize: '10px'
-                            }}>
-                              {otherMovie.rating}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Hover Overlay with "Mua vé" button */}
-                        <Box
-                          className="genre-overlay"
-                          sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            bgcolor: 'rgba(0,0,0,0.5)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            opacity: 0,
-                            transition: 'opacity 0.3s'
-                          }}
-                        >
-                          <Button
-                            variant="contained"
-                            startIcon={<ConfirmationNumberOutlinedIcon sx={{ fontSize: 14 }} />}
-                            sx={{
-                              bgcolor: COLORS.orange,
-                              color: '#fff',
-                              fontWeight: 600,
-                              textTransform: 'none',
-                              fontSize: '12px',
-                              px: 2,
-                              py: 0.5,
-                              '&:hover': {
-                                bgcolor: '#e09520'
-                              }
-                            }}
-                          >
-                            Mua vé
-                          </Button>
-                        </Box>
-                      </Box>
-
-                      {/* genre Title - Below Poster */}
-                      <Typography sx={{
-                        mt: 0.75,
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        color: '#333333',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {otherMovie.name}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
+                <SidebarMovieList movies={otherMovies} />
 
                 {/* Xem thêm button */}
                 <Button
@@ -1019,21 +882,17 @@ function GenresDetailPage() {
                   sx={{
                     mt: 2,
                     py: 1,
-                    color: COLORS.primary,
+                    color: '#f5a623',
                     fontWeight: 600,
                     fontSize: '13px',
                     textTransform: 'none',
-                    '&:hover': {
-                      bgcolor: 'transparent'
-                    }
+                    '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' }
                   }}
-                  endIcon={<ArrowForwardIosIcon sx={{ fontSize: 12 }} />}
                 >
-                  Xem thêm
+                  Xem thêm phim →
                 </Button>
               </Paper>
             </Grid>
-
           </Grid>
         </Box>
       </Container>

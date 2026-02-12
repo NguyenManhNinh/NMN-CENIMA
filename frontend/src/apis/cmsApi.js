@@ -40,15 +40,4 @@ export const getArticleAPI = async (slug) => {
   return response.data;
 };
 
-// ==================== EVENT API ====================
-
-/**
- * Get all events (promotions)
- * @param {Object} params - { limit, page }
- */
-export const getAllEventsAPI = async (params = {}) => {
-  const response = await api.get('/events', { params });
-  return response.data;
-};
-
 export default api;

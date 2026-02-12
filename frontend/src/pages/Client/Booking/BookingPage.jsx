@@ -431,14 +431,34 @@ function BookingPage() {
           bgcolor: '#000',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          overflow: 'hidden'
         }}>
+          {/* Blurred background poster - fills black bars */}
+          <Box
+            component="img"
+            src={movie.bannerUrl || movie.posterUrl}
+            alt=""
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%) scale(1.3)',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              filter: 'blur(20px) brightness(0.4)',
+              pointerEvents: 'none'
+            }}
+          />
           {/* Banner Image - contain full image */}
           <Box
             component="img"
             src={movie.bannerUrl || movie.posterUrl}
             alt={movie.title}
             sx={{
+              position: 'relative',
+              zIndex: 1,
               width: '100%',
               maxHeight: { xs: 280, md: 500 },
               objectFit: { xs: 'cover', md: 'contain' }
@@ -451,6 +471,7 @@ function BookingPage() {
             left: 0,
             right: 0,
             bottom: 0,
+            zIndex: 2,
             background: 'transparent',
             display: 'flex',
             alignItems: 'center',
@@ -1130,127 +1151,83 @@ function BookingPage() {
                   Phim đang chiếu
                 </Typography>
 
-                {/* Movie Cards - Vertical Layout */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {otherMovies.slice(0, 3).map((otherMovie) => (
+                {/* Movie Cards - Horizontal Layout */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {otherMovies.slice(0, 5).map((otherMovie) => (
                     <Box
                       key={otherMovie._id}
                       component={Link}
                       to={`/dat-ve/${otherMovie.slug}`}
                       sx={{
                         textDecoration: 'none',
-                        display: 'block',
-                        '&:hover .movie-overlay': {
-                          opacity: 1
+                        display: 'flex',
+                        gap: 1.5,
+                        p: 1,
+                        borderRadius: 1,
+                        transition: 'background 0.2s',
+                        '&:hover': {
+                          bgcolor: '#f5f5f5'
                         }
                       }}
                     >
-                      {/* Poster Container with Overlay */}
+                      {/* Poster - 2:3 ratio, no crop */}
                       <Box sx={{
-                        position: "relative",
-                        overflow: "hidden",
-                        aspectRatio: "16/9",
+                        width: 80,
+                        minWidth: 80,
+                        height: 120,
                         borderRadius: 1,
-                        bgcolor: "#f7f7f9ff",
+                        overflow: 'hidden',
+                        bgcolor: '#1c1c1c',
+                        flexShrink: 0,
+                        position: 'relative',
+                        '&:hover .poster-overlay': {
+                          opacity: 1
+                        }
                       }}>
-                        {/* Poster Image */}
                         <Box
                           component="img"
-                          src={otherMovie.bannerUrl || otherMovie.posterUrl}
+                          src={otherMovie.posterUrl || otherMovie.bannerUrl}
                           alt={otherMovie.title}
                           onError={(e) => {
                             e.target.onerror = null;
+                            e.target.style.display = 'none';
                           }}
                           sx={{
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            bgcolor: '#f7f7f9ff'
+                            display: 'block'
                           }}
                         />
-
-                        {/* Combined Rating Badge - Bottom Right */}
-                        <Box sx={{
-                          position: 'absolute',
-                          bottom: 6,
-                          right: 6,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          bgcolor: 'rgba(0,0,0,0.7)',
-                          borderRadius: '4px',
-                          overflow: 'hidden'
-                        }}>
-                          {/* Age Rating */}
-                          <Box sx={{
-                            bgcolor: COLORS.orange,
-                            px: 0.75,
-                            py: 0.25,
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
-                            <Typography sx={{
-                              color: '#fff',
-                              fontWeight: 700,
-                              fontSize: '10px',
-                              fontFamily: '"Nunito Sans", sans-serif'
-                            }}>
-                              {otherMovie.ageRating}
-                            </Typography>
-                          </Box>
-
-                          {/* Star Rating */}
-                          <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.25,
-                            px: 0.75,
-                            py: 0.25
-                          }}>
-                            <StarIcon sx={{ fontSize: 12, color: COLORS.orange }} />
-                            <Typography sx={{
-                              color: '#fff',
-                              fontWeight: 700,
-                              fontSize: '10px',
-                              fontFamily: '"Nunito Sans", sans-serif'
-                            }}>
-                              {otherMovie.rating}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Hover Overlay with "Mua vé" button */}
+                        {/* Hover Overlay */}
                         <Box
-                          className="movie-overlay"
+                          className="poster-overlay"
                           sx={{
                             position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            bgcolor: 'rgba(0,0,0,0.5)',
+                            top: 0, left: 0, right: 0, bottom: 0,
+                            bgcolor: 'rgba(0,0,0,0.55)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             opacity: 0,
-                            transition: 'opacity 0.3s'
+                            transition: 'opacity 0.25s'
                           }}
                         >
                           <Button
                             variant="contained"
-                            startIcon={<TicketIcon sx={{ fontSize: 14 }} />}
+                            size="small"
                             sx={{
                               bgcolor: COLORS.orange,
                               color: '#fff',
-                              fontWeight: 600,
+                              fontWeight: 700,
                               fontFamily: '"Nunito Sans", sans-serif',
                               textTransform: 'none',
-                              fontSize: '12px',
-                              px: 2,
-                              py: 0.5,
-                              '&:hover': {
-                                bgcolor: '#e09520'
-                              }
+                              fontSize: '10px',
+                              px: 1.5,
+                              py: 0.4,
+                              minWidth: 0,
+                              lineHeight: 1.4,
+                              '&:hover': { bgcolor: '#e09520' }
                             }}
                           >
                             Mua vé
@@ -1258,20 +1235,70 @@ function BookingPage() {
                         </Box>
                       </Box>
 
-                      {/* Movie Title - Below Poster */}
-                      <Typography sx={{
-                        mt: 0.75,
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        color: '#333333',
-                        fontFamily: '"Nunito Sans", sans-serif',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {otherMovie.title}
-                      </Typography>
+                      {/* Movie Info */}
+                      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0.5 }}>
+                        <Typography sx={{
+                          fontWeight: 700,
+                          fontSize: '13px',
+                          color: '#333',
+                          fontFamily: '"Nunito Sans", sans-serif',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          lineHeight: 1.4
+                        }}>
+                          {otherMovie.title}
+                        </Typography>
+
+                        {/* Duration */}
+                        {otherMovie.duration && (
+                          <Typography sx={{
+                            fontSize: '11px',
+                            color: '#888',
+                            fontFamily: '"Nunito Sans", sans-serif'
+                          }}>
+                            {otherMovie.duration} phút
+                          </Typography>
+                        )}
+
+                        {/* Badges row */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
+                          {/* Age Rating */}
+                          <Box sx={{
+                            bgcolor: COLORS.orange,
+                            px: 0.75,
+                            py: 0.15,
+                            borderRadius: '3px',
+                            display: 'inline-flex',
+                            alignItems: 'center'
+                          }}>
+                            <Typography sx={{
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '9px',
+                              fontFamily: '"Nunito Sans", sans-serif'
+                            }}>
+                              {otherMovie.ageRating}
+                            </Typography>
+                          </Box>
+
+                          {/* Star Rating */}
+                          {otherMovie.rating > 0 && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                              <StarIcon sx={{ fontSize: 12, color: COLORS.orange }} />
+                              <Typography sx={{
+                                color: '#666',
+                                fontWeight: 600,
+                                fontSize: '11px',
+                                fontFamily: '"Nunito Sans", sans-serif'
+                              }}>
+                                {otherMovie.rating}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
                     </Box>
                   ))}
                 </Box>

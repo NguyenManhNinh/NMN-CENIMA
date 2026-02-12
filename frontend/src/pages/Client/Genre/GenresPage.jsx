@@ -39,6 +39,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import SidebarMovieList from '../../../components/Common/SidebarMovieList/SidebarMovieList';
 
 // CẤU HÌNH BỘ LỌC TĨNH
 // Trạng thái phim
@@ -958,145 +959,8 @@ function GenresPage() {
                   Phim đang chiếu
                 </Typography>
 
-                {/* Thẻ phim - Dọc */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {sidebarMovies.slice(0, 3).map((movie) => (
-                    <Box
-                      key={movie._id}
-                      component={Link}
-                      to={`/dat-ve/${movie.slug}`}
-                      sx={{
-                        textDecoration: 'none',
-                        display: 'block',
-                        '&:hover .movie-overlay': {
-                          opacity: 1
-                        }
-                      }}
-                    >
-                      {/* Poster phim */}
-                      <Box sx={{
-                        position: 'relative',
-                        overflow: 'hidden',
-                        aspectRatio: '16/9',
-                        borderRadius: 1,
-                        bgcolor: '#f7f7f9ff',
-                      }}>
-                        {/* Ảnh Poster */}
-                        <Box
-                          component="img"
-                          src={movie.bannerUrl || movie.posterUrl}
-                          alt={movie.title}
-                          onError={handleImageError}
-                          sx={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            bgcolor: '#f7f7f9ff'
-                          }}
-                        />
+                <SidebarMovieList movies={sidebarMovies} />
 
-                        {/* Badge đánh giá */}
-                        <Box sx={{
-                          position: 'absolute',
-                          bottom: 6,
-                          right: 6,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          bgcolor: 'rgba(0,0,0,0.7)',
-                          borderRadius: '4px',
-                          overflow: 'hidden'
-                        }}>
-                          {/* Độ tuổi */}
-                          <Box sx={{
-                            bgcolor: '#f5a623',
-                            px: 0.75,
-                            py: 0.25,
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
-                            <Typography sx={{
-                              color: '#fff',
-                              fontWeight: 700,
-                              fontSize: '10px'
-                            }}>
-                              {movie.ageRating || 'P'}
-                            </Typography>
-                          </Box>
-
-                          {/* Đánh giá sao */}
-                          <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.25,
-                            px: 0.75,
-                            py: 0.25
-                          }}>
-                            <StarIcon sx={{ fontSize: 12, color: '#f5a623' }} />
-                            <Typography sx={{
-                              color: '#fff',
-                              fontWeight: 700,
-                              fontSize: '10px'
-                            }}>
-                              {movie.rating?.toFixed(1) || '0'}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Overlay khi hover */}
-                        <Box
-                          className="movie-overlay"
-                          sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            bgcolor: 'rgba(0,0,0,0.5)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            opacity: 0,
-                            transition: 'opacity 0.3s'
-                          }}
-                        >
-                          <Button
-                            variant="contained"
-                            startIcon={<ConfirmationNumberIcon sx={{ fontSize: 14 }} />}
-                            sx={{
-                              bgcolor: '#f5a623',
-                              color: '#fff',
-                              fontWeight: 600,
-                              textTransform: 'none',
-                              fontSize: '12px',
-                              px: 2,
-                              py: 0.5,
-                              '&:hover': {
-                                bgcolor: '#e09520'
-                              }
-                            }}
-                          >
-                            Mua vé
-                          </Button>
-                        </Box>
-                      </Box>
-
-                      {/* Tiêu đề phim */}
-                      <Typography sx={{
-                        mt: 0.75,
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        color: '#333333',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {movie.title}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
                 {/* Xem thêm button */}
                 <Button
                   component={Link}
@@ -1106,17 +970,14 @@ function GenresPage() {
                   sx={{
                     mt: 2,
                     py: 1,
-                    color: '#1A3A5C',
+                    color: '#f5a623',
                     fontWeight: 600,
                     fontSize: '13px',
                     textTransform: 'none',
-                    '&:hover': {
-                      bgcolor: 'transparent'
-                    }
+                    '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' }
                   }}
-                  endIcon={<ArrowForwardIosIcon sx={{ fontSize: 12 }} />}
                 >
-                  Xem thêm
+                  Xem thêm phim →
                 </Button>
               </Box>
             </Grid>

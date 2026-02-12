@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Box, Typography, Skeleton } from '@mui/material';
+import LocalActivityOutlinedIcon from '@mui/icons-material/LocalActivityOutlined';
 import PropTypes from 'prop-types';
 // HELPERS
 /**
@@ -37,8 +39,6 @@ const formatDateRange = (startAt, endAt) => {
   return `${formatDate(startAt)} - ${formatDate(endAt)}`;
 };
 
-// Fallback image khi ảnh lỗi
-const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2FhYSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 // STYLES
 const styles = {
   card: {
@@ -53,14 +53,34 @@ const styles = {
   imageWrapper: {
     width: '100%',
     overflow: 'hidden',
-    bgcolor: '#f5f5f5',
-    aspectRatio: '16 / 9'
+    bgcolor: '#1c1c1c'
   },
   image: {
     width: '100%',
-    height: '100%',
-    display: 'block',
-    objectFit: 'cover'
+    height: 'auto',
+    display: 'block'
+  },
+  imageFallback: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(145deg, #1c1c1c 0%, #2a2a2a 50%, #1c1c1c 100%)',
+    gap: 1.5,
+    aspectRatio: '16 / 9',
+    minHeight: 140
+  },
+  fallbackIcon: {
+    fontSize: '2.5rem',
+    color: 'rgba(245, 166, 35, 0.6)'
+  },
+  fallbackText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: '0.7rem',
+    fontWeight: 500,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5
   },
   dateStrip: {
     py: 1,
@@ -92,26 +112,32 @@ const styles = {
 // PROMOTION CARD COMPONENT
 function PromotionCard({ promotion, onClick }) {
   const { thumbnailUrl, coverUrl, startAt, endAt, title } = promotion;
+  const [hasError, setHasError] = useState(false);
 
   // Ưu tiên thumbnailUrl, fallback coverUrl
   const imageUrl = thumbnailUrl || coverUrl || '';
-
-  const handleImageError = (e) => {
-    e.target.onerror = null;
-    e.target.src = FALLBACK_IMAGE;
-  };
+  const showFallback = !imageUrl || hasError;
 
   return (
     <Box sx={styles.card} onClick={onClick} title={title}>
       <Box sx={styles.imageWrapper}>
-        <Box
-          component="img"
-          src={imageUrl}
-          alt={title || 'Ưu đãi'}
-          sx={styles.image}
-          onError={handleImageError}
-          loading="lazy"
-        />
+        {showFallback ? (
+          <Box sx={styles.imageFallback}>
+            <LocalActivityOutlinedIcon sx={styles.fallbackIcon} />
+            <Typography sx={styles.fallbackText}>
+              Chưa có ảnh
+            </Typography>
+          </Box>
+        ) : (
+          <Box
+            component="img"
+            src={imageUrl}
+            alt={title || 'Ưu đãi'}
+            sx={styles.image}
+            onError={() => setHasError(true)}
+            loading="lazy"
+          />
+        )}
       </Box>
 
       <Box sx={styles.dateStrip}>

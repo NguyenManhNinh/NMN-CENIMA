@@ -10,14 +10,15 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
+import LocalActivityOutlinedIcon from '@mui/icons-material/LocalActivityOutlined';
 
 // API
-import { getAllEventsAPI } from '../../../apis/cmsApi';
+import { getPromotionsAPI } from '../../../apis/promotionApi';
 
 
 
 // CONSTANTS
-const EVENTS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 4;
 const AUTO_ROTATE_INTERVAL_DESKTOP = 20000; // 20 giây cho desktop
 const AUTO_ROTATE_INTERVAL_MOBILE = 4000;   // 4 giây cho mobile
 const CARD_WIDTH = 264.76;
@@ -68,17 +69,16 @@ const styles = {
   },
   imageContainer: {
     overflow: 'hidden',
-    width: { xs: '100%', sm: CARD_WIDTH },
-    height: { xs: 'auto', sm: CARD_HEIGHT },
-    aspectRatio: { xs: '2/3', sm: 'auto' },
+    width: '100%',
     borderRadius: 1,
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
     position: 'relative',
+    backgroundColor: '#1c1c1c'
   },
   image: {
     width: '100%',
-    height: '100%',
-    objectFit: 'cover',
+    height: 'auto',
+    display: 'block',
     transition: 'transform 0.3s'
   },
   title: {
@@ -116,9 +116,63 @@ const styles = {
   mobileCard: {
     width: '100%',
     maxWidth: 300,
-    userSelect: 'none' // Ngăn select text khi swipe
+    userSelect: 'none',
+    backgroundColor: 'transparent'
+  },
+  // Fallback UI khi không có ảnh
+  imageFallback: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(145deg, #1c1c1c 0%, #2a2a2a 50%, #1c1c1c 100%)',
+    gap: 1.5,
+    aspectRatio: '4/3',
+    minHeight: 200
+  },
+  fallbackIcon: {
+    fontSize: '3rem',
+    color: 'rgba(245, 166, 35, 0.6)'
+  },
+  fallbackText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: '0.75rem',
+    fontWeight: 500,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    px: 2,
+    textAlign: 'center'
   }
 };
+
+// Sub-component: Image with fallback UI
+function PromotionImage({ src, alt }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!src || hasError) {
+    return (
+      <Box sx={styles.imageFallback}>
+        <LocalActivityOutlinedIcon sx={styles.fallbackIcon} />
+        <Typography sx={styles.fallbackText}>
+          Chưa có ảnh
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      component="img"
+      src={src}
+      alt={alt}
+      sx={styles.image}
+      draggable={false}
+      onError={() => setHasError(true)}
+    />
+  );
+}
 
 // PROMOTION SECTION COMPONENT
 function PromotionSection() {
@@ -126,7 +180,7 @@ function PromotionSection() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [allEvents, setAllEvents] = useState([]);
+  const [allPromotions, setAllPromotions] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [currentMobileIndex, setCurrentMobileIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -137,40 +191,33 @@ function PromotionSection() {
   const [touchEnd, setTouchEnd] = useState(null);
   const autoSlideRef = useRef(null);
 
-  // Load events từ API
+  // Load promotions từ API
   useEffect(() => {
-    const loadEvents = async () => {
+    const loadPromotions = async () => {
       setLoading(true);
       try {
-        const response = await getAllEventsAPI();
-        if (response?.data?.events) {
-          const now = new Date();
-          const activeEvents = response.data.events.filter(event => {
-            const endDate = new Date(event.endAt);
-            return endDate >= now || event.status !== 'ENDED';
-          });
-          setAllEvents(activeEvents);
-        } else {
-          setAllEvents([]);
-        }
+        const data = await getPromotionsAPI({ limit: 20 });
+        // unwrap() trả về mảng trực tiếp hoặc { promotions: [] }
+        const promotions = Array.isArray(data) ? data : (data?.promotions || []);
+        setAllPromotions(promotions);
       } catch (error) {
         console.error('Lỗi khi tải danh sách ưu đãi:', error);
-        setAllEvents([]);
+        setAllPromotions([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadEvents();
+    loadPromotions();
   }, []);
 
-  // Tính số trang desktop (4 events/trang)
-  const totalPages = Math.ceil(allEvents.length / EVENTS_PER_PAGE);
+  // Tính số trang desktop (4 items/trang)
+  const totalPages = Math.ceil(allPromotions.length / ITEMS_PER_PAGE);
 
-  // Lấy events hiển thị cho desktop
-  const visibleEvents = allEvents.slice(
-    currentPage * EVENTS_PER_PAGE,
-    (currentPage + 1) * EVENTS_PER_PAGE
+  // Lấy promotions hiển thị cho desktop
+  const visiblePromotions = allPromotions.slice(
+    currentPage * ITEMS_PER_PAGE,
+    (currentPage + 1) * ITEMS_PER_PAGE
   );
 
   // Chuyển trang desktop
@@ -194,14 +241,14 @@ function PromotionSection() {
 
   // Mobile: Chuyển slide
   const goToNextMobileSlide = useCallback(() => {
-    setCurrentMobileIndex((prev) => (prev + 1) % allEvents.length);
-  }, [allEvents.length]);
+    setCurrentMobileIndex((prev) => (prev + 1) % allPromotions.length);
+  }, [allPromotions.length]);
 
   const goToPrevMobileSlide = useCallback(() => {
     setCurrentMobileIndex((prev) =>
-      prev === 0 ? allEvents.length - 1 : prev - 1
+      prev === 0 ? allPromotions.length - 1 : prev - 1
     );
-  }, [allEvents.length]);
+  }, [allPromotions.length]);
 
   // Touch handlers cho swipe
   const handleTouchStart = (e) => {
@@ -244,12 +291,12 @@ function PromotionSection() {
     if (autoSlideRef.current) {
       clearInterval(autoSlideRef.current);
     }
-    if (allEvents.length > 1) {
+    if (allPromotions.length > 1) {
       autoSlideRef.current = setInterval(() => {
         goToNextMobileSlide();
       }, AUTO_ROTATE_INTERVAL_MOBILE);
     }
-  }, [allEvents.length, goToNextMobileSlide]);
+  }, [allPromotions.length, goToNextMobileSlide]);
 
   // Auto-rotate cho desktop
   useEffect(() => {
@@ -264,7 +311,7 @@ function PromotionSection() {
 
   // Auto-rotate cho mobile
   useEffect(() => {
-    if (!isMobile || allEvents.length <= 1) return;
+    if (!isMobile || allPromotions.length <= 1) return;
 
     startAutoSlide();
 
@@ -273,10 +320,10 @@ function PromotionSection() {
         clearInterval(autoSlideRef.current);
       }
     };
-  }, [isMobile, allEvents.length, startAutoSlide]);
+  }, [isMobile, allPromotions.length, startAutoSlide]);
 
-  const handleEventClick = (eventId) => {
-    navigate(`/khuyen-mai/${eventId}`);
+  const handlePromotionClick = (slug) => {
+    navigate(`/uu-dai/${slug}`);
   };
 
   // Render skeleton
@@ -299,8 +346,8 @@ function PromotionSection() {
     </Grid>
   );
 
-  // Không hiển thị section nếu không có events
-  if (!loading && allEvents.length === 0) {
+  // Không hiển thị section nếu không có promotions
+  if (!loading && allPromotions.length === 0) {
     return null;
   }
 
@@ -364,32 +411,20 @@ function PromotionSection() {
                       transform: `translateX(-${currentMobileIndex * 100}%)`
                     }}
                   >
-                    {allEvents.map((event) => (
-                      <Box key={event._id} sx={styles.mobileSlide}>
+                    {allPromotions.map((promo) => (
+                      <Box key={promo._id} sx={styles.mobileSlide}>
                         <Card
                           sx={styles.mobileCard}
-                          onClick={() => handleEventClick(event._id)}
+                          onClick={() => handlePromotionClick(promo.slug)}
                         >
                           <Box sx={{
                             ...styles.imageContainer,
-                            width: '100%',
-                            aspectRatio: '2/3',
-                            height: 'auto'
+                            width: '100%'
                           }}>
-                            <Box
-                              component="img"
-                              src={event.bannerUrl || 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image'}
-                              alt={event.title}
-                              sx={styles.image}
-                              draggable={false}
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image';
-                              }}
-                            />
+                            <PromotionImage src={promo.thumbnailUrl} alt={promo.title} />
                           </Box>
-                          <Typography sx={{ ...styles.title, textAlign: 'center' }}>
-                            {event.title}
+                          <Typography sx={{ ...styles.title, textAlign: 'left' }}>
+                            {promo.title}
                           </Typography>
                         </Card>
                       </Box>
@@ -397,7 +432,7 @@ function PromotionSection() {
                   </Box>
 
                   {/* Hint swipe - hiển thị nhẹ ở lần đầu */}
-                  {allEvents.length > 1 && (
+                  {allPromotions.length > 1 && (
                     <Typography
                       sx={{
                         textAlign: 'center',
@@ -421,28 +456,17 @@ function PromotionSection() {
                     opacity: isAnimating ? 0 : 1
                   }}
                 >
-                  {visibleEvents.map((event) => (
-                    <Grid item xs={6} sm={6} md={3} key={event._id}>
+                  {visiblePromotions.map((promo) => (
+                    <Grid item xs={6} sm={6} md={3} key={promo._id}>
                       <Card
                         sx={styles.card}
-                        onClick={() => handleEventClick(event._id)}
+                        onClick={() => handlePromotionClick(promo.slug)}
                       >
                         <Box sx={styles.imageContainer}>
-                          <Box
-                            component="img"
-                            src={event.bannerUrl || 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image'}
-                            alt={event.title}
-                            className="event-image"
-                            sx={styles.image}
-                            draggable={false}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = 'https://placehold.co/400x600/1a3a5c/ffffff?text=No+Image';
-                            }}
-                          />
+                          <PromotionImage src={promo.thumbnailUrl} alt={promo.title} />
                         </Box>
                         <Typography sx={styles.title}>
-                          {event.title}
+                          {promo.title}
                         </Typography>
                       </Card>
                     </Grid>
