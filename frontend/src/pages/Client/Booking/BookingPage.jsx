@@ -404,59 +404,76 @@ function BookingPage() {
   }
 
   return (
-    <Box className="booking-page" sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed', minHeight: '100vh' }}>
-
-      {/*BANNER TRAILER SECTION*/}
-      <Box sx={{
+    <Box
+      className="booking-page"
+      sx={{
+        minHeight: '100vh',
         position: 'relative',
-        width: '100%',
-        bgcolor: '#000',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        {/* Banner Image - contain full image */}
-        <Box
-          component="img"
-          src={movie.bannerUrl || movie.posterUrl}
-          alt={movie.title}
-          sx={{
-            width: '100%',
-            maxHeight: { xs: 280, md: 500 },
-            objectFit: 'contain'
-          }}
-        />
-        {/* Dark overlay for play button visibility */}
-        <Box sx={{
+        backgroundImage: 'url(/src/assets/images/bg-header.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+        backgroundRepeat: 'no-repeat',
+        '&::before': {
+          content: '""',
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3))',
+          inset: 0,
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.18), rgba(0,0,0,0.28))',
+          pointerEvents: 'none'
+        }
+      }}
+    >
+      <Box sx={{ position: 'relative', zIndex: 1 }}>
+
+        {/*BANNER TRAILER SECTION*/}
+        <Box sx={{
+          position: 'relative',
+          width: '100%',
+          bgcolor: '#000',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          {/* Play Button*/}
-          <IconButton
-            onClick={() => movie?.trailerUrl && setOpenTrailerModal(true)}
+          {/* Banner Image - contain full image */}
+          <Box
+            component="img"
+            src={movie.bannerUrl || movie.posterUrl}
+            alt={movie.title}
             sx={{
-              width: { xs: 60, md: 80 },
-              height: { xs: 60, md: 80 },
-              transition: 'all 0.3s',
-              cursor: movie?.trailerUrl ? 'pointer' : 'default',
-              '&:hover': { transform: 'scale(1.1)' }
+              width: '100%',
+              maxHeight: { xs: 280, md: 500 },
+              objectFit: { xs: 'cover', md: 'contain' }
             }}
-          >
-            <PlayIcon sx={{ fontSize: 64, color: 'white' }} />
-          </IconButton>
+          />
+          {/* Dark overlay for play button visibility */}
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {/* Play Button*/}
+            <IconButton
+              onClick={() => movie?.trailerUrl && setOpenTrailerModal(true)}
+              sx={{
+                width: { xs: 60, md: 80 },
+                height: { xs: 60, md: 80 },
+                transition: 'all 0.3s',
+                cursor: movie?.trailerUrl ? 'pointer' : 'default',
+                '&:hover': { transform: 'scale(1.1)' }
+              }}
+            >
+              <PlayIcon sx={{ fontSize: 64, color: 'white' }} />
+            </IconButton>
+          </Box>
         </Box>
-      </Box>
 
-      {/* ==================== MAIN CONTENT SECTION ==================== */}
-      <Container maxWidth="lg">
-        <Box sx={{ bgcolor: COLORS.white, borderRadius: 0, p: { xs: 2, md: 3 }, pb: 5 }}>
+        {/* ==================== MAIN CONTENT SECTION ==================== */}
+        <Container maxWidth="lg">
           <Grid container spacing={3} sx={{ py: 3, alignItems: 'flex-start' }}>
 
             {/* ===== LEFT COLUMN (8 cols): Poster + Info + Nội dung + Lịch chiếu ===== */}
@@ -488,14 +505,14 @@ function BookingPage() {
                 <Grid item xs={7} sm={8}>
                   {/* Title + Badges */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1, md: 2 }, flexWrap: 'wrap' }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.3rem', md: '1.6rem' }, color: COLORS.dark }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.3rem', md: '1.6rem' }, color: '#EA3B92' }}>
                       {movie.title}
                     </Typography>
                     <Chip label={movie.ageRating} size="small" sx={{ bgcolor: COLORS.orange, color: '#000', fontWeight: 700, fontSize: { xs: '10px', md: '12px' }, height: { xs: 20, md: 24 } }} />
                   </Box>
 
                   {/* Meta Row */}
-                  <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 }, mb: { xs: 1.5, md: 2.5 }, flexWrap: 'wrap', color: COLORS.textLight }}>
+                  <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 }, mb: { xs: 1.5, md: 2.5 }, flexWrap: 'wrap', color: '#fff' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <TimeIcon sx={{ fontSize: { xs: 14, md: 20 } }} />
                       <Typography sx={{ fontSize: { xs: '11px', md: '14px' } }}>{movie.duration} Phút</Typography>
@@ -510,43 +527,38 @@ function BookingPage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: 0.5,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          color: '#1a3a5c',
-                          '& .MuiSvgIcon-root': { color: '#1a3a5c' },
-                          '& .MuiTypography-root': { color: '#1a3a5c' }
-                        }
+                        cursor: 'pointer'
                       }}
                     >
                       <StarIcon sx={{ fontSize: { xs: 14, md: 20 }, color: COLORS.orange, transition: 'color 0.2s' }} />
                       <Typography sx={{ fontSize: { xs: '11px', md: '14px' }, fontWeight: 600, transition: 'color 0.2s' }}>
                         {movie.rating}
                       </Typography>
-                      <Typography sx={{ fontSize: { xs: '11px', md: '14px' }, color: COLORS.textMuted, transition: 'color 0.2s' }}>
+                      <Typography sx={{ fontSize: { xs: '11px', md: '14px' }, color: '#fff', transition: 'color 0.2s' }}>
                         ({movie.ratingCount || 0} đánh giá)
                       </Typography>
                     </Box>
-                    {/* Quốc gia - Mobile only */}
-                    <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1 }}>
-                      <Typography sx={{
-                        fontSize: '11px',
-                        color: '#4A4A4A'
-                      }}>
-                        Quốc gia:
-                      </Typography>
-                      <Typography sx={{
-                        fontSize: '11px',
-                        color: COLORS.text,
-                        fontWeight: 500,
-                        transition: 'color 0.2s',
-                        '&:hover': {
-                          color: (movie.country || 'Việt Nam') === 'Việt Nam' ? '#e53935' : COLORS.text
-                        },
-                      }}>
-                        {movie.country || 'Việt Nam'}
-                      </Typography>
-                    </Box>
+                  </Box>
+
+                  {/* Quốc gia - Mobile only - separate row */}
+                  <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Typography sx={{
+                      fontSize: '11px',
+                      color: '#EA3B92'
+                    }}>
+                      Quốc gia:
+                    </Typography>
+                    <Typography sx={{
+                      fontSize: '11px',
+                      color: '#fff',
+                      fontWeight: 500,
+                      transition: 'color 0.2s',
+                      '&:hover': {
+                        color: (movie.country || 'Việt Nam') === 'Việt Nam' ? '#e2130fa1' : '#fff'
+                      },
+                    }}>
+                      {movie.country || 'Việt Nam'}
+                    </Typography>
                   </Box>
 
                   {/* Details Grid - Desktop only (sm and up) */}
@@ -557,23 +569,23 @@ function BookingPage() {
                     fontSize: '0.85rem',
                     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
                   }}>
-                    <Typography sx={{ color: '#4A4A4A', cursor: 'default', transition: 'color 0.2s' }}>Quốc gia:</Typography>
+                    <Typography sx={{ color: '#EA3B92', cursor: 'default', transition: 'color 0.2s' }}>Quốc gia:</Typography>
                     <Typography sx={{
-                      color: '#333333',
+                      color: '#fff',
                       cursor: 'default',
                       transition: 'color 0.2s',
                       '&:hover': {
-                        color: (movie.country || 'Việt Nam') === 'Việt Nam' ? '#e53935' : '#333333'
+                        color: (movie.country || 'Việt Nam') === 'Việt Nam' ? '#e53935' : '#fff'
                       },
 
                     }}>
                       {movie.country || 'Việt Nam'}
                     </Typography>
 
-                    <Typography sx={{ color: '#4A4A4A' }}>Nhà sản xuất:</Typography>
-                    <Typography sx={{ color: '#333333' }}>{movie.studio || 'NMN Studio'}</Typography>
+                    <Typography sx={{ color: '#EA3B92' }}>Nhà sản xuất:</Typography>
+                    <Typography sx={{ color: '#fff' }}>{movie.studio || 'NMN Studio'}</Typography>
 
-                    <Typography sx={{ color: '#4A4A4A' }}>Thể loại:</Typography>
+                    <Typography sx={{ color: '#EA3B92' }}>Thể loại:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                       {(!movie.genres || movie.genres.length === 0) ? (
                         <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
@@ -596,15 +608,15 @@ function BookingPage() {
                                 fontSize: '0.85rem',
                                 height: 28,
                                 borderRadius: '7px',
-                                border: '1px solid #333',
-                                color: '#333',
+                                border: '1px solid #fff',
+                                color: '#fff',
                                 fontWeight: 500,
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
                                 '&:hover': {
-                                  borderColor: '#1a3a5c',
-                                  color: '#1a3a5c',
-                                  bgcolor: 'rgba(26, 58, 92, 0.05)'
+                                  borderColor: '#EA3B92',
+                                  color: '#EA3B92',
+                                  bgcolor: 'rgba(234, 59, 146, 0.1)'
                                 }
                               }}
                             />
@@ -613,7 +625,7 @@ function BookingPage() {
                       )}
                     </Box>
 
-                    <Typography sx={{ color: '#4A4A4A' }}>Đạo diễn:</Typography>
+                    <Typography sx={{ color: '#EA3B92' }}>Đạo diễn:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                       {(() => {
                         // Handle both API (object) and mock (string) formats
@@ -648,16 +660,16 @@ function BookingPage() {
                               fontSize: '0.85rem',
                               height: 28,
                               borderRadius: '7px',
-                              border: '1px solid #333',
-                              color: '#333',
+                              border: '1px solid #fff',
+                              color: '#fff',
                               fontWeight: 500,
                               bgcolor: 'transparent',
                               cursor: 'pointer',
                               transition: 'all 0.2s',
                               '&:hover': {
-                                borderColor: '#1a3a5c',
-                                color: '#1a3a5c',
-                                bgcolor: 'rgba(26, 58, 92, 0.05)'
+                                borderColor: '#EA3B92',
+                                color: '#EA3B92',
+                                bgcolor: 'rgba(234, 59, 146, 0.1)'
                               }
                             }}
                           />
@@ -665,7 +677,7 @@ function BookingPage() {
                       })()}
                     </Box>
 
-                    <Typography sx={{ color: '#4A4A4A' }}>Diễn viên:</Typography>
+                    <Typography sx={{ color: '#EA3B92' }}>Diễn viên:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                       {(!movie.actors || movie.actors.length === 0) ? (
                         <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
@@ -693,16 +705,16 @@ function BookingPage() {
                                 fontSize: '0.85rem',
                                 height: 28,
                                 borderRadius: '7px',
-                                border: '1px solid #333',
-                                color: '#333',
+                                border: '1px solid #fff',
+                                color: '#fff',
                                 fontWeight: 500,
                                 bgcolor: 'transparent',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
                                 '&:hover': {
-                                  borderColor: '#1a3a5c',
-                                  color: '#1a3a5c',
-                                  bgcolor: 'rgba(26, 58, 92, 0.05)'
+                                  borderColor: '#EA3B92',
+                                  color: '#EA3B92',
+                                  bgcolor: 'rgba(234, 59, 146, 0.1)'
                                 }
                               }}
                             />
@@ -723,10 +735,10 @@ function BookingPage() {
                 fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
                 mt: 2
               }}>
-                <Typography sx={{ color: '#4A4A4A' }}>Nhà sản xuất:</Typography>
-                <Typography sx={{ color: '#333333' }}>{movie.studio || 'NMN Studio'}</Typography>
+                <Typography sx={{ color: '#EA3B92' }}>Nhà sản xuất:</Typography>
+                <Typography sx={{ color: '#fff' }}>{movie.studio || 'NMN Studio'}</Typography>
 
-                <Typography sx={{ color: '#4A4A4A' }}>Thể loại:</Typography>
+                <Typography sx={{ color: '#EA3B92' }}>Thể loại:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
                   {(!movie.genres || movie.genres.length === 0) ? (
                     <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
@@ -749,15 +761,15 @@ function BookingPage() {
                             fontSize: { xs: '0.7rem', sm: '0.85rem' },
                             height: { xs: 22, sm: 28 },
                             borderRadius: '7px',
-                            border: '1px solid #333',
-                            color: '#333',
+                            border: '1px solid #fff',
+                            color: '#fff',
                             fontWeight: 500,
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                             '&:hover': {
-                              borderColor: '#1a3a5c',
-                              color: '#1a3a5c',
-                              bgcolor: 'rgba(26, 58, 92, 0.05)'
+                              borderColor: '#EA3B92',
+                              color: '#EA3B92',
+                              bgcolor: 'rgba(234, 59, 146, 0.1)'
                             }
                           }}
                         />
@@ -766,7 +778,7 @@ function BookingPage() {
                   )}
                 </Box>
 
-                <Typography sx={{ color: '#4A4A4A' }}>Đạo diễn:</Typography>
+                <Typography sx={{ color: '#EA3B92' }}>Đạo diễn:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
                   {(() => {
                     const directors = typeof movie.director === 'string'
@@ -800,16 +812,16 @@ function BookingPage() {
                           fontSize: { xs: '0.7rem', sm: '0.85rem' },
                           height: { xs: 22, sm: 28 },
                           borderRadius: '7px',
-                          border: '1px solid #333',
-                          color: '#333',
+                          border: '1px solid #fff',
+                          color: '#fff',
                           fontWeight: 500,
                           bgcolor: 'transparent',
                           cursor: 'pointer',
                           transition: 'all 0.2s',
                           '&:hover': {
-                            borderColor: '#1a3a5c',
-                            color: '#1a3a5c',
-                            bgcolor: 'rgba(26, 58, 92, 0.05)'
+                            borderColor: '#EA3B92',
+                            color: '#EA3B92',
+                            bgcolor: 'rgba(234, 59, 146, 0.1)'
                           }
                         }}
                       />
@@ -817,7 +829,7 @@ function BookingPage() {
                   })()}
                 </Box>
 
-                <Typography sx={{ color: '#4A4A4A' }}>Diễn viên:</Typography>
+                <Typography sx={{ color: '#EA3B92' }}>Diễn viên:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
                   {(!movie.actors || movie.actors.length === 0) ? (
                     <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
@@ -845,16 +857,16 @@ function BookingPage() {
                             fontSize: { xs: '0.7rem', sm: '0.85rem' },
                             height: { xs: 22, sm: 28 },
                             borderRadius: '7px',
-                            border: '1px solid #333',
-                            color: '#333',
+                            border: '1px solid #fff',
+                            color: '#fff',
                             fontWeight: 500,
                             bgcolor: 'transparent',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                             '&:hover': {
-                              borderColor: '#1a3a5c',
-                              color: '#1a3a5c',
-                              bgcolor: 'rgba(26, 58, 92, 0.05)'
+                              borderColor: '#EA3B92',
+                              color: '#EA3B92',
+                              bgcolor: 'rgba(234, 59, 146, 0.1)'
                             }
                           }}
                         />
@@ -869,17 +881,17 @@ function BookingPage() {
               <Box sx={{ mt: 4, mb: 4 }}>
                 <Typography sx={{
                   fontWeight: 600,
-                  fontSize: '16px',
+                  fontSize: '1.3rem',
                   fontFamily: '"Nunito Sans", sans-serif',
-                  color: '#4A4A4A', mb: 1,
-                  borderLeft: `3.2px solid #1a1a2e`,
+                  color: '#EA3B92', mb: 1,
+                  // borderLeft: `3.2px solid #1e1e3a`,
                   pl: 1.2, display: 'inline-block',
                   pb: 0.5
                 }}>
                   Nội Dung Phim
                 </Typography>
                 <Typography sx={{
-                  color: '#333333', lineHeight: 1.7,
+                  color: '#fff', lineHeight: 1.7,
                   fontFamily: '"Nunito Sans", sans-serif', pl: 1.7,
                   mb: 2, fontSize: '14px', textAlign: 'justify'
                 }}>
@@ -891,11 +903,11 @@ function BookingPage() {
               <Box>
                 <Typography sx={{
                   fontWeight: 700,
-                  fontSize: '16px',
+                  fontSize: '1.3rem',
                   fontFamily: '"Nunito Sans", sans-serif',
-                  color: '#333333',
+                  color: '#EA3B92',
                   mb: 2,
-                  borderLeft: `3.2px solid #1a1a2e`,
+                  // borderLeft: `3.2px solid #1a1a2e`,
                   pl: 1.2, display: 'inline-block',
                   pb: 0.5
                 }}>
@@ -961,52 +973,56 @@ function BookingPage() {
 
                 {/* Filters */}
                 <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-                  <FormControl size="small" sx={{ minWidth: 140, maxWidth: 180 }}>
-                    <Select value={selectedArea} onChange={(e) => setSelectedArea(e.target.value)} displayEmpty
-                      sx={{
-                        fontSize: '14px',
-                        fontFamily: '"Nunito Sans", sans-serif',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: COLORS.border
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: COLORS.border
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: COLORS.border,
-                          borderWidth: '1px'
-                        }
-                      }}>
-                      <MenuItem value="all">Toàn quốc</MenuItem>
-                      {cities.map((city, idx) => (
-                        <MenuItem key={idx} value={city}>{city}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl size="small" sx={{ minWidth: 160, maxWidth: 200 }}>
-                    <Select value={selectedCinema} onChange={(e) => setSelectedCinema(e.target.value)} displayEmpty
-                      sx={{
-                        fontSize: '14px',
-                        fontFamily: '"Nunito Sans", sans-serif',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: COLORS.border
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: COLORS.border
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: COLORS.border,
-                          borderWidth: '1px'
-                        }
-                      }}>
-                      <MenuItem value="all">Tất cả rạp</MenuItem>
-                      {cinemas
-                        .filter(c => selectedArea === 'all' || c.city === selectedArea)
-                        .map(c => (
-                          <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>
+                  <Box sx={{ bgcolor: '#fff' }}>
+                    <FormControl size="small" sx={{ minWidth: 140, maxWidth: 180 }}>
+                      <Select value={selectedArea} onChange={(e) => setSelectedArea(e.target.value)} displayEmpty
+                        sx={{
+                          fontSize: '14px',
+                          fontFamily: '"Nunito Sans", sans-serif',
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: COLORS.border
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: COLORS.border
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: COLORS.border,
+                            borderWidth: '1px'
+                          }
+                        }}>
+                        <MenuItem value="all">Toàn quốc</MenuItem>
+                        {cities.map((city, idx) => (
+                          <MenuItem key={idx} value={city}>{city}</MenuItem>
                         ))}
-                    </Select>
-                  </FormControl>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  <Box sx={{ bgcolor: '#fff' }}>
+                    <FormControl size="small" sx={{ minWidth: 160, maxWidth: 200 }}>
+                      <Select value={selectedCinema} onChange={(e) => setSelectedCinema(e.target.value)} displayEmpty
+                        sx={{
+                          fontSize: '14px',
+                          fontFamily: '"Nunito Sans", sans-serif',
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: COLORS.border
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: COLORS.border
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: COLORS.border,
+                            borderWidth: '1px'
+                          }
+                        }}>
+                        <MenuItem value="all">Tất cả rạp</MenuItem>
+                        {cinemas
+                          .filter(c => selectedArea === 'all' || c.city === selectedArea)
+                          .map(c => (
+                            <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>
+                          ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
                 </Box>
 
                 {/* Cinema List */}
@@ -1285,213 +1301,213 @@ function BookingPage() {
               </Paper>
             </Grid>
           </Grid>
-        </Box>
-      </Container>
+        </Container>
 
-      {/* ==================== RATING MODAL ==================== */}
-      <Dialog
-        open={openRatingModal}
-        onClose={() => setOpenRatingModal(false)}
-        maxWidth="xs"
-        fullWidth
-        PaperProps={{
-          sx: { borderRadius: 3, overflow: 'hidden' }
-        }}
-      >
-        {/* Close Button */}
-        <IconButton
-          onClick={() => setOpenRatingModal(false)}
-          sx={{
-            position: 'absolute',
-            right: 5,
-            top: 5,
-            zIndex: 70,
-            bgcolor: 'rgba(255,255,255,0.9)',
-            '&:hover': { bgcolor: COLORS.white }
+        {/* ==================== RATING MODAL ==================== */}
+        <Dialog
+          open={openRatingModal}
+          onClose={() => setOpenRatingModal(false)}
+          maxWidth="xs"
+          fullWidth
+          PaperProps={{
+            sx: { borderRadius: 3, overflow: 'hidden' }
           }}
         >
-          <CloseIcon />
-        </IconButton>
-
-        {/* Movie Banner */}
-        <Box
-          sx={{
-            width: '100%',
-            height: 250,
-            background: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${movie?.bannerUrl || movie?.posterUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
-
-        <DialogContent sx={{ textAlign: 'center', pb: 4 }}>
-          {/* Movie Title */}
-          <Typography sx={{ fontWeight: 700, fontSize: '18px', color: COLORS.dark, mb: 3 }}>
-            {movie?.title}
-          </Typography>
-
-          {/* Current Rating */}
-          <Box
+          {/* Close Button */}
+          <IconButton
+            onClick={() => setOpenRatingModal(false)}
             sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1,
-              px: 4,
-              py: 2,
-              borderRadius: '50px',
-              border: `1.7px solid ${COLORS.primary}`,
-              mb: 3
+              position: 'absolute',
+              right: 5,
+              top: 5,
+              zIndex: 70,
+              bgcolor: 'rgba(255,255,255,0.9)',
+              '&:hover': { bgcolor: COLORS.white }
             }}
           >
-            <StarIcon sx={{ color: COLORS.orange, fontSize: 28 }} />
-            <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: COLORS.dark }}>
-              {movie?.rating}
-            </Typography>
-            <Typography sx={{ fontSize: '0.9rem', color: COLORS.textMuted }}>
-              ({movie?.ratingCount || 0} đánh giá)
-            </Typography>
-          </Box>
+            <CloseIcon />
+          </IconButton>
 
-          {/* User Rating */}
-          <Box sx={{ mb: 3 }}>
-            <Rating
-              value={userRating}
-              onChange={(event, newValue) => setUserRating(newValue)}
-              size="large"
-              max={10}
-              icon={<StarIcon sx={{ fontSize: 32, color: COLORS.orange }} />}
-              emptyIcon={<StarBorderIcon sx={{ fontSize: 32, color: COLORS.textMuted }} />}
-            />
-          </Box>
+          {/* Movie Banner */}
+          <Box
+            sx={{
+              width: '100%',
+              height: 250,
+              background: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${movie?.bannerUrl || movie?.posterUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          />
 
-          {/* Action Buttons */}
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => setOpenRatingModal(false)}
+          <DialogContent sx={{ textAlign: 'center', pb: 4 }}>
+            {/* Movie Title */}
+            <Typography sx={{ fontWeight: 700, fontSize: '18px', color: COLORS.dark, mb: 3 }}>
+              {movie?.title}
+            </Typography>
+
+            {/* Current Rating */}
+            <Box
               sx={{
-                py: 1.5,
-                borderRadius: 0,
-                borderColor: COLORS.border,
-                color: COLORS.text,
-                fontWeight: 600,
-                '&:hover': { borderColor: COLORS.primary, bgcolor: 'transparent' }
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                px: 4,
+                py: 2,
+                borderRadius: '50px',
+                border: `1.7px solid ${COLORS.primary}`,
+                mb: 3
               }}
             >
-              Đóng
-            </Button>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={async () => {
-                if (!userRating) {
-                  alert('Vui lòng chọn số sao để đánh giá!');
-                  return;
-                }
+              <StarIcon sx={{ color: COLORS.orange, fontSize: 28 }} />
+              <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: COLORS.dark }}>
+                {movie?.rating}
+              </Typography>
+              <Typography sx={{ fontSize: '0.9rem', color: COLORS.textMuted }}>
+                ({movie?.ratingCount || 0} đánh giá)
+              </Typography>
+            </Box>
 
-                // Check if user is logged in
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                  alert('Vui lòng đăng nhập để đánh giá!');
-                  return;
-                }
-
-                try {
-                  // Token is automatically added by interceptor
-                  const result = await rateMovieAPI(movie._id, userRating);
-                  // Update local movie state with new rating
-                  setMovie(prev => ({
-                    ...prev,
-                    rating: result.data.rating,
-                    ratingCount: result.data.ratingCount
-                  }));
-                  setOpenRatingModal(false);
-                  alert('Đánh giá thành công!');
-                } catch (error) {
-                  console.error('Rating error:', error);
-                  const errorMsg = error.response?.data?.message || 'Đánh giá thất bại!';
-
-                  // Handle expired token
-                  if (errorMsg.includes('expired') || errorMsg.includes('jwt')) {
-                    localStorage.removeItem('accessToken');
-                    alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
-                    window.location.reload();
-                  } else {
-                    alert(errorMsg);
-                  }
-                }
-              }}
-              sx={{
-                py: 1.5,
-                borderRadius: 0,
-                bgcolor: COLORS.primary,
-                fontWeight: 600,
-                '&:hover': { bgcolor: '#023A7A' }
-              }}
-            >
-              Xác Nhận
-            </Button>
-          </Box>
-        </DialogContent>
-      </Dialog>
-
-      {/*TRAILER MODAL*/}
-      <Dialog
-        open={openTrailerModal}
-        onClose={() => setOpenTrailerModal(false)}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            overflow: 'hidden',
-            bgcolor: '#000'
-          }
-        }}
-      >
-        <DialogContent sx={{ p: 0, position: 'relative', aspectRatio: '16/9' }}>
-          {movie?.trailerUrl && (() => {
-            // Helper: Chuyển URL YouTube sang embed format
-            const getEmbedUrl = (url) => {
-              if (!url) return '';
-              // Đã là embed format
-              if (url.includes('/embed/')) return url;
-              // Format: youtu.be/VIDEO_ID
-              if (url.includes('youtu.be/')) {
-                const videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
-                return `https://www.youtube.com/embed/${videoId}`;
-              }
-              // Format: youtube.com/watch?v=VIDEO_ID
-              if (url.includes('watch?v=')) {
-                const videoId = url.split('watch?v=')[1]?.split(/[?&]/)[0];
-                return `https://www.youtube.com/embed/${videoId}`;
-              }
-              // Format: youtube.com/v/VIDEO_ID
-              if (url.includes('/v/')) {
-                const videoId = url.split('/v/')[1]?.split(/[?&]/)[0];
-                return `https://www.youtube.com/embed/${videoId}`;
-              }
-              return url;
-            };
-
-            return (
-              <iframe
-                width="1038px"
-                height="582px"
-                src={getEmbedUrl(movie.trailerUrl)}
-                title={`${movie.title} Trailer`}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+            {/* User Rating */}
+            <Box sx={{ mb: 3 }}>
+              <Rating
+                value={userRating}
+                onChange={(event, newValue) => setUserRating(newValue)}
+                size="large"
+                max={10}
+                icon={<StarIcon sx={{ fontSize: 32, color: COLORS.orange }} />}
+                emptyIcon={<StarBorderIcon sx={{ fontSize: 32, color: COLORS.textMuted }} />}
               />
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
-    </Box >
+            </Box>
+
+            {/* Action Buttons */}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => setOpenRatingModal(false)}
+                sx={{
+                  py: 1.5,
+                  borderRadius: 0,
+                  borderColor: COLORS.border,
+                  color: COLORS.text,
+                  fontWeight: 600,
+                  '&:hover': { borderColor: COLORS.primary, bgcolor: 'transparent' }
+                }}
+              >
+                Đóng
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={async () => {
+                  if (!userRating) {
+                    alert('Vui lòng chọn số sao để đánh giá!');
+                    return;
+                  }
+
+                  // Check if user is logged in
+                  const token = localStorage.getItem('accessToken');
+                  if (!token) {
+                    alert('Vui lòng đăng nhập để đánh giá!');
+                    return;
+                  }
+
+                  try {
+                    // Token is automatically added by interceptor
+                    const result = await rateMovieAPI(movie._id, userRating);
+                    // Update local movie state with new rating
+                    setMovie(prev => ({
+                      ...prev,
+                      rating: result.data.rating,
+                      ratingCount: result.data.ratingCount
+                    }));
+                    setOpenRatingModal(false);
+                    alert('Đánh giá thành công!');
+                  } catch (error) {
+                    console.error('Rating error:', error);
+                    const errorMsg = error.response?.data?.message || 'Đánh giá thất bại!';
+
+                    // Handle expired token
+                    if (errorMsg.includes('expired') || errorMsg.includes('jwt')) {
+                      localStorage.removeItem('accessToken');
+                      alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+                      window.location.reload();
+                    } else {
+                      alert(errorMsg);
+                    }
+                  }
+                }}
+                sx={{
+                  py: 1.5,
+                  borderRadius: 0,
+                  bgcolor: COLORS.primary,
+                  fontWeight: 600,
+                  '&:hover': { bgcolor: '#023A7A' }
+                }}
+              >
+                Xác Nhận
+              </Button>
+            </Box>
+          </DialogContent>
+        </Dialog>
+
+        {/*TRAILER MODAL*/}
+        <Dialog
+          open={openTrailerModal}
+          onClose={() => setOpenTrailerModal(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              overflow: 'hidden',
+              bgcolor: '#000'
+            }
+          }}
+        >
+          <DialogContent sx={{ p: 0, position: 'relative', aspectRatio: '16/9' }}>
+            {movie?.trailerUrl && (() => {
+              // Helper: Chuyển URL YouTube sang embed format
+              const getEmbedUrl = (url) => {
+                if (!url) return '';
+                // Đã là embed format
+                if (url.includes('/embed/')) return url;
+                // Format: youtu.be/VIDEO_ID
+                if (url.includes('youtu.be/')) {
+                  const videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+                  return `https://www.youtube.com/embed/${videoId}`;
+                }
+                // Format: youtube.com/watch?v=VIDEO_ID
+                if (url.includes('watch?v=')) {
+                  const videoId = url.split('watch?v=')[1]?.split(/[?&]/)[0];
+                  return `https://www.youtube.com/embed/${videoId}`;
+                }
+                // Format: youtube.com/v/VIDEO_ID
+                if (url.includes('/v/')) {
+                  const videoId = url.split('/v/')[1]?.split(/[?&]/)[0];
+                  return `https://www.youtube.com/embed/${videoId}`;
+                }
+                return url;
+              };
+
+              return (
+                <iframe
+                  width="1038px"
+                  height="582px"
+                  src={getEmbedUrl(movie.trailerUrl)}
+                  title={`${movie.title} Trailer`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                />
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
+      </Box>
+    </Box>
   );
 }
 

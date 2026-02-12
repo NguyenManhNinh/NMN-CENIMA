@@ -252,7 +252,6 @@ const MembershipPage = () => {
       backgroundImage: 'url(/src/assets/images/bg-header.jpg)',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
       py: 1
     }}>
       <Container maxWidth="lg">

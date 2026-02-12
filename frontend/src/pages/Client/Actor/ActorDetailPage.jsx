@@ -345,7 +345,7 @@ function ActorDetailPage() {
 
   //MAIN RENDE
   return (
-    <Box sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed', minHeight: '100vh', py: 1 }}>
+    <Box sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat', minHeight: '100vh', py: 1 }}>
 
       {/* NỘI DUNG CHÍNH */}
       <Container maxWidth="lg">

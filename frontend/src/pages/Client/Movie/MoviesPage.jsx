@@ -29,7 +29,6 @@ const styles = {
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
-    backgroundAttachment: 'fixed',
     minHeight: '80vh'
   },
   // Header inline: PHIM | Đang chiếu | Sắp chiếu

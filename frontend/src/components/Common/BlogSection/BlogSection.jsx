@@ -23,8 +23,7 @@ import { getActorsAPI, getDirectorsAPI } from '../../../apis/personApi';
 // STYLES
 const styles = {
   section: {
-    py: 5,
-    backgroundColor: '#fff'
+    py: 5
   },
   sectionHeader: {
     display: 'flex',
@@ -36,10 +35,10 @@ const styles = {
   sectionTitle: {
     fontWeight: 600,
     fontSize: { xs: '1.25rem', md: '1.5rem' },
-    color: '#1a3a5c',
+    color: '#EA3B92',
     textTransform: 'uppercase',
     pl: 2,
-    borderLeft: '4px solid #1a3a5c',
+    borderLeft: '4px solid #00405d',
     letterSpacing: 1
   },
   tabs: {
@@ -48,7 +47,7 @@ const styles = {
       fontWeight: 700,
       fontSize: '1rem',
       textTransform: 'none',
-      color: '#666',
+      color: '#858e8fff',
       minHeight: 'auto',
       py: 0.5,
       px: 2,
@@ -57,7 +56,7 @@ const styles = {
         outline: 'none'
       },
       '&.Mui-selected': {
-        color: '#1a3a5c'
+        color: '#EA3B92'
       },
       '&.Mui-focusVisible': {
         outline: 'none',
@@ -91,7 +90,7 @@ const styles = {
   featuredTitle: {
     fontWeight: 700,
     fontSize: '1.25rem',
-    color: '#333',
+    color: '#fff',
     mt: 2,
     lineHeight: 1.4
   },
@@ -123,7 +122,7 @@ const styles = {
   smallTitle: {
     fontWeight: 700,
     fontSize: '1rem',
-    color: '#333',
+    color: '#fff',
     lineHeight: 1.4,
     display: '-webkit-box',
     WebkitLineClamp: 2,
@@ -142,31 +141,31 @@ const styles = {
     alignItems: 'center',
     gap: 0.5,
     fontSize: '0.8rem',
-    color: '#666'
+    color: 'rgba(255,255,255,0.7)'
   },
   statIcon: {
     fontSize: '0.9rem'
   },
   // Like button
   likeButton: {
-    backgroundColor: '#e8f4ff',
-    color: '#1a3a5c',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    color: '#fff',
     fontSize: '0.75rem',
     fontWeight: 600,
     '&:hover': {
-      backgroundColor: '#d0e8ff'
+      backgroundColor: 'rgba(255,255,255,0.25)'
     }
   },
   // View more button
   viewMoreButton: {
-    border: '1px solid #1a3a5c',
-    color: '#1a3a5c',
+    border: '1px solid #FFFF33',
+    color: '#FFFF33',
     textTransform: 'none',
     fontWeight: 600,
     mt: 3,
     px: 4,
     '&:hover': {
-      backgroundColor: '#f5f5f5'
+      backgroundColor: 'rgba(255,255,255,0.1)'
     }
   }
 };

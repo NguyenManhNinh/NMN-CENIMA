@@ -14,8 +14,7 @@ import {
 // API
 import { getAllEventsAPI } from '../../../apis/cmsApi';
 
-// Background image
-import filmBackground from '../../../assets/images/background-uudai.png';
+
 
 // CONSTANTS
 const EVENTS_PER_PAGE = 4;
@@ -28,16 +27,12 @@ const SWIPE_THRESHOLD = 50; // Ngưỡng swipe tối thiểu (px)
 // STYLES
 const styles = {
   section: {
-    py: 5,
-    backgroundImage: `url(${filmBackground})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
+    py: 5
   },
   sectionTitle: {
     fontWeight: 700,
     fontSize: { xs: '1.25rem', md: '1.5rem' },
-    color: '#1a3a5c',
+    color: '#F3C246',
     textTransform: 'uppercase',
     letterSpacing: 1,
     textAlign: 'center'
@@ -52,14 +47,14 @@ const styles = {
     width: 10,
     height: 10,
     borderRadius: '50%',
-    backgroundColor: '#f0ececff',
+    backgroundColor: 'rgba(255,255,255,0.3)',
     cursor: 'pointer',
     transition: 'all 0.3s',
     border: 'none',
     padding: 0
   },
   dotActive: {
-    backgroundColor: '#090909ff',
+    backgroundColor: '#fff',
     transform: 'scale(1.2)'
   },
   gridContainer: {
@@ -89,7 +84,7 @@ const styles = {
   title: {
     fontWeight: 700,
     fontSize: '0.95rem',
-    color: 'hsla(63, 94%, 49%, 80%)',
+    color: '#fff',
     textTransform: 'uppercase',
     mt: 1.5,
     lineHeight: 1.4,
@@ -314,13 +309,13 @@ function PromotionSection() {
       <Container maxWidth="lg">
         {/* Header */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h5" component="h2" sx={{ ...styles.sectionTitle, color: '#1a1a2e' }}>
+          <Typography variant="h5" component="h2" sx={{ ...styles.sectionTitle, color: '#EA3B92' }}>
             ƯU ĐÃI
           </Typography>
           <Typography
             sx={{
               fontSize: '1.1rem',
-              color: '#1A1A2E',
+              color: 'rgba(255,255,255,0.85)',
               mt: 1,
               maxWidth: 700,
               mx: 'auto',
@@ -406,7 +401,7 @@ function PromotionSection() {
                     <Typography
                       sx={{
                         textAlign: 'center',
-                        color: '#1c1919ff',
+                        color: 'rgba(255,255,255,0.6)',
                         fontSize: '0.75rem',
                         mt: 1,
                         fontStyle: 'italic'

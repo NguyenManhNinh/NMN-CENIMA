@@ -52,7 +52,7 @@ const handleImageError = (e) => {
 const styles = {
   wrapper: {
     minHeight: '100vh',
-    background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed',
+    background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat',
     py: 1
   },
   pageTitle: {

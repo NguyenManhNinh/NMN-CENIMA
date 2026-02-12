@@ -350,7 +350,7 @@ function FilmDirectorDetailPage() {
   const age = calculateAge(director.birthDate);
 
   return (
-    <Box sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat fixed', minHeight: '100vh', py: 1 }}>
+    <Box sx={{ background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat', minHeight: '100vh', py: 1 }}>
       <Container maxWidth="lg">
         <Box sx={{ bgcolor: '#fff', borderRadius: 0, p: { xs: 2, md: 3 } }}>
           {/* Breadcrumbs */}

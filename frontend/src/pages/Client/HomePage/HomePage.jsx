@@ -24,8 +24,9 @@ import { getAllBannersAPI } from '../../../apis/cmsApi';
 // Mock data fallback
 import mockBanners from '../../../mocks/mockBanners';
 
-// Background image
+// Background images
 import filmBackground from '../../../assets/images/film-bg.png';
+import bgHeader from '../../../assets/images/bg-header.jpg';
 
 // STYLES
 const styles = {
@@ -35,8 +36,7 @@ const styles = {
     backgroundImage: `url(${filmBackground})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    backgroundAttachment: 'fixed'
+    backgroundRepeat: 'no-repeat'
   },
   // Header của section -
   sectionHeader: {
@@ -383,11 +383,19 @@ function HomePage() {
         </Container>
       </Box>
 
-      {/* PROMOTION SECTION - Tạm thời ẩn-Ưu đãi */}
-      <PromotionSection />
+      {/* PROMOTION + BLOG SECTIONS - Shared bg-header.jpg wrapper */}
+      <Box sx={{
+        backgroundImage: `url(${bgHeader})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}>
+        {/* PROMOTION SECTION - Ưu đãi */}
+        <PromotionSection />
 
-      {/* BLOG SECTION - Góc điện ảnh */}
-      <BlogSection />
+        {/* BLOG SECTION - Góc điện ảnh */}
+        <BlogSection />
+      </Box>
 
       {/* TRAILER MODAL */}
       <TrailerModal
