@@ -13,7 +13,9 @@ import {
 } from '@mui/material';
 import {
   ThumbUp as ThumbUpIcon,
-  Visibility as ViewIcon
+  Visibility as ViewIcon,
+  MovieOutlined as MovieIcon,
+  PersonOutlined as PersonIcon
 } from '@mui/icons-material';
 
 // APIs
@@ -78,7 +80,7 @@ const styles = {
     overflow: 'hidden',
     borderRadius: 1,
     aspectRatio: '16/9',
-    backgroundColor: '#e0e0e0'
+    backgroundColor: '#1c1c1c'
   },
   featuredImage: {
     width: '100%',
@@ -86,6 +88,16 @@ const styles = {
     objectFit: 'cover',
     objectPosition: 'center',
     transition: 'transform 0.3s'
+  },
+  imageFallback: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(145deg, #1c1c1c 0%, #2a2a2a 50%, #1c1c1c 100%)',
+    gap: 1
   },
   featuredTitle: {
     fontWeight: 700,
@@ -110,7 +122,7 @@ const styles = {
     overflow: 'hidden',
     borderRadius: 1,
     aspectRatio: '16/9',
-    backgroundColor: '#e0e0e0'
+    backgroundColor: '#1c1c1c'
   },
   smallImage: {
     width: '100%',
@@ -282,13 +294,13 @@ function BlogSection() {
 
     switch (activeTab) {
       case TAB_GENRES:
-        navigate(`/the-loai-phim/${slug}`);
+        navigate(`/phim/${slug}`);
         break;
       case TAB_ACTORS:
-        navigate(`/dien-vien/${slug}`);
+        navigate(`/dien-vien-chi-tiet/${slug}`);
         break;
       case TAB_DIRECTORS:
-        navigate(`/dao-dien/${slug}`);
+        navigate(`/dao-dien-chi-tiet/${slug}`);
         break;
       default:
         break;
@@ -308,16 +320,47 @@ function BlogSection() {
     }
   };
 
-  const getPlaceholderImage = () => {
+  const getFallbackIcon = () => {
     switch (activeTab) {
-      case TAB_GENRES:
-        return 'https://placehold.co/800x450/1a3a5c/ffffff?text=Genre';
       case TAB_ACTORS:
       case TAB_DIRECTORS:
-        return 'https://placehold.co/800x450/1a3a5c/ffffff?text=Person';
+        return PersonIcon;
       default:
-        return 'https://placehold.co/800x450/1a3a5c/ffffff?text=No+Image';
+        return MovieIcon;
     }
+  };
+
+  const getFallbackLabel = () => {
+    switch (activeTab) {
+      case TAB_GENRES:
+        return 'Chưa có ảnh thể loại';
+      case TAB_ACTORS:
+        return 'Chưa có ảnh diễn viên';
+      case TAB_DIRECTORS:
+        return 'Chưa có ảnh đạo diễn';
+      default:
+        return 'Chưa có ảnh';
+    }
+  };
+
+  // Fallback component khi ảnh lỗi hoặc không có
+  const ImageFallback = ({ size = 'large' }) => {
+    const Icon = getFallbackIcon();
+    return (
+      <Box sx={styles.imageFallback}>
+        <Icon sx={{ fontSize: size === 'large' ? '3rem' : '1.8rem', color: 'rgba(245, 166, 35, 0.5)' }} />
+        <Typography sx={{
+          color: 'rgba(255,255,255,0.4)',
+          fontSize: size === 'large' ? '0.75rem' : '0.55rem',
+          fontWeight: 500,
+          textTransform: 'uppercase',
+          letterSpacing: 1,
+          whiteSpace: 'nowrap'
+        }}>
+          {getFallbackLabel()}
+        </Typography>
+      </Box>
+    );
   };
 
   const featuredItem = items[0];
@@ -377,18 +420,27 @@ function BlogSection() {
                   onClick={() => handleItemClick(featuredItem)}
                 >
                   <Box sx={styles.featuredImageContainer}>
-                    <Box
-                      component="img"
-                      src={featuredItem.imageUrl || getPlaceholderImage()}
-                      alt={featuredItem.title}
-                      className="featured-image"
-                      sx={styles.featuredImage}
-                      draggable={false}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = getPlaceholderImage();
-                      }}
-                    />
+                    {featuredItem.imageUrl ? (
+                      <Box
+                        component="img"
+                        src={featuredItem.imageUrl}
+                        alt={featuredItem.title}
+                        className="featured-image"
+                        sx={styles.featuredImage}
+                        draggable={false}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.style.display = 'none';
+                          e.target.nextSibling && (e.target.nextSibling.style.display = 'flex');
+                        }}
+                      />
+                    ) : null}
+                    {!featuredItem.imageUrl && <ImageFallback size="large" />}
+                    {featuredItem.imageUrl && (
+                      <Box sx={{ ...styles.imageFallback, display: 'none' }}>
+                        <ImageFallback size="large" />
+                      </Box>
+                    )}
                   </Box>
 
                   <Typography sx={styles.featuredTitle}>
@@ -421,18 +473,27 @@ function BlogSection() {
                   onClick={() => handleItemClick(item)}
                 >
                   <Box sx={styles.smallImageContainer}>
-                    <Box
-                      component="img"
-                      src={item.imageUrl || getPlaceholderImage()}
-                      alt={item.title}
-                      className="small-image"
-                      sx={styles.smallImage}
-                      draggable={false}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = getPlaceholderImage();
-                      }}
-                    />
+                    {item.imageUrl ? (
+                      <Box
+                        component="img"
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="small-image"
+                        sx={styles.smallImage}
+                        draggable={false}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.style.display = 'none';
+                          e.target.nextSibling && (e.target.nextSibling.style.display = 'flex');
+                        }}
+                      />
+                    ) : null}
+                    {!item.imageUrl && <ImageFallback size="small" />}
+                    {item.imageUrl && (
+                      <Box sx={{ ...styles.imageFallback, display: 'none' }}>
+                        <ImageFallback size="small" />
+                      </Box>
+                    )}
                   </Box>
 
                   <Box sx={{ flex: 1 }}>

@@ -108,19 +108,18 @@ const styles = {
     alignItems: 'flex-start'
   },
 
-  // Avatar diễn viên
+  // Avatar diễn viên - tỉ lệ 2:3 (chuẩn CGV/Galaxy)
   actorThumb: {
-    width: { xs: 120, sm: 160, md: 300 },
-    aspectRatio: "16 / 9",
+    width: { xs: 120, sm: 160, md: 200 },
+    aspectRatio: '2 / 3',
+    objectFit: 'cover',
     cursor: "pointer",
     mr: { xs: 1, md: 2 },
     flexShrink: 0,
-    border: "none",
-    borderRadius: 0.7,
+    borderRadius: 1,
     overflow: "hidden",
-    objectFit: "cover",
     display: "block",
-    bgcolor: "#f7f7f9ff",
+    bgcolor: "#1c1c1c",
   },
 
 

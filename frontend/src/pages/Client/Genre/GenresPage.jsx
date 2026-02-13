@@ -128,24 +128,17 @@ const styles = {
     alignItems: 'flex-start'
   },
 
-  // Poster phim
+  // Poster phim - tỉ lệ 2:3 (chuẩn CGV/Galaxy)
   moviePoster: {
-    width: { xs: '140px', sm: '180px', md: '255px' },
-    height: { xs: '210px', sm: '270px', md: '155px' }, // Mobile: Portrait, Desktop: Landscape? Check user templates. Template looks portrait in mobile list usually, but code was 255x155 (Landscape).
-    // User Image 0 shows Landscape poster in the list.
-    // Let's stick to Landscape ratios but smaller if that's what desktop had, OR switch to Portrait if that matches the request.
-    // But current code had 255x155 (Landscape).
-    // Let's look at Image 0 again. It looks like Landscape posters.
-    // I will keep Landscape ratio but responsive.
-    width: { xs: '150px', sm: '200px', md: '255px' },
-    height: { xs: '90px', sm: '120px', md: '155px' },
+    width: { xs: '120px', sm: '160px', md: '200px' },
+    aspectRatio: '2 / 3',
     objectFit: 'cover',
-    flexShrink: 0,
     cursor: 'pointer',
-    boxShadow: 'none',
-    border: 'none',
-    borderRadius: 0,
-    marginRight: 2
+    mr: { xs: 1, md: 2 },
+    flexShrink: 0,
+    borderRadius: 1,
+    display: 'block',
+    bgcolor: '#1c1c1c',
   },
 
   // Nội dung phim (tiêu đề, mô tả, nút)
