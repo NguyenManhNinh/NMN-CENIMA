@@ -35,6 +35,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 // API - Vouchers
 import { getAvailableVouchersAPI, applyVoucherAPI } from '../../../apis/voucherApi';
+// API - Loyalty (Cinema Coin)
+import { getMyLoyaltyAPI } from '../../../apis/loyaltyApi';
 // API - Order
 import { createOrderAPI } from '../../../apis/orderApi';
 // Auth Context
@@ -153,6 +155,23 @@ const styles = {
     borderRadius: 1,
     border: '1px dashed #ffc107'
   },
+  // Section Cinema Coin
+  coinSection: {
+    mt: 2,
+    p: 2,
+    bgcolor: '#e3f2fd',
+    borderRadius: 1,
+    border: '1px dashed #1976d2'
+  },
+  coinApplied: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    bgcolor: '#e8f5e9',
+    p: 1.5,
+    borderRadius: 1,
+    mt: 1
+  },
   voucherApplied: {
     display: 'flex',
     alignItems: 'center',
@@ -259,6 +278,12 @@ function PaymentConfirmPage() {
   const [voucherDialogOpen, setVoucherDialogOpen] = useState(false); // Dialog chọn voucher
   const [availableVouchers, setAvailableVouchers] = useState([]); // Danh sách voucher từ API
   const [loadingVouchers, setLoadingVouchers] = useState(false);
+  // STATE CINEMA COIN
+  const [coinOpen, setCoinOpen] = useState(false);              // Mở/đóng section Cinema Coin
+  const [coinInput, setCoinInput] = useState('');               // Số điểm nhập
+  const [coinApplied, setCoinApplied] = useState(0);            // Điểm đã áp dụng
+  const [coinError, setCoinError] = useState('');               // Lỗi validate coin
+  const [userPoints, setUserPoints] = useState(0);              // Điểm hiện có của user
   // STATE THANH TOÁN
   const [paymentMethod, setPaymentMethod] = useState('vnpay');  // Phương thức thanh toán
   const [loading, setLoading] = useState(false);                // Đang xử lý thanh toán
@@ -272,20 +297,30 @@ function PaymentConfirmPage() {
    * Effect: Fetch danh sách voucher từ API
    */
   useEffect(() => {
-    const fetchVouchers = async () => {
+    const fetchData = async () => {
       setLoadingVouchers(true);
       try {
-        const response = await getAvailableVouchersAPI();
-        setAvailableVouchers(response.data?.vouchers || []);
-        console.log('[Voucher] Loaded vouchers:', response.data?.vouchers?.length);
+        // Fetch vouchers
+        const voucherRes = await getAvailableVouchersAPI();
+        setAvailableVouchers(voucherRes.data?.vouchers || []);
+        console.log('[Voucher] Loaded vouchers:', voucherRes.data?.vouchers?.length);
+
+        // Fetch Cinema Coin (user points)
+        try {
+          const loyaltyRes = await getMyLoyaltyAPI();
+          setUserPoints(loyaltyRes.data?.points || 0);
+          console.log('[CinemaCoin] User points:', loyaltyRes.data?.points);
+        } catch (loyaltyErr) {
+          console.error('[CinemaCoin] Error loading points:', loyaltyErr);
+        }
       } catch (error) {
         console.error('[Voucher] Error loading vouchers:', error);
       } finally {
         setLoadingVouchers(false);
-        setIsPageLoading(false); // Tắt loading sau khi fetch xong
+        setIsPageLoading(false);
       }
     };
-    fetchVouchers();
+    fetchData();
   }, []);
 
   /**
@@ -344,7 +379,8 @@ function PaymentConfirmPage() {
     }
   };
   const discount = calculateDiscount();
-  const grandTotal = (seatPrice + comboPrice) - discount;
+  const coinDiscount = coinApplied; // 1 điểm = 1 VND
+  const grandTotal = Math.max(0, (seatPrice + comboPrice) - discount - coinDiscount);
   // VOUCHER HANDLERS
   /**
    * Xử lý áp dụng voucher từ input nhập mã
@@ -413,6 +449,45 @@ function PaymentConfirmPage() {
   /**
    * Xử lý gỡ voucher đã áp dụng
    */
+  // CINEMA COIN HANDLERS
+  const MIN_COIN = 1000; // Tối thiểu 1,000 điểm
+
+  const handleApplyCoin = () => {
+    setCoinError('');
+    const points = parseInt(coinInput);
+
+    if (!points || isNaN(points) || points <= 0) {
+      setCoinError('Vui lòng nhập số điểm hợp lệ');
+      return;
+    }
+    if (points < MIN_COIN) {
+      setCoinError(`Tối thiểu ${MIN_COIN.toLocaleString()} điểm để sử dụng Cinema Coin`);
+      return;
+    }
+    if (points > userPoints) {
+      setCoinError(`Bạn chỉ có ${userPoints.toLocaleString()} điểm`);
+      return;
+    }
+
+    // Không giảm quá tổng đơn hàng (sau voucher)
+    const afterVoucher = (seatPrice + comboPrice) - discount;
+    if (points > afterVoucher) {
+      setCoinError(`Không thể dùng quá ${afterVoucher.toLocaleString()} điểm (tổng đơn hàng sau giảm giá)`);
+      return;
+    }
+
+    setCoinApplied(points);
+    setCoinInput('');
+    setCoinOpen(false);
+    console.log('[CinemaCoin] Applied:', points, 'points');
+  };
+
+  const handleRemoveCoin = () => {
+    console.log('[CinemaCoin] Removed:', coinApplied, 'points');
+    setCoinApplied(0);
+    setCoinError('');
+  };
+
   const handleRemoveVoucher = () => {
     console.log('[Voucher] Gỡ voucher:', appliedVoucher?.code);
     setAppliedVoucher(null);
@@ -470,6 +545,11 @@ function PaymentConfirmPage() {
       // Chỉ thêm voucherCode nếu có giá trị
       if (appliedVoucher?.code) {
         orderData.voucherCode = appliedVoucher.code;
+      }
+
+      // Thêm Cinema Coin nếu có
+      if (coinApplied > 0) {
+        orderData.usedPoints = coinApplied;
       }
 
       console.log('[Payment] Order data to send:', JSON.stringify(orderData, null, 2));
@@ -804,11 +884,105 @@ function PaymentConfirmPage() {
                     </Box>
                   )}
                 </Box>
+                {/* SECTION CINEMA COIN */}
+                <Box sx={styles.coinSection}>
+                  {/* Header - Toggle mở/đóng */}
+                  <Box
+                    onClick={() => setCoinOpen(!coinOpen)}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography sx={{ fontSize: 18 }}>🪙</Typography>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>
+                          Cinema Coin
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Bạn có {userPoints.toLocaleString()} điểm
+                        </Typography>
+                      </Box>
+                    </Box>
+                    {coinOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  </Box>
+                  {/* Form nhập điểm */}
+                  <Collapse in={coinOpen}>
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                        Tối thiểu 1,000 điểm • 1 điểm = 1 VND
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <TextField
+                          size="small"
+                          type="number"
+                          placeholder="Nhập số điểm"
+                          value={coinInput}
+                          onChange={(e) => setCoinInput(e.target.value)}
+                          sx={{
+                            flex: 1,
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': { borderColor: '#90caf9' },
+                              '&:hover fieldset': { borderColor: '#42a5f5' },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#1976d2',
+                                borderWidth: 1
+                              }
+                            }
+                          }}
+                          inputProps={{ min: 1000, step: 1 }}
+                        />
+                        <Button
+                          variant="contained"
+                          onClick={handleApplyCoin}
+                          disabled={userPoints < 1000}
+                          sx={{ bgcolor: '#1976d2', '&:hover': { bgcolor: '#1565c0' } }}
+                        >
+                          Áp dụng
+                        </Button>
+                      </Box>
+                      {coinError && (
+                        <Alert severity="error" sx={{ mt: 1, py: 0 }}>
+                          {coinError}
+                        </Alert>
+                      )}
+                    </Box>
+                  </Collapse>
+                  {/* Hiển thị coin đã áp dụng */}
+                  {coinApplied > 0 && (
+                    <Box sx={styles.coinApplied}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CheckCircleIcon sx={{ color: '#1976d2', fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="body2" fontWeight={600}>
+                            {coinApplied.toLocaleString()} điểm
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            -{formatPrice(coinDiscount)}đ
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <IconButton size="small" onClick={handleRemoveCoin}>
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  )}
+                </Box>
                 {/*Dòng giảm giá (chỉ hiện khi có voucher)*/}
                 {appliedVoucher && (
                   <Box sx={{ ...styles.paymentRow, color: '#4caf50', mt: 1 }}>
-                    <Typography variant="body2">Giảm giá</Typography>
+                    <Typography variant="body2">Giảm giá (voucher)</Typography>
                     <Typography variant="body2">-{formatPrice(discount)} Đ</Typography>
+                  </Box>
+                )}
+                {/*Dòng Cinema Coin (chỉ hiện khi đã áp dụng)*/}
+                {coinApplied > 0 && (
+                  <Box sx={{ ...styles.paymentRow, color: '#1976d2', mt: 0.5 }}>
+                    <Typography variant="body2">Cinema Coin</Typography>
+                    <Typography variant="body2">-{formatPrice(coinDiscount)} Đ</Typography>
                   </Box>
                 )}
                 {/*TỔNG THANH TOÁN*/}

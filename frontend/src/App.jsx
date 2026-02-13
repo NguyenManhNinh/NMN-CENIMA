@@ -28,6 +28,7 @@ import { BookingFallbackPage } from './pages/Client/BookingFallback';
 import { FeaturedPage, FeaturedDetailPage } from './pages/Client/Featured';
 import TicketPricingPage from './pages/Client/TicketPricing/TicketPricingPage';
 import MembershipPage from './pages/Client/Membership/MembershipPage';
+import AccountPage from './pages/Client/Account/AccountPage';
 
 function App() {
   return (
@@ -100,6 +101,9 @@ function App() {
 
             {/* Thành viên */}
             <Route path="thanh-vien" element={<MembershipPage />} />
+
+            {/* Tài khoản */}
+            <Route path="tai-khoan" element={<AccountPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

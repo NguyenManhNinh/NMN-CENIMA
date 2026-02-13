@@ -39,7 +39,9 @@ import {
   ConfirmationNumber as TicketIcon,
   PlayCircleOutline as TrailerIcon,
   Phone as PhoneIcon,
-  ConfirmationNumberTwoTone as ConfirmationNumberTwoToneIcon
+  ConfirmationNumberTwoTone as ConfirmationNumberTwoToneIcon,
+  Star as StarIcon,
+  Theaters as TheatersIcon
 } from '@mui/icons-material';
 
 // Logo
@@ -1074,15 +1076,15 @@ function Header() {
       anchorEl={accountMenuAnchor}
       open={Boolean(accountMenuAnchor)}
       onClose={handleAccountMenuClose}
-      PaperProps={{ sx: { mt: 1, minWidth: 180 } }}
+      PaperProps={{ sx: { mt: 1, minWidth: 220 } }}
     >
       <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/tai-khoan'); }}>
         <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
-        Tài khoản
+        Thông tin tài khoản
       </MenuItem>
-      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/lich-su'); }}>
-        <ListItemIcon><HistoryIcon fontSize="small" /></ListItemIcon>
-        Lịch sử
+      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/lich-su-mua-ve'); }}>
+        <ListItemIcon><TicketIcon fontSize="small" /></ListItemIcon>
+        Lịch sử mua vé
       </MenuItem>
       <Divider />
       <MenuItem onClick={handleLogout}>
