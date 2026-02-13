@@ -107,7 +107,7 @@ const promotionSchema = new mongoose.Schema({
   //RÀNG BUỘC
   allowedUserRanks: [{
     type: String,
-    enum: ['MEMBER', 'VIP', 'VVIP']
+    enum: ['MEMBER', 'VIP', 'DIAMOND']
   }],
 
   //THỐNG KÊ

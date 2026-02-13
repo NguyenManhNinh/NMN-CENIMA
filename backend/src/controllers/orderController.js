@@ -5,10 +5,10 @@ const Showtime = require('../models/Showtime');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const paymentController = require('./paymentController');
-const { VIP_SEAT_SURCHARGE } = require('../config/constants');
+const { VIP_SEAT_SURCHARGE, MIN_POINTS_PER_ORDER, POINT_VALUE_VND } = require('../config/constants');
 
 exports.createOrder = catchAsync(async (req, res, next) => {
-  const { showtimeId, seats, combos, voucherCode } = req.body; // seats: ['A1', 'B2']
+  const { showtimeId, seats, combos, voucherCode, usedPoints: reqUsedPoints } = req.body;
   const userId = req.user.id;
 
   console.log('[Order] createOrder called:', { userId, showtimeId, seats: seats?.length });
@@ -250,6 +250,47 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 
   totalAmount -= discount;
 
+  // CINEMA COIN LOGIC - Dùng điểm trừ tiền (1 điểm = 1 VND)
+  let usedPoints = 0;
+  let pointDiscount = 0;
+
+  if (reqUsedPoints && reqUsedPoints > 0) {
+    const User = require('../models/User');
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(new AppError('Không tìm thấy thông tin người dùng!', 404));
+    }
+
+    usedPoints = Math.floor(reqUsedPoints); // Làm tròn xuống
+
+    // Validate: Tối thiểu 1,000 điểm
+    if (usedPoints < MIN_POINTS_PER_ORDER) {
+      return next(new AppError(`Tối thiểu ${MIN_POINTS_PER_ORDER.toLocaleString()} điểm để sử dụng Cinema Coin!`, 400));
+    }
+
+    // Validate: User có đủ điểm không
+    if (usedPoints > user.points) {
+      return next(new AppError(`Bạn chỉ có ${user.points.toLocaleString()} điểm! Không đủ để sử dụng ${usedPoints.toLocaleString()} điểm.`, 400));
+    }
+
+    // Tính số tiền giảm (1 điểm = 1 VND)
+    pointDiscount = usedPoints * POINT_VALUE_VND;
+
+    // Không giảm quá tổng đơn hàng còn lại
+    if (pointDiscount > totalAmount) {
+      pointDiscount = totalAmount;
+      usedPoints = Math.floor(totalAmount / POINT_VALUE_VND);
+    }
+
+    // Trừ điểm user ngay (sẽ hoàn lại nếu payment fail)
+    user.points -= usedPoints;
+    await user.save();
+    console.log(`[CinemaCoin] User ${user.email} used ${usedPoints} points (-${pointDiscount} VND)`);
+
+    totalAmount -= pointDiscount;
+  }
+
   // P0-5 Fix: Atomic consume SeatHolds để tránh double order cùng ghế
   const holdIds = holds.map(h => h._id);
   const consumeResult = await SeatHold.deleteMany({
@@ -279,6 +320,8 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 
     subTotal,
     discount,
+    usedPoints,
+    pointDiscount,
     totalAmount,
 
     // ✅ NEW: voucher chưa consume

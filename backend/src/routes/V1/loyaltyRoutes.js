@@ -33,7 +33,7 @@ router.use(authMiddleware.protect);
  *                   type: integer
  *                 rank:
  *                   type: string
- *                   enum: [MEMBER, VIP, VVIP]
+ *                   enum: [MEMBER, VIP, DIAMOND]
  *                 nextRankPoints:
  *                   type: integer
  */

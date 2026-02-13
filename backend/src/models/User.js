@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema(
     },
     rank: {
       type: String,
-      enum: ['MEMBER', 'VIP', 'VVIP'],
+      enum: ['MEMBER', 'VIP', 'DIAMOND'],
       default: 'MEMBER'
     },
     // -------------------------

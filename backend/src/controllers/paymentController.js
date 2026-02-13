@@ -11,7 +11,9 @@ const catchAsync = require('../utils/catchAsync');
 const {
   POINTS_PER_VND,
   VIP_THRESHOLD,
-  VVIP_THRESHOLD
+  DIAMOND_THRESHOLD,
+  MAX_DAILY_POINTS,
+  FIRST_TRANSACTION_BONUS
 } = require('../config/constants');
 
 /**
@@ -306,21 +308,48 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
         { upsert: true, new: true }
       );
 
-      // LOYALTY LOGIC
+      // LOYALTY LOGIC - NMN Cinema Membership (with daily cap)
       try {
         const User = require('../models/User');
         const user = await User.findById(order.userId);
         if (user) {
-          // Tính điểm thưởng dựa trên số tiền thanh toán
-          const pointsEarned = Math.floor(amount / POINTS_PER_VND);
-          user.points += pointsEarned;
+          let pointsEarned = Math.floor(amount / POINTS_PER_VND);
 
-          // Rank Upgrade Logic
-          if (user.points >= VVIP_THRESHOLD) user.rank = 'VVIP';
-          else if (user.points >= VIP_THRESHOLD) user.rank = 'VIP';
-          else user.rank = 'MEMBER';
+          // Bonus 100 điểm cho giao dịch đầu tiên
+          const isFirstTransaction = await Order.countDocuments({
+            userId: order.userId,
+            status: 'PAID'
+          }) === 1;
+          if (isFirstTransaction) {
+            pointsEarned += FIRST_TRANSACTION_BONUS;
+            console.log(`[Loyalty] First transaction bonus: +${FIRST_TRANSACTION_BONUS} points for ${user.email}`);
+          }
 
-          await user.save();
+          // Giới hạn điểm tối đa/ngày (chống lạm dụng)
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+          const todayOrders = await Order.find({
+            userId: order.userId,
+            status: 'PAID',
+            paidAt: { $gte: todayStart }
+          }).select('totalAmount');
+          const pointsEarnedToday = todayOrders.reduce(
+            (sum, o) => sum + Math.floor(o.totalAmount / POINTS_PER_VND), 0
+          );
+          const remainingDaily = Math.max(0, MAX_DAILY_POINTS - pointsEarnedToday);
+          pointsEarned = Math.min(pointsEarned, remainingDaily);
+
+          if (pointsEarned > 0) {
+            user.points += pointsEarned;
+
+            // Rank Upgrade (NMN Cinema: MEMBER → VIP → DIAMOND)
+            if (user.points >= DIAMOND_THRESHOLD) user.rank = 'DIAMOND';
+            else if (user.points >= VIP_THRESHOLD) user.rank = 'VIP';
+            else user.rank = 'MEMBER';
+
+            await user.save();
+            console.log(`[Loyalty] User ${user.email} earned ${pointsEarned} points (daily: ${pointsEarnedToday + pointsEarned}/${MAX_DAILY_POINTS})`);
+          }
         }
       } catch (err) {
         console.error('Loyalty Error:', err);
@@ -329,13 +358,28 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
       return res.status(200).json({ RspCode: '00', Message: 'Success' });
     } else {
       // FAILED: Dùng CAS để tránh set FAILED khi đã PAID
-      await Order.findOneAndUpdate(
+      const failedOrder = await Order.findOneAndUpdate(
         {
           orderNo: originalOrderNo,
           status: { $in: ['PENDING', 'PROCESSING'] }
         },
-        { $set: { status: 'FAILED' } }
+        { $set: { status: 'FAILED' } },
+        { new: true }
       );
+
+      // CINEMA COIN REFUND - Hoàn lại điểm cho user khi payment thất bại
+      if (failedOrder && failedOrder.usedPoints > 0) {
+        try {
+          const User = require('../models/User');
+          await User.findByIdAndUpdate(failedOrder.userId, {
+            $inc: { points: failedOrder.usedPoints }
+          });
+          console.log(`[CinemaCoin] Refunded ${failedOrder.usedPoints} points for failed order ${originalOrderNo}`);
+        } catch (refundErr) {
+          console.error('[CinemaCoin] Refund error:', refundErr);
+        }
+      }
+
       // P0-3 Fix: Upsert
       await Payment.findOneAndUpdate(
         { txnRef: originalOrderNo },
@@ -461,21 +505,48 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
           { upsert: true, new: true }
         );
 
-        // LOYALTY LOGIC - Cộng điểm thưởng (non-blocking)
+        // LOYALTY LOGIC - NMN Cinema Membership (with daily cap)
         try {
           const User = require('../models/User');
           const user = await User.findById(order.userId);
           if (user) {
-            const pointsEarned = Math.floor(amount / POINTS_PER_VND);
-            user.points += pointsEarned;
+            let pointsEarned = Math.floor(amount / POINTS_PER_VND);
 
-            // Rank Upgrade
-            if (user.points >= VVIP_THRESHOLD) user.rank = 'VVIP';
-            else if (user.points >= VIP_THRESHOLD) user.rank = 'VIP';
-            else user.rank = 'MEMBER';
+            // Bonus 100 điểm cho giao dịch đầu tiên
+            const isFirstTransaction = await Order.countDocuments({
+              userId: order.userId,
+              status: 'PAID'
+            }) === 1;
+            if (isFirstTransaction) {
+              pointsEarned += FIRST_TRANSACTION_BONUS;
+              console.log(`[Loyalty] First transaction bonus: +${FIRST_TRANSACTION_BONUS} points for ${user.email}`);
+            }
 
-            await user.save();
-            console.log(`[Loyalty] User ${user.email} earned ${pointsEarned} points`);
+            // Giới hạn điểm tối đa/ngày (chống lạm dụng)
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            const todayOrders = await Order.find({
+              userId: order.userId,
+              status: 'PAID',
+              paidAt: { $gte: todayStart }
+            }).select('totalAmount');
+            const pointsEarnedToday = todayOrders.reduce(
+              (sum, o) => sum + Math.floor(o.totalAmount / POINTS_PER_VND), 0
+            );
+            const remainingDaily = Math.max(0, MAX_DAILY_POINTS - pointsEarnedToday);
+            pointsEarned = Math.min(pointsEarned, remainingDaily);
+
+            if (pointsEarned > 0) {
+              user.points += pointsEarned;
+
+              // Rank Upgrade (NMN Cinema: MEMBER → VIP → DIAMOND)
+              if (user.points >= DIAMOND_THRESHOLD) user.rank = 'DIAMOND';
+              else if (user.points >= VIP_THRESHOLD) user.rank = 'VIP';
+              else user.rank = 'MEMBER';
+
+              await user.save();
+              console.log(`[Loyalty] User ${user.email} earned ${pointsEarned} points (daily: ${pointsEarnedToday + pointsEarned}/${MAX_DAILY_POINTS})`);
+            }
           }
         } catch (loyaltyErr) {
           console.error('[Loyalty] Error:', loyaltyErr);

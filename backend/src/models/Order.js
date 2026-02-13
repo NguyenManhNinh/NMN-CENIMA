@@ -61,6 +61,15 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // Cinema Coin - Dùng điểm trừ tiền
+  usedPoints: {
+    type: Number,
+    default: 0
+  },
+  pointDiscount: {
+    type: Number,
+    default: 0 // = usedPoints * POINT_VALUE_VND
+  },
   // idempotent consume voucher
   voucherConsumed: {
     type: Boolean,

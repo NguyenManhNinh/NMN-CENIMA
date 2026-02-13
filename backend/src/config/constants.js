@@ -14,10 +14,15 @@ module.exports = {
   // === ROOM ===
   DEFAULT_SEATS_PER_ROOM: 50, // Số ghế mặc định/phòng (dùng cho tính occupancy)
 
-  // === LOYALTY ===
-  POINTS_PER_VND: 1000, // Số VND để đổi 1 điểm (1,000 VND = 1 Point)
-  VIP_THRESHOLD: 1000,   // Điểm tối thiểu lên VIP
-  VVIP_THRESHOLD: 5000,  // Điểm tối thiểu lên VVIP
+  // === LOYALTY (NMN Cinema Membership Program) ===
+  POINTS_PER_VND: 1000,           // 1,000 VND = 1 điểm
+  VIP_THRESHOLD: 3500,            // 3,500 điểm để lên NMN VIP
+  DIAMOND_THRESHOLD: 8000,        // 8,000 điểm để lên NMN Diamond
+  FIRST_TRANSACTION_BONUS: 100,   // Tặng 100 điểm cho giao dịch đầu tiên
+  MAX_DAILY_POINTS: 50,           // Giới hạn tối đa 50 điểm/ngày (chống lạm dụng)
+  MIN_COIN_REDEEM: 450,           // Tối thiểu 450 điểm để đổi thưởng (1 nước Aquafina)
+  MIN_POINTS_PER_ORDER: 1000,     // Tối thiểu 1,000 điểm để dùng Cinema Coin thanh toán
+  POINT_VALUE_VND: 1,             // 1 điểm = 1 VND giảm giá
 
   // === OTP ===
   OTP_EXPIRY_MINUTES: 5, // Thời gian hết hạn OTP (phút)

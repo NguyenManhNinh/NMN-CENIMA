@@ -58,14 +58,14 @@ const seedMembershipInfo = async () => {
       <td>Tích 1 điểm / 1.000đ chi tiêu</td>
     </tr>
     <tr style="background-color: #FFF8E1;">
-      <td><strong>VIP</strong><br>(từ 1.000 điểm)</td>
-      <td>Tích lũy ≥ 1.000 điểm</td>
-      <td>Giảm 5% giá vé, quà sinh nhật, ưu đãi sự kiện</td>
+      <td><strong>VIP</strong><br>(từ 3.500 điểm)</td>
+      <td>Tích lũy ≥ 3.500 điểm</td>
+      <td>Cộng thêm 3% bắp nước + 7% vé, quà lên hạng: 1 combo + 3 vé 2D</td>
     </tr>
     <tr style="background-color: #FCE4EC;">
-      <td><strong>VVIP</strong><br>(từ 5.000 điểm)</td>
-      <td>Tích lũy ≥ 5.000 điểm</td>
-      <td>Giảm 10% giá vé, suất chiếu sớm, quà sinh nhật đặc biệt, ưu tiên ghế VIP</td>
+      <td><strong>Diamond</strong><br>(từ 8.000 điểm)</td>
+      <td>Tích lũy ≥ 8.000 điểm</td>
+      <td>Cộng thêm 5% bắp nước + 10% vé, quà lên hạng: 2 combo + 5 vé 2D</td>
     </tr>
   </tbody>
 </table>
@@ -83,7 +83,7 @@ const seedMembershipInfo = async () => {
   <li>Điểm được cộng <strong>tự động</strong> sau khi thanh toán thành công (qua VNPay hoặc tại quầy)</li>
   <li>Điểm chỉ áp dụng cho giao dịch <strong>mua vé xem phim</strong> và <strong>combo đồ ăn/nước uống</strong></li>
   <li>Điểm <strong>không áp dụng</strong> cho: phí tiện ích, phụ thu 3D/IMAX đã giảm giá</li>
-  <li>Điểm tích lũy <strong>không có thời hạn</strong> (không bị reset hàng năm)</li>
+  <li>Điểm tích lũy sẽ được <strong>reset vào 23h59 ngày 31/12</strong> hàng năm</li>
 </ul>
 
 <h3>Ví dụ tính điểm</h3>
@@ -111,11 +111,13 @@ const seedMembershipInfo = async () => {
           content: `
 <h3>Ưu đãi sinh nhật dành cho thành viên</h3>
 <ul>
-  <li>Thành viên <strong>VIP</strong>: Tặng <strong>1 vé xem phim 2D miễn phí</strong> trong tháng sinh nhật</li>
-  <li>Thành viên <strong>VVIP</strong>: Tặng <strong>1 combo (vé + bắp nước)</strong> trong tháng sinh nhật</li>
-  <li>Ưu đãi sinh nhật được kích hoạt <strong>tự động</strong> vào ngày 1 của tháng sinh nhật</li>
-  <li>Quà sinh nhật có giá trị sử dụng trong <strong>30 ngày</strong> kể từ ngày kích hoạt</li>
-  <li>Mỗi thành viên chỉ nhận <strong>1 lần/năm</strong>, không cộng dồn</li>
+  <li>Thành viên <strong>Member</strong>: Tặng <strong>1 combo (1 nước ngọt + 1 bắp ngọt)</strong></li>
+  <li>Thành viên <strong>VIP</strong>: Tặng <strong>1 combo (2 nước ngọt + 1 bắp ngọt) + 1 vé 2D</strong></li>
+  <li>Thành viên <strong>Diamond</strong>: Tặng <strong>1 combo (2 nước ngọt + 1 bắp ngọt) + 2 vé 2D</strong></li>
+  <li>Thời gian nhận quà: <strong>trong vòng 10 ngày</strong> kể từ ngày sinh nhật</li>
+  <li>Chỉ những thành viên có <strong>ít nhất 1 giao dịch trong năm</strong> mới được nhận quà</li>
+  <li>Quà sinh nhật có giá trị sử dụng <strong>1 tháng</strong> kể từ ngày sinh nhật</li>
+  <li>Phần quà <strong>không quy đổi thành tiền mặt</strong></li>
 </ul>
 
 <h3>Cách nhận quà sinh nhật</h3>
@@ -141,11 +143,14 @@ const seedMembershipInfo = async () => {
     </tr>
   </thead>
   <tbody>
-    <tr><td>500 điểm</td><td>1 nước ngọt size M</td></tr>
-    <tr><td>700 điểm</td><td>1 bắp rang bơ size L</td></tr>
-    <tr><td>1.000 điểm</td><td>1 combo bắp + nước</td></tr>
-    <tr><td>1.200 điểm</td><td>1 vé xem phim 2D</td></tr>
-    <tr><td>1.500 điểm</td><td>1 vé xem phim 3D</td></tr>
+    <tr><td>450 điểm</td><td>1 nước Aquafina</td></tr>
+    <tr><td>500 điểm</td><td>1 nước ngọt</td></tr>
+    <tr><td>550 điểm</td><td>1 nước ngọt lớn</td></tr>
+    <tr><td>700 điểm</td><td>1 bắp ngọt</td></tr>
+    <tr><td>800 điểm</td><td>1 bắp phô mai / caramel</td></tr>
+    <tr><td>1.100 điểm</td><td>1 nước ngọt + 1 bắp ngọt</td></tr>
+    <tr><td>1.000 điểm</td><td>1 vé 2D</td></tr>
+    <tr><td>1.200 điểm</td><td>1 vé 3D</td></tr>
   </tbody>
 </table>
 

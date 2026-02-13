@@ -110,14 +110,14 @@ async function seedPromotions() {
       },
       {
         title: 'Ưu đãi thành viên VIP - Mua 1 tặng 1',
-        excerpt: 'Dành riêng cho thành viên VIP và VVIP - Mua 1 vé được tặng 1 vé miễn phí',
+        excerpt: 'Dành riêng cho thành viên VIP và Diamond - Mua 1 vé được tặng 1 vé miễn phí',
         content: `
           <h2>Đặc quyền VIP - Mua 1 Tặng 1!</h2>
-          <p>NMN Cinema tri ân khách hàng thân thiết với ưu đãi <strong>Mua 1 Tặng 1</strong> dành riêng cho thành viên VIP và VVIP.</p>
+          <p>NMN Cinema tri ân khách hàng thân thiết với ưu đãi <strong>Mua 1 Tặng 1</strong> dành riêng cho thành viên VIP và Diamond.</p>
 
           <h3>Điều kiện áp dụng:</h3>
           <ul>
-            <li>Chỉ áp dụng cho thành viên VIP/VVIP</li>
+            <li>Chỉ áp dụng cho thành viên VIP/Diamond</li>
             <li>Vé tặng có giá trị bằng hoặc thấp hơn vé mua</li>
             <li>Áp dụng từ thứ 2 đến thứ 5 (trừ lễ tết)</li>
             <li>Mỗi thành viên sử dụng tối đa 2 lần/tháng</li>
@@ -133,7 +133,7 @@ async function seedPromotions() {
         startAt: new Date(),
         endAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         applyMode: 'OFFLINE_ONLY',
-        allowedUserRanks: ['VIP', 'VVIP'],
+        allowedUserRanks: ['VIP', 'DIAMOND'],
         metaTitle: 'VIP Mua 1 Tặng 1 - NMN Cinema',
         metaDescription: 'Đặc quyền thành viên VIP tại NMN Cinema - Mua 1 vé tặng 1 vé miễn phí'
       }

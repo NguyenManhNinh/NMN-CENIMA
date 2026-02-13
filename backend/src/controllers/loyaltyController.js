@@ -1,17 +1,23 @@
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
+const {
+  POINTS_PER_VND,
+  VIP_THRESHOLD,
+  DIAMOND_THRESHOLD,
+  FIRST_TRANSACTION_BONUS
+} = require('../config/constants');
 
 /**
- * Lấy thông tin điểm và hạng thành viên
+ * Lấy thông tin điểm và hạng thành viên NMN Cinema
  */
 exports.getMyLoyalty = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('points rank name email');
 
-  // Tính điểm cần để lên hạng tiếp theo
+  // Ngưỡng hạng thành viên NMN Cinema
   const rankThresholds = {
-    MEMBER: { min: 0, max: 999, next: 'VIP', pointsToNext: 1000 },
-    VIP: { min: 1000, max: 4999, next: 'VVIP', pointsToNext: 5000 },
-    VVIP: { min: 5000, max: Infinity, next: null, pointsToNext: null }
+    MEMBER: { min: 0, max: VIP_THRESHOLD - 1, next: 'VIP', pointsToNext: VIP_THRESHOLD },
+    VIP: { min: VIP_THRESHOLD, max: DIAMOND_THRESHOLD - 1, next: 'DIAMOND', pointsToNext: DIAMOND_THRESHOLD },
+    DIAMOND: { min: DIAMOND_THRESHOLD, max: Infinity, next: null, pointsToNext: null }
   };
 
   const currentRankInfo = rankThresholds[user.rank] || rankThresholds.MEMBER;
@@ -37,8 +43,6 @@ exports.getMyLoyalty = catchAsync(async (req, res, next) => {
  * Lấy lịch sử tích/tiêu điểm
  */
 exports.getPointsHistory = catchAsync(async (req, res, next) => {
-  // TODO: Cần tạo PointsTransaction model nếu muốn lưu chi tiết
-  // Hiện tại trả về từ Orders đã PAID
   const Order = require('../models/Order');
 
   const orders = await Order.find({
@@ -51,7 +55,7 @@ exports.getPointsHistory = catchAsync(async (req, res, next) => {
 
   const history = orders.map(order => ({
     type: 'EARN',
-    points: Math.floor(order.totalAmount / 10000), // 10,000 VND = 1 điểm
+    points: Math.floor(order.totalAmount / POINTS_PER_VND),
     description: `Đơn hàng ${order.orderNo}`,
     date: order.createdAt
   }));
@@ -64,27 +68,27 @@ exports.getPointsHistory = catchAsync(async (req, res, next) => {
 });
 
 /**
- * Helper: Lấy quyền lợi theo hạng
+ * Helper: Quyền lợi thành viên NMN Cinema
  */
 function getRankBenefits(rank) {
   const benefits = {
     MEMBER: [
-      'Tích 1 điểm cho mỗi 10,000 VND',
-      'Nhận thông báo khuyến mãi'
+      'Tích 1 điểm cho mỗi 1,000 VND',
+      'Cộng thêm 3% bắp nước + 5% vé xem phim',
+      'Tặng 100 điểm khi hoàn tất giao dịch đầu tiên',
+      'Quà sinh nhật: 1 combo (1 nước ngọt + 1 bắp ngọt)'
     ],
     VIP: [
-      'Tích 1.5 điểm cho mỗi 10,000 VND',
-      'Giảm 5% giá vé thứ 2 trở đi',
-      'Ưu tiên chọn ghế VIP',
-      'Quà sinh nhật đặc biệt'
+      'Tích 1 điểm cho mỗi 1,000 VND',
+      'Cộng thêm 3% bắp nước + 7% vé xem phim',
+      'Quà lên hạng: 1 combo + 3 vé xem phim 2D',
+      'Quà sinh nhật: 1 combo (2 nước ngọt + 1 bắp ngọt) + 1 vé 2D'
     ],
-    VVIP: [
-      'Tích 2 điểm cho mỗi 10,000 VND',
-      'Giảm 10% tất cả đơn hàng',
-      'Miễn phí nâng cấp ghế VIP',
-      'Vé xem phim miễn phí mỗi tháng',
-      'Combo bắp nước miễn phí',
-      'Ưu tiên mua vé suất chiếu sớm'
+    DIAMOND: [
+      'Tích 1 điểm cho mỗi 1,000 VND',
+      'Cộng thêm 5% bắp nước + 10% vé xem phim',
+      'Quà lên hạng: 2 combo + 5 vé xem phim 2D',
+      'Quà sinh nhật: 1 combo (2 nước ngọt + 1 bắp ngọt) + 2 vé 2D'
     ]
   };
   return benefits[rank] || benefits.MEMBER;
