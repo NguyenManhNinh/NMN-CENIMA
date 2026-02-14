@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Container, Typography, Skeleton
 } from '@mui/material';
@@ -6,11 +7,33 @@ import {
   Star as StarIcon,
   EmojiEvents as TrophyIcon,
   WorkspacePremium as PremiumIcon,
-  MonetizationOn as CoinIcon
+  MonetizationOn as CoinIcon,
+  ConfirmationNumberOutlined as TicketIcon,
+  StarsOutlined as PointsIcon,
+  MovieOutlined as MovieIcon,
+  AssignmentOutlined as RequestIcon,
+  PersonOutlined as PersonIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getMyLoyaltyAPI } from '../../../apis/loyaltyApi';
 import JsBarcode from 'jsbarcode';
+import TicketHistory from './TicketHistory';
+import CancelHistory from './CancelHistory';
+
+// Tab configuration
+const TABS = [
+  { key: 'tickets', label: 'Lịch sử mua vé', icon: TicketIcon },
+  { key: 'points', label: 'Lịch sử tích điểm / VIP', icon: PointsIcon },
+  { key: 'watched', label: 'Phim đã xem', icon: MovieIcon },
+  { key: 'requests', label: 'Lịch sử yêu cầu của bạn', icon: RequestIcon },
+  { key: 'profile', label: 'Thông tin tài khoản', icon: PersonIcon }
+];
+
+// Sub-tabs cho "Lịch sử mua vé"
+const TICKET_SUB_TABS = [
+  { key: 'lich-su-mua-ve', label: 'Lịch sử mua vé' },
+  { key: 'lich-su-huy', label: 'Lịch sử hủy' }
+];
 
 // ==================== DESIGN TOKENS ====================
 const COLORS = {
@@ -264,8 +287,11 @@ function RankBadge({ rank }) {
 // ==================== MAIN COMPONENT ====================
 export default function AccountPage() {
   const { user } = useAuth();
+  const { slug } = useParams();
+  const navigate = useNavigate();
   const [loyaltyData, setLoyaltyData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(null);
 
   useEffect(() => {
     const fetchLoyalty = async () => {
@@ -368,7 +394,7 @@ export default function AccountPage() {
 
                 {/* Note */}
                 <Typography sx={styles.noteText}>
-                  Áp dụng thanh toán bằng Cinema Coin với số điểm tối thiểu là 450 điểm.
+                  Áp dụng thanh toán bằng Cinema Coin với số điểm tối thiểu là 1,000 điểm.
                 </Typography>
               </Box>{/* end wrapper inline-block */}
             </Box>{/* end leftCol */}
@@ -412,23 +438,100 @@ export default function AccountPage() {
                     </Box>
                   )}
                 </Box>
-                {loyaltyData?.nextRank && (
-                  <Box sx={styles.infoRow}>
-                    <Typography sx={styles.infoLabel}>
-                      Hạng tiếp theo ({loyaltyData.nextRank})
-                    </Typography>
-                    <Typography sx={{
-                      ...styles.infoValue,
-                      fontSize: '0.85rem'
-                    }}>
-                      Cần thêm {loyaltyData.pointsToNextRank?.toLocaleString('vi-VN')} điểm
-                    </Typography>
-                  </Box>
-                )}
               </Box>
             </Box>
           </Box>{/* end cardBody */}
         </Box>{/* end mainCard */}
+
+        {/* TAB NAVIGATION */}
+        <Box sx={{
+          mt: 2,
+          bgcolor: '#efebdb',
+          borderRadius: 0,
+          overflow: 'hidden'
+        }}>
+          {/* Main tabs */}
+          <Box sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 0
+          }}>
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.key;
+              const TabIcon = tab.icon;
+              return (
+                <Box
+                  key={tab.key}
+                  onClick={() => setActiveTab(isActive ? null : tab.key)}
+                  sx={{
+                    flex: { xs: '1 1 50%', sm: '1 1 auto' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.8,
+                    px: 2,
+                    py: 1.5,
+                    cursor: 'pointer',
+                    bgcolor: isActive ? '#ea3b92' : 'transparent',
+                    transition: 'all 0.05s',
+                    '&:last-of-type': { borderRight: 'none' }
+                  }}
+                >
+                  <TabIcon className="tab-icon" sx={{ fontSize: 18, color: isActive ? '#fff' : 'rgba(0,0,0,0.45)', transition: 'color 0.05s' }} />
+                  <Typography className="tab-label" sx={{
+                    fontSize: { xs: '0.75rem', sm: '0.82rem' },
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? '#fff' : 'rgba(0,0,0,0.65)',
+                    fontFamily: '"Nunito Sans", sans-serif',
+                    whiteSpace: 'nowrap',
+                    transition: 'color 0.05s'
+                  }}>
+                    {tab.label}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+
+          {/* Sub-tabs cho Lịch sử mua vé */}
+          {activeTab === 'tickets' && (
+            <Box sx={{
+              display: 'flex',
+              gap: 3,
+              borderTop: '1px solid rgba(0,0,0,0.08)',
+              px: 2,
+              py: 1.2
+            }}>
+              {TICKET_SUB_TABS.map((sub) => {
+                const isSubActive = slug === sub.key;
+                return (
+                  <Box
+                    key={sub.key}
+                    onClick={() => navigate(`/tai-khoan/${sub.key}`)}
+                    sx={{
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Typography sx={{
+                      fontSize: '0.8rem',
+                      fontWeight: isSubActive ? 800 : 500,
+                      color: 'rgba(0,0,0,0.65)',
+                      fontFamily: '"Nunito Sans", sans-serif',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {sub.label}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
+        </Box>
+
+        {/* CONTENT AREA */}
+        {activeTab === 'tickets' && slug === 'lich-su-huy' && <CancelHistory />}
+        {activeTab === 'tickets' && slug !== 'lich-su-huy' && <TicketHistory />}
+
       </Container>
     </Box>
   );

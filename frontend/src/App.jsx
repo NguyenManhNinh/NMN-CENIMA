@@ -104,6 +104,7 @@ function App() {
 
             {/* Tài khoản */}
             <Route path="tai-khoan" element={<AccountPage />} />
+            <Route path="tai-khoan/:slug" element={<AccountPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

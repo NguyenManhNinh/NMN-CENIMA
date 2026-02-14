@@ -396,7 +396,7 @@ function PaymentResultPage() {
               <Button
                 variant="outlined"
                 sx={styles.btnSecondary}
-                onClick={() => navigate('/lich-su-dat-ve')}
+                onClick={() => navigate('/tai-khoan/lich-su-mua-ve')}
               >
                 Xem vé của tôi
               </Button>
