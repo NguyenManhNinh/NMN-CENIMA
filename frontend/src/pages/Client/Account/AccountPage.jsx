@@ -19,6 +19,8 @@ import { getMyLoyaltyAPI } from '../../../apis/loyaltyApi';
 import JsBarcode from 'jsbarcode';
 import TicketHistory from './TicketHistory';
 import CancelHistory from './CancelHistory';
+import PointsHistory from './PointsHistory';
+import VipGuide from './VipGuide';
 
 // Tab configuration
 const TABS = [
@@ -33,6 +35,12 @@ const TABS = [
 const TICKET_SUB_TABS = [
   { key: 'lich-su-mua-ve', label: 'Lịch sử mua vé' },
   { key: 'lich-su-huy', label: 'Lịch sử hủy' }
+];
+
+// Sub-tabs cho "Lịch sử tích điểm / VIP"
+const POINTS_SUB_TABS = [
+  { key: 'cinema-point', label: 'Cinema Point' },
+  { key: 'huong-dan-vip', label: 'Hướng dẫn về số tiền nâng cấp VIP' }
 ];
 
 // ==================== DESIGN TOKENS ====================
@@ -526,11 +534,48 @@ export default function AccountPage() {
               })}
             </Box>
           )}
+
+          {/* Sub-tabs cho Lịch sử tích điểm / VIP */}
+          {activeTab === 'points' && (
+            <Box sx={{
+              display: 'flex',
+              gap: 3,
+              borderTop: '1px solid rgba(0,0,0,0.08)',
+              px: 2,
+              py: 1.2
+            }}>
+              {POINTS_SUB_TABS.map((sub) => {
+                const isSubActive = slug === sub.key;
+                return (
+                  <Box
+                    key={sub.key}
+                    onClick={() => navigate(`/tai-khoan/${sub.key}`)}
+                    sx={{
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Typography sx={{
+                      fontSize: '0.8rem',
+                      fontWeight: isSubActive ? 800 : 500,
+                      color: 'rgba(0,0,0,0.65)',
+                      fontFamily: '"Nunito Sans", sans-serif',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {sub.label}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
         </Box>
 
         {/* CONTENT AREA */}
         {activeTab === 'tickets' && slug === 'lich-su-huy' && <CancelHistory />}
         {activeTab === 'tickets' && slug !== 'lich-su-huy' && <TicketHistory />}
+
+        {activeTab === 'points' && slug === 'huong-dan-vip' && <VipGuide />}
+        {activeTab === 'points' && slug !== 'huong-dan-vip' && <PointsHistory />}
 
       </Container>
     </Box>
