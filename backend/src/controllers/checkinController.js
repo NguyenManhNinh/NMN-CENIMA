@@ -53,9 +53,30 @@ exports.scanTicket = catchAsync(async (req, res, next) => {
     return next(new AppError('Vé đã bị hủy!', 400));
   }
 
-  // 4. Kiểm tra thời gian suất chiếu (Optional: Cảnh báo nếu đến quá sớm hoặc quá muộn)
-  // Logic này tùy chọn, hiện tại chỉ warning, không chặn.
+  // 4. Kiểm tra thời gian suất chiếu
+  const showtime = ticket.showtimeId;
+  if (showtime && showtime.startAt) {
+    const now = new Date();
+    const startAt = new Date(showtime.startAt);
+    const oneHourBefore = new Date(startAt.getTime() - 60 * 60 * 1000);
+    const thirtyMinutesAfter = new Date(startAt.getTime() + 30 * 60 * 1000);
 
+    if (now < oneHourBefore) {
+      return next(new AppError(
+        `Chưa đến giờ check-in. Vui lòng quay lại sau ${oneHourBefore.toLocaleTimeString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}!`,
+        400
+      ));
+    }
+    if (now > thirtyMinutesAfter) {
+      // Tự động đánh dấu vé VOID khi quá giờ
+      ticket.status = 'VOID';
+      await ticket.save();
+      return next(new AppError(
+        'Vé đã hết hiệu lực! Đã quá thời gian check-in cho suất chiếu này.',
+        400
+      ));
+    }
+  }
   // 5. Cập nhật trạng thái -> USED
   ticket.status = 'USED';
   ticket.usedAt = Date.now();
