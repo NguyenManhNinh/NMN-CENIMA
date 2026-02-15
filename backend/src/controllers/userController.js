@@ -72,7 +72,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   }
 
   // 2) Lọc các trường cho phép cập nhật
-  const filteredBody = filterObj(req.body, 'name', 'email', 'phone', 'address', 'gender', 'birthday', 'avatar');
+  const filteredBody = filterObj(req.body, 'name', 'email', 'phone', 'address', 'city', 'district', 'gender', 'birthday', 'avatar');
 
   // 3) Cập nhật user
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
@@ -89,6 +89,19 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMe = catchAsync(async (req, res, next) => {
+  // 1) Yêu cầu xác nhận mật khẩu
+  const { password } = req.body;
+  if (!password) {
+    return next(new AppError('Vui lòng nhập mật khẩu để xác nhận xóa tài khoản!', 400));
+  }
+
+  // 2) Kiểm tra mật khẩu
+  const user = await User.findById(req.user.id).select('+password');
+  if (!(await user.correctPassword(password, user.password))) {
+    return next(new AppError('Mật khẩu không chính xác!', 401));
+  }
+
+  // 3) Soft delete
   await User.findByIdAndUpdate(req.user.id, { isActive: false });
 
   res.status(204).json({
