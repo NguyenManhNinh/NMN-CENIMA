@@ -173,7 +173,7 @@ exports.createReview = catchAsync(async (req, res, next) => {
   const { movieId } = req.params;
   const { rating, title = '', content, hasSpoiler = false, parentId = null } = req.body;
 
-  // Validate content length (10 chars cho reply, 20 cho top-level)
+  // Kiểm tra độ dài nội dung (10 ký tự cho reply, 20 cho nhận xét gốc)
   const minLength = parentId ? 10 : 20;
   if (!content || content.length < minLength) {
     return next(new AppError(`Nội dung phải có ít nhất ${minLength} ký tự`, 400));
@@ -187,15 +187,15 @@ exports.createReview = catchAsync(async (req, res, next) => {
     }
   }
 
-  // Check verified (user đã mua vé cho phim này)
+  // Kiểm tra xác thực (user đã từng mua vé tại rạp = khách hàng xác thực)
   let isVerified = false;
   try {
-    const hasOrder = await Order.findOne({
-      user: userId,
-      'movieInfo.movieId': movieId,
-      status: { $in: ['PAID', 'COMPLETED'] }
+    const Ticket = require('../models/Ticket');
+    const hasTicket = await Ticket.findOne({
+      userId,
+      status: { $in: ['VALID', 'USED'] }
     });
-    isVerified = !!hasOrder;
+    isVerified = !!hasTicket;
   } catch (err) {
     console.log('Verified check skipped:', err.message);
   }
@@ -204,14 +204,14 @@ exports.createReview = catchAsync(async (req, res, next) => {
     movie: movieId,
     user: userId,
     parentId,
-    rating: parentId ? null : rating, // Replies don't have rating
-    title: parentId ? '' : title, // Replies don't have title
+    rating: parentId ? null : rating, // Reply không có rating
+    title: parentId ? '' : title, // Reply không có title
     content,
     hasSpoiler,
     isVerified
   });
 
-  // Populate user info
+  // Populate thông tin user
   await review.populate('user', 'name avatar role');
 
   res.status(201).json({
@@ -345,6 +345,44 @@ exports.likeReview = catchAsync(async (req, res, next) => {
  * Legacy API compatibility - getAllReviews
  */
 exports.getAllReviews = exports.getReviewsByMovie;
+
+/**
+ * Lấy tất cả reviews của user đang đăng nhập
+ * GET /reviews/me
+ */
+exports.getMyReviews = catchAsync(async (req, res, next) => {
+  const userId = req.user._id;
+  const Ticket = require('../models/Ticket');
+
+  const reviews = await Review.find({
+    user: userId,
+    parentId: null, // Chỉ lấy review gốc, không lấy reply
+    movie: { $exists: true, $ne: null } // Chỉ lấy review phim, bỏ review genre
+  })
+    .populate('movie', 'title slug posterUrl')
+    .sort({ createdAt: -1 });
+
+  // Retroactive verify: nếu user có vé hợp lệ → xác thực tất cả review cũ
+  const unverifiedReviews = reviews.filter(r => !r.isVerified);
+  if (unverifiedReviews.length > 0) {
+    const hasTicket = await Ticket.findOne({
+      userId,
+      status: { $in: ['VALID', 'USED'] }
+    });
+    if (hasTicket) {
+      for (const review of unverifiedReviews) {
+        review.isVerified = true;
+        await review.save({ validateBeforeSave: false });
+      }
+    }
+  }
+
+  res.status(200).json({
+    status: 'success',
+    results: reviews.length,
+    data: { reviews }
+  });
+});
 
 // ============== GENRE REVIEW FUNCTIONS ==============
 

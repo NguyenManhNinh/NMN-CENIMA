@@ -109,6 +109,20 @@ router.route('/')
 
 /**
  * @swagger
+ * /reviews/me:
+ *   get:
+ *     summary: Lấy tất cả nhận xét của user đang đăng nhập
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Danh sách nhận xét của user
+ */
+router.get('/me', authMiddleware.protect, reviewController.getMyReviews);
+
+/**
+ * @swagger
  * /movies/{movieId}/reviews/summary:
  *   get:
  *     summary: Lấy tóm tắt đánh giá (điểm trung bình + phân bố sao)
