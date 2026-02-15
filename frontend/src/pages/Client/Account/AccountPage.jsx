@@ -23,6 +23,7 @@ import PointsHistory from './PointsHistory';
 import VipGuide from './VipGuide';
 import WatchedMovies from './WatchedMovies';
 import MyReviews from './MyReviews';
+import AccountInfo from './AccountInfo';
 
 // Tab configuration
 const TABS = [
@@ -621,6 +622,8 @@ export default function AccountPage() {
 
         {activeTab === 'watched' && slug === 'nhan-xet-cua-toi' && <MyReviews />}
         {activeTab === 'watched' && slug !== 'nhan-xet-cua-toi' && <WatchedMovies />}
+
+        {activeTab === 'profile' && <AccountInfo />}
 
       </Container>
     </Box>

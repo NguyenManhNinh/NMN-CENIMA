@@ -17,3 +17,12 @@ export const updatePasswordAPI = async (data) => {
   const response = await axiosInstance.patch('/users/updateMyPassword', data);
   return response.data;
 };
+
+/**
+ * Xóa tài khoản (Ly khai)
+ * @param {Object} data - { password }
+ */
+export const deleteMeAPI = async (data) => {
+  const response = await axiosInstance.delete('/users/deleteMe', { data });
+  return response.data;
+};
