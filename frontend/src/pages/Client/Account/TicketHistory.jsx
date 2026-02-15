@@ -446,7 +446,7 @@ export default function TicketHistory() {
               {d.orderDate}
             </Typography>
 
-            <Typography sx={{ ...cellStyle, flex: 1.8, fontWeight: 600, color: 'rgba(0,0,0,0.8)' }}>
+            <Typography sx={{ ...cellStyle, flex: 1.8, fontWeight: 600, color: 'rgba(0,0,0,0.8)', textAlign: 'left' }}>
               {d.movieTitle}
             </Typography>
 

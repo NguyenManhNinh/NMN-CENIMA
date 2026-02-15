@@ -287,7 +287,7 @@ export default function CancelHistory() {
               {d.orderDate}
             </Typography>
 
-            <Typography sx={{ ...cellStyle, flex: 2, fontWeight: 600, color: 'rgba(0,0,0,0.8)' }}>
+            <Typography sx={{ ...cellStyle, flex: 2, fontWeight: 600, color: 'rgba(0,0,0,0.8)', textAlign: 'left' }}>
               {d.movieTitle}
             </Typography>
 

@@ -81,6 +81,16 @@ export const replyToReviewAPI = async (movieId, data) => {
   return response.data;
 };
 
+// ============== MY REVIEWS ==============
+
+/**
+ * Lấy tất cả reviews của user đang đăng nhập
+ */
+export const getMyReviewsAPI = async () => {
+  const response = await axiosInstance.get('/reviews/me');
+  return response.data;
+};
+
 // ============== GENRE REVIEW APIs ==============
 
 /**

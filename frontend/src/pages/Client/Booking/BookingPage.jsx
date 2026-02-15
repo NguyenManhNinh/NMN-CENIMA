@@ -15,7 +15,8 @@ import {
   Dialog,
   DialogContent,
   Rating,
-  CircularProgress
+  CircularProgress,
+  TextField
 } from '@mui/material';
 import {
   AccessTime as TimeIcon,
@@ -32,6 +33,7 @@ import {
 
 // API calls
 import { getMovieAPI, getNowShowingMoviesAPI, rateMovieAPI } from '../../../apis/movieApi';
+import { createReviewAPI } from '../../../apis/reviewApi';
 import { getAllShowtimesAPI } from '../../../apis/showtimeApi';
 import { getAllCinemasAPI, getCitiesAPI } from '../../../apis/cinemaApi';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -97,6 +99,7 @@ function BookingPage() {
   const [selectedArea, setSelectedArea] = useState('all');
   const [openRatingModal, setOpenRatingModal] = useState(false);
   const [userRating, setUserRating] = useState(0);
+  const [reviewContent, setReviewContent] = useState('');
   const [openTrailerModal, setOpenTrailerModal] = useState(false);
   const [isLandscape, setIsLandscape] = useState(true);
 
@@ -1396,7 +1399,7 @@ function BookingPage() {
             </Box>
 
             {/* User Rating */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 2 }}>
               <Rating
                 value={userRating}
                 onChange={(event, newValue) => setUserRating(newValue)}
@@ -1406,6 +1409,33 @@ function BookingPage() {
                 emptyIcon={<StarBorderIcon sx={{ fontSize: 32, color: COLORS.textMuted }} />}
               />
             </Box>
+
+            {/* Review Content */}
+            <TextField
+              multiline
+              minRows={3}
+              maxRows={6}
+              fullWidth
+              placeholder="Viết nhận xét của bạn về phim (tối thiểu 20 ký tự)..."
+              value={reviewContent}
+              onChange={(e) => setReviewContent(e.target.value)}
+              sx={{
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  fontSize: '0.85rem',
+                  fontFamily: '"Nunito Sans", sans-serif',
+                  borderRadius: 2,
+                  '& fieldset': { borderColor: COLORS.border },
+                  '&:hover fieldset': { borderColor: COLORS.border },
+                  '&.Mui-focused fieldset': { borderColor: COLORS.border }
+                }
+              }}
+            />
+            {reviewContent.length > 0 && reviewContent.length < 20 && (
+              <Typography sx={{ fontSize: '0.72rem', color: '#d32f2f', mb: 1, mt: -2, textAlign: 'left' }}>
+                Nội dung cần tối thiểu 20 ký tự ({reviewContent.length}/20)
+              </Typography>
+            )}
 
             {/* Action Buttons */}
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -1433,7 +1463,13 @@ function BookingPage() {
                     return;
                   }
 
-                  // Check if user is logged in
+                  // Validate review content nếu có nhập
+                  if (reviewContent.trim() && reviewContent.trim().length < 20) {
+                    alert('Nội dung nhận xét cần tối thiểu 20 ký tự!');
+                    return;
+                  }
+
+                  // Kiểm tra đăng nhập
                   const token = localStorage.getItem('accessToken');
                   if (!token) {
                     alert('Vui lòng đăng nhập để đánh giá!');
@@ -1441,21 +1477,33 @@ function BookingPage() {
                   }
 
                   try {
-                    // Token is automatically added by interceptor
+                    // 1. Đánh giá phim (số sao)
                     const result = await rateMovieAPI(movie._id, userRating);
-                    // Update local movie state with new rating
                     setMovie(prev => ({
                       ...prev,
                       rating: result.data.rating,
                       ratingCount: result.data.ratingCount
                     }));
+
+                    // 2. Tạo nhận xét nếu có nội dung
+                    if (reviewContent.trim().length >= 20) {
+                      try {
+                        await createReviewAPI(movie._id, {
+                          rating: Math.ceil(userRating / 2), // Chuyển đổi hệ 10 sao sang hệ 5 sao cho review
+                          content: reviewContent.trim()
+                        });
+                      } catch (reviewErr) {
+                        console.log('Ghi chú nhận xét:', reviewErr.response?.data?.message || 'Đã có nhận xét trước đó');
+                      }
+                    }
+
                     setOpenRatingModal(false);
+                    setReviewContent('');
                     alert('Đánh giá thành công!');
                   } catch (error) {
-                    console.error('Rating error:', error);
+                    console.error('Lỗi đánh giá:', error);
                     const errorMsg = error.response?.data?.message || 'Đánh giá thất bại!';
 
-                    // Handle expired token
                     if (errorMsg.includes('expired') || errorMsg.includes('jwt')) {
                       localStorage.removeItem('accessToken');
                       alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
