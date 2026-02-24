@@ -357,30 +357,33 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
 
       return res.status(200).json({ RspCode: '00', Message: 'Success' });
     } else {
-      // FAILED: Dùng CAS để tránh set FAILED khi đã PAID
+      // Phân biệt: code '24' = user chủ động hủy → CANCELLED
+      //            code khác = lỗi kỹ thuật → FAILED
+      const newStatus = rspCode === '24' ? 'CANCELLED' : 'FAILED';
+
       const failedOrder = await Order.findOneAndUpdate(
         {
           orderNo: originalOrderNo,
           status: { $in: ['PENDING', 'PROCESSING'] }
         },
-        { $set: { status: 'FAILED' } },
+        { $set: { status: newStatus } },
         { new: true }
       );
 
-      // CINEMA COIN REFUND - Hoàn lại điểm cho user khi payment thất bại
+      // CINEMA COIN REFUND - Hoàn lại điểm cho user khi payment thất bại/hủy
       if (failedOrder && failedOrder.usedPoints > 0) {
         try {
           const User = require('../models/User');
           await User.findByIdAndUpdate(failedOrder.userId, {
             $inc: { points: failedOrder.usedPoints }
           });
-          console.log(`[CinemaCoin] Refunded ${failedOrder.usedPoints} points for failed order ${originalOrderNo}`);
+          console.log(`[CinemaCoin] Refunded ${failedOrder.usedPoints} points for ${newStatus} order ${originalOrderNo}`);
         } catch (refundErr) {
           console.error('[CinemaCoin] Refund error:', refundErr);
         }
       }
 
-      // P0-3 Fix: Upsert
+      // P0-3 Fix: Upsert Payment record
       await Payment.findOneAndUpdate(
         { txnRef: originalOrderNo },
         {
@@ -582,16 +585,35 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
       // ========== THANH TOÁN THẤT BẠI/HỦY ==========
       console.log('[VNPay Return] Payment FAILED:', orderNo, 'Code:', responseCode);
 
-      // P0-7 FIX: KHÔNG set order thành FAILED ngay
-      // Giữ PENDING để user có thể retry trong 15 phút
-      // Chỉ tạo Payment record với state=FAIL để tracking
+      // Phân biệt: code '24' = user chủ động hủy → CANCELLED (hiện trong lịch sử hủy)
+      //            code khác = lỗi kỹ thuật → giữ PENDING cho retry, cleanup job sẽ xử lý sau
       try {
         const order = await Order.findOne({ orderNo });
         if (order && order.status === 'PENDING') {
-          // KHÔNG thay đổi order.status - giữ PENDING cho phép retry
-          console.log('[VNPay Return] Keeping order PENDING for retry:', orderNo);
+          if (responseCode === '24') {
+            // User chủ động bấm "Hủy thanh toán" → set CANCELLED ngay
+            order.status = 'CANCELLED';
+            await order.save();
+            console.log('[VNPay Return] User cancelled payment - order set to CANCELLED:', orderNo);
 
-          // P0-3 Fix: Upsert Payment record - chỉ payment là FAIL
+            // Hoàn lại điểm nếu có dùng
+            if (order.usedPoints > 0) {
+              try {
+                const User = require('../models/User');
+                await User.findByIdAndUpdate(order.userId, {
+                  $inc: { points: order.usedPoints }
+                });
+                console.log(`[CinemaCoin] Refunded ${order.usedPoints} points for cancelled order ${orderNo}`);
+              } catch (refundErr) {
+                console.error('[CinemaCoin] Refund error:', refundErr);
+              }
+            }
+          } else {
+            // Lỗi kỹ thuật khác → giữ PENDING cho phép retry
+            console.log('[VNPay Return] Keeping order PENDING for retry:', orderNo);
+          }
+
+          // Upsert Payment record để tracking
           await Payment.findOneAndUpdate(
             { txnRef: orderNo },
             {
