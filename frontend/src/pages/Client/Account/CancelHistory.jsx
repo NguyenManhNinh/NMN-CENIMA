@@ -5,8 +5,8 @@ import { getMyOrdersAPI } from '../../../apis/orderApi';
 
 const STATUS_MAP = {
   FAILED: { label: 'Đặt vé không thành công', color: '#d32f2f' },
-  CANCELLED: { label: 'Đã hủy', color: '#d32f2f' },
-  EXPIRED: { label: 'Đã hủy', color: '#9e9e9e' }
+  CANCELLED: { label: 'Đã hủy thanh toán', color: '#d32f2f' },
+  EXPIRED: { label: 'Hết hạn thanh toán', color: '#9e9e9e' }
 };
 
 const COLUMNS = [
@@ -112,7 +112,7 @@ export default function CancelHistory() {
     );
   }
 
-  // ======================== MOBILE CARD LAYOUT ========================
+  //MOBILE CARD LAYOUT
   const renderMobileCards = () => (
     <Box sx={{ bgcolor: '#fff', p: 1.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       {orders.map((order, idx) => {

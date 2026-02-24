@@ -1082,7 +1082,7 @@ function Header() {
         <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
         Thông tin tài khoản
       </MenuItem>
-      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/lich-su-mua-ve'); }}>
+      <MenuItem onClick={() => { handleAccountMenuClose(); navigate('/tai-khoan/lich-su-mua-ve'); }}>
         <ListItemIcon><TicketIcon fontSize="small" /></ListItemIcon>
         Lịch sử mua vé
       </MenuItem>
