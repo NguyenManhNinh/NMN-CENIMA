@@ -30,6 +30,9 @@ import TicketPricingPage from './pages/Client/TicketPricing/TicketPricingPage';
 import MembershipPage from './pages/Client/Membership/MembershipPage';
 import AccountPage from './pages/Client/Account/AccountPage';
 
+// Pages - Admin
+import AdminLoginPage from './pages/Admin/Auth/AdminLoginPage';
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -39,6 +42,9 @@ function App() {
       {/* Router với future flags để tắt cảnh báo v7 */}
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
+          {/* ═══════ ADMIN ROUTES ═══════ */}
+          <Route path="admin/dang-nhap" element={<AdminLoginPage />} />
+
           {/* OAuth Callback - không cần layout */}
           <Route path="/oauth-callback" element={<OAuthCallback />} />
 

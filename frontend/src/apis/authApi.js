@@ -30,6 +30,15 @@ export const loginAPI = async (data) => {
 };
 
 /**
+ * Admin Login — chỉ cho phép admin/manager
+ * @param {Object} data - { email, password }
+ */
+export const adminLoginAPI = async (data) => {
+  const response = await axiosInstance.post('/auth/admin/login', data);
+  return response.data;
+};
+
+/**
  * Logout - revoke refresh token
  */
 export const logoutAPI = async () => {
