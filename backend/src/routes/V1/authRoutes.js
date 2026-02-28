@@ -89,6 +89,36 @@ router.post('/login', validate(loginSchema), authController.login);
 
 /**
  * @swagger
+ * /auth/admin/login:
+ *   post:
+ *     summary: Admin Login (chỉ admin/manager)
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Admin login thành công
+ *       401:
+ *         description: Email hoặc mật khẩu sai
+ *       403:
+ *         description: Không có quyền admin
+ */
+router.post('/admin/login', validate(loginSchema), authController.adminLogin);
+
+/**
+ * @swagger
  * /auth/verify:
  *   post:
  *     summary: Verify account with OTP

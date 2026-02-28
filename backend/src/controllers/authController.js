@@ -6,32 +6,39 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const sendEmail = require('../services/emailService');
 
-// Hàm tạo và gửi Token
-const signToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '1h' // Access Token 1 giờ (chuẩn Google/Netflix)
-  });
+// Hàm tạo Access Token — chứa id, role, tokenType để phân biệt và debug
+const signToken = (user) => {
+  return jwt.sign(
+    { id: user._id, role: user.role, tokenType: 'access' },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
 };
 
-const createSendToken = async (user, statusCode, res) => {
-  const accessToken = signToken(user._id);
+// Tạo token và gửi response
+// options.portal = 'admin' → dùng cookie riêng 'adminRefreshToken' (tránh đè session user)
+const createSendToken = async (user, statusCode, res, options = {}) => {
+  const accessToken = signToken(user);
 
   // Tạo Refresh Token (7 ngày)
   const refreshToken = new RefreshToken({
     user: user._id,
     token: crypto.randomBytes(40).toString('hex'),
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     createdByIp: res.req.ip
   });
   await refreshToken.save();
 
-  // Gửi Refresh Token qua Cookie (httpOnly)
+  // Cookie name tách biệt: admin dùng 'adminRefreshToken', user dùng 'refreshToken'
+  const cookieName = options.portal === 'admin' ? 'adminRefreshToken' : 'refreshToken';
+
   const cookieOptions = {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    httpOnly: true, // Chống XSS
-    secure: process.env.NODE_ENV === 'production' // Chỉ gửi qua HTTPS ở production
+    httpOnly: true,      // Chống XSS
+    sameSite: 'lax',     // Chống CSRF
+    secure: process.env.NODE_ENV === 'production'
   };
-  res.cookie('refreshToken', refreshToken.token, cookieOptions);
+  res.cookie(cookieName, refreshToken.token, cookieOptions);
 
   // Ẩn mật khẩu và OTP khỏi output
   user.password = undefined;
@@ -40,7 +47,7 @@ const createSendToken = async (user, statusCode, res) => {
 
   res.status(statusCode).json({
     status: 'success',
-    token: accessToken, // Client lưu Access Token vào Memory/Local Storage
+    token: accessToken,
     data: {
       user
     }
@@ -174,6 +181,51 @@ exports.login = catchAsync(async (req, res, next) => {
   await createSendToken(user, 200, res);
 });
 
+// Đăng nhập dành riêng cho Admin Portal
+// Chỉ cho phép role: admin, manager — từ chối mọi role khác TRƯỚC khi cấp token
+exports.adminLogin = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // 1) Tìm user và lấy các trường cần thiết cho bảo mật
+  const user = await User.findOne({ email }).select('+password +isActive +loginAttempts +lockUntil');
+
+  // 2) Kiểm tra tài khoản có bị khóa không
+  if (user && user.lockUntil && user.lockUntil > Date.now()) {
+    const remainingTime = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
+    return next(new AppError(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${remainingTime} phút.`, 423));
+  }
+
+  // 3) Kiểm tra user tồn tại và mật khẩu đúng
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    if (user) {
+      await user.incLoginAttempts();
+      const updatedUser = await User.findById(user._id).select('+loginAttempts +lockUntil');
+      if (updatedUser.lockUntil && updatedUser.lockUntil > Date.now()) {
+        return next(new AppError('Tài khoản đã bị khóa do đăng nhập sai quá 5 lần. Vui lòng thử lại sau 30 phút.', 423));
+      }
+    }
+    return next(new AppError('Email hoặc mật khẩu không chính xác!', 401));
+  }
+
+  // 4) Kiểm tra tài khoản đã kích hoạt chưa
+  if (!user.isActive) {
+    return next(new AppError('Tài khoản chưa được kích hoạt!', 401));
+  }
+
+  // 5) KIỂM TRA QUYỀN ADMIN — Chặn trước khi cấp token
+  if (!['admin', 'manager'].includes(user.role)) {
+    return next(new AppError('Tài khoản không có quyền truy cập trang quản trị!', 403));
+  }
+
+  // 6) Reset số lần đăng nhập sai
+  if (user.loginAttempts > 0) {
+    await user.resetLoginAttempts();
+  }
+
+  // 7) Cấp token với cookie riêng cho admin portal
+  await createSendToken(user, 200, res, { portal: 'admin' });
+});
+
 // Refresh Token (Rotation)
 exports.refreshToken = catchAsync(async (req, res, next) => {
   const token = req.cookies.refreshToken;
@@ -240,20 +292,29 @@ exports.refreshToken = catchAsync(async (req, res, next) => {
   });
 });
 
-// Logout (Revoke Token)
+// Logout (Revoke Token) — xử lý cả cookie user và admin
 exports.logout = catchAsync(async (req, res, next) => {
-  const token = req.cookies.refreshToken;
-  if (token) {
+  // Revoke cả 2 cookie (user + admin) nếu có
+  const userToken = req.cookies.refreshToken;
+  const adminToken = req.cookies.adminRefreshToken;
+
+  if (userToken) {
     await RefreshToken.findOneAndUpdate(
-      { token },
+      { token: userToken },
+      { revoked: Date.now(), revokedByIp: req.ip }
+    );
+  }
+  if (adminToken) {
+    await RefreshToken.findOneAndUpdate(
+      { token: adminToken },
       { revoked: Date.now(), revokedByIp: req.ip }
     );
   }
 
-  res.cookie('refreshToken', 'loggedout', {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true
-  });
+  // Xóa cả 2 cookie
+  const clearOptions = { expires: new Date(Date.now() + 10 * 1000), httpOnly: true };
+  res.cookie('refreshToken', 'loggedout', clearOptions);
+  res.cookie('adminRefreshToken', 'loggedout', clearOptions);
 
   res.status(200).json({ status: 'success' });
 });
@@ -266,8 +327,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 
   const user = await User.findOne({ email });
+
+  // Chống email enumeration: luôn trả 200 dù email có tồn tại hay không
   if (!user) {
-    return next(new AppError('Không tìm thấy người dùng với email này!', 404));
+    return res.status(200).json({
+      status: 'success',
+      message: 'Nếu email tồn tại, mã OTP đã được gửi!'
+    });
   }
 
   // Sinh OTP mới
@@ -282,7 +348,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      message: 'Mã OTP đã được gửi đến email của bạn!'
+      message: 'Nếu email tồn tại, mã OTP đã được gửi!'
     });
   } catch (err) {
     user.otpCode = undefined;
