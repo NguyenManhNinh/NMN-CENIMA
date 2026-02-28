@@ -32,6 +32,10 @@ import AccountPage from './pages/Client/Account/AccountPage';
 
 // Pages - Admin
 import AdminLoginPage from './pages/Admin/Auth/AdminLoginPage';
+import AdminDashboardPage from './pages/Admin/Dashboard/AdminDashboardPage';
+
+// Layouts - Admin
+import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
 
 function App() {
   return (
@@ -43,7 +47,13 @@ function App() {
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           {/* ═══════ ADMIN ROUTES ═══════ */}
+          {/* Trang đăng nhập admin – không dùng layout */}
           <Route path="admin/dang-nhap" element={<AdminLoginPage />} />
+
+          {/* Các trang quản trị – dùng AdminLayout (có header) */}
+          <Route path="admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+          </Route>
 
           {/* OAuth Callback - không cần layout */}
           <Route path="/oauth-callback" element={<OAuthCallback />} />
