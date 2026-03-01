@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAdminTheme } from '../../../components/Layout/AdminLayout/AdminThemeContext';
 import {
   Box, Card, CardContent, Typography, Grid, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, LinearProgress, Chip,
@@ -63,19 +64,24 @@ const getStatusProps = (status) => {
   }
 };
 
-// Kiểu dáng chung cho Card
-const cardSx = {
+// Kiểu dáng chung cho Card (nhận bảng màu từ context)
+const getCardSx = (colors, darkMode) => ({
   borderRadius: { xs: 1.5, sm: 2 },
-  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-  border: '1px solid #eee',
-  height: '100%'
-};
+  boxShadow: darkMode ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.08)',
+  border: `1px solid ${colors.borderCard}`,
+  bgcolor: colors.bgCard,
+  height: '100%',
+  transition: 'all 0.3s ease'
+});
 
 // Số lượng mục hiển thị mỗi trang
 const SHOWTIME_PER_PAGE = 10;
 const ORDER_PER_PAGE = 10;
 
 const AdminDashboardPage = () => {
+  // Lấy chế độ sáng/tối và bảng màu từ context
+  const { darkMode, colors } = useAdminTheme();
+  const cardSx = getCardSx(colors, darkMode);
   // Phân trang suất chiếu
   const [showtimePage, setShowtimePage] = useState(1);
   const totalShowtimePages = Math.ceil(TODAY_SHOWTIMES.length / SHOWTIME_PER_PAGE);
@@ -110,7 +116,7 @@ const AdminDashboardPage = () => {
   });
 
   return (
-    <Box sx={{ p: { xs: 1.5, sm: 3 }, maxWidth: 1400, mx: 'auto' }}>
+    <Box sx={{ p: { xs: 1.5, sm: 3 }, maxWidth: 1400, mx: 'auto', transition: 'all 0.3s ease' }}>
 
       {/* ===== HÀNG 1: THẺ THỐNG KÊ ===== */}
       <Box sx={sectionAnim(1)}>
@@ -140,10 +146,10 @@ const AdminDashboardPage = () => {
                         </Typography>
                       </Box>
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 0.3, fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.3, fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
                       {card.displayValue}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#666', fontSize: { xs: '0.7rem', sm: '0.82rem' } }}>
+                    <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: { xs: '0.7rem', sm: '0.82rem' } }}>
                       {card.label}
                     </Typography>
                   </CardContent>
@@ -160,16 +166,22 @@ const AdminDashboardPage = () => {
           <Grid item xs={12} md={8}>
             <Card sx={cardSx}>
               <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 0.5, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.5, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                   Doanh thu 7 ngày gần nhất
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1 }}>
+                <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1 }}>
                   Đơn vị: triệu VNĐ
                 </Typography>
-                <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <Box sx={{
+                  width: '100%', overflowX: 'auto',
+                  '& text': { fill: `${darkMode ? '#fff' : '#555'} !important` },
+                  '& tspan': { fill: `${darkMode ? '#fff' : '#555'} !important` },
+                  '& span': { color: `${darkMode ? '#fff' : '#555'} !important` },
+                  '& p': { color: `${darkMode ? '#fff' : '#555'} !important` }
+                }}>
                   <BarChart
-                    xAxis={[{ scaleType: 'band', data: REVENUE_7_DAYS.map(d => d.day) }]}
-                    yAxis={[{ label: 'Triệu VNĐ', valueFormatter: (v) => `${v}tr` }]}
+                    xAxis={[{ scaleType: 'band', data: REVENUE_7_DAYS.map(d => d.day), tickLabelStyle: { fill: colors.textSecondary } }]}
+                    yAxis={[{ label: 'Triệu VNĐ', valueFormatter: (v) => `${v}tr`, tickLabelStyle: { fill: colors.textSecondary }, labelStyle: { fill: colors.textMuted } }]}
                     series={[
                       { data: REVENUE_7_DAYS.map(d => d.tickets), label: 'Doanh thu vé', color: '#1B4F93', valueFormatter: (v) => `${v} triệu` },
                       { data: REVENUE_7_DAYS.map(d => d.combos), label: 'Doanh thu combo', color: '#ff9800', valueFormatter: (v) => `${v} triệu` }
@@ -177,9 +189,18 @@ const AdminDashboardPage = () => {
                     height={220}
                     margin={{ top: 20, right: 10, bottom: 30, left: 45 }}
                     slotProps={{
-                      legend: { position: { vertical: 'top', horizontal: 'right' }, itemMarkWidth: 10, itemMarkHeight: 10 }
+                      legend: {
+                        position: { vertical: 'top', horizontal: 'right' },
+                        itemMarkWidth: 10, itemMarkHeight: 10,
+                        labelStyle: { color: darkMode ? '#fff' : '#555', fill: darkMode ? '#fff' : '#555' }
+                      }
                     }}
-                    sx={{ '& .MuiChartsAxisHighlight-root': { fill: 'transparent' }, minWidth: 300 }}
+                    sx={{
+                      '& .MuiChartsAxisHighlight-root': { fill: 'transparent' },
+                      '& .MuiChartsAxis-line': { stroke: colors.borderSubtle },
+                      '& .MuiChartsAxis-tick': { stroke: colors.borderSubtle },
+                      minWidth: 300
+                    }}
                   />
                 </Box>
               </CardContent>
@@ -188,10 +209,10 @@ const AdminDashboardPage = () => {
           <Grid item xs={12} md={4}>
             <Card sx={cardSx}>
               <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 0.5 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.5 }}>
                   Thể loại phim phổ biến
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1 }}>
+                <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1 }}>
                   Số vé bán theo thể loại trong tháng (Top 5)
                 </Typography>
                 {(() => {
@@ -206,30 +227,35 @@ const AdminDashboardPage = () => {
                   const total = chartData.reduce((s, d) => s + d.value, 0);
                   return (
                     <>
-                      <PieChart
-                        series={[{
-                          data: chartData,
-                          innerRadius: 40,
-                          outerRadius: 80,
-                          paddingAngle: 2,
-                          cornerRadius: 4,
-                          valueFormatter: (item) => {
-                            const percent = Math.round((item.value / total) * 100);
-                            return `${item.value} vé (${percent}%)`;
-                          }
-                        }]}
-                        height={200}
-                        margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-                        slotProps={{ legend: { hidden: true } }}
-                      />
+                      <Box sx={{
+                        '& text': { fill: `${darkMode ? '#fff' : '#555'} !important` },
+                        '& tspan': { fill: `${darkMode ? '#fff' : '#555'} !important` }
+                      }}>
+                        <PieChart
+                          series={[{
+                            data: chartData,
+                            innerRadius: 40,
+                            outerRadius: 80,
+                            paddingAngle: 2,
+                            cornerRadius: 4,
+                            valueFormatter: (item) => {
+                              const percent = Math.round((item.value / total) * 100);
+                              return `${item.value} vé (${percent}%)`;
+                            }
+                          }]}
+                          height={200}
+                          margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                          slotProps={{ legend: { hidden: true } }}
+                        />
+                      </Box>
                       {/* Custom compact legend */}
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', mt: 1 }}>
                         {chartData.map((d) => (
                           <Box key={d.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: d.color, flexShrink: 0 }} />
-                            <Typography variant="caption" sx={{ color: '#555', fontSize: '0.72rem' }}>
+                            <span style={{ color: darkMode ? '#ffffff' : '#555555', fontSize: '0.72rem' }}>
                               {d.label} ({Math.round((d.value / total) * 100)}%)
-                            </Typography>
+                            </span>
                           </Box>
                         ))}
                       </Box>
@@ -248,31 +274,42 @@ const AdminDashboardPage = () => {
           <Grid item xs={12} md={8}>
             <Card sx={cardSx}>
               <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 0.5 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.5 }}>
                   Xu hướng doanh thu 30 ngày
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1 }}>
+                <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1 }}>
                   30/01/2026 — 28/02/2026
                 </Typography>
-                <LineChart
-                  xAxis={[{
-                    scaleType: 'band',
-                    data: REVENUE_30_DAYS.map(d => d.day),
-                    tickLabelStyle: { fontSize: 10 }
-                  }]}
-                  yAxis={[{ label: 'Triệu VNĐ', valueFormatter: (v) => `${v}tr` }]}
-                  series={[{
-                    data: REVENUE_30_DAYS.map(d => d.value),
-                    label: 'Doanh thu',
-                    color: '#ff9800',
-                    area: true,
-                    valueFormatter: (v) => `${v} triệu VNĐ`
-                  }]}
-                  height={260}
-                  margin={{ top: 20, right: 20, bottom: 30, left: 55 }}
-                  slotProps={{ legend: { hidden: true } }}
-                  sx={{ '& .MuiChartsAxisHighlight-root': { fill: 'transparent' } }}
-                />
+                <Box sx={{
+                  '& text': { fill: `${darkMode ? '#fff' : '#555'} !important` },
+                  '& tspan': { fill: `${darkMode ? '#fff' : '#555'} !important` },
+                  '& span': { color: `${darkMode ? '#fff' : '#555'} !important` },
+                  '& p': { color: `${darkMode ? '#fff' : '#555'} !important` }
+                }}>
+                  <LineChart
+                    xAxis={[{
+                      scaleType: 'band',
+                      data: REVENUE_30_DAYS.map(d => d.day),
+                      tickLabelStyle: { fontSize: 10, fill: colors.textSecondary }
+                    }]}
+                    yAxis={[{ label: 'Triệu VNĐ', valueFormatter: (v) => `${v}tr`, tickLabelStyle: { fill: colors.textSecondary }, labelStyle: { fill: colors.textMuted } }]}
+                    series={[{
+                      data: REVENUE_30_DAYS.map(d => d.value),
+                      label: 'Doanh thu',
+                      color: '#ff9800',
+                      area: true,
+                      valueFormatter: (v) => `${v} triệu VNĐ`
+                    }]}
+                    height={260}
+                    margin={{ top: 20, right: 20, bottom: 30, left: 55 }}
+                    slotProps={{ legend: { hidden: true } }}
+                    sx={{
+                      '& .MuiChartsAxisHighlight-root': { fill: 'transparent' },
+                      '& .MuiChartsAxis-line': { stroke: colors.borderSubtle },
+                      '& .MuiChartsAxis-tick': { stroke: colors.borderSubtle }
+                    }}
+                  />
+                </Box>
                 {/* === Summary Stats === */}
                 {(() => {
                   const values = REVENUE_30_DAYS.map(d => d.value);
@@ -284,21 +321,21 @@ const AdminDashboardPage = () => {
                   const lowDay = REVENUE_30_DAYS.find(d => d.value === min)?.day;
                   return (
                     <Box sx={{ display: 'flex', gap: 1.5, mt: 2, flexWrap: 'wrap' }}>
-                      <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: '#fff8e1', borderRadius: 1.5, textAlign: 'center' }}>
+                      <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgWarm, borderRadius: 1.5, textAlign: 'center' }}>
                         <Typography variant="body2" sx={{ fontWeight: 700, color: '#e65100' }}>{total} tr</Typography>
-                        <Typography variant="caption" sx={{ color: '#888' }}>Tổng 30 ngày</Typography>
+                        <Typography variant="caption" sx={{ color: colors.textMuted }}>Tổng 30 ngày</Typography>
                       </Box>
-                      <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: '#e3f2fd', borderRadius: 1.5, textAlign: 'center' }}>
+                      <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgBlue, borderRadius: 1.5, textAlign: 'center' }}>
                         <Typography variant="body2" sx={{ fontWeight: 700, color: '#1565c0' }}>~{avg} tr/ngày</Typography>
-                        <Typography variant="caption" sx={{ color: '#888' }}>Trung bình</Typography>
+                        <Typography variant="caption" sx={{ color: colors.textMuted }}>Trung bình</Typography>
                       </Box>
-                      <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: '#e8f5e9', borderRadius: 1.5, textAlign: 'center' }}>
+                      <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgGreen, borderRadius: 1.5, textAlign: 'center' }}>
                         <Typography variant="body2" sx={{ fontWeight: 700, color: '#2e7d32' }}>{max} tr ({peakDay})</Typography>
-                        <Typography variant="caption" sx={{ color: '#888' }}>Cao nhất</Typography>
+                        <Typography variant="caption" sx={{ color: colors.textMuted }}>Cao nhất</Typography>
                       </Box>
-                      <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: '#fce4ec', borderRadius: 1.5, textAlign: 'center' }}>
+                      <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgRed, borderRadius: 1.5, textAlign: 'center' }}>
                         <Typography variant="body2" sx={{ fontWeight: 700, color: '#c62828' }}>{min} tr ({lowDay})</Typography>
-                        <Typography variant="caption" sx={{ color: '#888' }}>Thấp nhất</Typography>
+                        <Typography variant="caption" sx={{ color: colors.textMuted }}>Thấp nhất</Typography>
                       </Box>
                     </Box>
                   );
@@ -309,7 +346,7 @@ const AdminDashboardPage = () => {
           <Grid item xs={12} md={4}>
             <Card sx={cardSx}>
               <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 2 }}>
                   Top 5 phim bán chạy
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -335,7 +372,7 @@ const AdminDashboardPage = () => {
                             bgcolor: movie.rank <= 3 ? '#1B4F93' : '#bdbdbd',
                             color: '#fff', fontSize: '0.6rem', fontWeight: 700,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            border: '2px solid #fff'
+                            border: '2px solid currentColor'
                           }}>
                             {movie.rank}
                           </Box>
@@ -343,10 +380,10 @@ const AdminDashboardPage = () => {
                         {/* Info */}
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.3 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#333', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: colors.textPrimary, fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {movie.title}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: '#666', fontWeight: 600, flexShrink: 0, ml: 1 }}>
+                            <Typography variant="caption" sx={{ color: colors.textSecondary, fontWeight: 600, flexShrink: 0, ml: 1 }}>
                               {movie.tickets} vé
                             </Typography>
                           </Box>
@@ -361,7 +398,7 @@ const AdminDashboardPage = () => {
                             variant="determinate"
                             value={movie.percentage}
                             sx={{
-                              height: 5, borderRadius: 3, bgcolor: '#f0f0f0',
+                              height: 5, borderRadius: 3, bgcolor: colors.bgProgressTrack,
                               '& .MuiLinearProgress-bar': { borderRadius: 3, bgcolor: movie.rank <= 3 ? '#1B4F93' : '#90caf9' }
                             }}
                           />
@@ -383,18 +420,18 @@ const AdminDashboardPage = () => {
           <Grid item xs={12} md={8}>
             <Card sx={cardSx}>
               <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 0.5 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.5 }}>
                   Combo bán chạy
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 2 }}>
+                <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 2 }}>
                   Thống kê F&B trong tháng
                 </Typography>
                 {/* Header */}
                 <Box sx={{ display: 'flex', alignItems: 'center', px: 1, mb: 1 }}>
-                  <Typography variant="caption" sx={{ flex: 2, fontWeight: 700, color: '#888', fontSize: '0.7rem' }}>TÊN COMBO</Typography>
-                  <Typography variant="caption" sx={{ width: 70, fontWeight: 700, color: '#888', fontSize: '0.7rem', textAlign: 'right' }}>GIÁ</Typography>
-                  <Typography variant="caption" sx={{ width: 60, fontWeight: 700, color: '#888', fontSize: '0.7rem', textAlign: 'right' }}>ĐÃ BÁN</Typography>
-                  <Typography variant="caption" sx={{ width: 90, fontWeight: 700, color: '#888', fontSize: '0.7rem', textAlign: 'right' }}>DOANH THU</Typography>
+                  <Typography variant="caption" sx={{ flex: 2, fontWeight: 700, color: colors.textMuted, fontSize: '0.7rem' }}>TÊN COMBO</Typography>
+                  <Typography variant="caption" sx={{ width: 70, fontWeight: 700, color: colors.textMuted, fontSize: '0.7rem', textAlign: 'right' }}>GIÁ</Typography>
+                  <Typography variant="caption" sx={{ width: 60, fontWeight: 700, color: colors.textMuted, fontSize: '0.7rem', textAlign: 'right' }}>ĐÃ BÁN</Typography>
+                  <Typography variant="caption" sx={{ width: 90, fontWeight: 700, color: colors.textMuted, fontSize: '0.7rem', textAlign: 'right' }}>DOANH THU</Typography>
                 </Box>
                 {/* Items */}
                 {(() => {
@@ -404,21 +441,21 @@ const AdminDashboardPage = () => {
                     <>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         {TOP_COMBOS.map((combo, idx) => (
-                          <Box key={idx} sx={{ p: 1, borderRadius: 1.5, bgcolor: '#fafbfc', '&:hover': { bgcolor: '#f0f4f8' } }}>
+                          <Box key={idx} sx={{ p: 1, borderRadius: 1.5, bgcolor: colors.bgSubtle, '&:hover': { bgcolor: colors.bgSubtleHover } }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                               <Box sx={{ flex: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: combo.color, flexShrink: 0 }} />
-                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#333', fontSize: '0.82rem' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: colors.textPrimary, fontSize: '0.82rem' }}>
                                   {combo.name}
                                 </Typography>
                               </Box>
-                              <Typography variant="body2" sx={{ width: 70, textAlign: 'right', color: '#666', fontSize: '0.78rem' }}>
+                              <Typography variant="body2" sx={{ width: 70, textAlign: 'right', color: colors.textSecondary, fontSize: '0.78rem' }}>
                                 {combo.price}K
                               </Typography>
                               <Typography variant="body2" sx={{ width: 60, textAlign: 'right', fontWeight: 600, color: '#1B4F93', fontSize: '0.82rem' }}>
                                 {combo.sold}
                               </Typography>
-                              <Typography variant="body2" sx={{ width: 90, textAlign: 'right', fontWeight: 600, color: '#333', fontSize: '0.78rem' }}>
+                              <Typography variant="body2" sx={{ width: 90, textAlign: 'right', fontWeight: 600, color: colors.textPrimary, fontSize: '0.78rem' }}>
                                 {(combo.revenue / 1000).toFixed(1)}tr
                               </Typography>
                             </Box>
@@ -426,7 +463,7 @@ const AdminDashboardPage = () => {
                               variant="determinate"
                               value={Math.round((combo.sold / maxSold) * 100)}
                               sx={{
-                                height: 4, borderRadius: 2, bgcolor: '#eee',
+                                height: 4, borderRadius: 2, bgcolor: colors.bgProgressTrack,
                                 '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: combo.color }
                               }}
                             />
@@ -434,8 +471,8 @@ const AdminDashboardPage = () => {
                         ))}
                       </Box>
                       {/* Total */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, pt: 1.5, borderTop: '1px solid #eee' }}>
-                        <Typography variant="body2" sx={{ color: '#888', fontWeight: 500 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, pt: 1.5, borderTop: `1px solid ${colors.borderSubtle}` }}>
+                        <Typography variant="body2" sx={{ color: colors.textMuted, fontWeight: 500 }}>
                           Tổng cộng: {TOP_COMBOS.reduce((s, c) => s + c.sold, 0)} combo đã bán
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 700, color: '#1B4F93' }}>
@@ -453,53 +490,58 @@ const AdminDashboardPage = () => {
           <Grid item xs={12} md={4}>
             <Card sx={cardSx}>
               <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 0.5 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.5 }}>
                   Phân bổ thành viên
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1 }}>
+                <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1 }}>
                   Tổng quan hạng thành viên
                 </Typography>
                 {(() => {
                   const total = MEMBERSHIP_DISTRIBUTION.reduce((s, m) => s + m.value, 0);
                   return (
                     <>
-                      <PieChart
-                        series={[{
-                          data: MEMBERSHIP_DISTRIBUTION,
-                          innerRadius: 45,
-                          outerRadius: 75,
-                          paddingAngle: 3,
-                          cornerRadius: 4,
-                          valueFormatter: (item) => {
-                            const percent = Math.round((item.value / total) * 100);
-                            return `${item.value.toLocaleString()} người (${percent}%)`;
-                          }
-                        }]}
-                        height={170}
-                        margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-                        slotProps={{ legend: { hidden: true } }}
-                      />
+                      <Box sx={{
+                        '& text': { fill: `${darkMode ? '#fff' : '#555'} !important` },
+                        '& tspan': { fill: `${darkMode ? '#fff' : '#555'} !important` }
+                      }}>
+                        <PieChart
+                          series={[{
+                            data: MEMBERSHIP_DISTRIBUTION,
+                            innerRadius: 45,
+                            outerRadius: 75,
+                            paddingAngle: 3,
+                            cornerRadius: 4,
+                            valueFormatter: (item) => {
+                              const percent = Math.round((item.value / total) * 100);
+                              return `${item.value.toLocaleString()} người (${percent}%)`;
+                            }
+                          }]}
+                          height={170}
+                          margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                          slotProps={{ legend: { hidden: true } }}
+                        />
+                      </Box>
                       {/* Tổng */}
                       <Box sx={{ textAlign: 'center', mb: 1.5 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1a1a2e', lineHeight: 1.2 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: colors.textPrimary, lineHeight: 1.2 }}>
                           {total.toLocaleString()}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#888' }}>Tổng thành viên</Typography>
+                        <Typography variant="caption" sx={{ color: colors.textMuted }}>Tổng thành viên</Typography>
                       </Box>
                       {/* Tier breakdown */}
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         {MEMBERSHIP_DISTRIBUTION.map((tier) => {
                           const percent = Math.round((tier.value / total) * 100);
                           return (
-                            <Box key={tier.id} sx={{ p: 1, bgcolor: '#fafbfc', borderRadius: 1.5 }}>
+                            <Box key={tier.id} sx={{ p: 1, bgcolor: colors.bgSubtle, borderRadius: 1.5 }}>
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                                   <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: tier.color }} />
-                                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#333', fontSize: '0.82rem' }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: colors.textPrimary, fontSize: '0.82rem' }}>
                                     {tier.label}
                                   </Typography>
                                 </Box>
-                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a2e', fontSize: '0.82rem' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: colors.textPrimary, fontSize: '0.82rem' }}>
                                   {tier.value.toLocaleString()} ({percent}%)
                                 </Typography>
                               </Box>
@@ -507,7 +549,7 @@ const AdminDashboardPage = () => {
                                 variant="determinate"
                                 value={percent}
                                 sx={{
-                                  height: 4, borderRadius: 2, bgcolor: '#eee',
+                                  height: 4, borderRadius: 2, bgcolor: colors.bgProgressTrack,
                                   '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: tier.color }
                                 }}
                               />
@@ -531,10 +573,10 @@ const AdminDashboardPage = () => {
           <Grid item xs={12} sm={6} md={4}>
             <Card sx={cardSx}>
               <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 0.5, alignSelf: 'flex-start' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.5, alignSelf: 'flex-start' }}>
                   Tỷ lệ lấp đầy ghế hôm nay
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1.5 }}>
+                <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1.5 }}>
                   Tổng hợp tất cả phòng chiếu
                 </Typography>
                 {/* Circular gauge + stats */}
@@ -551,26 +593,26 @@ const AdminDashboardPage = () => {
                       position: 'absolute', top: 0, left: 0, bottom: 0, right: 0,
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
                     }}>
-                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#1a1a2e', lineHeight: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: colors.textPrimary, lineHeight: 1 }}>
                         {SEAT_OCCUPANCY.percentage}%
                       </Typography>
                     </Box>
                   </Box>
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                      <Typography variant="caption" sx={{ color: '#888' }}>Đã đặt</Typography>
+                      <Typography variant="caption" sx={{ color: colors.textMuted }}>Đã đặt</Typography>
                       <Typography variant="caption" sx={{ fontWeight: 700, color: '#4caf50' }}>{SEAT_OCCUPANCY.bookedSeats}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                      <Typography variant="caption" sx={{ color: '#888' }}>Còn trống</Typography>
+                      <Typography variant="caption" sx={{ color: colors.textMuted }}>Còn trống</Typography>
                       <Typography variant="caption" sx={{ fontWeight: 700, color: '#999' }}>{SEAT_OCCUPANCY.totalSeats - SEAT_OCCUPANCY.bookedSeats}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                      <Typography variant="caption" sx={{ color: '#888' }}>Tổng ghế</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#1a1a2e' }}>{SEAT_OCCUPANCY.totalSeats}</Typography>
+                      <Typography variant="caption" sx={{ color: colors.textMuted }}>Tổng ghế</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: colors.textPrimary }}>{SEAT_OCCUPANCY.totalSeats}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="caption" sx={{ color: '#888' }}>Hôm qua</Typography>
+                      <Typography variant="caption" sx={{ color: colors.textMuted }}>Hôm qua</Typography>
                       <Typography variant="caption" sx={{ fontWeight: 700, color: SEAT_OCCUPANCY.percentage >= SEAT_OCCUPANCY.yesterdayPercentage ? '#4caf50' : '#f44336' }}>
                         {SEAT_OCCUPANCY.percentage >= SEAT_OCCUPANCY.yesterdayPercentage ? '↓' : '↑'} {SEAT_OCCUPANCY.yesterdayPercentage}%
                       </Typography>
@@ -578,18 +620,18 @@ const AdminDashboardPage = () => {
                   </Box>
                 </Box>
                 {/* Room breakdown */}
-                <Typography variant="caption" sx={{ fontWeight: 700, color: '#888', mb: 0.5, display: 'block' }}>CHI TIẾT PHÒNG</Typography>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: colors.textMuted, mb: 0.5, display: 'block' }}>CHI TIẾT PHÒNG</Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                   {SEAT_OCCUPANCY.rooms.slice(0, 5).map((room, idx) => {
                     const pct = Math.round((room.booked / room.total) * 100);
                     const barColor = pct >= 70 ? '#4caf50' : pct >= 50 ? '#ff9800' : '#f44336';
                     return (
                       <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="caption" sx={{ color: '#555', fontSize: '0.68rem', width: 100, flexShrink: 0 }}>{room.name}</Typography>
+                        <Typography variant="caption" sx={{ color: colors.textSecondary, fontSize: '0.68rem', width: 100, flexShrink: 0 }}>{room.name}</Typography>
                         <LinearProgress variant="determinate" value={pct}
-                          sx={{ flex: 1, height: 4, borderRadius: 2, bgcolor: '#eee', '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: barColor } }}
+                          sx={{ flex: 1, height: 4, borderRadius: 2, bgcolor: colors.bgProgressTrack, '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: barColor } }}
                         />
-                        <Typography variant="caption" sx={{ fontWeight: 600, color: '#333', fontSize: '0.68rem', width: 35, textAlign: 'right' }}>{pct}%</Typography>
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: colors.textPrimary, fontSize: '0.68rem', width: 35, textAlign: 'right' }}>{pct}%</Typography>
                       </Box>
                     );
                   })}
@@ -603,12 +645,12 @@ const AdminDashboardPage = () => {
             <Card sx={cardSx}>
               <CardContent sx={{ p: 2.5 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary }}>
                     Khuyến mãi đang hoạt động
                   </Typography>
                   <Chip label={`${ACTIVE_PROMOTIONS.totalPromotions} KM`} size="small" sx={{ bgcolor: '#e91e63', color: '#fff', fontWeight: 700, fontSize: '0.65rem', height: 20 }} />
                 </Box>
-                <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1.5 }}>
+                <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1.5 }}>
                   {ACTIVE_PROMOTIONS.totalVouchers} voucher đang lưu hành
                 </Typography>
                 {/* Promotion list */}
@@ -616,17 +658,17 @@ const AdminDashboardPage = () => {
                   {ACTIVE_PROMOTIONS.promotionList.map((promo, idx) => {
                     const usePct = Math.round((promo.used / promo.total) * 100);
                     return (
-                      <Box key={idx} sx={{ p: 1, bgcolor: '#fafbfc', borderRadius: 1.5 }}>
+                      <Box key={idx} sx={{ p: 1, bgcolor: colors.bgSubtle, borderRadius: 1.5 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.3 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#333', fontSize: '0.78rem' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: colors.textPrimary, fontSize: '0.78rem' }}>
                             {promo.name}
                           </Typography>
                           <Chip label={promo.type} size="small"
-                            sx={{ height: 16, fontSize: '0.58rem', fontWeight: 600, bgcolor: '#e3f2fd', color: '#1565c0', '& .MuiChip-label': { px: 0.6 } }}
+                            sx={{ height: 16, fontSize: '0.58rem', fontWeight: 600, bgcolor: colors.bgBlue, color: '#1565c0', '& .MuiChip-label': { px: 0.6 } }}
                           />
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.3 }}>
-                          <Typography variant="caption" sx={{ color: '#999', fontSize: '0.68rem' }}>
+                          <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.68rem' }}>
                             HSD: {promo.endDate} • Đã dùng: {promo.used}/{promo.total}
                           </Typography>
                           <Typography variant="caption" sx={{ fontWeight: 600, color: usePct >= 80 ? '#f44336' : '#1B4F93', fontSize: '0.68rem' }}>
@@ -634,7 +676,7 @@ const AdminDashboardPage = () => {
                           </Typography>
                         </Box>
                         <LinearProgress variant="determinate" value={usePct}
-                          sx={{ height: 3, borderRadius: 2, bgcolor: '#eee', '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: usePct >= 80 ? '#f44336' : '#4caf50' } }}
+                          sx={{ height: 3, borderRadius: 2, bgcolor: colors.bgProgressTrack, '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: usePct >= 80 ? '#f44336' : '#4caf50' } }}
                         />
                       </Box>
                     );
@@ -648,54 +690,54 @@ const AdminDashboardPage = () => {
           <Grid item xs={12} md={4}>
             <Card sx={cardSx}>
               <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e', mb: 0.5 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.5 }}>
                   Tổng quan nhanh
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1.5 }}>
+                <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1.5 }}>
                   Dữ liệu hôm nay — 28/02/2026
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: '#e3f2fd', borderRadius: 1.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: colors.bgBlue, borderRadius: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <ConfirmationNumberIcon sx={{ color: '#1565c0', fontSize: 18 }} />
-                      <Typography variant="body2" sx={{ color: '#333', fontSize: '0.82rem' }}>Suất chiếu</Typography>
+                      <Typography variant="body2" sx={{ color: colors.textPrimary, fontSize: '0.82rem' }}>Suất chiếu</Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 700, color: '#1565c0' }}>{TODAY_SHOWTIMES.length} suất</Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: '#e8f5e9', borderRadius: 1.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: colors.bgGreen, borderRadius: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <AttachMoneyIcon sx={{ color: '#2e7d32', fontSize: 18 }} />
-                      <Typography variant="body2" sx={{ color: '#333', fontSize: '0.82rem' }}>Doanh thu</Typography>
+                      <Typography variant="body2" sx={{ color: colors.textPrimary, fontSize: '0.82rem' }}>Doanh thu</Typography>
                     </Box>
                     <Box sx={{ textAlign: 'right' }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, color: '#2e7d32' }}>85.2 triệu</Typography>
                       <Typography variant="caption" sx={{ color: '#4caf50', fontSize: '0.65rem' }}>↑ 12% vs hôm qua</Typography>
                     </Box>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: '#fff8e1', borderRadius: 1.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: colors.bgWarm, borderRadius: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <ShoppingCartIcon sx={{ color: '#e65100', fontSize: 18 }} />
-                      <Typography variant="body2" sx={{ color: '#333', fontSize: '0.82rem' }}>Đơn hàng</Typography>
+                      <Typography variant="body2" sx={{ color: colors.textPrimary, fontSize: '0.82rem' }}>Đơn hàng</Typography>
                     </Box>
                     <Box sx={{ textAlign: 'right' }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, color: '#e65100' }}>48 đơn</Typography>
                       <Typography variant="caption" sx={{ color: '#f44336', fontSize: '0.65rem' }}>↓ 5% vs hôm qua</Typography>
                     </Box>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: '#f3e5f5', borderRadius: 1.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: colors.bgPurple, borderRadius: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <StarIcon sx={{ color: '#7b1fa2', fontSize: 18 }} />
-                      <Typography variant="body2" sx={{ color: '#333', fontSize: '0.82rem' }}>Review mới</Typography>
+                      <Typography variant="body2" sx={{ color: colors.textPrimary, fontSize: '0.82rem' }}>Review mới</Typography>
                     </Box>
                     <Box sx={{ textAlign: 'right' }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, color: '#7b1fa2' }}>12 đánh giá</Typography>
                       <Typography variant="caption" sx={{ color: '#4caf50', fontSize: '0.65rem' }}>⭐ TB: 4.2/5</Typography>
                     </Box>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: '#fce4ec', borderRadius: 1.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, bgcolor: colors.bgRed, borderRadius: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <PeopleIcon sx={{ color: '#c62828', fontSize: 18 }} />
-                      <Typography variant="body2" sx={{ color: '#333', fontSize: '0.82rem' }}>Thành viên mới</Typography>
+                      <Typography variant="body2" sx={{ color: colors.textPrimary, fontSize: '0.82rem' }}>Thành viên mới</Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 700, color: '#c62828' }}>7 người</Typography>
                   </Box>
@@ -711,25 +753,25 @@ const AdminDashboardPage = () => {
         <Card sx={{ ...cardSx, mb: { xs: 2, sm: 3 } }}>
           <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary }}>
                 Suất chiếu hôm nay
               </Typography>
-              <Typography variant="caption" sx={{ color: '#888' }}>
+              <Typography variant="caption" sx={{ color: colors.textMuted }}>
                 Tổng: {TODAY_SHOWTIMES.length} suất • Trang {showtimePage}/{totalShowtimePages}
               </Typography>
             </Box>
-            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #f0f0f0', borderRadius: 1.5, overflowX: 'auto' }}>
-              <Table size="small" sx={{ minWidth: 800 }}>
+            <TableContainer component={Paper} elevation={0} sx={{ bgcolor: colors.bgCard, border: `1px solid ${colors.borderTable}`, borderRadius: 1.5, overflowX: 'auto' }}>
+              <Table size="small" sx={{ minWidth: 800, '& .MuiTableCell-root': { color: colors.textPrimary, borderColor: colors.borderSubtle } }}>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Giờ chiếu</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Phim</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Phòng</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Định dạng</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Ngôn ngữ</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Giá vé</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Ghế đặt</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Trạng thái</TableCell>
+                  <TableRow sx={{ bgcolor: colors.bgTableHead }}>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Giờ chiếu</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Phim</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Phòng</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Định dạng</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Ngôn ngữ</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Giá vé</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Ghế đặt</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Trạng thái</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -739,9 +781,9 @@ const AdminDashboardPage = () => {
                     const statusMap = { OPEN: { label: 'Đang mở', color: '#e8f5e9', textColor: '#2e7d32' }, CLOSED: { label: 'Đã đóng', color: '#f5f5f5', textColor: '#888' }, CANCELED: { label: 'Đã hủy', color: '#ffebee', textColor: '#c62828' } };
                     const st = statusMap[show.status] || statusMap.OPEN;
                     return (
-                      <TableRow key={idx} sx={{ '&:hover': { bgcolor: '#fafbfc' }, opacity: show.status === 'CANCELED' ? 0.5 : 1 }}>
-                        <TableCell sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#1a1a2e' }}>
-                          {show.time} <Typography component="span" sx={{ color: '#999', fontSize: '0.7rem' }}>- {show.endTime}</Typography>
+                      <TableRow key={idx} sx={{ '&:hover': { bgcolor: colors.bgSubtle }, opacity: show.status === 'CANCELED' ? 0.5 : 1 }}>
+                        <TableCell sx={{ fontSize: '0.8rem', fontWeight: 600, color: colors.textPrimary }}>
+                          {show.time} <Typography component="span" sx={{ color: colors.textMuted, fontSize: '0.7rem' }}>- {show.endTime}</Typography>
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.8rem' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -821,9 +863,9 @@ const AdminDashboardPage = () => {
             {totalShowtimePages > 1 && (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0.5, mt: 2 }}>
                 <Box onClick={() => setShowtimePage(1)}
-                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: showtimePage === 1 ? 'default' : 'pointer', color: showtimePage === 1 ? '#ccc' : '#666', fontSize: '14px' }}>«</Box>
+                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: showtimePage === 1 ? 'default' : 'pointer', color: showtimePage === 1 ? colors.textDisabled : colors.paginationText, fontSize: '14px' }}>«</Box>
                 <Box onClick={() => showtimePage > 1 && setShowtimePage(showtimePage - 1)}
-                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: showtimePage === 1 ? 'default' : 'pointer', color: showtimePage === 1 ? '#ccc' : '#666', fontSize: '14px' }}>‹</Box>
+                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: showtimePage === 1 ? 'default' : 'pointer', color: showtimePage === 1 ? colors.textDisabled : colors.paginationText, fontSize: '14px' }}>‹</Box>
                 {[...Array(totalShowtimePages)].map((_, idx) => {
                   const pageNum = idx + 1;
                   return (
@@ -831,16 +873,16 @@ const AdminDashboardPage = () => {
                       sx={{
                         width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                         bgcolor: showtimePage === pageNum ? '#f5a623' : 'transparent',
-                        color: showtimePage === pageNum ? '#fff' : '#666',
+                        color: showtimePage === pageNum ? '#fff' : colors.paginationText,
                         borderRadius: '4px', fontSize: '14px', fontWeight: showtimePage === pageNum ? 600 : 400,
-                        '&:hover': { bgcolor: showtimePage === pageNum ? '#f5a623' : '#f0f0f0' }
+                        '&:hover': { bgcolor: showtimePage === pageNum ? '#f5a623' : colors.paginationHover }
                       }}>{pageNum}</Box>
                   );
                 })}
                 <Box onClick={() => showtimePage < totalShowtimePages && setShowtimePage(showtimePage + 1)}
-                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: showtimePage === totalShowtimePages ? 'default' : 'pointer', color: showtimePage === totalShowtimePages ? '#ccc' : '#666', fontSize: '14px' }}>›</Box>
+                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: showtimePage === totalShowtimePages ? 'default' : 'pointer', color: showtimePage === totalShowtimePages ? colors.textDisabled : colors.paginationText, fontSize: '14px' }}>›</Box>
                 <Box onClick={() => setShowtimePage(totalShowtimePages)}
-                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: showtimePage === totalShowtimePages ? 'default' : 'pointer', color: showtimePage === totalShowtimePages ? '#ccc' : '#666', fontSize: '14px' }}>»</Box>
+                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: showtimePage === totalShowtimePages ? 'default' : 'pointer', color: showtimePage === totalShowtimePages ? colors.textDisabled : colors.paginationText, fontSize: '14px' }}>»</Box>
               </Box>
             )}
           </CardContent>
@@ -852,35 +894,35 @@ const AdminDashboardPage = () => {
         <Card sx={cardSx}>
           <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a2e' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.textPrimary }}>
                 Đơn hàng gần đây
               </Typography>
-              <Typography variant="caption" sx={{ color: '#888' }}>
+              <Typography variant="caption" sx={{ color: colors.textMuted }}>
                 Tổng: {RECENT_ORDERS.length} đơn • Trang {orderPage}/{totalOrderPages}
               </Typography>
             </Box>
-            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #f0f0f0', borderRadius: 1.5, overflowX: 'auto' }}>
-              <Table size="small" sx={{ minWidth: 750 }}>
+            <TableContainer component={Paper} elevation={0} sx={{ bgcolor: colors.bgCard, border: `1px solid ${colors.borderTable}`, borderRadius: 1.5, overflowX: 'auto' }}>
+              <Table size="small" sx={{ minWidth: 750, '& .MuiTableCell-root': { color: colors.textPrimary, borderColor: colors.borderSubtle } }}>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Mã đơn</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Thời gian</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Khách hàng</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Phim</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Ghế</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Combo</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Giảm giá</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Tổng tiền</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Trạng thái</TableCell>
+                  <TableRow sx={{ bgcolor: colors.bgTableHead }}>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Mã đơn</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Thời gian</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Khách hàng</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Phim</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Ghế</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Combo</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Giảm giá</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Tổng tiền</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem' }}>Trạng thái</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {pagedOrders.map((order) => {
                     const statusProps = getStatusProps(order.status);
                     return (
-                      <TableRow key={order.orderNo} sx={{ '&:hover': { bgcolor: '#fafbfc' } }}>
+                      <TableRow key={order.orderNo} sx={{ '&:hover': { bgcolor: colors.bgSubtle } }}>
                         <TableCell sx={{ fontSize: '0.8rem', fontWeight: 500, color: '#1B4F93' }}>{order.orderNo}</TableCell>
-                        <TableCell sx={{ fontSize: '0.75rem', color: '#888' }}>{order.createdAt}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem', color: colors.textMuted }}>{order.createdAt}</TableCell>
                         <TableCell sx={{ fontSize: '0.8rem' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Avatar
@@ -929,9 +971,9 @@ const AdminDashboardPage = () => {
             {totalOrderPages > 1 && (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0.5, mt: 2 }}>
                 <Box onClick={() => setOrderPage(1)}
-                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: orderPage === 1 ? 'default' : 'pointer', color: orderPage === 1 ? '#ccc' : '#666', fontSize: '14px' }}>«</Box>
+                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: orderPage === 1 ? 'default' : 'pointer', color: orderPage === 1 ? colors.textDisabled : colors.paginationText, fontSize: '14px' }}>«</Box>
                 <Box onClick={() => orderPage > 1 && setOrderPage(orderPage - 1)}
-                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: orderPage === 1 ? 'default' : 'pointer', color: orderPage === 1 ? '#ccc' : '#666', fontSize: '14px' }}>‹</Box>
+                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: orderPage === 1 ? 'default' : 'pointer', color: orderPage === 1 ? colors.textDisabled : colors.paginationText, fontSize: '14px' }}>‹</Box>
                 {[...Array(totalOrderPages)].map((_, idx) => {
                   const pageNum = idx + 1;
                   return (
@@ -939,16 +981,16 @@ const AdminDashboardPage = () => {
                       sx={{
                         width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                         bgcolor: orderPage === pageNum ? '#f5a623' : 'transparent',
-                        color: orderPage === pageNum ? '#fff' : '#666',
+                        color: orderPage === pageNum ? '#fff' : colors.paginationText,
                         borderRadius: '4px', fontSize: '14px', fontWeight: orderPage === pageNum ? 600 : 400,
-                        '&:hover': { bgcolor: orderPage === pageNum ? '#f5a623' : '#f0f0f0' }
+                        '&:hover': { bgcolor: orderPage === pageNum ? '#f5a623' : colors.paginationHover }
                       }}>{pageNum}</Box>
                   );
                 })}
                 <Box onClick={() => orderPage < totalOrderPages && setOrderPage(orderPage + 1)}
-                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: orderPage === totalOrderPages ? 'default' : 'pointer', color: orderPage === totalOrderPages ? '#ccc' : '#666', fontSize: '14px' }}>›</Box>
+                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: orderPage === totalOrderPages ? 'default' : 'pointer', color: orderPage === totalOrderPages ? colors.textDisabled : colors.paginationText, fontSize: '14px' }}>›</Box>
                 <Box onClick={() => setOrderPage(totalOrderPages)}
-                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: orderPage === totalOrderPages ? 'default' : 'pointer', color: orderPage === totalOrderPages ? '#ccc' : '#666', fontSize: '14px' }}>»</Box>
+                  sx={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: orderPage === totalOrderPages ? 'default' : 'pointer', color: orderPage === totalOrderPages ? colors.textDisabled : colors.paginationText, fontSize: '14px' }}>»</Box>
               </Box>
             )}
           </CardContent>

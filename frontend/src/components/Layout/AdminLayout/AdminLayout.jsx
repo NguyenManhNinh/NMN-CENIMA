@@ -1,36 +1,56 @@
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
+import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
-import AdminNavbar from './AdminNavbar';
+import { AdminThemeProvider, useAdminTheme } from './AdminThemeContext';
+
+/**
+ * AdminContent – Nội dung bên trong Provider
+ * Dùng useAdminTheme để lấy bảng màu
+ */
+const AdminContent = () => {
+  const { colors } = useAdminTheme();
+
+  // State điều khiển mở/đóng sidebar trên mobile
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: colors.bgPage, transition: 'background-color 0.3s ease' }}>
+      {/* Sidebar điều hướng */}
+      <AdminSidebar
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
+
+      {/* Vùng nội dung chính (bên phải sidebar) */}
+      <Box sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: 0
+      }}>
+        {/* Header: tìm kiếm, thông báo, theme toggle, avatar */}
+        <AdminHeader onMenuClick={() => setMobileOpen(true)} />
+
+        {/* Nội dung trang con */}
+        <Box component="main" sx={{ flex: 1 }}>
+          <Outlet />
+        </Box>
+      </Box>
+    </Box>
+  );
+};
 
 /**
  * AdminLayout – Layout chung cho các trang quản trị
- * - AdminHeader: thanh trên cùng (logo + avatar)
- * - AdminNavbar: thanh điều hướng tab (Trang chủ, ...)
- * - Outlet: nội dung trang con
+ * Bọc AdminThemeProvider để tất cả component con truy cập chế độ sáng/tối
  */
 const AdminLayout = () => {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Header cố định + Navbar liền bên dưới */}
-      <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1200 }}>
-        <AdminHeader />
-        <AdminNavbar />
-      </Box>
-
-      {/* Vùng nội dung chính – margin-top bù cho header + navbar */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          mt: { xs: '100px', sm: '108px' },
-          backgroundColor: '#f5f7fa',
-          minHeight: 'calc(100vh - 108px)'
-        }}
-      >
-        <Outlet />
-      </Box>
-    </Box>
+    <AdminThemeProvider>
+      <AdminContent />
+    </AdminThemeProvider>
   );
 };
 
