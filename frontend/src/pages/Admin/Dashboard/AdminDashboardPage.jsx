@@ -14,6 +14,7 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import StarIcon from '@mui/icons-material/Star';
 import PeopleIcon from '@mui/icons-material/People';
+import InboxIcon from '@mui/icons-material/Inbox';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { LineChart } from '@mui/x-charts/LineChart';
@@ -44,6 +45,16 @@ const ICON_MAP = {
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
+
+// Empty state placeholder — hiển thị khi chưa có dữ liệu
+const EmptyPlaceholder = ({ message = 'Chưa có dữ liệu', height = 200, colors }) => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height, gap: 1 }}>
+    <InboxIcon sx={{ fontSize: 40, color: colors?.textMuted || 'rgba(0,0,0,0.2)' }} />
+    <Typography variant="body2" sx={{ color: colors?.textMuted || 'rgba(0,0,0,0.4)', fontSize: '0.85rem' }}>
+      {message}
+    </Typography>
+  </Box>
+);
 
 // Lấy nhãn và màu cho trạng thái đơn hàng
 const getStatusProps = (status) => {
@@ -254,7 +265,7 @@ const AdminDashboardPage = () => {
                     '& span': { color: `${darkMode ? '#fff' : '#555'} !important` },
                     '& p': { color: `${darkMode ? '#fff' : '#555'} !important` }
                   }}>
-                    <BarChart
+                    {revenue7Days.length > 0 ? <BarChart
                       xAxis={[{ scaleType: 'band', data: revenue7Days.map(d => d.day), tickLabelStyle: { fill: colors.textSecondary } }]}
                       yAxis={[{ label: 'VNĐ', valueFormatter: (v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}tr` : v >= 1e3 ? `${Math.round(v / 1e3)}K` : `${v}`, tickLabelStyle: { fill: colors.textSecondary }, labelStyle: { fill: colors.textMuted } }]}
                       series={[
@@ -276,7 +287,7 @@ const AdminDashboardPage = () => {
                         '& .MuiChartsAxis-tick': { stroke: colors.borderSubtle },
                         minWidth: 300
                       }}
-                    />
+                    /> : <EmptyPlaceholder message="Chưa có dữ liệu doanh thu" height={220} colors={colors} />}
                   </Box>
                 </CardContent>
               </Card>
@@ -290,7 +301,7 @@ const AdminDashboardPage = () => {
                   <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1 }}>
                     Số vé bán theo thể loại trong tháng (Top 5)
                   </Typography>
-                  {(() => {
+                  {genreDistribution.length > 0 ? (() => {
                     // Gom thể loại: top 5 + còn lại thành "Khác"
                     const sorted = [...genreDistribution].sort((a, b) => b.value - a.value);
                     const top5 = sorted.slice(0, 5);
@@ -299,7 +310,7 @@ const AdminDashboardPage = () => {
                     const chartData = othersTotal > 0
                       ? [...top5, { id: 99, value: othersTotal, label: 'Khác', color: '#bdbdbd' }]
                       : top5;
-                    const total = chartData.reduce((s, d) => s + d.value, 0);
+                    const total = chartData.reduce((s, d) => s + d.value, 0) || 1;
                     return (
                       <>
                         <Box sx={{
@@ -323,7 +334,6 @@ const AdminDashboardPage = () => {
                             slotProps={{ legend: { hidden: true } }}
                           />
                         </Box>
-                        {/* Custom compact legend */}
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', mt: 1 }}>
                           {chartData.map((d) => (
                             <Box key={d.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -336,7 +346,7 @@ const AdminDashboardPage = () => {
                         </Box>
                       </>
                     );
-                  })()}
+                  })() : <EmptyPlaceholder message="Chưa có dữ liệu thể loại" height={200} colors={colors} />}
                 </CardContent>
               </Card>
             </Grid>
@@ -355,67 +365,70 @@ const AdminDashboardPage = () => {
                   <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1 }}>
                     {revenue30DaysRange.startDate} — {revenue30DaysRange.endDate}
                   </Typography>
-                  <Box sx={{
-                    '& text': { fill: `${darkMode ? '#fff' : '#555'} !important` },
-                    '& tspan': { fill: `${darkMode ? '#fff' : '#555'} !important` },
-                    '& span': { color: `${darkMode ? '#fff' : '#555'} !important` },
-                    '& p': { color: `${darkMode ? '#fff' : '#555'} !important` }
-                  }}>
-                    <LineChart
-                      xAxis={[{
-                        scaleType: 'band',
-                        data: revenue30Days.map(d => d.day),
-                        tickLabelStyle: { fontSize: 10, fill: colors.textSecondary }
-                      }]}
-                      yAxis={[{ label: 'VNĐ', valueFormatter: (v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}tr` : v >= 1e3 ? `${Math.round(v / 1e3)}K` : `${v}`, tickLabelStyle: { fill: colors.textSecondary }, labelStyle: { fill: colors.textMuted } }]}
-                      series={[{
-                        data: revenue30Days.map(d => d.value),
-                        label: 'Doanh thu',
-                        color: '#ff9800',
-                        area: true,
-                        valueFormatter: (v) => v != null ? `${v.toLocaleString('vi-VN')} VNĐ` : ''
-                      }]}
-                      height={260}
-                      margin={{ top: 20, right: 20, bottom: 30, left: 55 }}
-                      slotProps={{ legend: { hidden: true } }}
-                      sx={{
-                        '& .MuiChartsAxisHighlight-root': { fill: 'transparent' },
-                        '& .MuiChartsAxis-line': { stroke: colors.borderSubtle },
-                        '& .MuiChartsAxis-tick': { stroke: colors.borderSubtle }
-                      }}
-                    />
-                  </Box>
-                  {/* === Summary Stats === */}
-                  {(() => {
-                    const values = revenue30Days.map(d => d.value);
-                    const total = values.reduce((s, v) => s + v, 0);
-                    const avg = Math.round(total / 30);
-                    const max = Math.max(...values);
-                    const min = Math.min(...values);
-                    const peakDay = revenue30Days.find(d => d.value === max)?.day;
-                    const lowDay = revenue30Days.find(d => d.value === min)?.day;
-                    const fmtVND = (v) => v >= 1e9 ? `${(v / 1e9).toFixed(1)} tỷ` : v >= 1e6 ? `${(v / 1e6).toFixed(1)} tr` : v >= 1e3 ? `${Math.round(v / 1e3)}K` : `${v}`;
-                    return (
-                      <Box sx={{ display: 'flex', gap: 1.5, mt: 2, flexWrap: 'wrap' }}>
-                        <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgWarm, borderRadius: 1.5, textAlign: 'center' }}>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#e65100' }}>{fmtVND(total)}</Typography>
-                          <Typography variant="caption" sx={{ color: colors.textMuted }}>Tổng 30 ngày</Typography>
-                        </Box>
-                        <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgBlue, borderRadius: 1.5, textAlign: 'center' }}>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#1565c0' }}>~{fmtVND(avg)}/ngày</Typography>
-                          <Typography variant="caption" sx={{ color: colors.textMuted }}>Trung bình</Typography>
-                        </Box>
-                        <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgGreen, borderRadius: 1.5, textAlign: 'center' }}>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#2e7d32' }}>{fmtVND(max)} ({peakDay})</Typography>
-                          <Typography variant="caption" sx={{ color: colors.textMuted }}>Cao nhất</Typography>
-                        </Box>
-                        <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgRed, borderRadius: 1.5, textAlign: 'center' }}>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#c62828' }}>{fmtVND(min)} ({lowDay})</Typography>
-                          <Typography variant="caption" sx={{ color: colors.textMuted }}>Thấp nhất</Typography>
-                        </Box>
+                  {revenue30Days.length > 0 ? (
+                    <>
+                      <Box sx={{
+                        '& text': { fill: `${darkMode ? '#fff' : '#555'} !important` },
+                        '& tspan': { fill: `${darkMode ? '#fff' : '#555'} !important` },
+                        '& span': { color: `${darkMode ? '#fff' : '#555'} !important` },
+                        '& p': { color: `${darkMode ? '#fff' : '#555'} !important` }
+                      }}>
+                        <LineChart
+                          xAxis={[{
+                            scaleType: 'band',
+                            data: revenue30Days.map(d => d.day),
+                            tickLabelStyle: { fontSize: 10, fill: colors.textSecondary }
+                          }]}
+                          yAxis={[{ label: 'VNĐ', valueFormatter: (v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}tr` : v >= 1e3 ? `${Math.round(v / 1e3)}K` : `${v}`, tickLabelStyle: { fill: colors.textSecondary }, labelStyle: { fill: colors.textMuted } }]}
+                          series={[{
+                            data: revenue30Days.map(d => d.value),
+                            label: 'Doanh thu',
+                            color: '#ff9800',
+                            area: true,
+                            valueFormatter: (v) => v != null ? `${v.toLocaleString('vi-VN')} VNĐ` : ''
+                          }]}
+                          height={260}
+                          margin={{ top: 20, right: 20, bottom: 30, left: 55 }}
+                          slotProps={{ legend: { hidden: true } }}
+                          sx={{
+                            '& .MuiChartsAxisHighlight-root': { fill: 'transparent' },
+                            '& .MuiChartsAxis-line': { stroke: colors.borderSubtle },
+                            '& .MuiChartsAxis-tick': { stroke: colors.borderSubtle }
+                          }}
+                        />
                       </Box>
-                    );
-                  })()}
+                      {(() => {
+                        const values = revenue30Days.map(d => d.value);
+                        const total = values.reduce((s, v) => s + v, 0);
+                        const avg = values.length > 0 ? Math.round(total / values.length) : 0;
+                        const max = values.length > 0 ? Math.max(...values) : 0;
+                        const min = values.length > 0 ? Math.min(...values) : 0;
+                        const peakDay = revenue30Days.find(d => d.value === max)?.day || '—';
+                        const lowDay = revenue30Days.find(d => d.value === min)?.day || '—';
+                        const fmtVND = (v) => v >= 1e9 ? `${(v / 1e9).toFixed(1)} tỷ` : v >= 1e6 ? `${(v / 1e6).toFixed(1)} tr` : v >= 1e3 ? `${Math.round(v / 1e3)}K` : `${v}`;
+                        return (
+                          <Box sx={{ display: 'flex', gap: 1.5, mt: 2, flexWrap: 'wrap' }}>
+                            <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgWarm, borderRadius: 1.5, textAlign: 'center' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#e65100' }}>{fmtVND(total)}</Typography>
+                              <Typography variant="caption" sx={{ color: colors.textMuted }}>Tổng 30 ngày</Typography>
+                            </Box>
+                            <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgBlue, borderRadius: 1.5, textAlign: 'center' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#1565c0' }}>~{fmtVND(avg)}/ngày</Typography>
+                              <Typography variant="caption" sx={{ color: colors.textMuted }}>Trung bình</Typography>
+                            </Box>
+                            <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgGreen, borderRadius: 1.5, textAlign: 'center' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#2e7d32' }}>{fmtVND(max)} ({peakDay})</Typography>
+                              <Typography variant="caption" sx={{ color: colors.textMuted }}>Cao nhất</Typography>
+                            </Box>
+                            <Box sx={{ flex: 1, minWidth: 100, p: 1.5, bgcolor: colors.bgRed, borderRadius: 1.5, textAlign: 'center' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#c62828' }}>{fmtVND(min)} ({lowDay})</Typography>
+                              <Typography variant="caption" sx={{ color: colors.textMuted }}>Thấp nhất</Typography>
+                            </Box>
+                          </Box>
+                        );
+                      })()}
+                    </>
+                  ) : <EmptyPlaceholder message="Chưa có dữ liệu xu hướng doanh thu" height={280} colors={colors} />}
                 </CardContent>
               </Card>
             </Grid>
@@ -575,8 +588,8 @@ const AdminDashboardPage = () => {
                   <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mb: 1 }}>
                     Tổng quan hạng thành viên
                   </Typography>
-                  {(() => {
-                    const total = membershipDistribution.reduce((s, m) => s + m.value, 0);
+                  {membershipDistribution.length > 0 ? (() => {
+                    const total = membershipDistribution.reduce((s, m) => s + m.value, 0) || 1;
                     return (
                       <>
                         <Box sx={{
@@ -638,7 +651,7 @@ const AdminDashboardPage = () => {
                         </Box>
                       </>
                     );
-                  })()}
+                  })() : <EmptyPlaceholder message="Chưa có dữ liệu thành viên" height={200} colors={colors} />}
                 </CardContent>
               </Card>
             </Grid>
@@ -715,7 +728,7 @@ const AdminDashboardPage = () => {
                   </Typography>
                   {/* Promotion list */}
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {activePromotions.promotionList.map((promo, idx) => {
+                    {activePromotions.promotionList.length > 0 ? activePromotions.promotionList.map((promo, idx) => {
                       const usePct = promo.hasQuota && promo.total > 0 ? Math.round((promo.used / promo.total) * 100) : 0;
                       // Màu chip theo loại KM
                       const chipColor = promo.applyMode === 'ONLINE_VOUCHER'
@@ -750,7 +763,7 @@ const AdminDashboardPage = () => {
                           )}
                         </Box>
                       );
-                    })}
+                    }) : <EmptyPlaceholder message="Chưa có khuyến mãi" height={120} colors={colors} />}
                   </Box>
                 </CardContent>
               </Card>
@@ -860,7 +873,7 @@ const AdminDashboardPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {pagedShowtimes.map((show, idx) => {
+                    {pagedShowtimes.length > 0 ? pagedShowtimes.map((show, idx) => {
                       const [booked, total] = show.seatStatus.split('/').map(Number);
                       const fillRate = Math.round((booked / total) * 100);
                       const statusMap = { OPEN: { label: 'Đang mở', color: '#e8f5e9', textColor: '#2e7d32' }, CLOSED: { label: 'Đã đóng', color: '#f5f5f5', textColor: '#888' }, CANCELED: { label: 'Đã hủy', color: '#ffebee', textColor: '#c62828' } };
@@ -940,7 +953,14 @@ const AdminDashboardPage = () => {
                           </TableCell>
                         </TableRow>
                       );
-                    })}
+                    }) : (
+                      <TableRow>
+                        <TableCell colSpan={8} align="center" sx={{ py: 4, color: colors.textMuted }}>
+                          <InboxIcon sx={{ fontSize: 32, mb: 0.5, display: 'block', mx: 'auto', color: colors.textMuted }} />
+                          Chưa có suất chiếu hôm nay
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -1002,7 +1022,7 @@ const AdminDashboardPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {pagedOrders.map((order) => {
+                    {pagedOrders.length > 0 ? pagedOrders.map((order) => {
                       const statusProps = getStatusProps(order.status);
                       return (
                         <TableRow key={order.orderNo} sx={{ '&:hover': { bgcolor: colors.bgSubtle } }}>
@@ -1048,7 +1068,14 @@ const AdminDashboardPage = () => {
                           </TableCell>
                         </TableRow>
                       );
-                    })}
+                    }) : (
+                      <TableRow>
+                        <TableCell colSpan={9} align="center" sx={{ py: 4, color: colors.textMuted }}>
+                          <InboxIcon sx={{ fontSize: 32, mb: 0.5, display: 'block', mx: 'auto', color: colors.textMuted }} />
+                          Chưa có đơn hàng gần đây
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>

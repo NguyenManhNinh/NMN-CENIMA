@@ -1,17 +1,18 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Box, Typography, Drawer } from '@mui/material';
+import { Box, Typography, Drawer, Collapse } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MovieIcon from '@mui/icons-material/Movie';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import PeopleIcon from '@mui/icons-material/People';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import SettingsIcon from '@mui/icons-material/Settings';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import logo from '../../../assets/images/NMN_CENIMA_LOGO.png';
 
 // Chiều rộng sidebar
 const SIDEBAR_WIDTH = 260;
 
 // Danh sách menu điều hướng (phân nhóm)
+// - item có `path` → click navigate
+// - item có `children` → click mở/đóng dropdown (không navigate)
 const MENU_GROUPS = [
   {
     label: 'TỔNG QUAN',
@@ -22,16 +23,13 @@ const MENU_GROUPS = [
   {
     label: 'QUẢN LÝ',
     items: [
-      { label: 'Phim', path: '/admin/movies', icon: <MovieIcon /> },
-      { label: 'Suất chiếu', path: '/admin/showtimes', icon: <ConfirmationNumberIcon /> },
-      { label: 'Khách hàng', path: '/admin/customers', icon: <PeopleIcon /> },
-      { label: 'Khuyến mãi', path: '/admin/promotions', icon: <LocalOfferIcon /> }
-    ]
-  },
-  {
-    label: 'HỆ THỐNG',
-    items: [
-      { label: 'Cài đặt', path: '/admin/settings', icon: <SettingsIcon /> }
+      {
+        label: 'Quản lý Phim',
+        icon: <MovieIcon />,
+        children: [
+          // Thêm chức năng con ở đây sau
+        ]
+      }
     ]
   }
 ];
@@ -57,20 +55,56 @@ const menuItemSx = (isActive) => ({
   }
 });
 
+// Style cho child item (thụt vào)
+const childItemSx = (isActive) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1.5,
+  pl: 5.5,
+  pr: 2,
+  py: 0.7,
+  mx: 1.5,
+  borderRadius: 1.5,
+  cursor: 'pointer',
+  position: 'relative',
+  transition: 'color 0.2s ease',
+  bgcolor: 'transparent',
+  color: isActive ? '#fff' : 'rgba(255,255,255,0.5)',
+  fontWeight: isActive ? 600 : 400,
+  '&:hover': {
+    bgcolor: 'transparent',
+    color: '#fff'
+  }
+});
+
 /**
  * AdminSidebar – Thanh điều hướng bên trái trang quản trị
- * - Logo NMN Cinema ở trên cùng
- * - Menu nhóm: Tổng quan, Quản lý, Hệ thống
- * - Mobile: dùng Drawer mở/đóng
+ * - Hỗ trợ menu cha-con (dropdown expand/collapse)
+ * - Menu cha có `children` → toggle dropdown
+ * - Menu cha có `path` → navigate trực tiếp
  */
 const AdminSidebar = ({ mobileOpen, onMobileClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [expanded, setExpanded] = useState({});
 
-  // Xử lý click menu item
+  // Toggle expand/collapse cho parent item
+  const handleToggle = (label) => {
+    setExpanded(prev => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  // Navigate cho item đơn hoặc child item
   const handleNavClick = (path) => {
     navigate(path);
     if (onMobileClose) onMobileClose();
+  };
+
+  // Kiểm tra item cha có child nào đang active không
+  const isParentActive = (item) => {
+    if (item.children && item.children.length > 0) {
+      return item.children.some(c => location.pathname === c.path || location.pathname.startsWith(c.path + '/'));
+    }
+    return false;
   };
 
   // Nội dung sidebar
@@ -120,6 +154,72 @@ const AdminSidebar = ({ mobileOpen, onMobileClose }) => {
 
             {/* Các mục trong nhóm */}
             {group.items.map((item) => {
+              const hasChildren = item.children && item.children.length >= 0 && !item.path;
+              const isOpen = expanded[item.label] || false;
+              const parentActive = isParentActive(item);
+
+              if (hasChildren) {
+                // === PARENT ITEM (dropdown) ===
+                return (
+                  <Box key={item.label}>
+                    <Box
+                      onClick={() => handleToggle(item.label)}
+                      sx={menuItemSx(parentActive)}
+                    >
+                      <Box sx={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        '& .MuiSvgIcon-root': { fontSize: 20 }
+                      }}>
+                        {item.icon}
+                      </Box>
+                      <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 'inherit', flex: 1 }}>
+                        {item.label}
+                      </Typography>
+                      {/* Mũi tên expand/collapse */}
+                      <Box sx={{ '& .MuiSvgIcon-root': { fontSize: 16, transition: 'transform 0.2s' } }}>
+                        {isOpen ? <ExpandMoreIcon /> : <ChevronRightIcon />}
+                      </Box>
+                      {/* Thanh active bên trái */}
+                      {parentActive && (
+                        <Box sx={{
+                          position: 'absolute',
+                          left: 0, top: '50%', transform: 'translateY(-50%)',
+                          width: 3, height: 20,
+                          borderRadius: '0 4px 4px 0',
+                          bgcolor: '#4fc3f7'
+                        }} />
+                      )}
+                    </Box>
+
+                    {/* Children dropdown */}
+                    <Collapse in={isOpen} timeout="auto">
+                      {item.children.length > 0 ? (
+                        item.children.map((child) => {
+                          const isChildActive = location.pathname === child.path
+                            || location.pathname.startsWith(child.path + '/');
+                          return (
+                            <Box
+                              key={child.path}
+                              onClick={() => handleNavClick(child.path)}
+                              sx={childItemSx(isChildActive)}
+                            >
+                              <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: isChildActive ? '#4fc3f7' : 'rgba(255,255,255,0.3)' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', fontWeight: 'inherit' }}>
+                                {child.label}
+                              </Typography>
+                            </Box>
+                          );
+                        })
+                      ) : (
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.25)', pl: 5.5, py: 0.5, display: 'block', fontSize: '0.72rem' }}>
+                        </Typography>
+                      )}
+                    </Collapse>
+                  </Box>
+                );
+              }
+
+              // === SIMPLE ITEM (navigate) ===
               const isActive = location.pathname === item.path
                 || location.pathname.startsWith(item.path + '/');
               return (
