@@ -69,5 +69,36 @@ router.get('/top-movies', reportController.getTopMovies);
  */
 router.get('/occupancy', reportController.getOccupancyRate);
 
-module.exports = router;
+// ========== DASHBOARD ENDPOINTS ==========
 
+/** GET /reports/dashboard/stats — 4 thẻ thống kê */
+router.get('/dashboard/stats', reportController.getDashboardStats);
+
+/** GET /reports/dashboard/revenue-7d — Doanh thu 7 ngày (BarChart) */
+router.get('/dashboard/revenue-7d', reportController.getRevenue7Days);
+
+/** GET /reports/dashboard/revenue-30d — Xu hướng 30 ngày (LineChart) */
+router.get('/dashboard/revenue-30d', reportController.getRevenue30Days);
+
+/** GET /reports/dashboard/genre-stats — Thể loại phim (PieChart) */
+router.get('/dashboard/genre-stats', reportController.getGenreStats);
+
+/** GET /reports/dashboard/today-showtimes — Suất chiếu hôm nay */
+router.get('/dashboard/today-showtimes', reportController.getTodayShowtimes);
+
+/** GET /reports/dashboard/recent-orders — Đơn hàng gần đây */
+router.get('/dashboard/recent-orders', reportController.getRecentOrders);
+
+/** GET /reports/dashboard/top-combos — Top combo bán chạy */
+router.get('/dashboard/top-combos', reportController.getTopCombos);
+
+/** GET /reports/dashboard/membership — Phân bổ thành viên */
+router.get('/dashboard/membership', reportController.getMembershipStats);
+
+/** GET /reports/dashboard/promotions — Khuyến mãi đang hoạt động */
+router.get('/dashboard/promotions', reportController.getActivePromotions);
+
+/** GET /reports/dashboard/today-summary — Tổng quan nhanh hôm nay */
+router.get('/dashboard/today-summary', reportController.getTodaySummary);
+
+module.exports = router;
