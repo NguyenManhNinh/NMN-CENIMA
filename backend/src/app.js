@@ -84,6 +84,13 @@ app.use(mongoSanitize());
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Serve static uploads (cho phép cross-origin để frontend truy cập ảnh)
+const path = require('path');
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, '..', 'public', 'uploads')));
+
 // 2) ROUTES
 app.use('/api/v1', routes);
 

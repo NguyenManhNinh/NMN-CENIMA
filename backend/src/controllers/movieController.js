@@ -2,12 +2,57 @@ const Movie = require('../models/Movie');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
+// Proxy lấy thông tin YouTube (avatar kênh, title) - tránh CORS
+exports.getYoutubeInfo = catchAsync(async (req, res, next) => {
+  const { videoId } = req.params;
+  if (!videoId || videoId.length !== 11) {
+    return next(new AppError('Video ID không hợp lệ', 400));
+  }
+
+  try {
+    // Lấy title + channel từ oEmbed
+    const oembedRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+    const oembed = await oembedRes.json();
+
+    // Lấy avatar kênh từ YouTube page
+    let avatar = '';
+    try {
+      const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      });
+      const html = await pageRes.text();
+      // Tìm channelThumbnail trong InitialPlayerResponse
+      const avatarMatch = html.match(/"channelThumbnail":\{"thumbnails":\[\{"url":"([^"]+)"/);
+      if (avatarMatch) avatar = avatarMatch[1];
+    } catch (e) { /* ignore */ }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        title: oembed.title || '',
+        channel: oembed.author_name || '',
+        avatar
+      }
+    });
+  } catch (err) {
+    res.status(200).json({
+      status: 'success',
+      data: { title: '', channel: '', avatar: '' }
+    });
+  }
+});
+
 // Lấy danh sách phim (có thể lọc, phân trang)
 exports.getAllMovies = catchAsync(async (req, res, next) => {
-  const { status, genre, country, year, sortBy, limit = 50, page = 1 } = req.query;
+  const { status, genre, country, year, sortBy, search, limit = 50, page = 1 } = req.query;
 
   // Build filter query
   const query = {};
+
+  // Tìm kiếm theo tên phim (case-insensitive)
+  if (search && search.trim()) {
+    query.title = { $regex: search.trim(), $options: 'i' };
+  }
 
   // Filter by status (NOW, COMING, STOP)
   if (status) {
@@ -46,7 +91,6 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
   }
 
   // Nếu có sortBy param, override (cho trang danh sách phim đầy đủ)
-  if (sortBy === 'views') sort = { viewCount: -1 };
   if (sortBy === 'rating') sort = { rating: -1, ratingCount: -1 };
   if (sortBy === 'newest') sort = { releaseDate: -1 };
   if (sortBy === 'priority') sort = { menuPriority: -1, createdAt: -1 };
@@ -152,12 +196,33 @@ exports.getMovie = catchAsync(async (req, res, next) => {
 
 // Tạo phim mới (Admin only)
 exports.createMovie = catchAsync(async (req, res, next) => {
-  // Xử lý file upload (Poster)
+  // Xử lý file upload (Poster) - lưu full URL
   if (req.file) {
-    req.body.posterUrl = req.file.filename; // Lưu tên file vào DB
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    req.body.posterUrl = `${baseUrl}/uploads/${req.file.filename}`;
   }
 
-  const newMovie = await Movie.create(req.body);
+  // Xử lý directorName -> lưu trực tiếp vào director
+  if (req.body.directorName) {
+    req.body.director = req.body.directorName.trim();
+    delete req.body.directorName;
+  }
+
+  // Xử lý actorNames (comma-separated) -> lưu mảng string
+  if (req.body.actorNames) {
+    req.body.actors = req.body.actorNames.split(',').map(n => n.trim()).filter(n => n);
+    delete req.body.actorNames;
+  }
+
+  let newMovie;
+  try {
+    newMovie = await Movie.create(req.body);
+  } catch (err) {
+    if (err.code === 11000) {
+      return next(new AppError('Phim đã tồn tại trong hệ thống!', 400));
+    }
+    throw err;
+  }
 
   res.status(201).json({
     status: 'success',
@@ -169,9 +234,24 @@ exports.createMovie = catchAsync(async (req, res, next) => {
 
 // Cập nhật phim (Admin only)
 exports.updateMovie = catchAsync(async (req, res, next) => {
-  // Xử lý file upload nếu có cập nhật poster
+  // Xử lý file upload nếu có cập nhật poster - lưu full URL
   if (req.file) {
-    req.body.posterUrl = req.file.filename;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    req.body.posterUrl = `${baseUrl}/uploads/${req.file.filename}`;
+  }
+
+  // Xử lý directorName -> lưu trực tiếp vào director
+  if (req.body.directorName !== undefined) {
+    req.body.director = req.body.directorName.trim() || null;
+    delete req.body.directorName;
+  }
+
+  // Xử lý actorNames (comma-separated) -> lưu mảng string
+  if (req.body.actorNames !== undefined) {
+    req.body.actors = req.body.actorNames
+      ? req.body.actorNames.split(',').map(n => n.trim()).filter(n => n)
+      : [];
+    delete req.body.actorNames;
   }
 
   const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, {
@@ -259,102 +339,5 @@ exports.rateMovie = catchAsync(async (req, res, next) => {
       ratingCount: updatedMovie.ratingCount,
       userRating: rating
     }
-  });
-});
-
-// Tăng lượt xem phim (gọi khi user vào trang chi tiết phim)
-exports.incrementViewCount = catchAsync(async (req, res, next) => {
-  const movie = await Movie.findByIdAndUpdate(
-    req.params.id,
-    { $inc: { viewCount: 1 } },
-    { new: true }
-  );
-
-  if (!movie) {
-    return next(new AppError('Không tìm thấy phim với ID này!', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      viewCount: movie.viewCount
-    }
-  });
-});
-
-// Toggle Like phim (User - Mỗi user chỉ được like 1 lần, click lại sẽ unlike)
-exports.toggleLike = catchAsync(async (req, res, next) => {
-  const userId = req.user._id;
-  const movieId = req.params.id;
-
-  const movie = await Movie.findById(movieId);
-  if (!movie) {
-    return next(new AppError('Không tìm thấy phim với ID này!', 404));
-  }
-
-  // Kiểm tra user đã like chưa
-  const hasLiked = movie.likedBy && movie.likedBy.includes(userId);
-
-  let updatedMovie;
-  if (hasLiked) {
-    // UNLIKE: Xóa user khỏi likedBy và giảm likeCount
-    updatedMovie = await Movie.findByIdAndUpdate(
-      movieId,
-      {
-        $pull: { likedBy: userId },
-        $inc: { likeCount: -1 }
-      },
-      { new: true }
-    );
-    // Đảm bảo likeCount không âm
-    if (updatedMovie.likeCount < 0) {
-      await Movie.findByIdAndUpdate(movieId, { likeCount: 0 });
-      updatedMovie.likeCount = 0;
-    }
-  } else {
-    // LIKE: Thêm user vào likedBy và tăng likeCount
-    updatedMovie = await Movie.findByIdAndUpdate(
-      movieId,
-      {
-        $addToSet: { likedBy: userId },
-        $inc: { likeCount: 1 }
-      },
-      { new: true }
-    );
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      liked: !hasLiked,
-      likeCount: updatedMovie.likeCount
-    }
-  });
-});
-
-// Kiểm tra trạng thái like của user hiện tại
-exports.getLikeStatus = catchAsync(async (req, res, next) => {
-  const movieId = req.params.id;
-
-  // Nếu không đăng nhập, trả về liked: false
-  if (!req.user) {
-    return res.status(200).json({
-      status: 'success',
-      data: { liked: false }
-    });
-  }
-
-  const userId = req.user._id;
-  const movie = await Movie.findById(movieId).select('likedBy');
-
-  if (!movie) {
-    return next(new AppError('Không tìm thấy phim với ID này!', 404));
-  }
-
-  const liked = movie.likedBy && movie.likedBy.includes(userId);
-
-  res.status(200).json({
-    status: 'success',
-    data: { liked }
   });
 });

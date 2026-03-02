@@ -93,6 +93,9 @@ router
  */
 router.get('/countries', movieController.getCountries);
 
+// Proxy lấy thông tin YouTube (avatar kênh, title, channel)
+router.get('/youtube-info/:videoId', movieController.getYoutubeInfo);
+
 /**
  * @swagger
  * /movies/years:
@@ -198,56 +201,6 @@ router.post(
   movieController.rateMovie
 );
 
-/**
- * @swagger
- * /movies/{id}/view:
- *   post:
- *     summary: Tăng lượt xem phim
- *     tags: [Movies]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Tăng lượt xem thành công
- */
-router.post('/:id/view', movieController.incrementViewCount);
-
-/**
- * @swagger
- * /movies/{id}/like:
- *   post:
- *     summary: Toggle like phim (like/unlike)
- *     tags: [Movies]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Toggle like thành công
- *   get:
- *     summary: Kiểm tra trạng thái like của user hiện tại
- *     tags: [Movies]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Trạng thái like
- */
-router.post('/:id/like', authMiddleware.protect, movieController.toggleLike);
-router.get('/:id/like', authMiddleware.optionalAuth, movieController.getLikeStatus);
-
 module.exports = router;
+
 

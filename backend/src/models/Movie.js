@@ -15,11 +15,10 @@ const movieSchema = new mongoose.Schema(
       required: [true, 'Vui lòng nhập mô tả phim!'],
       trim: true
     },
-    // Đạo diễn - Reference đến Person
+    // Đạo diễn - lưu tên trực tiếp
     director: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Person',
-      required: [true, 'Vui lòng chọn đạo diễn!']
+      type: String,
+      trim: true
     },
     // Nhà sản xuất
     studio: {
@@ -32,10 +31,10 @@ const movieSchema = new mongoose.Schema(
       trim: true,
       default: 'Việt Nam'
     },
-    // Diễn viên - Reference đến Person
+    // Diễn viên - lưu tên trực tiếp
     actors: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Person'
+      type: String,
+      trim: true
     }],
     duration: {
       type: Number,
@@ -94,21 +93,7 @@ const movieSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
-    // View count
-    viewCount: {
-      type: Number,
-      default: 0
-    },
-    // Like count
-    likeCount: {
-      type: Number,
-      default: 0
-    },
-    // Danh sách user đã like (để check mỗi user chỉ được like 1 lần)
-    likedBy: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }],
+
     // === MENU DROPDOWN PRIORITY ===
     // Admin ghim phim lên dropdown menu (0 = bình thường, 50 = ưu tiên, 100 = ghim top)
     menuPriority: {
