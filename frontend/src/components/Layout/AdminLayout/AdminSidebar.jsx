@@ -27,7 +27,8 @@ const MENU_GROUPS = [
         label: 'Quản lý Phim',
         icon: <MovieIcon />,
         children: [
-          { label: 'Phim', path: '/admin/phim' }
+          { label: 'Phim', path: '/admin/phim' },
+          { label: 'Thể loại', path: '/admin/the-loai' }
         ]
       }
     ]

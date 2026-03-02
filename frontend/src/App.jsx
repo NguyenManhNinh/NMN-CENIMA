@@ -34,6 +34,7 @@ import AccountPage from './pages/Client/Account/AccountPage';
 import AdminLoginPage from './pages/Admin/Auth/AdminLoginPage';
 import AdminDashboardPage from './pages/Admin/Dashboard/AdminDashboardPage';
 import AdminMovieListPage from './pages/Admin/Movie/AdminMovieListPage';
+import AdminGenreListPage from './pages/Admin/Genre/AdminGenreListPage';
 
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
@@ -55,6 +56,7 @@ function App() {
           <Route path="admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboardPage />} />
             <Route path="phim" element={<AdminMovieListPage />} />
+            <Route path="the-loai" element={<AdminGenreListPage />} />
           </Route>
 
           {/* OAuth Callback - không cần layout */}

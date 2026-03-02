@@ -178,14 +178,14 @@ const EditMovieModal = ({ open, onClose, onSuccess, movie }) => {
 
       {/* Content */}
       <DialogContent sx={{ pt: 3, pb: 1 }}>
-        <Box sx={{ display: 'flex', gap: 3, mt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 2, sm: 3 }, mt: 1 }}>
 
           {/* === CỘT TRÁI: Poster Upload === */}
-          <Box sx={{ width: 220, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ width: { xs: '100%', sm: 220 }, flexShrink: 0, display: 'flex', flexDirection: { xs: 'row', sm: 'column' }, alignItems: 'center', gap: 1.5 }}>
             {/* Poster preview */}
             <Box
               sx={{
-                width: 200, height: 290, borderRadius: 2, overflow: 'hidden',
+                width: { xs: 130, sm: 200 }, height: { xs: 185, sm: 290 }, borderRadius: 2, overflow: 'hidden',
                 border: `2px dashed ${colors.borderSubtle}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 bgcolor: colors.bgInput, cursor: 'pointer', position: 'relative',
@@ -244,7 +244,7 @@ const EditMovieModal = ({ open, onClose, onSuccess, movie }) => {
             />
 
             {/* Row: Thời lượng + Tuổi + Trạng thái */}
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
               <TextField
                 size="small" label="Thời lượng (phút) *"
                 type="number"
@@ -274,7 +274,7 @@ const EditMovieModal = ({ open, onClose, onSuccess, movie }) => {
             </Box>
 
             {/* Row: Đạo diễn + Diễn viên */}
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
               <TextField
                 size="small" label="Đạo diễn"
                 value={form.directorName || ''} onChange={handleChange('directorName')}
@@ -296,7 +296,7 @@ const EditMovieModal = ({ open, onClose, onSuccess, movie }) => {
             />
 
             {/* Row: Nhà sản xuất + Quốc gia */}
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
               <TextField
                 size="small" label="Nhà sản xuất"
                 value={form.studio || ''} onChange={handleChange('studio')}
@@ -310,7 +310,7 @@ const EditMovieModal = ({ open, onClose, onSuccess, movie }) => {
             </Box>
 
             {/* Row: Ngày khởi chiếu + Ngày kết thúc */}
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
               <TextField
                 size="small" label="Ngày khởi chiếu *"
                 type="date" value={form.releaseDate || ''}

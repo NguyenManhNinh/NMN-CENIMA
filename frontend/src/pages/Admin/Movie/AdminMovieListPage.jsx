@@ -246,11 +246,11 @@ const AdminMovieListPage = () => {
                   <TableRow sx={{ bgcolor: colors.bgTableHead, '& .MuiTableCell-root': { whiteSpace: 'nowrap' } }}>
                     <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', width: 40 }}>STT</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', width: 50 }}>Poster</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', minWidth: 220 }}>Tên phim</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', minWidth: 160 }}>Tên phim</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', width: 200 }}>Trailer</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', minWidth: 150 }}>Thể loại</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', minWidth: 100 }}>Thể loại</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', minWidth: 90 }}>Đạo diễn</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', minWidth: 120 }}>Diễn viên</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', minWidth: 100 }}>Diễn viên</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', minWidth: 100 }}>Nhà sản xuất</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', width: 65 }}>Thời lượng</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.78rem', width: 50 }}>Tuổi</TableCell>
@@ -266,8 +266,8 @@ const AdminMovieListPage = () => {
                     const stt = (page - 1) * PER_PAGE + idx + 1;
                     const status = STATUS_MAP[movie.status] || STATUS_MAP.COMING;
                     const age = AGE_RATING_MAP[movie.ageRating] || AGE_RATING_MAP.P;
-                    const genres = movie.genres?.length > 0
-                      ? [...new Set(movie.genres.flatMap(g => g.category || []))].join(', ') || '—'
+                    const genres = movie.movieCategories?.length > 0
+                      ? movie.movieCategories.join(', ')
                       : '—';
                     // Giới hạn tối đa 2 dòng, dòng thừa hiện "..."
                     const clamp2 = { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.4 };

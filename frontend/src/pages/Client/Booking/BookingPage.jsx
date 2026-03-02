@@ -611,22 +611,21 @@ function BookingPage() {
 
                     <Typography sx={{ color: '#EA3B92' }}>Thể loại:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                      {(!movie.genres || movie.genres.length === 0) ? (
-                        <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
-                      ) : (
-                        movie.genres.map((genre, idx) => {
-                          // Lấy category (thể loại phim) thay vì name (tên bài viết)
-                          const genreCategory = typeof genre === 'string' ? genre : genre?.category || genre?.name || '';
-                          if (!genreCategory) return null; // Không hiển thị nếu không có category
+                      {/* Chỉ hiển thị movieCategories (từ admin quản lý thể loại) */}
+                      {(() => {
+                        const cats = movie.movieCategories || [];
+                        if (!cats || cats.length === 0) return (
+                          <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
+                        );
+                        return cats.map((cat, idx) => {
                           return (
                             <Chip
                               key={idx}
-                              label={genreCategory}
+                              label={cat}
                               size="small"
                               variant="outlined"
                               onClick={() => {
-                                // Navigate đến GenresPage với category filter
-                                navigate(`/the-loai-phim?the-loai=${encodeURIComponent(genreCategory)}`);
+                                navigate(`/the-loai-phim?the-loai=${encodeURIComponent(cat)}`);
                               }}
                               sx={{
                                 fontSize: '0.85rem',
@@ -645,8 +644,8 @@ function BookingPage() {
                               }}
                             />
                           );
-                        })
-                      )}
+                        });
+                      })()}
                     </Box>
 
                     <Typography sx={{ color: '#EA3B92' }}>Đạo diễn:</Typography>
@@ -762,22 +761,21 @@ function BookingPage() {
 
                 <Typography sx={{ color: '#EA3B92' }}>Thể loại:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
-                  {(!movie.genres || movie.genres.length === 0) ? (
-                    <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
-                  ) : (
-                    movie.genres.map((genre, idx) => {
-                      // Lấy category (thể loại phim)
-                      const genreCategory = typeof genre === 'string' ? genre : genre?.category || genre?.name || '';
-                      if (!genreCategory) return null;
+                  {/* Chỉ hiển thị movieCategories (từ admin quản lý thể loại) */}
+                  {(() => {
+                    const cats = movie.movieCategories || [];
+                    if (!cats || cats.length === 0) return (
+                      <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
+                    );
+                    return cats.map((cat, idx) => {
                       return (
                         <Chip
                           key={idx}
-                          label={genreCategory}
+                          label={cat}
                           size="small"
                           variant="outlined"
                           onClick={() => {
-                            // Navigate đến GenresPage với category filter
-                            navigate(`/the-loai-phim?the-loai=${encodeURIComponent(genreCategory)}`);
+                            navigate(`/the-loai-phim?the-loai=${encodeURIComponent(cat)}`);
                           }}
                           sx={{
                             fontSize: { xs: '0.7rem', sm: '0.85rem' },
@@ -796,8 +794,8 @@ function BookingPage() {
                           }}
                         />
                       );
-                    })
-                  )}
+                    });
+                  })()}
                 </Box>
 
                 <Typography sx={{ color: '#EA3B92' }}>Đạo diễn:</Typography>
