@@ -45,10 +45,10 @@ const movieSchema = new mongoose.Schema(
       enum: ['P', 'C13', 'C16', 'C18'],
       default: 'P'
     },
-    // Thể loại - Reference đến Genre
-    genres: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Genre'
+    // Thể loại phim (lưu trực tiếp tên: Hành động, Hài, Tình cảm...)
+    movieCategories: [{
+      type: String,
+      trim: true
     }],
     posterUrl: {
       type: String,
@@ -119,20 +119,8 @@ movieSchema.pre('save', function (next) {
   next();
 });
 
-// Middleware: Populate khi find (tùy chọn, cân nhắc performance)
-movieSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: 'genres',
-    select: 'name slug category'
-  }).populate({
-    path: 'director',
-    select: 'name slug photoUrl'
-  }).populate({
-    path: 'actors',
-    select: 'name slug photoUrl'
-  });
-  next();
-});
+// Lưu ý: genres, director, actors đều là String (không phải ObjectId ref)
+// => Không cần populate middleware
 
 const Movie = mongoose.model('Movie', movieSchema);
 

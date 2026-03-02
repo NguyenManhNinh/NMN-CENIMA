@@ -112,6 +112,10 @@ const defaultRoutes = [
   {
     path: '/membership-info',
     route: require('./membershipInfoRoutes')
+  },
+  {
+    path: '/movie-categories',
+    route: require('./movieCategoryRoutes')
   }
 ];
 

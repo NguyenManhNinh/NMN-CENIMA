@@ -59,9 +59,9 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
     query.status = status.toUpperCase();
   }
 
-  // Filter by genre (slug or ObjectId)
+  // Lọc theo thể loại phim (movieCategories)
   if (genre) {
-    query.genres = genre;
+    query.movieCategories = genre;
   }
 
   // Filter by country
@@ -99,9 +99,6 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const movies = await Movie.find(query)
-    .populate('director', 'name photoUrl')
-    .populate('actors', 'name photoUrl')
-    .populate('genres', 'name slug category')
     .limit(parseInt(limit))
     .skip(skip)
     .sort(sort);
@@ -177,10 +174,7 @@ exports.getMovie = catchAsync(async (req, res, next) => {
     ? { _id: id }
     : { slug: id };
 
-  const movie = await Movie.findOne(query)
-    .populate('director', 'name photoUrl slug')
-    .populate('actors', 'name photoUrl slug')
-    .populate('genres', 'name slug category');
+  const movie = await Movie.findOne(query);
 
   if (!movie) {
     return next(new AppError('Không tìm thấy phim!', 404));

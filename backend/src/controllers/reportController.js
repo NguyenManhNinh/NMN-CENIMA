@@ -383,27 +383,11 @@ exports.getGenreStats = catchAsync(async (req, res) => {
     { $unwind: '$showtime' },
     { $lookup: { from: 'movies', localField: 'showtime.movieId', foreignField: '_id', as: 'movie' } },
     { $unwind: '$movie' },
-    { $unwind: '$movie.genres' },
-    { $lookup: { from: 'genres', localField: 'movie.genres', foreignField: '_id', as: 'genre' } },
-    { $unwind: '$genre' },
-    // Unwind category array
-    { $unwind: '$genre.category' },
-    // Tách chuỗi "Hài, Gia đình, Tình cảm" thành từng thể loại riêng
-    {
-      $addFields: {
-        splitCategories: { $split: ['$genre.category', ', '] }
-      }
-    },
-    { $unwind: '$splitCategories' },
-    // Trim khoảng trắng
-    {
-      $addFields: {
-        cleanCategory: { $trim: { input: '$splitCategories' } }
-      }
-    },
+    // Sử dụng movieCategories (mảng string) thay vì genres (ObjectId)
+    { $unwind: '$movie.movieCategories' },
     {
       $group: {
-        _id: '$cleanCategory',
+        _id: '$movie.movieCategories',
         value: { $sum: { $size: '$seats' } }
       }
     },
@@ -426,27 +410,12 @@ exports.getGenreStats = catchAsync(async (req, res) => {
   } else {
     // === FALLBACK: Đếm số phim theo thể loại ===
     source = 'movies';
-    const Genre = require('../models/Genre');
     const fallback = await Movie.aggregate([
       { $match: { status: { $in: ['NOW', 'COMING'] } } },
-      { $unwind: '$genres' },
-      { $lookup: { from: 'genres', localField: 'genres', foreignField: '_id', as: 'genre' } },
-      { $unwind: '$genre' },
-      { $unwind: '$genre.category' },
-      {
-        $addFields: {
-          splitCategories: { $split: ['$genre.category', ', '] }
-        }
-      },
-      { $unwind: '$splitCategories' },
-      {
-        $addFields: {
-          cleanCategory: { $trim: { input: '$splitCategories' } }
-        }
-      },
+      { $unwind: '$movieCategories' },
       {
         $group: {
-          _id: '$cleanCategory',
+          _id: '$movieCategories',
           value: { $sum: 1 }
         }
       },
