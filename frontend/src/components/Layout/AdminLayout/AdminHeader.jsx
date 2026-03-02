@@ -18,6 +18,7 @@ import { useAdminTheme } from './AdminThemeContext';
 // Map path → tên trang hiển thị
 const PAGE_TITLES = {
   '/admin/dashboard': 'Dashboard',
+  '/admin/phim': 'Quản lý phim',
   '/admin/movies': 'Quản lý phim',
   '/admin/showtimes': 'Suất chiếu',
   '/admin/customers': 'Khách hàng',

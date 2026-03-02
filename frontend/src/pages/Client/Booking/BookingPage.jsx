@@ -654,10 +654,8 @@ function BookingPage() {
                       {(() => {
                         // Handle both API (object) and mock (string) formats
                         const directors = typeof movie.director === 'string'
-                          ? movie.director.split(',').map(d => d.trim())
-                          : movie.director?.name
-                            ? [movie.director.name]
-                            : [];
+                          ? movie.director.split(',').map(d => d.trim()).filter(d => d)
+                          : [];
 
                         if (directors.length === 0) {
                           return <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>;
@@ -806,10 +804,8 @@ function BookingPage() {
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
                   {(() => {
                     const directors = typeof movie.director === 'string'
-                      ? movie.director.split(',').map(d => d.trim())
-                      : movie.director?.name
-                        ? [movie.director.name]
-                        : [];
+                      ? movie.director.split(',').map(d => d.trim()).filter(d => d)
+                      : [];
 
                     if (directors.length === 0) {
                       return <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>;

@@ -33,6 +33,7 @@ import AccountPage from './pages/Client/Account/AccountPage';
 // Pages - Admin
 import AdminLoginPage from './pages/Admin/Auth/AdminLoginPage';
 import AdminDashboardPage from './pages/Admin/Dashboard/AdminDashboardPage';
+import AdminMovieListPage from './pages/Admin/Movie/AdminMovieListPage';
 
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
@@ -53,6 +54,7 @@ function App() {
           {/* Các trang quản trị – dùng AdminLayout (có header) */}
           <Route path="admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="phim" element={<AdminMovieListPage />} />
           </Route>
 
           {/* OAuth Callback - không cần layout */}

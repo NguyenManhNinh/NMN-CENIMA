@@ -527,7 +527,6 @@ function SeatSelectionPage() {
         basePrice: showtimeData.basePrice,
         rating: movie.rating || 0,
         ratingCount: movie.ratingCount || 0,
-        viewCount: movie.viewCount || 0,
         duration: movie.duration,
         releaseDate: movie.releaseDate
       };

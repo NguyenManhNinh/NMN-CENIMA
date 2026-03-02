@@ -27,7 +27,7 @@ const MENU_GROUPS = [
         label: 'Quản lý Phim',
         icon: <MovieIcon />,
         children: [
-          // Thêm chức năng con ở đây sau
+          { label: 'Phim', path: '/admin/phim' }
         ]
       }
     ]
@@ -203,7 +203,6 @@ const AdminSidebar = ({ mobileOpen, onMobileClose }) => {
                               onClick={() => handleNavClick(child.path)}
                               sx={childItemSx(isChildActive)}
                             >
-                              <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: isChildActive ? '#4fc3f7' : 'rgba(255,255,255,0.3)' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', fontWeight: 'inherit' }}>
                                 {child.label}
                               </Typography>

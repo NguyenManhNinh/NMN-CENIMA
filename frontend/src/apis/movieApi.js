@@ -119,6 +119,14 @@ export const getYearsAPI = async () => {
   return response.data;
 };
 /**
+ * Lấy thông tin YouTube video (title, channel, avatar kênh)
+ * @param {string} videoId - YouTube video ID (11 ký tự)
+ */
+export const getYoutubeInfoAPI = async (videoId) => {
+  const response = await api.get(`/youtube-info/${videoId}`);
+  return response.data;
+};
+/**
  * Đánh giá phim
  * @param {string} movieId - ID phim cần đánh giá
  * @param {number} rating - Điểm đánh giá (1-10)
@@ -128,30 +136,36 @@ export const rateMovieAPI = async (movieId, rating) => {
   return response.data;
 };
 
+
 /**
- * Tăng lượt xem phim
- * @param {string} movieId - ID phim
+ * Tạo phim mới (Admin only)
+ * @param {FormData} formData - FormData chứa thông tin phim + poster file
  */
-export const incrementViewAPI = async (movieId) => {
-  const response = await api.post(`/${movieId}/view`);
+export const createMovieAPI = async (formData) => {
+  const response = await api.post('/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return response.data;
+};
+/**
+ * Xóa phim (Admin only)
+ * @param {string} movieId - ID phim cần xóa
+ */
+export const deleteMovieAPI = async (movieId) => {
+  const response = await api.delete(`/${movieId}`);
   return response.data;
 };
 
 /**
- * Toggle like phim (like/unlike)
- * @param {string} movieId - ID phim
+ * Cập nhật phim (Admin only)
+ * @param {string} movieId - ID phim cần cập nhật
+ * @param {FormData|Object} data - Dữ liệu cập nhật
  */
-export const toggleLikeAPI = async (movieId) => {
-  const response = await api.post(`/${movieId}/like`);
-  return response.data;
-};
-
-/**
- * Kiểm tra trạng thái like của user hiện tại
- * @param {string} movieId - ID phim
- */
-export const getLikeStatusAPI = async (movieId) => {
-  const response = await api.get(`/${movieId}/like`);
+export const updateMovieAPI = async (movieId, data) => {
+  const isFormData = data instanceof FormData;
+  const response = await api.patch(`/${movieId}`, data, {
+    headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {}
+  });
   return response.data;
 };
 
