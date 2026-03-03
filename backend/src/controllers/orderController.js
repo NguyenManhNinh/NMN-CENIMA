@@ -375,13 +375,47 @@ exports.getMyOrders = catchAsync(async (req, res, next) => {
 exports.getAllOrders = catchAsync(async (req, res, next) => {
   const orders = await Order.find()
     .sort('-createdAt')
-    .populate('userId', 'name email');
+    .populate('userId', 'name email')
+    .populate({
+      path: 'showtimeId',
+      select: 'startAt movieId roomId cinemaId',
+      populate: [
+        { path: 'movieId', select: 'title posterUrl' },
+        { path: 'roomId', select: 'name' },
+        { path: 'cinemaId', select: 'name' }
+      ]
+    });
+
+  // Lấy Payment info cho tất cả orders (batch query)
+  const Payment = require('../models/Payment');
+  const orderIds = orders.map(o => o._id);
+  const payments = await Payment.find({ orderId: { $in: orderIds } })
+    .select('orderId gateway bankCode state rawPayload')
+    .lean();
+
+  // Map payment theo orderId
+  const paymentMap = {};
+  payments.forEach(p => {
+    paymentMap[p.orderId.toString()] = p;
+  });
+
+  // Gắn paymentInfo vào mỗi order
+  const ordersWithPayment = orders.map(o => {
+    const orderObj = o.toObject();
+    const payment = paymentMap[o._id.toString()];
+    orderObj.paymentInfo = payment ? {
+      gateway: payment.gateway || 'VNPAY',
+      bankCode: payment.bankCode || payment.rawPayload?.vnp_BankCode || '',
+      state: payment.state || ''
+    } : null;
+    return orderObj;
+  });
 
   res.status(200).json({
     status: 'success',
-    results: orders.length,
+    results: ordersWithPayment.length,
     data: {
-      orders
+      orders: ordersWithPayment
     }
   });
 });

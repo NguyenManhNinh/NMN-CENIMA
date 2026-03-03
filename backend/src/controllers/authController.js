@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
+const Role = require('../models/Role');
 const RefreshToken = require('../models/RefreshToken');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
@@ -135,6 +136,12 @@ exports.verifyAccount = catchAsync(async (req, res, next) => {
     console.error('Send Welcome Email Failed:', e);
   }
 
+  // Khóa bước phát hành token nếu role đang bị tắt
+  const userRole = await Role.findOne({ name: user.role });
+  if (userRole && !userRole.isActive) {
+    return next(new AppError(`Tài khoản đã được xác thực, nhưng chức vụ "${user.role}" hiện đang bị tắt. Vui lòng liên hệ quản trị viên để đăng nhập.`, 403));
+  }
+
   // Đăng nhập luôn cho user (gửi token)
   await createSendToken(user, 200, res);
 });
@@ -172,12 +179,18 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để xác thực.', 401));
   }
 
-  // 5) Reset số lần đăng nhập sai khi login thành công
+  // 5) Kiểm tra chức vụ có đang hoạt động không
+  const userRole = await Role.findOne({ name: user.role });
+  if (userRole && !userRole.isActive) {
+    return next(new AppError(`Chức vụ "${user.role}" hiện đang bị tắt. Vui lòng liên hệ quản trị viên.`, 403));
+  }
+
+  // 6) Reset số lần đăng nhập sai khi login thành công
   if (user.loginAttempts > 0) {
     await user.resetLoginAttempts();
   }
 
-  // 6) Gửi token cho client
+  // 7) Gửi token cho client
   await createSendToken(user, 200, res);
 });
 
@@ -212,17 +225,23 @@ exports.adminLogin = catchAsync(async (req, res, next) => {
     return next(new AppError('Tài khoản chưa được kích hoạt!', 401));
   }
 
-  // 5) KIỂM TRA QUYỀN ADMIN — Chặn trước khi cấp token
+  // 5) Kiểm tra chức vụ có đang hoạt động không
+  const userRole = await Role.findOne({ name: user.role });
+  if (userRole && !userRole.isActive) {
+    return next(new AppError(`Chức vụ "${user.role}" hiện đang bị tắt. Không thể đăng nhập.`, 403));
+  }
+
+  // 6) KIỂM TRA QUYỀN ADMIN — Chặn trước khi cấp token
   if (!['admin', 'manager'].includes(user.role)) {
     return next(new AppError('Tài khoản không có quyền truy cập trang quản trị!', 403));
   }
 
-  // 6) Reset số lần đăng nhập sai
+  // 7) Reset số lần đăng nhập sai
   if (user.loginAttempts > 0) {
     await user.resetLoginAttempts();
   }
 
-  // 7) Cấp token với cookie riêng cho admin portal
+  // 8) Cấp token với cookie riêng cho admin portal
   await createSendToken(user, 200, res, { portal: 'admin' });
 });
 
@@ -445,6 +464,12 @@ exports.googleCallback = catchAsync(async (req, res, next) => {
         avatar: googleUser.avatar,
         isActive: true // Google email đã xác thực
       });
+    }
+
+    // Khóa bước phát hành token nếu role đang bị tắt
+    const userRole = await Role.findOne({ name: user.role });
+    if (userRole && !userRole.isActive) {
+      return res.redirect(`${FRONTEND_URL}?error=role_inactive&role=${user.role}`);
     }
 
     // Tạo Access Token

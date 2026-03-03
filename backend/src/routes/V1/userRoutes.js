@@ -15,6 +15,11 @@ const router = express.Router();
 // PUBLIC: Hủy đăng ký nhận email (từ link trong email)
 router.get('/unsubscribe', userController.unsubscribeNewsletter);
 
+// PUBLIC: Ping — cập nhật lastActiveAt cho user đang online (dùng optionalAuth)
+router.post('/ping', authMiddleware.optionalAuth, (req, res) => {
+  res.status(200).json({ status: 'ok', online: !!req.user });
+});
+
 // Tất cả các route bên dưới đều yêu cầu đăng nhập
 router.use(authMiddleware.protect);
 
@@ -191,6 +196,21 @@ router.route('/').get(userController.getAllUsers);
  */
 // Admin only routes
 router.use(authMiddleware.restrictTo('admin'));
+
+// Admin: Danh sách user (pagination, filter, search)
+router.get('/admin/list', userController.adminGetUserList);
+
+// Admin: Tạo tài khoản mới
+router.post('/admin/create', userController.adminCreateUser);
+
+// Admin: Bật/Tắt tình trạng hoạt động
+router.patch('/admin/:id/toggle-active', userController.toggleUserActive);
+
+// Admin: Đổi chức vụ (role)
+router.patch('/admin/:id/change-role', userController.changeUserRole);
+
+// Admin: Tìm user theo email
+router.get('/admin/search-email', userController.searchUserByEmail);
 
 router.route('/:id')
   .get(userController.getUser)

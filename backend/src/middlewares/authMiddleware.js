@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 const User = require('../models/User');
+const Role = require('../models/Role');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
@@ -45,6 +46,20 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
 
+  // 5) Kiểm tra chức vụ của user có đang hoạt động không
+  const userRole = await Role.findOne({ name: currentUser.role });
+  if (userRole && !userRole.isActive) {
+    return next(
+      new AppError(
+        `Chức vụ "${currentUser.role}" hiện đang bị tắt. Vui lòng liên hệ quản trị viên.`,
+        403
+      )
+    );
+  }
+
+  // Cập nhật thời gian hoạt động cuối (fire-and-forget)
+  User.findByIdAndUpdate(currentUser._id, { lastActiveAt: new Date() }).catch(() => { });
+
   // Cấp quyền truy cập cho route
   req.user = currentUser;
   next();
@@ -84,6 +99,8 @@ exports.optionalAuth = catchAsync(async (req, res, next) => {
     const currentUser = await User.findById(decoded.id);
     if (currentUser && !currentUser.changedPasswordAfter(decoded.iat)) {
       req.user = currentUser;
+      // Cập nhật lastActiveAt cho user đang duyệt web
+      User.findByIdAndUpdate(currentUser._id, { lastActiveAt: new Date() }).catch(() => { });
     }
   } catch (err) {
     // Token không hợp lệ -> bỏ qua, tiếp tục như guest

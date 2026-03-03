@@ -37,7 +37,6 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'staff', 'manager', 'admin'],
       default: 'user'
     },
     authType: {
@@ -47,6 +46,10 @@ const userSchema = new mongoose.Schema(
     },
     authId: {
       type: String
+    },
+    lastActiveAt: {
+      type: Date,
+      default: null
     },
     isActive: {
       type: Boolean,

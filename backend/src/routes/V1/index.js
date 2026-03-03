@@ -116,6 +116,10 @@ const defaultRoutes = [
   {
     path: '/movie-categories',
     route: require('./movieCategoryRoutes')
+  },
+  {
+    path: '/roles',
+    route: require('./roleRoutes')
   }
 ];
 

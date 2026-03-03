@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Role = require('../models/Role');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const jwt = require('jsonwebtoken');
@@ -45,6 +46,116 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
   });
 });
 
+/**
+ * Admin: Danh sách user với pagination, search, filter
+ * GET /api/v1/users/admin/list?role=user&search=abc&page=1&limit=20&isActive=true
+ */
+exports.adminGetUserList = catchAsync(async (req, res, next) => {
+  const { role, search, page = 1, limit = 20, isActive } = req.query;
+
+  // Build query filter
+  const filter = {};
+  if (role) filter.role = role;
+  if (isActive !== undefined) filter.isActive = isActive === 'true';
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
+      { phone: { $regex: search, $options: 'i' } }
+    ];
+  }
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const total = await User.countDocuments(filter);
+  const users = await User.find(filter)
+    .select('+isActive')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    total,
+    totalPages: Math.ceil(total / parseInt(limit)),
+    currentPage: parseInt(page),
+    data: users
+  });
+});
+
+/**
+ * Admin: Bật/Tắt tình trạng hoạt động user (toggle isActive)
+ * PATCH /api/v1/users/admin/:id/toggle-active
+ */
+exports.toggleUserActive = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id).select('+isActive');
+  if (!user) {
+    return next(new AppError('Không tìm thấy người dùng!', 404));
+  }
+
+  // Không cho tắt chính mình
+  if (user._id.toString() === req.user._id.toString()) {
+    return next(new AppError('Không thể tắt tài khoản của chính bạn!', 400));
+  }
+
+  user.isActive = !user.isActive;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: 'success',
+    data: user
+  });
+});
+
+/**
+ * Admin: Tạo tài khoản mới (đã kích hoạt sẵn)
+ * POST /api/v1/users/admin/create
+ */
+exports.adminCreateUser = catchAsync(async (req, res, next) => {
+  const { name, email, password, phone, role, gender, birthday, address, city, district } = req.body;
+
+  if (!name || !email || !password) {
+    return next(new AppError('Vui lòng nhập tên, email và mật khẩu!', 400));
+  }
+
+  // Kiểm tra email trùng
+  const existing = await User.findOne({ email: email.toLowerCase() });
+  if (existing) {
+    return next(new AppError('Email này đã được sử dụng!', 400));
+  }
+
+  // Validate role tồn tại trong Role collection
+  if (role && role !== 'user') {
+    const roleExists = await Role.findOne({ name: role, isActive: true });
+    if (!roleExists) {
+      return next(new AppError(`Chức vụ '${role}' không tồn tại hoặc đã bị tắt!`, 400));
+    }
+  }
+
+  const newUser = await User.create({
+    name,
+    email: email.toLowerCase(),
+    password,
+    phone: phone || '',
+    role: role || 'user',
+    gender,
+    birthday,
+    address,
+    city,
+    district,
+    isActive: true,
+    authType: 'local'
+  });
+
+  // Ẩn password
+  newUser.password = undefined;
+
+  res.status(201).json({
+    status: 'success',
+    data: newUser
+  });
+});
+
 exports.getUser = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.params.id);
 
@@ -56,6 +167,74 @@ exports.getUser = catchAsync(async (req, res, next) => {
     status: 'success',
     data: {
       user
+    }
+  });
+});
+
+/**
+ * Admin: Đổi role user (thăng chức / hạ chức)
+ * PATCH /api/v1/users/admin/:id/change-role
+ */
+exports.changeUserRole = catchAsync(async (req, res, next) => {
+  const { role } = req.body;
+
+  if (!role) {
+    return next(new AppError('Vui lòng chọn chức vụ!', 400));
+  }
+
+  // Validate role tồn tại trong Role collection
+  const roleExists = await Role.findOne({ name: role, isActive: true });
+  if (!roleExists) {
+    return next(new AppError(`Chức vụ '${role}' không tồn tại hoặc đã bị tắt!`, 400));
+  }
+
+  // Không cho tự đổi role chính mình
+  if (req.params.id === req.user.id) {
+    return next(new AppError('Không thể thay đổi chức vụ của chính mình!', 400));
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { role },
+    { new: true, runValidators: true }
+  );
+
+  if (!user) {
+    return next(new AppError('Không tìm thấy người dùng!', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: { user }
+  });
+});
+
+/**
+ * Admin: Tìm user theo email (dùng cho thăng chức)
+ * GET /api/v1/users/admin/search-email?email=xxx
+ */
+exports.searchUserByEmail = catchAsync(async (req, res, next) => {
+  const { email } = req.query;
+  if (!email) {
+    return next(new AppError('Vui lòng nhập email!', 400));
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase() }).select('+isActive');
+  if (!user) {
+    return next(new AppError('Không tìm thấy tài khoản với email này!', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      avatar: user.avatar,
+      isActive: user.isActive,
+      createdAt: user.createdAt
     }
   });
 });
@@ -147,7 +326,12 @@ exports.updateUser = catchAsync(async (req, res, next) => {
     'role',
     'isActive',
     'avatar',
-    'rank'
+    'rank',
+    'gender',
+    'birthday',
+    'address',
+    'city',
+    'district'
   );
 
   const user = await User.findByIdAndUpdate(req.params.id, filteredBody, {
