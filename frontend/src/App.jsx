@@ -40,6 +40,7 @@ import AdminSeatPage from './pages/Admin/Seat/AdminSeatPage';
 import AdminRoomPage from './pages/Admin/Room/AdminRoomPage';
 import AdminCinemaPage from './pages/Admin/Cinema/AdminCinemaPage';
 import AdminComboPage from './pages/Admin/Combo/AdminComboPage';
+import AdminStatisticsPage from './pages/Admin/Statistics/AdminStatisticsPage';
 
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
@@ -66,7 +67,8 @@ function App() {
             <Route path="ghe" element={<AdminSeatPage />} />
             <Route path="rap" element={<AdminCinemaPage />} />
             <Route path="phong" element={<AdminRoomPage />} />
-            <Route path="do-an" element={<AdminComboPage />} />
+            <Route path="combo" element={<AdminComboPage />} />
+            <Route path="thong-ke" element={<AdminStatisticsPage />} />
           </Route>
 
           {/* OAuth Callback - không cần layout */}

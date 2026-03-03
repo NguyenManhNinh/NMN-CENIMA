@@ -6,6 +6,7 @@ import MovieIcon from '@mui/icons-material/Movie';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import logo from '../../../assets/images/NMN_CENIMA_LOGO.png';
 
@@ -50,6 +51,12 @@ const MENU_GROUPS = [
           { label: 'Combo', path: '/admin/combo' },
         ]
       }
+    ]
+  },
+  {
+    label: 'BÁO CÁO',
+    items: [
+      { label: 'Thống kê', path: '/admin/thong-ke', icon: <BarChartIcon /> }
     ]
   }
 ];
