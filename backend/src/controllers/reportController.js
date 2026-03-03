@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Showtime = require('../models/Showtime');
 const Room = require('../models/Room');
 const Promotion = require('../models/Promotion');
+const Payment = require('../models/Payment');
 const catchAsync = require('../utils/catchAsync');
 
 // ========== EXISTING ENDPOINTS ==========
@@ -774,4 +775,463 @@ exports.getTodaySummary = catchAsync(async (req, res) => {
       newMembers: newMembersToday
     }
   });
+});
+
+// ========== STATISTICS PAGE ENDPOINTS ==========
+
+/**
+ * GET /reports/statistics/revenue-trend
+ * Doanh thu theo ngày + tổng hợp + phân bổ trạng thái đơn hàng
+ * Query: from, to (ISO date strings)
+ */
+exports.getRevenueTrend = catchAsync(async (req, res) => {
+  const { from, to } = req.query;
+  const fromDate = from ? new Date(from) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const toDate = to ? new Date(new Date(to).setHours(23, 59, 59, 999)) : new Date();
+
+  // 1. Doanh thu theo ngày
+  const dailyRevenue = await Order.aggregate([
+    { $match: { status: 'PAID', createdAt: { $gte: fromDate, $lte: toDate } } },
+    {
+      $group: {
+        _id: { $dateToString: { format: '%d/%m', date: '$createdAt', timezone: '+07:00' } },
+        dateSort: { $first: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: '+07:00' } } },
+        revenue: { $sum: '$totalAmount' },
+        orders: { $sum: 1 },
+        tickets: { $sum: { $size: '$seats' } }
+      }
+    },
+    { $sort: { dateSort: 1 } }
+  ]);
+
+  // 2. Tổng hợp kỳ hiện tại
+  const [summary] = await Order.aggregate([
+    { $match: { status: 'PAID', createdAt: { $gte: fromDate, $lte: toDate } } },
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: '$totalAmount' },
+        totalOrders: { $sum: 1 },
+        totalTickets: { $sum: { $size: '$seats' } },
+        totalDiscount: { $sum: '$discount' }
+      }
+    }
+  ]);
+
+  const totalRevenue = summary?.totalRevenue || 0;
+  const totalOrders = summary?.totalOrders || 0;
+  const totalTickets = summary?.totalTickets || 0;
+  const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+
+  // 2b. Tổng hợp kỳ TRƯỚC (so sánh %)
+  const periodMs = toDate.getTime() - fromDate.getTime();
+  const prevFrom = new Date(fromDate.getTime() - periodMs);
+  const prevTo = new Date(fromDate.getTime() - 1);
+  const [prevSummary] = await Order.aggregate([
+    { $match: { status: 'PAID', createdAt: { $gte: prevFrom, $lte: prevTo } } },
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: '$totalAmount' },
+        totalOrders: { $sum: 1 },
+        totalTickets: { $sum: { $size: '$seats' } }
+      }
+    }
+  ]);
+  const prevRevenue = prevSummary?.totalRevenue || 0;
+  const prevOrders = prevSummary?.totalOrders || 0;
+  const prevTickets = prevSummary?.totalTickets || 0;
+  const prevAvg = prevOrders > 0 ? Math.round(prevRevenue / prevOrders) : 0;
+  const calcChange = (curr, prev) => prev > 0 ? Math.round(((curr - prev) / prev) * 1000) / 10 : 0;
+
+  // 3. Phân bổ trạng thái đơn hàng
+  const statusBreakdown = await Order.aggregate([
+    { $match: { createdAt: { $gte: fromDate, $lte: toDate } } },
+    { $group: { _id: '$status', count: { $sum: 1 } } },
+    { $sort: { count: -1 } }
+  ]);
+
+  const STATUS_COLORS = {
+    PAID: '#4caf50', PENDING: '#ff9800', PROCESSING: '#2196f3',
+    FAILED: '#f44336', CANCELLED: '#9e9e9e', EXPIRED: '#795548'
+  };
+  const STATUS_LABELS = {
+    PAID: 'Thành công', PENDING: 'Chờ xử lý', PROCESSING: 'Đang xử lý',
+    FAILED: 'Thất bại', CANCELLED: 'Đã hủy', EXPIRED: 'Hết hạn'
+  };
+  const statusData = statusBreakdown.map((s, i) => ({
+    id: i, value: s.count,
+    label: STATUS_LABELS[s._id] || s._id,
+    color: STATUS_COLORS[s._id] || '#607d8b'
+  }));
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      daily: dailyRevenue.map(d => ({ day: d._id, revenue: d.revenue, orders: d.orders, tickets: d.tickets })),
+      summary: {
+        totalRevenue, totalOrders, totalTickets, avgOrderValue,
+        revenueChange: calcChange(totalRevenue, prevRevenue),
+        ordersChange: calcChange(totalOrders, prevOrders),
+        ticketsChange: calcChange(totalTickets, prevTickets),
+        avgChange: calcChange(avgOrderValue, prevAvg)
+      },
+      statusBreakdown: statusData
+    }
+  });
+});
+
+/**
+ * GET /reports/statistics/payment-methods
+ * Phân bổ theo ngân hàng (bankCode) từ Payment model
+ */
+exports.getPaymentMethods = catchAsync(async (req, res) => {
+  const { from, to } = req.query;
+  const fromDate = from ? new Date(from) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const toDate = to ? new Date(new Date(to).setHours(23, 59, 59, 999)) : new Date();
+
+  const BANK_COLORS = ['#1B4F93', '#e74c3c', '#ff9800', '#4caf50', '#9c27b0', '#00bcd4', '#e91e63', '#795548', '#607d8b', '#3f51b5'];
+
+  const stats = await Payment.aggregate([
+    { $match: { state: 'SUCCESS', createdAt: { $gte: fromDate, $lte: toDate } } },
+    {
+      $group: {
+        _id: '$bankCode',
+        count: { $sum: 1 },
+        totalAmount: { $sum: '$amount' }
+      }
+    },
+    { $sort: { totalAmount: -1 } }
+  ]);
+
+  const pieData = stats.map((s, i) => ({
+    id: i, value: s.count,
+    label: s._id || 'Khác',
+    color: BANK_COLORS[i % BANK_COLORS.length]
+  }));
+
+  const barData = stats.map(s => ({
+    bank: s._id || 'Khác',
+    amount: s.totalAmount,
+    count: s.count
+  }));
+
+  res.status(200).json({ status: 'success', data: { pieData, barData } });
+});
+
+/**
+ * GET /reports/statistics/top-movies
+ * Top phim doanh thu cao nhất (có lọc thời gian)
+ */
+exports.getTopMoviesStats = catchAsync(async (req, res) => {
+  const { from, to, limit = 10 } = req.query;
+  const fromDate = from ? new Date(from) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const toDate = to ? new Date(new Date(to).setHours(23, 59, 59, 999)) : new Date();
+
+  const stats = await Order.aggregate([
+    { $match: { status: 'PAID', createdAt: { $gte: fromDate, $lte: toDate } } },
+    { $lookup: { from: 'showtimes', localField: 'showtimeId', foreignField: '_id', as: 'showtime' } },
+    { $unwind: '$showtime' },
+    { $lookup: { from: 'movies', localField: 'showtime.movieId', foreignField: '_id', as: 'movie' } },
+    { $unwind: '$movie' },
+    {
+      $group: {
+        _id: '$movie._id',
+        title: { $first: '$movie.title' },
+        posterUrl: { $first: '$movie.posterUrl' },
+        revenue: { $sum: '$totalAmount' },
+        ticketsSold: { $sum: { $size: '$seats' } },
+        orders: { $sum: 1 }
+      }
+    },
+    { $sort: { revenue: -1 } },
+    { $limit: parseInt(limit) }
+  ]);
+
+  const maxRevenue = stats.length > 0 ? stats[0].revenue : 1;
+  const result = stats.map((s, i) => ({
+    rank: i + 1, title: s.title, posterUrl: s.posterUrl,
+    revenue: s.revenue, ticketsSold: s.ticketsSold, orders: s.orders,
+    percent: Math.round((s.revenue / maxRevenue) * 100)
+  }));
+
+  res.status(200).json({ status: 'success', data: { movies: result } });
+});
+
+/**
+ * GET /reports/statistics/orders-table
+ * Bảng chi tiết đơn hàng (phân trang) — dùng aggregate để xử lý showtime/movie đã xóa
+ * Query: from, to, page, limit, status
+ */
+exports.getOrdersTable = catchAsync(async (req, res) => {
+  const { from, to, page = 1, limit = 20, status } = req.query;
+  const fromDate = from ? new Date(from) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const toDate = to ? new Date(new Date(to).setHours(23, 59, 59, 999)) : new Date();
+
+  const matchStage = { createdAt: { $gte: fromDate, $lte: toDate } };
+  if (status && status !== 'all') matchStage.status = status;
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const total = await Order.countDocuments(matchStage);
+
+  const orders = await Order.aggregate([
+    { $match: matchStage },
+    { $sort: { createdAt: -1 } },
+    { $skip: skip },
+    { $limit: parseInt(limit) },
+    // Lookup user
+    { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: '_user' } },
+    { $unwind: { path: '$_user', preserveNullAndEmptyArrays: true } },
+    // Lookup showtime
+    { $lookup: { from: 'showtimes', localField: 'showtimeId', foreignField: '_id', as: '_showtime' } },
+    { $unwind: { path: '$_showtime', preserveNullAndEmptyArrays: true } },
+    // Lookup movie từ showtime
+    { $lookup: { from: 'movies', localField: '_showtime.movieId', foreignField: '_id', as: '_movie' } },
+    { $unwind: { path: '$_movie', preserveNullAndEmptyArrays: true } },
+    // Lookup room từ showtime
+    { $lookup: { from: 'rooms', localField: '_showtime.roomId', foreignField: '_id', as: '_room' } },
+    { $unwind: { path: '$_room', preserveNullAndEmptyArrays: true } },
+    // Lookup payment (để lấy bankCode, phương thức TT)
+    { $lookup: { from: 'payments', localField: 'orderNo', foreignField: 'txnRef', as: '_payment' } },
+    { $unwind: { path: '$_payment', preserveNullAndEmptyArrays: true } },
+    // Chỉ lấy các field cần thiết
+    {
+      $project: {
+        orderNo: 1,
+        customerName: { $ifNull: ['$_user.name', 'N/A'] },
+        customerEmail: { $ifNull: ['$_user.email', ''] },
+        movie: { $ifNull: ['$_movie.title', 'Phim đã xóa'] },
+        room: { $ifNull: ['$_room.name', '—'] },
+        showtimeStart: '$_showtime.startAt',
+        seats: 1,
+        combos: 1,
+        subTotal: 1,
+        discount: { $ifNull: ['$discount', 0] },
+        usedPoints: { $ifNull: ['$usedPoints', 0] },
+        pointDiscount: { $ifNull: ['$pointDiscount', 0] },
+        voucherCode: { $ifNull: ['$voucherCode', ''] },
+        totalAmount: 1,
+        status: 1,
+        bankCode: { $ifNull: ['$_payment.bankCode', ''] },
+        paymentState: { $ifNull: ['$_payment.state', ''] },
+        createdAt: 1
+      }
+    }
+  ]);
+
+  const result = orders.map(o => {
+    const createdAt = new Date(o.createdAt);
+    const vnDate = new Date(createdAt.getTime() + 7 * 60 * 60 * 1000);
+    const dd = String(vnDate.getUTCDate()).padStart(2, '0');
+    const mm = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+    const hh = String(vnDate.getUTCHours()).padStart(2, '0');
+    const mi = String(vnDate.getUTCMinutes()).padStart(2, '0');
+
+    // Giờ chiếu
+    let showtimeStr = '';
+    if (o.showtimeStart) {
+      const st = new Date(o.showtimeStart);
+      const vnSt = new Date(st.getTime() + 7 * 60 * 60 * 1000);
+      showtimeStr = `${String(vnSt.getUTCHours()).padStart(2, '0')}:${String(vnSt.getUTCMinutes()).padStart(2, '0')} ${String(vnSt.getUTCDate()).padStart(2, '0')}/${String(vnSt.getUTCMonth() + 1).padStart(2, '0')}`;
+    }
+
+    return {
+      orderNo: o.orderNo,
+      customer: o.customerName,
+      email: o.customerEmail,
+      movie: o.movie,
+      room: o.room,
+      showtime: showtimeStr,
+      seats: o.seats?.length || 0,
+      seatCodes: o.seats?.map(s => s.seatCode).join(', ') || '',
+      combos: o.combos?.length || 0,
+      comboNames: o.combos?.map(c => `${c.quantity}x ${c.name}`).join(', ') || '',
+      subTotal: o.subTotal || 0,
+      discount: o.discount || 0,
+      usedPoints: o.usedPoints || 0,
+      pointDiscount: o.pointDiscount || 0,
+      voucherCode: o.voucherCode || '',
+      totalAmount: o.totalAmount,
+      bankCode: o.bankCode || '',
+      status: o.status,
+      createdAt: `${dd}/${mm} ${hh}:${mi}`
+    };
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      orders: result,
+      pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) }
+    }
+  });
+});
+
+/**
+ * GET /reports/statistics/peak-hours
+ * Giờ cao điểm — phân bổ đơn hàng theo giờ trong ngày
+ */
+exports.getPeakHours = catchAsync(async (req, res) => {
+  const { from, to } = req.query;
+  const fromDate = from ? new Date(from) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const toDate = to ? new Date(new Date(to).setHours(23, 59, 59, 999)) : new Date();
+
+  const stats = await Order.aggregate([
+    { $match: { status: 'PAID', createdAt: { $gte: fromDate, $lte: toDate } } },
+    {
+      $group: {
+        _id: { $hour: { date: '$createdAt', timezone: '+07:00' } },
+        orders: { $sum: 1 },
+        revenue: { $sum: '$totalAmount' },
+        tickets: { $sum: { $size: '$seats' } }
+      }
+    },
+    { $sort: { _id: 1 } }
+  ]);
+
+  // Fill tất cả 24 giờ
+  const hourlyData = [];
+  for (let h = 0; h < 24; h++) {
+    const found = stats.find(s => s._id === h);
+    hourlyData.push({
+      hour: `${String(h).padStart(2, '0')}:00`,
+      orders: found?.orders || 0,
+      revenue: found?.revenue || 0,
+      tickets: found?.tickets || 0
+    });
+  }
+
+  // Tìm giờ cao điểm
+  const peak = [...hourlyData].sort((a, b) => b.orders - a.orders)[0];
+
+  res.status(200).json({
+    status: 'success',
+    data: { hourly: hourlyData, peakHour: peak?.hour || '—', peakOrders: peak?.orders || 0 }
+  });
+});
+
+/**
+ * GET /reports/statistics/voucher-stats
+ * Thống kê voucher/khuyến mãi đã sử dụng
+ */
+exports.getVoucherStats = catchAsync(async (req, res) => {
+  const Voucher = require('../models/Voucher');
+  const { from, to } = req.query;
+  const fromDate = from ? new Date(from) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const toDate = to ? new Date(new Date(to).setHours(23, 59, 59, 999)) : new Date();
+
+  // 1. Đơn hàng dùng voucher trong khoảng thời gian
+  const voucherOrders = await Order.aggregate([
+    {
+      $match: {
+        status: 'PAID',
+        createdAt: { $gte: fromDate, $lte: toDate },
+        voucherCode: { $ne: null, $exists: true }
+      }
+    },
+    {
+      $group: {
+        _id: '$voucherCode',
+        count: { $sum: 1 },
+        totalDiscount: { $sum: '$discount' },
+        totalRevenue: { $sum: '$totalAmount' }
+      }
+    },
+    { $sort: { count: -1 } },
+    { $limit: 10 }
+  ]);
+
+  // 2. Tổng quan
+  const [voucherSummary] = await Order.aggregate([
+    {
+      $match: {
+        status: 'PAID',
+        createdAt: { $gte: fromDate, $lte: toDate }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalOrders: { $sum: 1 },
+        ordersWithVoucher: {
+          $sum: { $cond: [{ $and: [{ $ne: ['$voucherCode', null] }, { $ne: ['$voucherCode', ''] }] }, 1, 0] }
+        },
+        totalDiscount: {
+          $sum: { $cond: [{ $gt: ['$discount', 0] }, '$discount', 0] }
+        },
+        ordersWithPoints: {
+          $sum: { $cond: [{ $gt: ['$usedPoints', 0] }, 1, 0] }
+        },
+        totalPointDiscount: { $sum: '$pointDiscount' }
+      }
+    }
+  ]);
+
+  const totalOrders = voucherSummary?.totalOrders || 0;
+  const ordersWithVoucher = voucherSummary?.ordersWithVoucher || 0;
+  const voucherRate = totalOrders > 0 ? Math.round((ordersWithVoucher / totalOrders) * 100) : 0;
+
+  // 3. Voucher info tổng
+  const totalVouchers = await Voucher.countDocuments();
+  const activeVouchers = await Voucher.countDocuments({ status: 'ACTIVE' });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      summary: {
+        totalOrders,
+        ordersWithVoucher,
+        voucherRate,
+        totalDiscount: voucherSummary?.totalDiscount || 0,
+        ordersWithPoints: voucherSummary?.ordersWithPoints || 0,
+        totalPointDiscount: voucherSummary?.totalPointDiscount || 0,
+        totalVouchers,
+        activeVouchers
+      },
+      topVouchers: voucherOrders.map((v, i) => ({
+        rank: i + 1,
+        code: v._id,
+        used: v.count,
+        totalDiscount: v.totalDiscount,
+        totalRevenue: v.totalRevenue
+      }))
+    }
+  });
+});
+
+/**
+ * GET /reports/statistics/top-combos
+ * Combo bán chạy (có lọc thời gian)
+ */
+exports.getTopCombosStats = catchAsync(async (req, res) => {
+  const { from, to } = req.query;
+  const fromDate = from ? new Date(from) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const toDate = to ? new Date(new Date(to).setHours(23, 59, 59, 999)) : new Date();
+
+  const COMBO_COLORS = ['#1B4F93', '#ff9800', '#4caf50', '#e91e63', '#00bcd4', '#9c27b0', '#795548', '#607d8b', '#f44336', '#3f51b5'];
+
+  const stats = await Order.aggregate([
+    { $match: { status: 'PAID', createdAt: { $gte: fromDate, $lte: toDate } } },
+    { $unwind: '$combos' },
+    {
+      $group: {
+        _id: '$combos.name',
+        sold: { $sum: '$combos.quantity' },
+        revenue: { $sum: '$combos.totalPrice' },
+        avgPrice: { $avg: '$combos.unitPrice' }
+      }
+    },
+    { $sort: { sold: -1 } },
+    { $limit: 10 }
+  ]);
+
+  const result = stats.map((s, i) => ({
+    name: s._id,
+    sold: s.sold,
+    price: Math.round(s.avgPrice),
+    revenue: s.revenue,
+    color: COMBO_COLORS[i % COMBO_COLORS.length]
+  }));
+
+  res.status(200).json({ status: 'success', data: { combos: result } });
 });

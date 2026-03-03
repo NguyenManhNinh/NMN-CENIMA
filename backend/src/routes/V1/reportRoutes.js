@@ -101,4 +101,27 @@ router.get('/dashboard/promotions', reportController.getActivePromotions);
 /** GET /reports/dashboard/today-summary — Tổng quan nhanh hôm nay */
 router.get('/dashboard/today-summary', reportController.getTodaySummary);
 
+// ========== STATISTICS PAGE ==========
+
+/** GET /reports/statistics/revenue-trend — Doanh thu theo ngày + tổng hợp */
+router.get('/statistics/revenue-trend', reportController.getRevenueTrend);
+
+/** GET /reports/statistics/payment-methods — Phân bổ theo ngân hàng */
+router.get('/statistics/payment-methods', reportController.getPaymentMethods);
+
+/** GET /reports/statistics/top-movies — Top phim doanh thu */
+router.get('/statistics/top-movies', reportController.getTopMoviesStats);
+
+/** GET /reports/statistics/orders-table — Bảng chi tiết đơn hàng */
+router.get('/statistics/orders-table', reportController.getOrdersTable);
+
+/** GET /reports/statistics/peak-hours — Giờ cao điểm */
+router.get('/statistics/peak-hours', reportController.getPeakHours);
+
+/** GET /reports/statistics/voucher-stats — Voucher/KM */
+router.get('/statistics/voucher-stats', reportController.getVoucherStats);
+
+/** GET /reports/statistics/top-combos — Combo bán chạy */
+router.get('/statistics/top-combos', reportController.getTopCombosStats);
+
 module.exports = router;

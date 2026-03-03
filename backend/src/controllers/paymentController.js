@@ -301,6 +301,11 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
           },
           $set: {
             bankTranNo: req.query.vnp_BankTranNo,
+            bankCode: req.query.vnp_BankCode || '',
+            payDate: req.query.vnp_PayDate ? new Date(
+              req.query.vnp_PayDate.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1-$2-$3T$4:$5:$6+07:00')
+            ) : new Date(),
+            responseCode: req.query.vnp_ResponseCode || '00',
             state: 'SUCCESS',
             rawPayload: req.query
           }
@@ -394,6 +399,8 @@ exports.vnpayIpn = catchAsync(async (req, res, next) => {
             amount: amount
           },
           $set: {
+            bankCode: req.query.vnp_BankCode || '',
+            responseCode: req.query.vnp_ResponseCode || '',
             state: 'FAIL',
             rawPayload: req.query
           }
@@ -501,6 +508,11 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
             },
             $set: {
               bankTranNo: req.query.vnp_BankTranNo || '',
+              bankCode: req.query.vnp_BankCode || '',
+              payDate: req.query.vnp_PayDate ? new Date(
+                req.query.vnp_PayDate.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1-$2-$3T$4:$5:$6+07:00')
+              ) : new Date(),
+              responseCode: req.query.vnp_ResponseCode || '00',
               state: 'SUCCESS',
               rawPayload: req.query
             }
@@ -624,6 +636,8 @@ exports.vnpayReturn = catchAsync(async (req, res, next) => {
                 amount: amount
               },
               $set: {
+                bankCode: req.query.vnp_BankCode || '',
+                responseCode: req.query.vnp_ResponseCode || '',
                 state: 'FAIL',
                 rawPayload: req.query
               }
