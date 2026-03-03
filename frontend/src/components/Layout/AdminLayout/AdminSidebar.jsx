@@ -3,7 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Typography, Drawer, Collapse } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MovieIcon from '@mui/icons-material/Movie';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FastfoodIcon from '@mui/icons-material/Fastfood';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import logo from '../../../assets/images/NMN_CENIMA_LOGO.png';
 
@@ -29,6 +31,23 @@ const MENU_GROUPS = [
         children: [
           { label: 'Phim', path: '/admin/phim' },
           { label: 'Thể loại', path: '/admin/the-loai' }
+        ]
+      },
+      {
+        label: 'Lịch chiếu',
+        icon: <CalendarMonthIcon />,
+        children: [
+          { label: 'Ghế', path: '/admin/ghe' },
+          { label: 'Rạp', path: '/admin/rap' },
+          { label: 'Phòng', path: '/admin/phong' },
+          { label: 'Suất chiếu', path: '/admin/suat-chieu' },
+        ]
+      },
+      {
+        label: 'Dịch vụ',
+        icon: <FastfoodIcon />,
+        children: [
+          { label: 'Combo', path: '/admin/combo' },
         ]
       }
     ]

@@ -35,6 +35,11 @@ import AdminLoginPage from './pages/Admin/Auth/AdminLoginPage';
 import AdminDashboardPage from './pages/Admin/Dashboard/AdminDashboardPage';
 import AdminMovieListPage from './pages/Admin/Movie/AdminMovieListPage';
 import AdminGenreListPage from './pages/Admin/Genre/AdminGenreListPage';
+import AdminShowtimePage from './pages/Admin/Showtime/AdminShowtimePage';
+import AdminSeatPage from './pages/Admin/Seat/AdminSeatPage';
+import AdminRoomPage from './pages/Admin/Room/AdminRoomPage';
+import AdminCinemaPage from './pages/Admin/Cinema/AdminCinemaPage';
+import AdminComboPage from './pages/Admin/Combo/AdminComboPage';
 
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
@@ -57,6 +62,11 @@ function App() {
             <Route path="dashboard" element={<AdminDashboardPage />} />
             <Route path="phim" element={<AdminMovieListPage />} />
             <Route path="the-loai" element={<AdminGenreListPage />} />
+            <Route path="suat-chieu" element={<AdminShowtimePage />} />
+            <Route path="ghe" element={<AdminSeatPage />} />
+            <Route path="rap" element={<AdminCinemaPage />} />
+            <Route path="phong" element={<AdminRoomPage />} />
+            <Route path="do-an" element={<AdminComboPage />} />
           </Route>
 
           {/* OAuth Callback - không cần layout */}

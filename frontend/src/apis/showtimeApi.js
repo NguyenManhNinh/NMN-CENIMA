@@ -54,4 +54,34 @@ export const getShowtimeByIdAPI = async (showtimeId) => {
   return response.data;
 };
 
+// ===== ADMIN APIs =====
+
+/**
+ * Tạo suất chiếu mới (Admin)
+ * @param {Object} data - { movieId, roomId, startAt, basePrice }
+ */
+export const createShowtimeAPI = async (data) => {
+  const response = await axiosInstance.post('/showtimes', data);
+  return response.data;
+};
+
+/**
+ * Cập nhật suất chiếu (Admin)
+ * @param {string} id - Showtime ID
+ * @param {Object} data - { startAt, basePrice, format, subtitle, status }
+ */
+export const updateShowtimeAPI = async (id, data) => {
+  const response = await axiosInstance.put(`/showtimes/${id}`, data);
+  return response.data;
+};
+
+/**
+ * Xóa suất chiếu (Admin)
+ * @param {string} id - Showtime ID
+ */
+export const deleteShowtimeAPI = async (id) => {
+  const response = await axiosInstance.delete(`/showtimes/${id}`);
+  return response.data;
+};
+
 export default axiosInstance;

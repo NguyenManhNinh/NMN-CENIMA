@@ -57,4 +57,31 @@ export const getCitiesAPI = async () => {
   return response.data;
 };
 
+/**
+ * Tạo rạp mới (Admin - cần auth)
+ */
+export const createCinemaAPI = async (data) => {
+  const { default: axiosInstance } = await import('./axiosInstance');
+  const response = await axiosInstance.post('/cinemas', data);
+  return response.data;
+};
+
+/**
+ * Cập nhật rạp (Admin - cần auth)
+ */
+export const updateCinemaAPI = async (id, data) => {
+  const { default: axiosInstance } = await import('./axiosInstance');
+  const response = await axiosInstance.patch(`/cinemas/${id}`, data);
+  return response.data;
+};
+
+/**
+ * Xoá rạp (Admin - cần auth)
+ */
+export const deleteCinemaAPI = async (id) => {
+  const { default: axiosInstance } = await import('./axiosInstance');
+  const response = await axiosInstance.delete(`/cinemas/${id}`);
+  return response.data;
+};
+
 export default api;

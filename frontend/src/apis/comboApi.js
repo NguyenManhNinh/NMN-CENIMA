@@ -18,7 +18,38 @@ export const getComboByIdAPI = async (comboId) => {
   return response.data;
 };
 
+/**
+ * Tạo combo mới (Admin)
+ * @param {Object} data
+ */
+export const createComboAPI = async (data) => {
+  const response = await axiosInstance.post('/combos', data);
+  return response.data;
+};
+
+/**
+ * Cập nhật combo (Admin)
+ * @param {string} comboId
+ * @param {Object} data
+ */
+export const updateComboAPI = async (comboId, data) => {
+  const response = await axiosInstance.patch(`/combos/${comboId}`, data);
+  return response.data;
+};
+
+/**
+ * Xóa combo (Admin)
+ * @param {string} comboId
+ */
+export const deleteComboAPI = async (comboId) => {
+  const response = await axiosInstance.delete(`/combos/${comboId}`);
+  return response.data;
+};
+
 export default {
   getAllCombosAPI,
-  getComboByIdAPI
+  getComboByIdAPI,
+  createComboAPI,
+  updateComboAPI,
+  deleteComboAPI
 };
