@@ -7,7 +7,7 @@ exports.getAllRooms = catchAsync(async (req, res, next) => {
   let filter = {};
   if (req.params.cinemaId) filter = { cinemaId: req.params.cinemaId };
 
-  const rooms = await Room.find(filter);
+  const rooms = await Room.find(filter).populate('cinemaId', 'name');
 
   res.status(200).json({
     status: 'success',

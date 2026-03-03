@@ -6,7 +6,7 @@ exports.getAllCombos = catchAsync(async (req, res, next) => {
   // Public: chỉ lấy ACTIVE, Admin: lấy hết
   const filter = req.user && ['admin', 'manager'].includes(req.user.role) ? {} : { status: 'ACTIVE' };
 
-  const combos = await Combo.find(filter);
+  const combos = await Combo.find(filter).populate('movieIds', 'title');
 
   res.status(200).json({
     status: 'success',
@@ -24,10 +24,17 @@ exports.createCombo = catchAsync(async (req, res, next) => {
 });
 
 exports.updateCombo = catchAsync(async (req, res, next) => {
+  console.log('=== UPDATE COMBO ===');
+  console.log('ID:', req.params.id);
+  console.log('Body:', JSON.stringify(req.body, null, 2));
+
   const combo = await Combo.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
-  });
+  }).populate('movieIds', 'title');
+
+  console.log('Updated combo:', JSON.stringify(combo, null, 2));
+
   if (!combo) return next(new AppError('No combo found with that ID', 404));
   res.status(200).json({
     status: 'success',

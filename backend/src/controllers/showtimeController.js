@@ -1,6 +1,7 @@
 const Showtime = require('../models/Showtime');
 const Movie = require('../models/Movie');
 const Room = require('../models/Room');
+const Ticket = require('../models/Ticket');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
@@ -49,16 +50,32 @@ exports.getAllShowtimes = catchAsync(async (req, res, next) => {
   }
 
   const showtimes = await Showtime.find(filter)
-    .populate('movieId', 'title duration')
+    .populate('movieId', 'title duration posterUrl')
     .populate('cinemaId', 'name')
-    .populate('roomId', 'name')
-    .sort({ startAt: 1 });
+    .populate('roomId', 'name totalSeats')
+    .sort({ startAt: 1 })
+    .lean();
+
+  // Tính ghế trống cho từng suất
+  const showtimeIds = showtimes.map(s => s._id);
+  const ticketCounts = await Ticket.aggregate([
+    { $match: { showtimeId: { $in: showtimeIds }, status: { $ne: 'VOID' } } },
+    { $group: { _id: '$showtimeId', count: { $sum: 1 } } }
+  ]);
+  const ticketMap = {};
+  ticketCounts.forEach(t => { ticketMap[t._id.toString()] = t.count; });
+
+  const result = showtimes.map(s => ({
+    ...s,
+    soldSeats: ticketMap[s._id.toString()] || 0,
+    availableSeats: (s.roomId?.totalSeats || 0) - (ticketMap[s._id.toString()] || 0)
+  }));
 
   res.status(200).json({
     status: 'success',
-    results: showtimes.length,
+    results: result.length,
     data: {
-      showtimes
+      showtimes: result
     }
   });
 });
@@ -85,7 +102,7 @@ exports.getShowtimeById = catchAsync(async (req, res, next) => {
 
 // Tạo suất chiếu mới (Admin only)
 exports.createShowtime = catchAsync(async (req, res, next) => {
-  const { movieId, roomId, startAt, basePrice } = req.body;
+  const { movieId, roomId, startAt, basePrice, seatPrices, format, subtitle, status, maintenanceSeats } = req.body;
 
   // 1. Lấy thông tin phim để tính endAt
   const movie = await Movie.findById(movieId);
@@ -115,7 +132,11 @@ exports.createShowtime = catchAsync(async (req, res, next) => {
     startAt: startTime,
     endAt: endTime,
     basePrice,
-    format: room.type // Mặc định theo loại phòng
+    seatPrices: seatPrices || { standard: basePrice, vip: basePrice, couple: basePrice },
+    format: format || room.type, // Ưu tiên frontend, fallback room.type
+    subtitle: subtitle || 'Phụ đề',
+    status: status || 'COMING',
+    maintenanceSeats: maintenanceSeats || []
   });
 
   res.status(201).json({
@@ -123,6 +144,44 @@ exports.createShowtime = catchAsync(async (req, res, next) => {
     data: {
       showtime: newShowtime
     }
+  });
+});
+
+// Cập nhật suất chiếu (Admin only)
+exports.updateShowtime = catchAsync(async (req, res, next) => {
+  const showtime = await Showtime.findById(req.params.id);
+  if (!showtime) return next(new AppError('Không tìm thấy suất chiếu!', 404));
+
+  const { startAt, basePrice, format, subtitle, status } = req.body;
+
+  // Nếu đổi startAt → tính lại endAt + check collision
+  if (startAt) {
+    const movie = await Movie.findById(showtime.movieId);
+    if (!movie) return next(new AppError('Không tìm thấy phim!', 404));
+
+    const startTime = new Date(startAt);
+    const durationMs = (movie.duration + 30) * 60 * 1000;
+    const endTime = new Date(startTime.getTime() + durationMs);
+
+    const collision = await checkCollision(showtime.roomId, startTime, endTime, showtime._id);
+    if (collision) {
+      return next(new AppError('Xung đột lịch chiếu! Phòng này đang bận trong khoảng thời gian đã chọn.', 400));
+    }
+
+    showtime.startAt = startTime;
+    showtime.endAt = endTime;
+  }
+
+  if (basePrice !== undefined) showtime.basePrice = basePrice;
+  if (format) showtime.format = format;
+  if (subtitle !== undefined) showtime.subtitle = subtitle;
+  if (status) showtime.status = status;
+
+  await showtime.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: { showtime }
   });
 });
 

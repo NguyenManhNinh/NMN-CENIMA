@@ -102,6 +102,11 @@ router
 router
   .route('/:id')
   .get(showtimeController.getShowtimeById)
+  .put(
+    authMiddleware.protect,
+    authMiddleware.restrictTo('admin'),
+    showtimeController.updateShowtime
+  )
   .delete(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),

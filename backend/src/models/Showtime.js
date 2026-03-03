@@ -17,7 +17,7 @@ const showtimeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
     required: [true, 'Suất chiếu phải thuộc về một phòng!'],
-    index: true // FK 
+    index: true // FK
   },
   startAt: {
     type: Date,
@@ -31,6 +31,12 @@ const showtimeSchema = new mongoose.Schema({
   basePrice: {
     type: Number,
     required: [true, 'Vui lòng nhập giá vé cơ bản!']
+  },
+  // Giá vé theo loại ghế
+  seatPrices: {
+    standard: { type: Number, default: 0 },
+    vip: { type: Number, default: 0 },
+    couple: { type: Number, default: 0 }
   },
   format: {
     type: String,
@@ -49,8 +55,8 @@ const showtimeSchema = new mongoose.Schema({
   }],
   status: {
     type: String,
-    enum: ['OPEN', 'CLOSED', 'CANCELED'],
-    default: 'OPEN'
+    enum: ['NOW', 'COMING', 'STOP'], // Đang chiếu, Sắp chiếu, Ngưng chiếu
+    default: 'COMING'
   }
 }, {
   timestamps: true

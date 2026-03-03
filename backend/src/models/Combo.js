@@ -22,6 +22,10 @@ const comboSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  movieIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Movie'
+  }],
   status: {
     type: String,
     enum: ['ACTIVE', 'INACTIVE'],
