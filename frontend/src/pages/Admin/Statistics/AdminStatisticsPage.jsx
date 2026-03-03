@@ -656,7 +656,7 @@ const AdminStatisticsPage = () => {
                           {o.email && <Typography variant="caption" sx={{ color: colors.textMuted, fontSize: '0.65rem', display: 'block' }}>{o.email}</Typography>}
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontSize: '0.78rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>{o.movie}</Typography>
+                          <Typography variant="body2" sx={{ fontSize: '0.78rem', fontWeight: 500 }}>{o.movie}</Typography>
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.78rem', fontWeight: 500 }}>{o.room || '—'}</TableCell>
                         <TableCell sx={{ fontSize: '0.72rem', color: colors.textMuted }}>{o.showtime || '—'}</TableCell>

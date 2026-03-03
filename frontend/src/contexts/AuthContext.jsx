@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { loginAPI, logoutAPI, getMeAPI, registerAPI, verifyAccountAPI } from '../apis/authApi';
+import axiosInstance from '../apis/axiosInstance';
 
 // Create context
 const AuthContext = createContext(null);
@@ -42,6 +43,17 @@ export function AuthProvider({ children }) {
 
     checkAuth();
   }, []);
+
+  // Heartbeat: cập nhật lastActiveAt mỗi 3 phút khi user đang đăng nhập
+  useEffect(() => {
+    if (!user) return;
+    // Ping ngay khi user đăng nhập
+    axiosInstance.post('/users/ping').catch(() => { });
+    const interval = setInterval(() => {
+      axiosInstance.post('/users/ping').catch(() => { });
+    }, 3 * 60 * 1000); // 3 phút
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Login function
   const login = useCallback(async (email, password) => {

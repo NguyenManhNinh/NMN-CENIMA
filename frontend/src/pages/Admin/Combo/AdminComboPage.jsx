@@ -358,7 +358,7 @@ const AdminComboPage = () => {
                           <Typography sx={{ fontWeight: 600, fontSize: '0.85rem', color: colors.textPrimary }}>{combo.name}</Typography>
                           {combo.description && (
                             <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mt: 0.2, lineHeight: 1.3 }}>
-                              {combo.description.length > 50 ? combo.description.substring(0, 50) + '...' : combo.description}
+                              {combo.description}
                             </Typography>
                           )}
                         </TableCell>

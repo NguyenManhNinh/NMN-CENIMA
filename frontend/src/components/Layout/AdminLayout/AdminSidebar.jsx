@@ -7,7 +7,10 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import SettingsIcon from '@mui/icons-material/Settings';
+import PeopleIcon from '@mui/icons-material/People';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import logo from '../../../assets/images/NMN_CENIMA_LOGO.png';
 
 // Chiều rộng sidebar
@@ -56,7 +59,29 @@ const MENU_GROUPS = [
   {
     label: 'BÁO CÁO',
     items: [
-      { label: 'Thống kê', path: '/admin/thong-ke', icon: <BarChartIcon /> }
+      { label: 'Thống kê', path: '/admin/thong-ke', icon: <BarChartIcon /> },
+      { label: 'Hóa đơn', path: '/admin/hoa-don', icon: <ReceiptIcon /> }
+    ]
+  },
+  {
+    label: 'HỆ THỐNG',
+    items: [
+      {
+        label: 'Người dùng',
+        icon: <PeopleIcon />,
+        children: [
+          { label: 'Khách hàng', path: '/admin/khach-hang' },
+          { label: 'Nhân viên', path: '/admin/nhan-vien' },
+        ]
+      },
+      {
+        label: 'Hệ thống',
+        icon: <SettingsIcon />,
+        children: [
+          { label: 'Chức vụ', path: '/admin/chuc-vu' },
+          { label: 'Phân quyền', path: '/admin/phan-quyen' },
+        ]
+      }
     ]
   }
 ];

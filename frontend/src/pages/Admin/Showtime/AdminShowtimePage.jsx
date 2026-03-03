@@ -391,7 +391,7 @@ const AdminShowtimePage = () => {
                               />
                             )}
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.82rem', color: colors.textPrimary }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.82rem', color: colors.textPrimary, whiteSpace: 'nowrap' }}>
                                 {s.movieId?.title || '—'}
                               </Typography>
                               {s.subtitle && (
@@ -403,10 +403,10 @@ const AdminShowtimePage = () => {
                           </Box>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>{s.cinemaId?.name || '—'}</Typography>
+                          <Typography variant="body2" sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{s.cinemaId?.name || '—'}</Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>{s.roomId?.name || '—'}</Typography>
+                          <Typography variant="body2" sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{s.roomId?.name || '—'}</Typography>
                         </TableCell>
                         <TableCell align="center">
                           <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.82rem', color: '#1565c0' }}>

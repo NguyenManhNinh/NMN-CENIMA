@@ -42,10 +42,19 @@ export const getOrderByOrderNoAPI = async (orderNo) => {
   const response = await axiosInstance.get(`/orders/by-order-no/${orderNo}`);
   return response.data;
 };
+/**
+ * Lấy tất cả đơn hàng (Admin/Manager)
+ * @returns {Promise<{orders: Array}>}
+ */
+export const getAllOrdersAPI = async () => {
+  const response = await axiosInstance.get('/orders');
+  return response.data;
+};
 
 export default {
   createOrderAPI,
   getMyOrdersAPI,
   getOrderByIdAPI,
-  getOrderByOrderNoAPI
+  getOrderByOrderNoAPI,
+  getAllOrdersAPI
 };

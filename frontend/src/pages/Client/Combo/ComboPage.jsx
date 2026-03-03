@@ -85,19 +85,21 @@ const styles = {
     flexDirection: { xs: 'row', sm: 'row' },
     gap: { xs: 1.5, md: 2 },
     p: { xs: 1.5, md: 2 },
-    border: '1px solid #e0e0e0',
-    borderRadius: 2,
     bgcolor: '#fff',
-    transition: 'box-shadow 0.2s',
+    transition: 'background 0.2s',
+    border: { xs: '1px solid #e0e0e0', md: 'none' },
+    borderRadius: { xs: 2, md: 0 },
+    mb: { xs: 1.5, md: 0 },
     '&:hover': {
-      boxShadow: { xs: 'none', md: '0 2px 8px rgba(0,0,0,0.1)' }
+      bgcolor: { xs: '#fff', md: '#f9f9f9' }
     }
   },
   comboImage: {
     width: { xs: 70, sm: 85, md: 100 },
     height: { xs: 55, sm: 70, md: 80 },
     objectFit: 'contain',
-    flexShrink: 0
+    flexShrink: 0,
+    borderRadius: '3px'
   },
   comboInfo: {
     flex: 1,
@@ -113,7 +115,8 @@ const styles = {
     fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
     color: '#666',
     mb: 1,
-    lineHeight: 1.4
+    lineHeight: 1.4,
+    whiteSpace: { xs: 'normal', md: 'nowrap' }
   },
   comboPrice: {
     fontWeight: 700,
@@ -394,10 +397,10 @@ function ComboPage() {
           {/* Danh sách combo */}
           <Grid item xs={12} md={8}>
 
-            {/* Grid combo */}
-            <Grid container spacing={2}>
-              {combos.map(combo => (
-                <Grid item xs={12} sm={6} key={combo._id}>
+            {/* All combos - single card on desktop, individual cards on mobile */}
+            <Paper elevation={0} sx={{ border: { xs: 'none', md: '1px solid #e0e0e0' }, borderRadius: 0, bgcolor: { xs: 'transparent', md: '#fff' }, overflow: 'hidden' }}>
+              {combos.map((combo, index) => (
+                <Box key={combo._id}>
                   <Box sx={styles.comboCard}>
                     {/* Ảnh combo */}
                     <Box
@@ -440,9 +443,9 @@ function ComboPage() {
                       </IconButton>
                     </Box>
                   </Box>
-                </Grid>
+                </Box>
               ))}
-            </Grid>
+            </Paper>
           </Grid>
 
           {/* Sidebar thông tin đặt vé */}

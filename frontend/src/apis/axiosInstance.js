@@ -50,11 +50,17 @@ axiosInstance.interceptors.response.use(
     const status = error.response?.status;
 
     // Kiểm tra nếu là lỗi authentication (401) hoặc lỗi liên quan token
+    // Bỏ qua nếu là request login, admin/login, hoặc chính request refresh-token
     const isAuthError = status === 401 ||
       (status === 500 && error.response?.data?.message?.includes('jwt'));
 
-    // Nếu là auth error và chưa retry
-    if (isAuthError && !originalRequest._retry) {
+    const isLoginOrRefreshRequest =
+      originalRequest.url.includes('/auth/login') ||
+      originalRequest.url.includes('/auth/admin/login') ||
+      originalRequest.url.includes('/auth/refresh-token');
+
+    // Nếu là auth error và chưa retry và KHÔNG PHẢI đang login/refresh
+    if (isAuthError && !originalRequest._retry && !isLoginOrRefreshRequest) {
       // Nếu đang trong quá trình refresh, đưa request vào queue chờ
       if (isRefreshing) {
         return new Promise((resolve, reject) => {

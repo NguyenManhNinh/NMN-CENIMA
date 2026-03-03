@@ -113,10 +113,10 @@ function BookingPage() {
         const movieData = movieRes?.data?.movie;
         setMovie(movieData);
 
-        // 2. Get other now showing movies
+        // 2. Get other now showing movies (default: 5 phim trên sidebar)
         const nowShowingRes = await getNowShowingMoviesAPI(5);
         const nowShowingMovies = nowShowingRes?.data?.movies || [];
-        setOtherMovies(nowShowingMovies.filter(m => m.slug !== slug).slice(0, 4));
+        setOtherMovies(nowShowingMovies.slice(0, 5));
 
         // 3. Get all cinemas
         const cinemasRes = await getAllCinemasAPI();
@@ -611,10 +611,9 @@ function BookingPage() {
 
                     <Typography sx={{ color: '#EA3B92' }}>Thể loại:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                      {/* Chỉ hiển thị movieCategories (từ admin quản lý thể loại) */}
                       {(() => {
-                        const cats = movie.movieCategories || [];
-                        if (!cats || cats.length === 0) return (
+                        const cats = (movie.movieCategories || []).flatMap(c => c.split(',').map(s => s.trim())).filter(Boolean);
+                        if (cats.length === 0) return (
                           <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
                         );
                         return cats.map((cat, idx) => {
@@ -703,7 +702,7 @@ function BookingPage() {
                       {(!movie.actors || movie.actors.length === 0) ? (
                         <Typography sx={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
                       ) : (
-                        movie.actors.slice(0, 3).map((actor, idx) => {
+                        movie.actors.map((actor, idx) => {
                           const actorName = typeof actor === 'string' ? actor : actor?.name || '';
                           return (
                             <Chip
@@ -761,10 +760,9 @@ function BookingPage() {
 
                 <Typography sx={{ color: '#EA3B92' }}>Thể loại:</Typography>
                 <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap' }}>
-                  {/* Chỉ hiển thị movieCategories (từ admin quản lý thể loại) */}
                   {(() => {
-                    const cats = movie.movieCategories || [];
-                    if (!cats || cats.length === 0) return (
+                    const cats = (movie.movieCategories || []).flatMap(c => c.split(',').map(s => s.trim())).filter(Boolean);
+                    if (cats.length === 0) return (
                       <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
                     );
                     return cats.map((cat, idx) => {
@@ -852,7 +850,7 @@ function BookingPage() {
                   {(!movie.actors || movie.actors.length === 0) ? (
                     <Typography sx={{ color: '#999', fontSize: '11px', fontStyle: 'italic' }}>Chưa cập nhật</Typography>
                   ) : (
-                    movie.actors.slice(0, 3).map((actor, idx) => {
+                    movie.actors.map((actor, idx) => {
                       const actorName = typeof actor === 'string' ? actor : actor?.name || '';
                       return (
                         <Chip
@@ -911,7 +909,8 @@ function BookingPage() {
                 <Typography sx={{
                   color: '#fff', lineHeight: 1.7,
                   fontFamily: '"Nunito Sans", sans-serif', pl: 1.7,
-                  mb: 2, fontSize: '14px', textAlign: 'justify'
+                  mb: 2, fontSize: '14px', textAlign: 'justify',
+                  whiteSpace: 'pre-line'
                 }}>
                   {movie.description}
                 </Typography>
