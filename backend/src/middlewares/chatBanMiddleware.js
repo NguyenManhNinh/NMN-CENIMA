@@ -24,8 +24,9 @@ const requireNotChatBanned = (req, res, next) => {
       year: 'numeric',
       timeZone: 'Asia/Ho_Chi_Minh'
     });
+    const reason = user.chatBanReason ? `\nLý do: ${user.chatBanReason}` : '';
     return next(
-      new AppError(`Bạn bị hạn chế bình luận đến ${banEndTime}`, 403)
+      new AppError(`Bạn bị hạn chế bình luận đến ${banEndTime}${reason}`, 403)
     );
   }
 

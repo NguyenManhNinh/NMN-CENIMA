@@ -435,8 +435,32 @@ exports.getReviewsByGenre = catchAsync(async (req, res, next) => {
     { $sort: sortObj },
     { $skip: skip },
     { $limit: Number(limit) },
+    // Lookup comment author
     { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userObj' } },
     { $unwind: '$userObj' },
+    // Lookup reaction users
+    { $lookup: { from: 'users', localField: 'reactions.user', foreignField: '_id', as: 'reactionUsers' } },
+    {
+      $addFields: {
+        reactions: {
+          $map: {
+            input: '$reactions',
+            as: 'r',
+            in: {
+              type: '$$r.type',
+              user: {
+                $let: {
+                  vars: {
+                    matched: { $arrayElemAt: [{ $filter: { input: '$reactionUsers', as: 'u', cond: { $eq: ['$$u._id', '$$r.user'] } } }, 0] }
+                  },
+                  in: { _id: '$$matched._id', name: '$$matched.name', avatar: '$$matched.avatar' }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     {
       $project: {
         _id: 1, rating: 1, title: 1, content: 1, hasSpoiler: 1, isVerified: 1,

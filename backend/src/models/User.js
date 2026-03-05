@@ -123,6 +123,10 @@ const userSchema = new mongoose.Schema(
     chatBanUntil: {
       type: Date,
       default: null
+    },
+    chatBanReason: {
+      type: String,
+      default: null
     }
   },
   {

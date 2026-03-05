@@ -220,3 +220,41 @@ exports.checkReportStatus = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+// ===========================================
+// ADMIN: Ban/Unban user chat trực tiếp
+// PATCH /admin/users/:userId/chat-ban
+// Body: { banMinutes, reason? }
+// banMinutes = 0 → unban
+// ===========================================
+exports.adminChatBan = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  const { banMinutes, reason } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return next(new AppError('Không tìm thấy người dùng', 404));
+  }
+
+  if (!banMinutes || banMinutes <= 0) {
+    // Unban
+    user.chatBanUntil = null;
+    user.chatBanReason = null;
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json({
+      status: 'success',
+      message: `Đã gỡ cấm chat cho ${user.name}`
+    });
+  }
+
+  const banUntil = new Date(Date.now() + banMinutes * 60 * 1000);
+  user.chatBanUntil = banUntil;
+  user.chatBanReason = reason || null;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: 'success',
+    message: `Đã cấm chat ${user.name} trong ${banMinutes} phút`,
+    data: { chatBanUntil: banUntil }
+  });
+});
