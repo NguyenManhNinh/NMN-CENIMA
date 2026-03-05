@@ -29,6 +29,11 @@ const personSchema = new mongoose.Schema(
       type: String,
       default: null
     },
+    // Ảnh poster lớn (dùng cho trang chi tiết)
+    posterUrl: {
+      type: String,
+      default: null
+    },
     // Gallery ảnh (nhiều ảnh)
     gallery: [{
       url: String,
