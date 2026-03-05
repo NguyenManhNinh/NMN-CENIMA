@@ -17,7 +17,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import {
-  getActorsAPI, createPersonAPI, updatePersonAPI, deletePersonAPI
+  getActorsAPI, getDirectorsAPI, createPersonAPI, updatePersonAPI, deletePersonAPI
 } from '../../../apis/personApi';
 
 const ROLES = [
@@ -35,7 +35,12 @@ const EMPTY_FORM = {
   gallery: [], filmography: []
 };
 
-const AdminActorListPage = () => {
+const AdminActorListPage = ({
+  personRole = 'actor',
+  pageTitle = 'Quản lý Diễn viên',
+  pageSubtitle = 'Thêm, sửa, xóa diễn viên trong hệ thống',
+  fetchAPI = getActorsAPI
+}) => {
   const { darkMode, colors } = useAdminTheme();
 
   const [persons, setPersons] = useState([]);
@@ -83,7 +88,7 @@ const AdminActorListPage = () => {
     try {
       const params = { page: page + 1, limit: rowsPerPage, sort: '-createdAt' };
       if (search) params.search = search;
-      const res = await getActorsAPI(params);
+      const res = await fetchAPI(params);
       setPersons(res.data || []);
       setTotal(res.total || 0);
     } catch (err) {
@@ -97,7 +102,7 @@ const AdminActorListPage = () => {
 
   // Mở modal thêm
   const openAddModal = () => {
-    setFormData(EMPTY_FORM);
+    setFormData({ ...EMPTY_FORM, role: personRole });
     setFormError('');
     setFormDialog({ open: true, editItem: null });
   };
@@ -139,6 +144,16 @@ const AdminActorListPage = () => {
       if (data.birthDate) data.birthDate = new Date(data.birthDate).toISOString();
       else delete data.birthDate;
 
+      // Xóa các field rỗng để không ghi đè dữ liệu cũ
+      const optionalFields = ['nameEn', 'photoUrl', 'posterUrl', 'birthPlace', 'nationality', 'height', 'shortBio', 'fullBio'];
+      optionalFields.forEach(key => {
+        if (data[key] === '' || data[key] === null || data[key] === undefined) delete data[key];
+      });
+
+      // Lọc gallery/filmography rỗng
+      if (data.gallery) data.gallery = data.gallery.filter(g => g.url?.trim());
+      if (data.filmography) data.filmography = data.filmography.filter(f => f.title?.trim());
+
       if (formDialog.editItem) {
         await updatePersonAPI(formDialog.editItem._id, data);
       } else {
@@ -175,10 +190,10 @@ const AdminActorListPage = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color: colors.textPrimary, fontSize: { xs: '1.1rem', sm: '1.4rem' } }}>
-            Quản lý Diễn viên
+            {pageTitle}
           </Typography>
           <Typography variant="body2" sx={{ color: colors.textMuted, mt: 0.3 }}>
-            Thêm, sửa, xóa diễn viên trong hệ thống
+            {pageSubtitle}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -238,7 +253,7 @@ const AdminActorListPage = () => {
                     <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem', display: { xs: 'none', lg: 'table-cell' } }}>Ngày sinh</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem', display: { xs: 'none', lg: 'table-cell', whiteSpace: 'nowrap' } }}>Chiều cao</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem', display: { xs: 'none', lg: 'table-cell' }, minWidth: 140 }}>Nơi sinh</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Hình ảnh diễn viên</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{personRole === 'director' ? 'Hình ảnh đạo diễn' : 'Hình ảnh diễn viên'}</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Phim đã tham gia</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 700, color: colors.textSecondary, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       Thích
@@ -359,7 +374,7 @@ const AdminActorListPage = () => {
       <Dialog open={formDialog.open} onClose={closeFormDialog} maxWidth="sm" fullWidth
         PaperProps={{ sx: { borderRadius: 2, bgcolor: colors.bgCard } }}>
         <DialogTitle sx={{ fontWeight: 700, fontSize: '1rem', color: colors.textPrimary, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {formDialog.editItem ? 'Cập nhật diễn viên' : 'Thêm diễn viên mới'}
+          {formDialog.editItem ? `Cập nhật ${personRole === 'director' ? 'đạo diễn' : 'diễn viên'}` : `Thêm ${personRole === 'director' ? 'đạo diễn' : 'diễn viên'} mới`}
           <IconButton size="small" onClick={closeFormDialog}><CloseIcon fontSize="small" /></IconButton>
         </DialogTitle>
         <DialogContent sx={{ px: 2.5, pt: 1 }}>
@@ -367,7 +382,7 @@ const AdminActorListPage = () => {
             {/* Tên */}
             <Box sx={{ gridColumn: '1 / -1' }}>
               <Typography variant="body2" sx={{ color: colors.textSecondary, mb: 0.5, fontWeight: 500, fontSize: '0.82rem' }}>Tên *</Typography>
-              <TextField fullWidth size="small" placeholder="Tên diễn viên"
+              <TextField fullWidth size="small" placeholder={personRole === 'director' ? 'Tên đạo diễn' : 'Tên diễn viên'}
                 value={formData.name}
                 onChange={(e) => { setFormData(p => ({ ...p, name: e.target.value })); if (formError) setFormError(''); }}
                 error={!!formError && !formData.name.trim()}
@@ -465,7 +480,7 @@ const AdminActorListPage = () => {
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Typography variant="body2" sx={{ color: colors.textSecondary, fontWeight: 600, fontSize: '0.85rem' }}>
-                Hình ảnh diễn viên ({formData.gallery.length})
+                {personRole === 'director' ? 'Hình ảnh đạo diễn' : 'Hình ảnh diễn viên'} ({formData.gallery.length})
               </Typography>
               <Button size="small" startIcon={<AddIcon />}
                 onClick={() => setFormData(p => ({ ...p, gallery: [...p.gallery, { url: '', caption: '' }] }))}

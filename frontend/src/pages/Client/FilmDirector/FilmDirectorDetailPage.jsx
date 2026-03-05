@@ -389,7 +389,7 @@ function FilmDirectorDetailPage() {
                     >
                       <Box
                         component="img"
-                        src={director.photoUrl}
+                        src={director.posterUrl || director.photoUrl}
                         alt={director.name}
                         sx={{
                           width: '100%',
@@ -661,6 +661,7 @@ function FilmDirectorDetailPage() {
                           p: 1,
                           borderRadius: 1,
                           transition: 'all 0.2s',
+                          overflow: 'hidden',
                         }}
                       >
                         <Box
@@ -685,9 +686,7 @@ function FilmDirectorDetailPage() {
                               fontWeight: 600,
                               fontSize: { xs: '13px', md: '14px' },
                               color: COLORS.text,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
+                              lineHeight: 1.4
                             }}
                           >
                             {movie.title}
