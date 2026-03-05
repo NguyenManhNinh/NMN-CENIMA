@@ -21,8 +21,7 @@ import { Link } from 'react-router-dom';
 import { getNowShowingMoviesAPI, getComingSoonMoviesAPI } from '../../../apis/movieApi';
 import { getAllBannersAPI } from '../../../apis/cmsApi';
 
-// Mock data fallback
-import mockBanners from '../../../mocks/mockBanners';
+
 
 // Background images
 import filmBackground from '../../../assets/images/film-bg.png';
@@ -161,21 +160,17 @@ function HomePage() {
         console.error('Lỗi tải phim:', moviesResult.reason);
       }
 
-      // Set banners từ API hoặc fallback mock
+      // Set banners từ API
       if (bannersResult.status === 'fulfilled') {
         const bannersData = bannersResult.value?.data?.banners || bannersResult.value?.data;
-        if (Array.isArray(bannersData) && bannersData.length > 0) {
+        if (Array.isArray(bannersData)) {
           setBanners(bannersData);
-        } else {
-          setBanners(mockBanners);
         }
       } else {
         console.error('Lỗi tải banners:', bannersResult.reason);
-        setBanners(mockBanners);
       }
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu:', error);
-      setBanners(mockBanners);
     } finally {
       setLoading(false);
     }
@@ -353,8 +348,8 @@ function HomePage() {
 
   return (
     <Box>
-      {/* BANNER SLIDER */}
-      <BannerSlider banners={banners} />
+      {/* BANNER SLIDER - chỉ hiện khi có dữ liệu */}
+      {banners.length > 0 && <BannerSlider banners={banners} />}
 
       {/* QUICK BOOKING BAR - Đặt vé nhanh */}
       <QuickBookingBar />

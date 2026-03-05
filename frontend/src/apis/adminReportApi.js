@@ -19,3 +19,14 @@ export const handleReportActionAPI = async (reportId, data) => {
   const response = await axiosInstance.patch(`/admin/reports/${reportId}/action`, data);
   return response.data;
 };
+
+/**
+ * Ban/Unban user chat trực tiếp (Admin Only)
+ * @param {string} userId - ID user
+ * @param {object} data - { banMinutes, reason }
+ * banMinutes = 0 → unban
+ */
+export const adminChatBanAPI = async (userId, data) => {
+  const response = await axiosInstance.patch(`/admin/reports/users/${userId}/chat-ban`, data);
+  return response.data;
+};

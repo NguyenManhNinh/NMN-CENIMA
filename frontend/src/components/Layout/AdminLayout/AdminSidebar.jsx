@@ -11,6 +11,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PeopleIcon from '@mui/icons-material/People';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import ArticleIcon from '@mui/icons-material/Article';
+import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
+import EventIcon from '@mui/icons-material/Event';
+import LocalActivityIcon from '@mui/icons-material/LocalActivity';
 import logo from '../../../assets/images/NMN_CENIMA_LOGO.png';
 
 // Chiều rộng sidebar
@@ -61,6 +65,48 @@ const MENU_GROUPS = [
     items: [
       { label: 'Thống kê', path: '/admin/thong-ke', icon: <BarChartIcon /> },
       { label: 'Hóa đơn', path: '/admin/hoa-don', icon: <ReceiptIcon /> }
+    ]
+  },
+  {
+    label: 'NỘI DUNG',
+    items: [
+      {
+        label: 'Quản lý nội dung',
+        icon: <ArticleIcon />,
+        children: [
+          { label: 'Slide', path: '/admin/slide' },
+        ]
+      },
+      {
+        label: 'Góc điện ảnh',
+        icon: <LocalMoviesIcon />,
+        children: [
+          { label: 'Thể loại phim', path: '/admin/the-loai-phim' },
+          { label: 'Bình luận', path: '/admin/binh-luan-the-loai' },
+          { label: 'Quản lý diễn viên', path: '/admin/dien-vien' },
+          { label: 'Quản lý Đạo diễn', path: '/admin/dao-dien' }
+        ]
+      },
+      {
+        label: 'Sự kiện',
+        icon: <EventIcon />,
+        children: [
+          { label: 'Ưu đãi', path: '/admin/uu-dai' },
+          { label: 'Phim hay hàng tháng', path: '/admin/phim-hay-hang-thang' }
+        ]
+      }
+    ]
+  },
+  {
+    label: 'Giá vé',
+    items: [
+      { label: 'Giá vé', path: '/admin/gia-ve', icon: <LocalActivityIcon /> }
+    ]
+  },
+  {
+    label: 'Thành viên',
+    items: [
+      { label: 'Thành viên', path: '/admin/thanh-vien', icon: <PeopleIcon /> }
     ]
   },
   {

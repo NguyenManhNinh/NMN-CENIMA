@@ -45,6 +45,9 @@ import AdminRolePage from './pages/Admin/Role/AdminRolePage';
 import AdminCustomerPage from './pages/Admin/User/AdminCustomerPage';
 import AdminStaffPage from './pages/Admin/User/AdminStaffPage';
 import AdminInvoicePage from './pages/Admin/Invoice/AdminInvoicePage';
+import AdminSlidePage from './pages/Admin/Slide/AdminSlidePage';
+import AdminGenreCinemaPage from './pages/Admin/GenreCinema/AdminGenreCinemaPage';
+import AdminGenreCommentsPage from './pages/Admin/GenreCinema/AdminGenreCommentsPage';
 
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
@@ -77,6 +80,9 @@ function App() {
             <Route path="khach-hang" element={<AdminCustomerPage />} />
             <Route path="nhan-vien" element={<AdminStaffPage />} />
             <Route path="hoa-don" element={<AdminInvoicePage />} />
+            <Route path="slide" element={<AdminSlidePage />} />
+            <Route path="the-loai-phim" element={<AdminGenreCinemaPage />} />
+            <Route path="binh-luan-the-loai" element={<AdminGenreCommentsPage />} />
           </Route>
 
           {/* OAuth Callback - không cần layout */}
