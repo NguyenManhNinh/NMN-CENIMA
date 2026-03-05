@@ -33,7 +33,7 @@ const getActors = catchAsync(async (req, res) => {
   const total = await Person.countDocuments(filter);
 
   const actors = await Person.find(filter)
-    .select('name nameEn slug photoUrl posterUrl shortBio fullBio genres viewCount likeCount nationality birthDate birthPlace height gallery filmography isActive createdAt')
+    .select('name nameEn slug role photoUrl posterUrl shortBio fullBio genres viewCount likeCount nationality birthDate birthPlace height gallery filmography isActive createdAt')
     .sort(sort)
     .skip(skip)
     .limit(parseInt(limit))
@@ -78,7 +78,7 @@ const getDirectors = catchAsync(async (req, res) => {
   const total = await Person.countDocuments(filter);
 
   const directors = await Person.find(filter)
-    .select('name slug photoUrl shortBio genres viewCount likeCount nationality createdAt')
+    .select('name nameEn slug role photoUrl posterUrl shortBio fullBio genres viewCount likeCount nationality birthDate birthPlace height gallery filmography isActive createdAt')
     .sort(sort)
     .skip(skip)
     .limit(parseInt(limit))
