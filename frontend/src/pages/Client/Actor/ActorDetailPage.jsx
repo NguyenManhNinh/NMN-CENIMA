@@ -396,7 +396,7 @@ function ActorDetailPage() {
                     >
                       <Box
                         component="img"
-                        src={actor.photoUrl}
+                        src={actor.posterUrl || actor.photoUrl}
                         alt={actor.name}
                         onError={handleImageError}
                         sx={{

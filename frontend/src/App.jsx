@@ -48,6 +48,7 @@ import AdminInvoicePage from './pages/Admin/Invoice/AdminInvoicePage';
 import AdminSlidePage from './pages/Admin/Slide/AdminSlidePage';
 import AdminGenreCinemaPage from './pages/Admin/GenreCinema/AdminGenreCinemaPage';
 import AdminGenreCommentsPage from './pages/Admin/GenreCinema/AdminGenreCommentsPage';
+import AdminActorListPage from './pages/Admin/Actor/AdminActorListPage';
 
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
@@ -83,6 +84,7 @@ function App() {
             <Route path="slide" element={<AdminSlidePage />} />
             <Route path="the-loai-phim" element={<AdminGenreCinemaPage />} />
             <Route path="binh-luan-the-loai" element={<AdminGenreCommentsPage />} />
+            <Route path="dien-vien" element={<AdminActorListPage />} />
           </Route>
 
           {/* OAuth Callback - không cần layout */}

@@ -1,14 +1,12 @@
-import axios from 'axios';
+import axiosInstance from './axiosInstance';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
-
-// Create axios instance
-const api = axios.create({
-  baseURL: `${API_URL}/persons`,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+// Wrapper để thêm prefix /persons
+const api = {
+  get: (url, config) => axiosInstance.get(`/persons${url}`, config),
+  post: (url, data, config) => axiosInstance.post(`/persons${url}`, data, config),
+  put: (url, data, config) => axiosInstance.put(`/persons${url}`, data, config),
+  delete: (url, config) => axiosInstance.delete(`/persons${url}`, config)
+};
 
 // PERSON API
 
@@ -62,12 +60,7 @@ export const getNationalitiesAPI = async (params = {}) => {
  * @param {string} personId - Person ID
  */
 export const togglePersonLikeAPI = async (personId) => {
-  const token = localStorage.getItem('accessToken');
-  const response = await api.post(`/${personId}/like`, {}, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  const response = await api.post(`/${personId}/like`, {});
   return response.data;
 };
 
@@ -77,6 +70,36 @@ export const togglePersonLikeAPI = async (personId) => {
  */
 export const incrementPersonViewAPI = async (personId) => {
   const response = await api.post(`/${personId}/view`);
+  return response.data;
+};
+
+// ============== ADMIN CRUD ==============
+
+/**
+ * Create new person (Admin)
+ * @param {Object} data - Person data
+ */
+export const createPersonAPI = async (data) => {
+  const response = await api.post('/', data);
+  return response.data;
+};
+
+/**
+ * Update person (Admin)
+ * @param {string} id - Person ID
+ * @param {Object} data - Person data
+ */
+export const updatePersonAPI = async (id, data) => {
+  const response = await api.put(`/${id}`, data);
+  return response.data;
+};
+
+/**
+ * Delete person (Admin)
+ * @param {string} id - Person ID
+ */
+export const deletePersonAPI = async (id) => {
+  const response = await api.delete(`/${id}`);
   return response.data;
 };
 
