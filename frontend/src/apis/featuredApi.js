@@ -87,4 +87,30 @@ export const toggleFeaturedLikeAPI = async (id) => {
   return response.data;
 };
 
+// ============ ADMIN APIs ============
+
+/** Lấy tất cả bài viết (bao gồm draft) */
+export const getAllFeaturedAdminAPI = async (params = {}) => {
+  const response = await api.get('/admin/all', { params });
+  return response.data;
+};
+
+/** Tạo bài viết mới */
+export const createFeaturedAdminAPI = async (data) => {
+  const response = await api.post('/', data);
+  return response.data;
+};
+
+/** Cập nhật bài viết */
+export const updateFeaturedAdminAPI = async (id, data) => {
+  const response = await api.put(`/${id}`, data);
+  return response.data;
+};
+
+/** Xoá bài viết */
+export const deleteFeaturedAdminAPI = async (id) => {
+  const response = await api.delete(`/${id}`);
+  return response.data;
+};
+
 export default api;

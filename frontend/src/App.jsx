@@ -51,6 +51,7 @@ import AdminGenreCommentsPage from './pages/Admin/GenreCinema/AdminGenreComments
 import AdminActorListPage from './pages/Admin/Actor/AdminActorListPage';
 import AdminDirectorListPage from './pages/Admin/Director/AdminDirectorListPage';
 import AdminPromotionPage from './pages/Admin/Promotion/AdminPromotionPage';
+import AdminFeaturedPage from './pages/Admin/Featured/AdminFeaturedPage';
 
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
@@ -89,6 +90,7 @@ function App() {
             <Route path="dien-vien" element={<AdminActorListPage />} />
             <Route path="dao-dien" element={<AdminDirectorListPage />} />
             <Route path="uu-dai" element={<AdminPromotionPage />} />
+            <Route path="phim-hay-thang" element={<AdminFeaturedPage />} />
           </Route>
 
           {/* OAuth Callback - không cần layout */}

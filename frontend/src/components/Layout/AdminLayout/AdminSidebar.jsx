@@ -92,7 +92,7 @@ const MENU_GROUPS = [
         icon: <EventIcon />,
         children: [
           { label: 'Ưu đãi', path: '/admin/uu-dai' },
-          { label: 'Phim hay hàng tháng', path: '/admin/phim-hay-hang-thang' }
+          { label: 'Phim hay hàng tháng', path: '/admin/phim-hay-thang' }
         ]
       }
     ]

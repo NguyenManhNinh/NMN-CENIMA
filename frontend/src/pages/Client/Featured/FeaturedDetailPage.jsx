@@ -355,66 +355,65 @@ function FeaturedDetailPage() {
                 />
               )}
 
-              {/* Video Embed OR Thumbnail */}
-              {article.videoUrl && !videoError ? (
+              {/* Video Embed — chỉ hiện khi có videoUrl */}
+              {article.videoUrl && (
                 <Box sx={{ mb: 3, overflow: 'hidden', position: 'relative' }}>
-                  <Box
-                    component="iframe"
-                    src={getYoutubeEmbedUrl(article.videoUrl)}
-                    title={article.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    onError={() => setVideoError(true)}
-                    sx={{
-                      width: '100%',
-                      aspectRatio: '16/9',
-                      border: 'none'
-                    }}
-                  />
-                </Box>
-              ) : (
-                <Box sx={{ mb: 3, overflow: 'hidden', position: 'relative' }}>
-                  <Box
-                    component="img"
-                    src={article.thumbnail}
-                    alt={article.title}
-                    onError={handleImageError}
-                    sx={{
-                      width: '100%',
-                      aspectRatio: '16/9',
-                      objectFit: 'cover'
-                    }}
-                  />
-                  {/* Play button overlay nếu có video nhưng bị lỗi */}
-                  {article.videoUrl && videoError && (
+                  {!videoError ? (
                     <Box
-                      component="a"
-                      href={article.videoUrl.replace('/embed/', '/watch?v=')}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      component="iframe"
+                      src={getYoutubeEmbedUrl(article.videoUrl)}
+                      title={article.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      onError={() => setVideoError(true)}
                       sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        bgcolor: 'rgba(0,0,0,0.7)',
-                        color: 'white',
-                        borderRadius: '50%',
-                        width: 70,
-                        height: 70,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        textDecoration: 'none',
-                        transition: 'all 0.3s',
-                        '&:hover': {
-                          bgcolor: COLORS.primary,
-                          transform: 'translate(-50%, -50%) scale(1.1)'
-                        }
+                        width: '100%',
+                        aspectRatio: '16/9',
+                        border: 'none'
                       }}
-                    >
-                      <PlayArrowIcon sx={{ fontSize: 40 }} />
-                    </Box>
+                    />
+                  ) : (
+                    <>
+                      <Box
+                        component="img"
+                        src={article.thumbnail}
+                        alt={article.title}
+                        onError={handleImageError}
+                        sx={{
+                          width: '100%',
+                          aspectRatio: '16/9',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      <Box
+                        component="a"
+                        href={article.videoUrl.replace('/embed/', '/watch?v=')}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          bgcolor: 'rgba(0,0,0,0.7)',
+                          color: 'white',
+                          borderRadius: '50%',
+                          width: 70,
+                          height: 70,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textDecoration: 'none',
+                          transition: 'all 0.3s',
+                          '&:hover': {
+                            bgcolor: COLORS.primary,
+                            transform: 'translate(-50%, -50%) scale(1.1)'
+                          }
+                        }}
+                      >
+                        <PlayArrowIcon sx={{ fontSize: 40 }} />
+                      </Box>
+                    </>
                   )}
                 </Box>
               )}
