@@ -40,4 +40,31 @@ export const getMembershipInfoAPI = async () => {
   return response.data;
 };
 
+// ═══ ADMIN APIs ═══
+
+/**
+ * [ADMIN] Lấy tất cả trang thành viên (bao gồm draft)
+ * @route   GET /api/v1/membership-info/admin/all
+ */
+export const getAllMembershipInfoAdminAPI = async () => {
+  const token = localStorage.getItem('accessToken');
+  const response = await api.get('/admin/all', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+/**
+ * [ADMIN] Cập nhật hoặc tạo mới trang thành viên
+ * @route   PUT /api/v1/membership-info
+ * @body    { title, sections[], status }
+ */
+export const updateMembershipInfoAdminAPI = async (data) => {
+  const token = localStorage.getItem('accessToken');
+  const response = await api.put('/', data, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
 export default api;
