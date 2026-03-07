@@ -92,7 +92,8 @@ const styles = {
   dateText: {
     fontSize: '0.75rem',
     color: '#666',
-    fontWeight: 400
+    fontWeight: 400,
+    whiteSpace: 'nowrap'
   },
   skeletonImage: {
     width: '100%',

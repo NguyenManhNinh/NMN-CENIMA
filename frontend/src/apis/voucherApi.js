@@ -15,6 +15,22 @@ export const getAvailableVouchersAPI = async () => {
  * @param {number} totalAmount - Tổng tiền trước giảm
  * @returns {Promise} - { discountAmount, finalAmount, ... }
  */
+/**
+ * Lấy tất cả voucher (admin)
+ */
+export const getAllVouchersAdminAPI = async () => {
+  const response = await axiosInstance.get('/vouchers');
+  return response.data;
+};
+
+/**
+ * Tạo voucher mới (admin)
+ */
+export const createVoucherAdminAPI = async (data) => {
+  const response = await axiosInstance.post('/vouchers', data);
+  return response.data;
+};
+
 export const applyVoucherAPI = async (code, totalAmount) => {
   const response = await axiosInstance.post('/vouchers/apply', {
     code,

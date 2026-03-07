@@ -93,6 +93,7 @@ const styles = {
     fontSize: '0.95rem',
     lineHeight: 1.9,
     color: '#333',
+    whiteSpace: 'pre-line',
     '& p': { mb: 1.5 },
     '& strong': { fontWeight: 600 }
   },
@@ -340,6 +341,15 @@ function PromotionDetailPage() {
                 alt={promotion?.title}
                 sx={styles.bannerImage}
               />
+            </Box>
+          )}
+
+          {/* EXCERPT */}
+          {promotion?.excerpt && (
+            <Box sx={{ bgcolor: '#fff', px: { xs: 2, md: 3 }, pt: 2 }}>
+              <Typography sx={{ fontSize: '0.93rem', color: '#555', lineHeight: 1.7, fontStyle: 'italic' }}>
+                {promotion.excerpt}
+              </Typography>
             </Box>
           )}
 
