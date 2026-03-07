@@ -53,4 +53,31 @@ export const getTicketPricingAPI = async () => {
   return response.data;
 };
 
+// ═══ ADMIN APIs ═══
+
+/**
+ * [ADMIN] Lấy tất cả bảng giá (bao gồm draft)
+ * @route   GET /api/v1/ticket-pricing/admin/all
+ */
+export const getAllTicketPricingAdminAPI = async () => {
+  const token = localStorage.getItem('accessToken');
+  const response = await api.get('/admin/all', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+/**
+ * [ADMIN] Cập nhật hoặc tạo mới bảng giá vé
+ * @route   PUT /api/v1/ticket-pricing
+ * @body    { title, tabs[], notes, status }
+ */
+export const updateTicketPricingAdminAPI = async (data) => {
+  const token = localStorage.getItem('accessToken');
+  const response = await api.put('/', data, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
 export default api;

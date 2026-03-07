@@ -275,7 +275,13 @@ const AdminFeaturedPage = () => {
 
   // Render form
   const renderFormFields = () => (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+    <Box sx={{
+      display: 'flex', flexDirection: 'column', gap: 2, mt: 1,
+      '& .MuiOutlinedInput-root': {
+        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)', borderWidth: 1 }
+      }
+    }}>
 
       {/* ═══ THÔNG TIN CƠ BẢN ═══ */}
       <SectionTitle>Thông tin cơ bản</SectionTitle>
