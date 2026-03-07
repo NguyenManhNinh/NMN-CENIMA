@@ -701,13 +701,13 @@ const createPromotion = async (req, res) => {
           const Voucher = require('../models/Voucher');
           const logger = require('../utils/logger');
 
-          // TODO: Đổi lại 24 * 60 * 60 * 1000 sau khi test xong và nếu muốn test đổi lại 30 * 1000 là 30s
-          const emailCooldown = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24h
+          // TODO: Đổi lại 24 * 60 * 60 * 1000
+          const emailCooldown = new Date(Date.now() - 24 * 60 * 60 * 1000); // 30s cho test
 
           // Lấy users: đã subscribe, không bị deactive, chưa nhận email trong cooldown
           const users = await User.find({
             newsletterSubscribed: true,
-            isActive: { $ne: false },  // Bao gồm users chưa set hoặc set true
+            isActive: { $ne: false },
             $or: [
               { lastPromotionEmailAt: null },
               { lastPromotionEmailAt: { $exists: false } },
@@ -715,7 +715,20 @@ const createPromotion = async (req, res) => {
             ]
           }).select('email name _id').lean();
 
-          if (users.length > 0) {
+          logger.info(`[Promotion Email] Found ${users.length} users matching criteria`);
+
+          // Deduplicate by email - mỗi email chỉ nhận 1 lần
+          const seenEmails = new Set();
+          const uniqueUsers = users.filter(u => {
+            const email = u.email?.toLowerCase();
+            if (!email || seenEmails.has(email)) return false;
+            seenEmails.add(email);
+            return true;
+          });
+
+          logger.info(`[Promotion Email] After dedup: ${uniqueUsers.length} unique emails (from ${users.length} users)`);
+
+          if (uniqueUsers.length > 0) {
             // Lấy voucher code nếu có
             let voucherCode = null;
             if (promotion.voucherId) {
@@ -723,8 +736,8 @@ const createPromotion = async (req, res) => {
               if (voucher) voucherCode = voucher.code;
             }
 
-            const result = await emailService.sendBulkPromotionEmails(promotion, users, voucherCode);
-            logger.info(`Promotion notification: sent to ${result.sentCount} users for "${promotion.title}"`);
+            const result = await emailService.sendBulkPromotionEmails(promotion, uniqueUsers, voucherCode);
+            logger.info(`Promotion notification: sent to ${result.sentCount}/${uniqueUsers.length} unique emails for "${promotion.title}"`);
           }
         } catch (emailError) {
           const logger = require('../utils/logger');
