@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Typography, Drawer, Collapse } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -16,6 +16,7 @@ import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
 import EventIcon from '@mui/icons-material/Event';
 import LocalActivityIcon from '@mui/icons-material/LocalActivity';
 import logo from '../../../assets/images/NMN_CENIMA_LOGO.png';
+import { usePermission } from '../../../contexts/PermissionContext';
 
 // Chiều rộng sidebar
 const SIDEBAR_WIDTH = 260;
@@ -27,7 +28,7 @@ const MENU_GROUPS = [
   {
     label: 'TỔNG QUAN',
     items: [
-      { label: 'Dashboard', path: '/admin/dashboard', icon: <DashboardIcon /> }
+      { label: 'Dashboard', path: '/admin/dashboard', icon: <DashboardIcon />, permissionKey: 'dashboard' }
     ]
   },
   {
@@ -37,25 +38,25 @@ const MENU_GROUPS = [
         label: 'Quản lý Phim',
         icon: <MovieIcon />,
         children: [
-          { label: 'Phim', path: '/admin/phim' },
-          { label: 'Thể loại', path: '/admin/the-loai' }
+          { label: 'Phim', path: '/admin/phim', permissionKey: 'phim' },
+          { label: 'Thể loại', path: '/admin/the-loai', permissionKey: 'the-loai' }
         ]
       },
       {
         label: 'Lịch chiếu',
         icon: <CalendarMonthIcon />,
         children: [
-          { label: 'Ghế', path: '/admin/ghe' },
-          { label: 'Rạp', path: '/admin/rap' },
-          { label: 'Phòng', path: '/admin/phong' },
-          { label: 'Suất chiếu', path: '/admin/suat-chieu' },
+          { label: 'Ghế', path: '/admin/ghe', permissionKey: 'ghe' },
+          { label: 'Rạp', path: '/admin/rap', permissionKey: 'rap' },
+          { label: 'Phòng', path: '/admin/phong', permissionKey: 'phong' },
+          { label: 'Suất chiếu', path: '/admin/suat-chieu', permissionKey: 'suat-chieu' },
         ]
       },
       {
         label: 'Dịch vụ',
         icon: <FastfoodIcon />,
         children: [
-          { label: 'Combo', path: '/admin/combo' },
+          { label: 'Combo', path: '/admin/combo', permissionKey: 'combo' },
         ]
       }
     ]
@@ -63,8 +64,8 @@ const MENU_GROUPS = [
   {
     label: 'BÁO CÁO',
     items: [
-      { label: 'Thống kê', path: '/admin/thong-ke', icon: <BarChartIcon /> },
-      { label: 'Hóa đơn', path: '/admin/hoa-don', icon: <ReceiptIcon /> }
+      { label: 'Thống kê', path: '/admin/thong-ke', icon: <BarChartIcon />, permissionKey: 'thong-ke' },
+      { label: 'Hóa đơn', path: '/admin/hoa-don', icon: <ReceiptIcon />, permissionKey: 'hoa-don' }
     ]
   },
   {
@@ -74,25 +75,25 @@ const MENU_GROUPS = [
         label: 'Quản lý nội dung',
         icon: <ArticleIcon />,
         children: [
-          { label: 'Slide', path: '/admin/slide' },
+          { label: 'Slide', path: '/admin/slide', permissionKey: 'slide' },
         ]
       },
       {
         label: 'Góc điện ảnh',
         icon: <LocalMoviesIcon />,
         children: [
-          { label: 'Thể loại phim', path: '/admin/the-loai-phim' },
-          { label: 'Bình luận', path: '/admin/binh-luan-the-loai' },
-          { label: 'Quản lý diễn viên', path: '/admin/dien-vien' },
-          { label: 'Quản lý Đạo diễn', path: '/admin/dao-dien' }
+          { label: 'Thể loại phim', path: '/admin/the-loai-phim', permissionKey: 'the-loai-phim' },
+          { label: 'Bình luận', path: '/admin/binh-luan-the-loai', permissionKey: 'binh-luan' },
+          { label: 'Quản lý diễn viên', path: '/admin/dien-vien', permissionKey: 'dien-vien' },
+          { label: 'Quản lý Đạo diễn', path: '/admin/dao-dien', permissionKey: 'dao-dien' }
         ]
       },
       {
         label: 'Sự kiện',
         icon: <EventIcon />,
         children: [
-          { label: 'Ưu đãi', path: '/admin/uu-dai' },
-          { label: 'Phim hay hàng tháng', path: '/admin/phim-hay-thang' }
+          { label: 'Ưu đãi', path: '/admin/uu-dai', permissionKey: 'uu-dai' },
+          { label: 'Phim hay hàng tháng', path: '/admin/phim-hay-thang', permissionKey: 'phim-hay' }
         ]
       }
     ]
@@ -100,13 +101,13 @@ const MENU_GROUPS = [
   {
     label: 'Giá vé',
     items: [
-      { label: 'Giá vé', path: '/admin/gia-ve', icon: <LocalActivityIcon /> }
+      { label: 'Giá vé', path: '/admin/gia-ve', icon: <LocalActivityIcon />, permissionKey: 'gia-ve' }
     ]
   },
   {
     label: 'Thành viên',
     items: [
-      { label: 'Thành viên', path: '/admin/thanh-vien', icon: <PeopleIcon /> }
+      { label: 'Thành viên', path: '/admin/thanh-vien', icon: <PeopleIcon />, permissionKey: 'thanh-vien' }
     ]
   },
   {
@@ -116,16 +117,16 @@ const MENU_GROUPS = [
         label: 'Người dùng',
         icon: <PeopleIcon />,
         children: [
-          { label: 'Khách hàng', path: '/admin/khach-hang' },
-          { label: 'Nhân viên', path: '/admin/nhan-vien' },
+          { label: 'Khách hàng', path: '/admin/khach-hang', permissionKey: 'khach-hang' },
+          { label: 'Nhân viên', path: '/admin/nhan-vien', permissionKey: 'nhan-vien' },
         ]
       },
       {
         label: 'Hệ thống',
         icon: <SettingsIcon />,
         children: [
-          { label: 'Chức vụ', path: '/admin/chuc-vu' },
-          { label: 'Phân quyền', path: '/admin/phan-quyen' },
+          { label: 'Chức vụ', path: '/admin/chuc-vu', permissionKey: 'chuc-vu' },
+          { label: 'Phân quyền', path: '/admin/phan-quyen', permissionKey: 'phan-quyen' },
         ]
       }
     ]
@@ -185,6 +186,30 @@ const AdminSidebar = ({ mobileOpen, onMobileClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [expanded, setExpanded] = useState({});
+  const { hasAnyPermission, isMaster } = usePermission();
+
+  // Filter menu theo permissions
+  const filteredGroups = useMemo(() => {
+    if (isMaster) return MENU_GROUPS;
+    return MENU_GROUPS.map(group => {
+      const filteredItems = group.items.map(item => {
+        if (item.children) {
+          const filteredChildren = item.children.filter(child =>
+            child.permissionKey === 'dashboard' || hasAnyPermission(child.permissionKey)
+          );
+          if (filteredChildren.length === 0) return null;
+          return { ...item, children: filteredChildren };
+        }
+        // Item đơn (không có children)
+        if (item.permissionKey === 'dashboard' || hasAnyPermission(item.permissionKey)) {
+          return item;
+        }
+        return null;
+      }).filter(Boolean);
+      if (filteredItems.length === 0) return null;
+      return { ...group, items: filteredItems };
+    }).filter(Boolean);
+  }, [isMaster, hasAnyPermission]);
 
   // Toggle expand/collapse cho parent item
   const handleToggle = (label) => {
@@ -235,7 +260,7 @@ const AdminSidebar = ({ mobileOpen, onMobileClose }) => {
 
       {/* Danh sách menu */}
       <Box sx={{ flex: 1, overflowY: 'auto', py: 1.5 }}>
-        {MENU_GROUPS.map((group) => (
+        {filteredGroups.map((group) => (
           <Box key={group.label} sx={{ mb: 1 }}>
             {/* Tên nhóm */}
             <Typography variant="overline" sx={{
@@ -354,7 +379,7 @@ const AdminSidebar = ({ mobileOpen, onMobileClose }) => {
       {/* Phiên bản ứng dụng */}
       <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.65rem' }}>
-          NMN Cinema Admin v1.0
+          ĐATN-CINEMA
         </Typography>
       </Box>
     </Box>

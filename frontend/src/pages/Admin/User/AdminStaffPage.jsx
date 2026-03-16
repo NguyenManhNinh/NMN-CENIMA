@@ -23,6 +23,15 @@ import {
 } from '../../../apis/userManagementApi';
 import { getAllRolesAPI } from '../../../apis/roleApi';
 
+// Mapping tên chức vụ sang tiếng Việt
+const ROLE_DISPLAY_NAMES = {
+  admin: 'Quản trị viên',
+  manager: 'Quản lý',
+  staff: 'Nhân viên',
+  user: 'Khách hàng'
+};
+const getRoleDisplayName = (name) => ROLE_DISPLAY_NAMES[name] || name;
+
 // Màu cho role — cycle nếu nhiều role
 const ROLE_COLORS = [
   { color: '#c62828', bg: '#ffebee' },
@@ -297,7 +306,7 @@ const AdminStaffPage = () => {
                 SelectProps={{ displayEmpty: true, renderValue: (v) => v || 'Tất cả chức vụ' }}
                 sx={{ ...noOutlineSx, width: 160 }}>
                 <MenuItem value="">Tất cả chức vụ</MenuItem>
-                {staffRoles.map(r => <MenuItem key={r.name} value={r.name}>{r.name}</MenuItem>)}
+                {staffRoles.map(r => <MenuItem key={r.name} value={r.name}>{getRoleDisplayName(r.name)}</MenuItem>)}
               </TextField>
               <TextField size="small" placeholder="Tìm tên, email, SĐT..."
                 value={search} onChange={e => setSearch(e.target.value)}
@@ -360,7 +369,7 @@ const AdminStaffPage = () => {
                             </Typography>
                           </TableCell>
                           <TableCell align="center">
-                            <Chip label={user.role} size="small"
+                            <Chip label={getRoleDisplayName(user.role)} size="small"
                               sx={{
                                 height: 24, fontWeight: 600, fontSize: '0.7rem',
                                 bgcolor: darkMode ? 'transparent' : rc.bg,
@@ -480,7 +489,7 @@ const AdminStaffPage = () => {
 
               <TextField select label="Chức vụ *" size="small" fullWidth value={formRole}
                 onChange={e => setFormRole(e.target.value)} sx={{ ...noOutlineSx }}>
-                {staffRoles.map(r => <MenuItem key={r.name} value={r.name}>{r.name}</MenuItem>)}
+                {staffRoles.map(r => <MenuItem key={r.name} value={r.name}>{getRoleDisplayName(r.name)}</MenuItem>)}
               </TextField>
 
               <Box sx={{ display: 'flex', gap: 2 }}>
@@ -526,12 +535,12 @@ const AdminStaffPage = () => {
               {promoteUser && (
                 <>
                   <Alert icon={<CheckCircleIcon />} severity="success" sx={{ borderRadius: 2, fontSize: '0.85rem', py: 0.5 }}>
-                    <b>{promoteUser.name}</b> — {promoteUser.email} — Vai trò: <b>{promoteUser.role}</b>
+                    <b>{promoteUser.name}</b> — {promoteUser.email} — Vai trò: <b>{getRoleDisplayName(promoteUser.role)}</b>
                   </Alert>
 
                   <TextField select label="Chức vụ mới *" size="small" fullWidth value={promoteRole}
                     onChange={e => setPromoteRole(e.target.value)} sx={{ ...noOutlineSx }}>
-                    {staffRoles.map(r => <MenuItem key={r.name} value={r.name}>{r.name}</MenuItem>)}
+                    {staffRoles.map(r => <MenuItem key={r.name} value={r.name}>{getRoleDisplayName(r.name)}</MenuItem>)}
                   </TextField>
                 </>
               )}

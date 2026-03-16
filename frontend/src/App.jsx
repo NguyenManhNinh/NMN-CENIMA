@@ -54,9 +54,23 @@ import AdminPromotionPage from './pages/Admin/Promotion/AdminPromotionPage';
 import AdminFeaturedPage from './pages/Admin/Featured/AdminFeaturedPage';
 import AdminTicketPricingPage from './pages/Admin/TicketPricing/AdminTicketPricingPage';
 import AdminMembershipPage from './pages/Admin/Membership/AdminMembershipPage';
+import AdminPermissionPage from './pages/Admin/Permission/AdminPermissionPage';
 
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
+
+// Permission System
+import { PermissionProvider, usePermission } from './contexts/PermissionContext';
+import { Navigate } from 'react-router-dom';
+
+// Route Guard: chặn truy cập trang không có quyền
+function PermissionRoute({ permissionKey, children }) {
+  const { hasAnyPermission, isMaster } = usePermission();
+  if (isMaster || permissionKey === 'dashboard' || hasAnyPermission(permissionKey)) {
+    return children;
+  }
+  return <Navigate to="/admin/dashboard" replace />;
+}
 
 function App() {
   return (
@@ -72,29 +86,30 @@ function App() {
           <Route path="admin/dang-nhap" element={<AdminLoginPage />} />
 
           {/* Các trang quản trị – dùng AdminLayout (có header) */}
-          <Route path="admin" element={<AdminLayout />}>
+          <Route path="admin" element={<PermissionProvider><AdminLayout /></PermissionProvider>}>
             <Route path="dashboard" element={<AdminDashboardPage />} />
-            <Route path="phim" element={<AdminMovieListPage />} />
-            <Route path="the-loai" element={<AdminGenreListPage />} />
-            <Route path="suat-chieu" element={<AdminShowtimePage />} />
-            <Route path="ghe" element={<AdminSeatPage />} />
-            <Route path="rap" element={<AdminCinemaPage />} />
-            <Route path="phong" element={<AdminRoomPage />} />
-            <Route path="combo" element={<AdminComboPage />} />
-            <Route path="thong-ke" element={<AdminStatisticsPage />} />
-            <Route path="chuc-vu" element={<AdminRolePage />} />
-            <Route path="khach-hang" element={<AdminCustomerPage />} />
-            <Route path="nhan-vien" element={<AdminStaffPage />} />
-            <Route path="hoa-don" element={<AdminInvoicePage />} />
-            <Route path="slide" element={<AdminSlidePage />} />
-            <Route path="the-loai-phim" element={<AdminGenreCinemaPage />} />
-            <Route path="binh-luan-the-loai" element={<AdminGenreCommentsPage />} />
-            <Route path="dien-vien" element={<AdminActorListPage />} />
-            <Route path="dao-dien" element={<AdminDirectorListPage />} />
-            <Route path="uu-dai" element={<AdminPromotionPage />} />
-            <Route path="phim-hay-thang" element={<AdminFeaturedPage />} />
-            <Route path="gia-ve" element={<AdminTicketPricingPage />} />
-            <Route path="thanh-vien" element={<AdminMembershipPage />} />
+            <Route path="phim" element={<PermissionRoute permissionKey="phim"><AdminMovieListPage /></PermissionRoute>} />
+            <Route path="the-loai" element={<PermissionRoute permissionKey="the-loai"><AdminGenreListPage /></PermissionRoute>} />
+            <Route path="suat-chieu" element={<PermissionRoute permissionKey="suat-chieu"><AdminShowtimePage /></PermissionRoute>} />
+            <Route path="ghe" element={<PermissionRoute permissionKey="ghe"><AdminSeatPage /></PermissionRoute>} />
+            <Route path="rap" element={<PermissionRoute permissionKey="rap"><AdminCinemaPage /></PermissionRoute>} />
+            <Route path="phong" element={<PermissionRoute permissionKey="phong"><AdminRoomPage /></PermissionRoute>} />
+            <Route path="combo" element={<PermissionRoute permissionKey="combo"><AdminComboPage /></PermissionRoute>} />
+            <Route path="thong-ke" element={<PermissionRoute permissionKey="thong-ke"><AdminStatisticsPage /></PermissionRoute>} />
+            <Route path="chuc-vu" element={<PermissionRoute permissionKey="chuc-vu"><AdminRolePage /></PermissionRoute>} />
+            <Route path="khach-hang" element={<PermissionRoute permissionKey="khach-hang"><AdminCustomerPage /></PermissionRoute>} />
+            <Route path="nhan-vien" element={<PermissionRoute permissionKey="nhan-vien"><AdminStaffPage /></PermissionRoute>} />
+            <Route path="hoa-don" element={<PermissionRoute permissionKey="hoa-don"><AdminInvoicePage /></PermissionRoute>} />
+            <Route path="slide" element={<PermissionRoute permissionKey="slide"><AdminSlidePage /></PermissionRoute>} />
+            <Route path="the-loai-phim" element={<PermissionRoute permissionKey="the-loai-phim"><AdminGenreCinemaPage /></PermissionRoute>} />
+            <Route path="binh-luan-the-loai" element={<PermissionRoute permissionKey="binh-luan"><AdminGenreCommentsPage /></PermissionRoute>} />
+            <Route path="dien-vien" element={<PermissionRoute permissionKey="dien-vien"><AdminActorListPage /></PermissionRoute>} />
+            <Route path="dao-dien" element={<PermissionRoute permissionKey="dao-dien"><AdminDirectorListPage /></PermissionRoute>} />
+            <Route path="uu-dai" element={<PermissionRoute permissionKey="uu-dai"><AdminPromotionPage /></PermissionRoute>} />
+            <Route path="phim-hay-thang" element={<PermissionRoute permissionKey="phim-hay"><AdminFeaturedPage /></PermissionRoute>} />
+            <Route path="gia-ve" element={<PermissionRoute permissionKey="gia-ve"><AdminTicketPricingPage /></PermissionRoute>} />
+            <Route path="thanh-vien" element={<PermissionRoute permissionKey="thanh-vien"><AdminMembershipPage /></PermissionRoute>} />
+            <Route path="phan-quyen" element={<PermissionRoute permissionKey="phan-quyen"><AdminPermissionPage /></PermissionRoute>} />
           </Route>
 
           {/* OAuth Callback - không cần layout */}

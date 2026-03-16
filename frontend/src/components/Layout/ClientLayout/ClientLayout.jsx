@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import ChatbotWidget from '../../ChatbotWidget/ChatbotWidget';
 
 // STYLES
 const styles = {
@@ -34,6 +35,9 @@ function ClientLayout() {
 
       {/* Footer - Chân trang */}
       <Footer />
+
+      {/* Chatbot AI - Trợ lý ảo */}
+      <ChatbotWidget />
     </Box>
   );
 }

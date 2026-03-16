@@ -16,6 +16,15 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import PeopleIcon from '@mui/icons-material/People';
 import { getAllRolesAPI, createRoleAPI, updateRoleAPI, deleteRoleAPI } from '../../../apis/roleApi';
 
+// Mapping tên chức vụ sang tiếng Việt
+const ROLE_DISPLAY_NAMES = {
+  admin: 'Quản trị viên',
+  manager: 'Quản lý',
+  staff: 'Nhân viên',
+  user: 'Khách hàng'
+};
+const getRoleDisplayName = (name) => ROLE_DISPLAY_NAMES[name] || name;
+
 // Card style — giống AdminComboPage / AdminCinemaPage
 const getCardSx = (colors) => ({
   borderRadius: 3,
@@ -194,7 +203,7 @@ const AdminRolePage = () => {
                     <TableRow key={role._id} sx={{ '&:hover': { bgcolor: colors.bgSubtle } }}>
                       <TableCell sx={{ fontSize: '0.8rem', color: colors.textMuted }}>{idx + 1}</TableCell>
                       <TableCell>
-                        <Typography sx={{ fontWeight: 600, fontSize: '0.85rem', color: colors.textPrimary }}>{role.name}</Typography>
+                        <Typography sx={{ fontWeight: 600, fontSize: '0.85rem', color: colors.textPrimary }}>{getRoleDisplayName(role.name)}</Typography>
                         {role.description && (
                           <Typography variant="caption" sx={{ color: colors.textMuted, display: 'block', mt: 0.2, lineHeight: 1.3 }}>
                             {role.description}
@@ -289,7 +298,7 @@ const AdminRolePage = () => {
         PaperProps={{ sx: { borderRadius: 3, bgcolor: colors.bgCard } }}>
         <DialogTitle sx={{ fontWeight: 700, color: colors.textPrimary, pb: 0.5, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box>
-            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>Tài khoản chức vụ: {usersDialogRole?.name}</Typography>
+            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>Tài khoản chức vụ: {getRoleDisplayName(usersDialogRole?.name)}</Typography>
             <Typography variant="body2" sx={{ color: colors.textMuted, fontWeight: 400, fontSize: '0.8rem', mt: 0.3 }}>
               {usersDialogRole?.userCount || 0} người dùng đang giữ chức vụ này
             </Typography>
