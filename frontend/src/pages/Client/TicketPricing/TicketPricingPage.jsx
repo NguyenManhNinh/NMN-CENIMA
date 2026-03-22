@@ -18,7 +18,7 @@ import { getTicketPricingAPI } from '../../../apis/ticketPricingApi';
 const tokens = {
   colors: {
     page: {
-      background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat'  // Nền ảnh banner
+      background: 'url(/bg-header.jpg) center top / cover no-repeat'  // Nền ảnh banner
     },
     wrapper: {
       background: '#1A1A2E'                      // Nền wrapper chính (tối)

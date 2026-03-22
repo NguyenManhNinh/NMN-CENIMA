@@ -75,7 +75,7 @@ const styles = {
   // Container chính của trang
   wrapper: {
     minHeight: '100vh',
-    background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat',
+    background: 'url(/bg-header.jpg) center top / cover no-repeat',
     py: 1
   },
 

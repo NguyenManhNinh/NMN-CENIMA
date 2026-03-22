@@ -432,7 +432,7 @@ function BookingPage() {
       sx={{
         minHeight: '100vh',
         position: 'relative',
-        backgroundImage: 'url(/src/assets/images/bg-header.jpg)',
+        backgroundImage: 'url(/bg-header.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
         backgroundRepeat: 'no-repeat',

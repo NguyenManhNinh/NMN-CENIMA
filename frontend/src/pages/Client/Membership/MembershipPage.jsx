@@ -249,7 +249,7 @@ const MembershipPage = () => {
   return (
     <Box sx={{
       minHeight: '100vh',
-      backgroundImage: 'url(/src/assets/images/bg-header.jpg)',
+      backgroundImage: 'url(/bg-header.jpg)',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       py: 1

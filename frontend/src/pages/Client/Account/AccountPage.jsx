@@ -90,7 +90,7 @@ const RANK_CONFIG = {
 // ==================== STYLES ====================
 const styles = {
   pageContainer: {
-    background: 'url(/src/assets/images/bg-header.jpg) center top / cover no-repeat',
+    background: 'url(/bg-header.jpg) center top / cover no-repeat',
     minHeight: '100vh',
     py: { xs: 3, md: 5 },
     px: { xs: 2, md: 0 }
