@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import { AdminThemeProvider, useAdminTheme } from './AdminThemeContext';
+import { ToastProvider } from '../../../contexts/ToastContext';
 
 /**
  * AdminContent – Nội dung bên trong Provider
@@ -49,7 +50,9 @@ const AdminContent = () => {
 const AdminLayout = () => {
   return (
     <AdminThemeProvider>
-      <AdminContent />
+      <ToastProvider>
+        <AdminContent />
+      </ToastProvider>
     </AdminThemeProvider>
   );
 };

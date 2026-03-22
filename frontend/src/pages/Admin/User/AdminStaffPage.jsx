@@ -22,6 +22,7 @@ import {
   toggleUserActiveAPI, adminDeleteUserAPI, searchUserByEmailAPI, changeUserRoleAPI
 } from '../../../apis/userManagementApi';
 import { getAllRolesAPI } from '../../../apis/roleApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Mapping tên chức vụ sang tiếng Việt
 const ROLE_DISPLAY_NAMES = {
@@ -56,6 +57,7 @@ const getCardSx = (colors) => ({
 
 const AdminStaffPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   const noOutlineSx = {
@@ -218,7 +220,7 @@ const AdminStaffPage = () => {
       // Delay nhỏ để state cập nhật trước khi fetch
       setTimeout(() => fetchStaff(), 100);
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra!');
+      showToast(err.response?.data?.message || 'Có lỗi xảy ra!', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -252,7 +254,7 @@ const AdminStaffPage = () => {
       setSearch(''); setSearchDebounce(''); setFilterRole(''); setPage(1);
       setTimeout(() => fetchStaff(), 100);
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra!');
+      showToast(err.response?.data?.message || 'Có lỗi xảy ra!', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -260,7 +262,7 @@ const AdminStaffPage = () => {
     try {
       await toggleUserActiveAPI(user._id);
       fetchStaff();
-    } catch (err) { alert(err.response?.data?.message || 'Cập nhật thất bại!'); }
+    } catch (err) { showToast(err.response?.data?.message || 'Cập nhật thất bại!', 'error'); }
   };
 
   const handleDelete = async () => {
@@ -270,7 +272,7 @@ const AdminStaffPage = () => {
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       fetchStaff();
-    } catch (err) { alert(err.response?.data?.message || 'Xóa thất bại!'); }
+    } catch (err) { showToast(err.response?.data?.message || 'Xóa thất bại!', 'error'); }
   };
 
   return (

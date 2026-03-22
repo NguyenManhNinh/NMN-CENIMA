@@ -20,6 +20,7 @@ import {
   toggleUserActiveAPI, adminDeleteUserAPI
 } from '../../../apis/userManagementApi';
 import VIETNAM_LOCATIONS from '../../../utils/vietnamLocations';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Card style — giống AdminComboPage
 const getCardSx = (colors) => ({
@@ -31,6 +32,7 @@ const getCardSx = (colors) => ({
 
 const AdminCustomerPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   const noOutlineSx = {
@@ -175,7 +177,7 @@ const AdminCustomerPage = () => {
       resetForm();
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra!');
+      showToast(err.response?.data?.message || 'Có lỗi xảy ra!', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -185,7 +187,7 @@ const AdminCustomerPage = () => {
       await toggleUserActiveAPI(user._id);
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Cập nhật thất bại!');
+      showToast(err.response?.data?.message || 'Cập nhật thất bại!', 'error');
     }
   };
 
@@ -198,7 +200,7 @@ const AdminCustomerPage = () => {
       setDeleteTarget(null);
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Xóa thất bại!');
+      showToast(err.response?.data?.message || 'Xóa thất bại!', 'error');
     }
   };
 

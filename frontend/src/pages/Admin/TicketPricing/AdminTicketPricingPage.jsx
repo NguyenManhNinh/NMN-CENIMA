@@ -19,6 +19,7 @@ import {
   getAllTicketPricingAdminAPI,
   updateTicketPricingAdminAPI
 } from '../../../apis/ticketPricingApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Card style
 const getCardSx = (colors) => ({
@@ -50,6 +51,7 @@ const formatDate = (d) => {
 
 const AdminTicketPricingPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   // State
@@ -129,12 +131,12 @@ const AdminTicketPricingPage = () => {
   // Submit
   const handleSubmit = async () => {
     if (!form.title.trim()) {
-      alert('Vui lòng nhập tiêu đề bảng giá');
+      showToast('Vui lòng nhập tiêu đề bảng giá', 'warning');
       return;
     }
     const validTabs = form.tabs.filter(t => t.name.trim() && t.imageUrl.trim());
     if (validTabs.length === 0) {
-      alert('Cần ít nhất 1 tab có tên và ảnh');
+      showToast('Cần ít nhất 1 tab có tên và ảnh', 'warning');
       return;
     }
     setSubmitting(true);
@@ -155,7 +157,7 @@ const AdminTicketPricingPage = () => {
       fetchPricings();
     } catch (err) {
       console.error('Submit error:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Lỗi khi lưu bảng giá!');
+      showToast(err.response?.data?.message || 'Lỗi khi lưu bảng giá!', 'error');
     } finally { setSubmitting(false); }
   };
 

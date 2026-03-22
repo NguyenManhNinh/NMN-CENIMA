@@ -343,10 +343,10 @@ const eventTicketMenuItems = [
 const memberMenuItems = [
   { label: 'Thành viên', path: '/thanh-vien' },
 ];
-// LIÊN HỆ MENU ITEMS
-const contactMenuItems = [
-  { label: 'Liên hệ', path: '/lien-he' },
-]
+// // LIÊN HỆ MENU ITEMS
+// const contactMenuItems = [
+//   { label: 'Liên hệ', path: '/lien-he' },
+// ]
 
 // HEADER COMPONENT
 function Header() {
@@ -1058,13 +1058,13 @@ function Header() {
             '&:hover': { backgroundColor: COLORS.hover }
           }}
         >
-          <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
+          {/* <ListItemIcon sx={{ color: COLORS.primary, minWidth: 40 }}>
             <PhoneIcon />
           </ListItemIcon>
           <ListItemText
             primary="Liên hệ"
             primaryTypographyProps={{ fontWeight: 600 }}
-          />
+          /> */}
         </ListItem>
       </List>
     </Drawer>
@@ -1224,7 +1224,7 @@ function Header() {
                 Thành viên
               </Button>
             </Box>
-            {/* Nút liên hệ */}
+            {/* Nút liên hệ
             <Box sx={{ mx: 0.5 }}>
               <Button
                 component={Link}
@@ -1235,7 +1235,7 @@ function Header() {
               >
                 Liên hệ
               </Button>
-            </Box>
+            </Box> */}
           </Box>
 
           {/*PHẦN PHẢI: Search + Login*/}

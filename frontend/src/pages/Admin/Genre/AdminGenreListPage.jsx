@@ -18,9 +18,11 @@ import {
   updateMovieCategoryAPI, deleteMovieCategoryAPI, getMoviesByCategoryAPI
 } from '../../../apis/movieCategoryApi';
 import { getAllMoviesAPI } from '../../../apis/movieApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 const AdminGenreListPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
 
   // State danh sách
   const [categories, setCategories] = useState([]);
@@ -169,7 +171,7 @@ const AdminGenreListPage = () => {
       if (editingCategory?._id === deleteDialog.item._id) handleCancelEdit();
       fetchCategories();
     } catch (err) {
-      alert(err.response?.data?.message || 'Xóa thể loại thất bại!');
+      showToast(err.response?.data?.message || 'Xóa thể loại thất bại!', 'error');
     } finally {
       setDeleting(false);
     }

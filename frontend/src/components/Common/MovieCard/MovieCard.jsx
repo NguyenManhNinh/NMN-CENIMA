@@ -8,7 +8,6 @@ import {
   Box,
   Button,
   Chip,
-  Rating,
   Fade
 } from '@mui/material';
 import {
@@ -204,18 +203,11 @@ function MovieCard({ movie, onTrailerClick }) {
         </Fade>
       </Box>
 
-      {/* NỘI DUNG: Tên phim, Rating */}
+      {/* NỘI DUNG: Tên phim */}
       <CardContent sx={styles.content}>
         <Typography sx={styles.title} title={movie.title}>
           {movie.title}
         </Typography>
-
-        <Rating
-          value={movie.rating ? movie.rating / 2 : 0}
-          size="small"
-          readOnly
-          precision={0.5}
-        />
       </CardContent>
     </Card>
   );

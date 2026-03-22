@@ -18,6 +18,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { getAllMoviesAPI, getYoutubeInfoAPI, deleteMovieAPI } from '../../../apis/movieApi';
 import AddMovieModal from './AddMovieModal';
 import EditMovieModal from './EditMovieModal';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Cấu hình phân trang
 const PER_PAGE = 10;
@@ -61,6 +62,7 @@ const getCardSx = (colors, darkMode) => ({
 
 const AdminMovieListPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors, darkMode);
 
   // State
@@ -586,7 +588,7 @@ const AdminMovieListPage = () => {
                 setDeleteDialog({ open: false, movie: null });
                 fetchMovies();
               } catch (err) {
-                alert(err.response?.data?.message || 'Xóa phim thất bại!');
+                showToast(err.response?.data?.message || 'Xóa phim thất bại!', 'error');
               } finally {
                 setDeleting(false);
               }

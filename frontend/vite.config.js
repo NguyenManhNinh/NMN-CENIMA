@@ -7,7 +7,15 @@ export default defineConfig({
 
   // 1. Cấu hình cổng chạy (Port)
   server: {
-    port: 3000, // Chạy port 3000
+    port: 3000,
+    host: true,
+    proxy: {
+      '/api/v1': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
 
   // 2. Cấu hình đường dẫn tắt (Alias)

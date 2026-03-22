@@ -21,6 +21,7 @@ import { getAllShowtimesAPI, createShowtimeAPI, deleteShowtimeAPI, updateShowtim
 import { getAllRoomsAPI, getRoomByIdAPI } from '../../../apis/roomApi';
 import { getAllMoviesAPI } from '../../../apis/movieApi';
 import { getAllCinemasAPI } from '../../../apis/cinemaApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Status map
 const STATUS_MAP = {
@@ -58,6 +59,7 @@ const getCardSx = (colors, darkMode) => ({
 
 const AdminShowtimePage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors, darkMode);
 
   // State
@@ -199,7 +201,7 @@ const AdminShowtimePage = () => {
     try {
       const startAt = new Date(`${formDate}T${formTime}:00`);
       if (isNaN(startAt.getTime())) {
-        alert('Ngày/giờ không hợp lệ!');
+        showToast('Ngày/giờ không hợp lệ!', 'warning');
         setCreating(false);
         return;
       }
@@ -225,9 +227,10 @@ const AdminShowtimePage = () => {
       setFormFormat('2D'); setFormSubtitle('Phụ đề'); setFormStatus('COMING'); setFormMaintenanceSeats([]);
       setSelectedRoomDetail(null);
       fetchShowtimes();
+      showToast('Tạo suất chiếu thành công!');
     } catch (err) {
       console.error('Create showtime error:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Lỗi tạo suất chiếu!');
+      showToast(err.response?.data?.message || 'Lỗi tạo suất chiếu!', 'error');
     } finally {
       setCreating(false);
     }
@@ -241,8 +244,9 @@ const AdminShowtimePage = () => {
       await deleteShowtimeAPI(deleteDialog.item._id);
       setDeleteDialog({ open: false, item: null });
       fetchShowtimes();
+      showToast('Xóa suất chiếu thành công!', 'error');
     } catch (err) {
-      alert('Lỗi xóa suất chiếu!');
+      showToast('Lỗi xóa suất chiếu!', 'error');
     } finally {
       setDeleting(false);
     }
@@ -254,8 +258,9 @@ const AdminShowtimePage = () => {
     try {
       await updateShowtimeAPI(showtime._id, { status: nextStatus });
       fetchShowtimes();
+      showToast('Cập nhật trạng thái thành công!');
     } catch (err) {
-      alert('Lỗi cập nhật trạng thái!');
+      showToast('Lỗi cập nhật trạng thái!', 'error');
     }
   };
 

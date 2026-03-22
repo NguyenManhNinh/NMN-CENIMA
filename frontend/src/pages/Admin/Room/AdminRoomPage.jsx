@@ -15,6 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { getAllRoomsAPI, createRoomAPI, updateRoomAPI, deleteRoomAPI } from '../../../apis/roomApi';
 import { getAllCinemasAPI } from '../../../apis/cinemaApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Card style
 const getCardSx = (colors) => ({
@@ -33,6 +34,7 @@ const TYPE_MAP = {
 
 const AdminRoomPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   // State
@@ -122,9 +124,9 @@ const AdminRoomPage = () => {
       setOpenAddRoom(false);
       setNewRoomCinema(''); setNewRoomName(''); setNewRoomType('2D'); setNewRoomStatus('ACTIVE');
       fetchRooms();
-      alert('Tạo phòng thành công!');
+      showToast('Tạo phòng thành công!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi tạo phòng!');
+      showToast(err.response?.data?.message || 'Lỗi tạo phòng!', 'error');
     } finally {
       setCreating(false);
     }
@@ -151,8 +153,9 @@ const AdminRoomPage = () => {
       });
       setOpenEditRoom(false);
       fetchRooms();
+      showToast('Cập nhật phòng thành công!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi sửa phòng!');
+      showToast(err.response?.data?.message || 'Lỗi sửa phòng!', 'error');
     } finally {
       setEditing(false);
     }
@@ -166,8 +169,9 @@ const AdminRoomPage = () => {
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       fetchRooms();
+      showToast('Xóa phòng thành công!', 'error');
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi xóa phòng!');
+      showToast(err.response?.data?.message || 'Lỗi xóa phòng!', 'error');
     }
   };
 

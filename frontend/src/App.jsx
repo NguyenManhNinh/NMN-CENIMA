@@ -59,6 +59,14 @@ import AdminPermissionPage from './pages/Admin/Permission/AdminPermissionPage';
 // Layouts - Admin
 import AdminLayout from './components/Layout/AdminLayout/AdminLayout';
 
+// Pages - Staff
+import StaffLoginPage from './pages/Staff/StaffLoginPage';
+import StaffScannerPage from './pages/Staff/StaffScannerPage';
+import StaffProfilePage from './pages/Staff/StaffProfilePage';
+
+// Layouts - Staff
+import StaffLayout from './components/Layout/StaffLayout/StaffLayout';
+
 // Permission System
 import { PermissionProvider, usePermission } from './contexts/PermissionContext';
 import { Navigate } from 'react-router-dom';
@@ -84,6 +92,13 @@ function App() {
           {/* ═══════ ADMIN ROUTES ═══════ */}
           {/* Trang đăng nhập admin – không dùng layout */}
           <Route path="admin/dang-nhap" element={<AdminLoginPage />} />
+
+          {/* ═══════ STAFF ROUTES ═══════ */}
+          <Route path="staff/dang-nhap" element={<StaffLoginPage />} />
+          <Route path="staff" element={<StaffLayout />}>
+            <Route index element={<StaffScannerPage />} />
+            <Route path="ho-so" element={<StaffProfilePage />} />
+          </Route>
 
           {/* Các trang quản trị – dùng AdminLayout (có header) */}
           <Route path="admin" element={<PermissionProvider><AdminLayout /></PermissionProvider>}>

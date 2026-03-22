@@ -21,6 +21,7 @@ import { getAllRoomsAPI, getRoomByIdAPI, updateRoomAPI } from '../../../apis/roo
 import gheThuong from '../../../assets/images/ghe-thuong.png';
 import gheVip from '../../../assets/images/ghe-vip.png';
 import gheDoi from '../../../assets/images/ghe-doi.png';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Loại ghế
 const SEAT_TYPE_MAP = {
@@ -39,6 +40,7 @@ const getCardSx = (colors) => ({
 
 const AdminSeatPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   // State
@@ -150,7 +152,7 @@ const AdminSeatPage = () => {
     try {
       const res = await getRoomByIdAPI(addSeatRoom);
       const room = res.data?.room;
-      if (!room) { alert('Không tìm thấy phòng!'); return; }
+      if (!room) { showToast('Không tìm thấy phòng!', 'error'); return; }
 
       const seatMap = room.seatMap || [];
       const rowUpper = addSeatRow.toUpperCase();
@@ -194,9 +196,9 @@ const AdminSeatPage = () => {
       setOpenAddSeat(false);
       setAddSeatRoom(''); setAddSeatRow('');
       setAddCountStandard(''); setAddCountVip(''); setAddCountCouple('');
-      alert(`Thêm ${std + vipC + coupleC} ghế thành công!`);
+      showToast(`Thêm ${std + vipC + coupleC} ghế thành công!`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi thêm ghế!');
+      showToast(err.response?.data?.message || 'Lỗi thêm ghế!', 'error');
     } finally {
       setAddingSeat(false);
     }
@@ -226,7 +228,7 @@ const AdminSeatPage = () => {
       setRooms(roomsRes.data?.rooms || []);
       setOpenEditSeat(false);
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi sửa ghế!');
+      showToast(err.response?.data?.message || 'Lỗi sửa ghế!', 'error');
     } finally {
       setEditingSeat(false);
     }
@@ -259,7 +261,7 @@ const AdminSeatPage = () => {
       setOpenDeleteSeatConfirm(false);
       setDeleteSeatTarget(null);
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi xóa ghế!');
+      showToast(err.response?.data?.message || 'Lỗi xóa ghế!', 'error');
     }
   };
 

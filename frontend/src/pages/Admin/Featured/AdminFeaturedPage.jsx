@@ -25,6 +25,7 @@ import {
   updateFeaturedAdminAPI,
   deleteFeaturedAdminAPI
 } from '../../../apis/featuredApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Card style
 const getCardSx = (colors) => ({
@@ -128,6 +129,7 @@ const parseContentToItems = (html) => {
 
 const AdminFeaturedPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   // State
@@ -214,7 +216,7 @@ const AdminFeaturedPage = () => {
   // Submit
   const handleSubmit = async () => {
     if (!form.title.trim()) {
-      alert('Vui lòng nhập tiêu đề bài viết');
+      showToast('Vui lòng nhập tiêu đề bài viết', 'warning');
       return;
     }
     setSubmitting(true);
@@ -247,7 +249,7 @@ const AdminFeaturedPage = () => {
       fetchArticles();
     } catch (err) {
       console.error('Submit error:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Lỗi khi lưu bài viết!');
+      showToast(err.response?.data?.message || 'Lỗi khi lưu bài viết!', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -260,7 +262,7 @@ const AdminFeaturedPage = () => {
       setDeleteTarget(null);
       fetchArticles();
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi xóa bài viết!');
+      showToast(err.response?.data?.message || 'Lỗi xóa bài viết!', 'error');
     }
   };
 

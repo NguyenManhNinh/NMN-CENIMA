@@ -17,6 +17,7 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import { getAllCombosAPI, createComboAPI, updateComboAPI, deleteComboAPI } from '../../../apis/comboApi';
 import { getAllMoviesAPI } from '../../../apis/movieApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Card style — giống AdminCinemaPage / AdminRoomPage
 const getCardSx = (colors) => ({
@@ -34,6 +35,7 @@ const STATUS_MAP = {
 
 const AdminComboPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   // No-outline input sx — giống Cinema/Room
@@ -163,9 +165,10 @@ const AdminComboPage = () => {
       setOpenDialog(false);
       resetForm();
       fetchCombos();
+      showToast(isEdit ? 'Cập nhật combo thành công!' : 'Tạo combo thành công!');
     } catch (err) {
       console.error('Submit error:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Lỗi khi lưu combo!');
+      showToast(err.response?.data?.message || 'Lỗi khi lưu combo!', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -177,8 +180,9 @@ const AdminComboPage = () => {
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       fetchCombos();
+      showToast('Xóa combo thành công!', 'error');
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi xóa combo!');
+      showToast(err.response?.data?.message || 'Lỗi xóa combo!', 'error');
     }
   };
 

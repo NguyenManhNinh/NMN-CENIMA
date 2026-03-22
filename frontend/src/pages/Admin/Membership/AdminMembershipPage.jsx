@@ -24,6 +24,7 @@ import {
   getAllMembershipInfoAdminAPI,
   updateMembershipInfoAdminAPI
 } from '../../../apis/membershipInfoApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Card style
 const getCardSx = (colors) => ({
@@ -74,6 +75,7 @@ const noOutlineSx = {
 
 const AdminMembershipPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   // Tab state
@@ -181,9 +183,9 @@ const AdminMembershipPage = () => {
 
   // Submit
   const handleSubmit = async () => {
-    if (!form.title.trim()) { alert('Vui lòng nhập tiêu đề'); return; }
+    if (!form.title.trim()) { showToast('Vui lòng nhập tiêu đề', 'warning'); return; }
     const validSections = form.sections.filter(s => s.title.trim());
-    if (validSections.length === 0) { alert('Cần ít nhất 1 section có tiêu đề'); return; }
+    if (validSections.length === 0) { showToast('Cần ít nhất 1 section có tiêu đề', 'warning'); return; }
     setSubmitting(true);
     try {
       await updateMembershipInfoAdminAPI({
@@ -202,7 +204,7 @@ const AdminMembershipPage = () => {
       fetchInfos();
     } catch (err) {
       console.error('Submit error:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Lỗi khi lưu!');
+      showToast(err.response?.data?.message || 'Lỗi khi lưu!', 'error');
     } finally { setSubmitting(false); }
   };
 

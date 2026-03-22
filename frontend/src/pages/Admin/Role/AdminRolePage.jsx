@@ -15,6 +15,7 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import PeopleIcon from '@mui/icons-material/People';
 import { getAllRolesAPI, createRoleAPI, updateRoleAPI, deleteRoleAPI } from '../../../apis/roleApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Mapping tên chức vụ sang tiếng Việt
 const ROLE_DISPLAY_NAMES = {
@@ -35,6 +36,7 @@ const getCardSx = (colors) => ({
 
 const AdminRolePage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   // No-outline input sx — giống Combo/Cinema/Room
@@ -119,7 +121,7 @@ const AdminRolePage = () => {
       resetForm();
       fetchRoles();
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra!');
+      showToast(err.response?.data?.message || 'Có lỗi xảy ra!', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -129,7 +131,7 @@ const AdminRolePage = () => {
       await updateRoleAPI(role._id, { isActive: !role.isActive });
       fetchRoles();
     } catch (err) {
-      alert(err.response?.data?.message || 'Cập nhật thất bại!');
+      showToast(err.response?.data?.message || 'Cập nhật thất bại!', 'error');
     }
   };
 
@@ -148,7 +150,7 @@ const AdminRolePage = () => {
       setDeleteTarget(null);
       fetchRoles();
     } catch (err) {
-      alert(err.response?.data?.message || 'Xóa chức vụ thất bại!');
+      showToast(err.response?.data?.message || 'Xóa chức vụ thất bại!', 'error');
     }
   };
 

@@ -19,6 +19,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   getActorsAPI, getDirectorsAPI, createPersonAPI, updatePersonAPI, deletePersonAPI
 } from '../../../apis/personApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 const ROLES = [
   { value: 'actor', label: 'Diễn viên' },
@@ -42,6 +43,7 @@ const AdminActorListPage = ({
   fetchAPI = getActorsAPI
 }) => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
 
   const [persons, setPersons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -178,7 +180,7 @@ const AdminActorListPage = ({
       setDeleteDialog({ open: false, item: null });
       fetchPersons();
     } catch (err) {
-      alert(err.response?.data?.message || 'Xóa thất bại!');
+      showToast(err.response?.data?.message || 'Xóa thất bại!', 'error');
     } finally {
       setDeleting(false);
     }

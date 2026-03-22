@@ -26,6 +26,7 @@ import {
 } from '../../../apis/promotionApi';
 import { getAllVouchersAdminAPI, createVoucherAdminAPI } from '../../../apis/voucherApi';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Card style
 const getCardSx = (colors) => ({
@@ -101,6 +102,7 @@ const toInputDate = (d) => {
 
 const AdminPromotionPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   const noOutlineSx = {
@@ -185,7 +187,7 @@ const AdminPromotionPage = () => {
   // Create voucher inline
   const handleCreateVoucher = async () => {
     if (!newVoucher.code.trim() || !newVoucher.value || !newVoucher.validFrom || !newVoucher.validTo) {
-      alert('Vui lòng điền đủ: Mã, Giá trị, Ngày bắt đầu, Ngày kết thúc');
+      showToast('Vui lòng điền đủ thông tin voucher', 'warning');
       return;
     }
     setCreatingVoucher(true);
@@ -209,7 +211,7 @@ const AdminPromotionPage = () => {
       resetNewVoucher();
     } catch (err) {
       console.error('Create voucher error:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Lỗi khi tạo voucher!');
+      showToast(err.response?.data?.message || 'Lỗi khi tạo voucher!', 'error');
     } finally { setCreatingVoucher(false); }
   };
 
@@ -249,7 +251,7 @@ const AdminPromotionPage = () => {
   // Submit
   const handleSubmit = async () => {
     if (!form.title.trim() || !form.content.trim() || !form.startAt || !form.endAt) {
-      alert('Vui lòng điền đủ: Tiêu đề, Nội dung, Ngày bắt đầu, Ngày kết thúc');
+      showToast('Vui lòng điền đủ thông tin ưu đãi', 'warning');
       return;
     }
     setSubmitting(true);
@@ -306,7 +308,7 @@ const AdminPromotionPage = () => {
       fetchPromotions();
     } catch (err) {
       console.error('Submit error:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Lỗi khi lưu ưu đãi!');
+      showToast(err.response?.data?.message || 'Lỗi khi lưu ưu đãi!', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -319,7 +321,7 @@ const AdminPromotionPage = () => {
       setDeleteTarget(null);
       fetchPromotions();
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi xóa ưu đãi!');
+      showToast(err.response?.data?.message || 'Lỗi xóa ưu đãi!', 'error');
     }
   };
 

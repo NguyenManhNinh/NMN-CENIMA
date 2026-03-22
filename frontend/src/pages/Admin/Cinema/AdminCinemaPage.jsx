@@ -16,6 +16,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import { getAllCinemasAPI, createCinemaAPI, updateCinemaAPI, deleteCinemaAPI } from '../../../apis/cinemaApi';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Card style
 const getCardSx = (colors) => ({
@@ -34,6 +35,7 @@ const STATUS_MAP = {
 
 const AdminCinemaPage = () => {
   const { darkMode, colors } = useAdminTheme();
+  const { showToast } = useToast();
   const cardSx = getCardSx(colors);
 
   // State
@@ -128,8 +130,9 @@ const AdminCinemaPage = () => {
       setOpenAdd(false);
       setNewName(''); setNewAddress(''); setNewCity('Hà Nội'); setNewPhone(''); setNewDescription(''); setNewStatus('OPEN');
       fetchCinemas();
+      showToast('Tạo rạp thành công!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi tạo rạp!');
+      showToast(err.response?.data?.message || 'Lỗi tạo rạp!', 'error');
     } finally {
       setCreating(false);
     }
@@ -162,8 +165,9 @@ const AdminCinemaPage = () => {
       });
       setOpenEdit(false);
       fetchCinemas();
+      showToast('Cập nhật rạp thành công!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi sửa rạp!');
+      showToast(err.response?.data?.message || 'Lỗi sửa rạp!', 'error');
     } finally {
       setEditing(false);
     }
@@ -177,8 +181,9 @@ const AdminCinemaPage = () => {
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       fetchCinemas();
+      showToast('Xóa rạp thành công!', 'error');
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi xóa rạp!');
+      showToast(err.response?.data?.message || 'Lỗi xóa rạp!', 'error');
     }
   };
 
