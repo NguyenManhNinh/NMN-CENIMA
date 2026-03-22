@@ -1,14 +1,19 @@
 const nodemailer = require('nodemailer');
 const logger = require('../utils/logger');
 
-// Cấu hình Email (Sử dụng Gmail hoặc Ethereal để test)
-// Tốt nhất nên dùng biến môi trường
+// Cấu hình Email - Dùng Gmail SMTP với port 465 (SSL)
+// Port 587 (STARTTLS) bị timeout trên một số hosting (Render), port 465 hoạt động ổn định hơn
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // SSL trực tiếp
   auth: {
-    user: process.env.EMAIL_USERNAME, // VD: manhninh@gmail.com
-    pass: process.env.EMAIL_PASSWORD  // VD: manhninh
-  }
+    user: process.env.EMAIL_USERNAME,
+    pass: process.env.EMAIL_PASSWORD
+  },
+  connectionTimeout: 10000, // 10s timeout
+  greetingTimeout: 10000,
+  socketTimeout: 15000
 });
 
 
