@@ -264,6 +264,9 @@ exports.adminLogin = catchAsync(async (req, res, next) => {
     if (!userRole.permissions || userRole.permissions.length === 0) {
       return next(new AppError('Chức vụ của bạn chưa được phân quyền! Liên hệ quản trị viên.', 403));
     }
+  } else if (!userRole && !user.isMaster) {
+    // Không có roles collection và user không có isMaster
+    // Cho phép nếu role không phải 'user' (đã chặn ở trên)
   }
 
   // 7) Reset số lần đăng nhập sai
@@ -275,6 +278,10 @@ exports.adminLogin = catchAsync(async (req, res, next) => {
   if (userRole) {
     user._doc.permissions = userRole.isMaster ? ['*'] : (userRole.permissions || []);
     user._doc.isMaster = userRole.isMaster || false;
+  } else if (user.isMaster) {
+    // Fallback: nếu không có roles collection, check isMaster trên user document
+    user._doc.permissions = ['*'];
+    user._doc.isMaster = true;
   }
 
   // 9) Cấp token với cookie riêng cho admin portal
