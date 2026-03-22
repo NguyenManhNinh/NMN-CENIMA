@@ -892,7 +892,7 @@ function Header() {
         }}>
           <ListItem
             component={Link}
-            to="/movies?status=now"
+            to="/phim-dang-chieu"
             onClick={toggleMobileMenu}
             sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
           >
@@ -900,7 +900,7 @@ function Header() {
           </ListItem>
           <ListItem
             component={Link}
-            to="/movies?status=coming"
+            to="/phim-sap-chieu"
             onClick={toggleMobileMenu}
             sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
           >
@@ -1007,7 +1007,7 @@ function Header() {
           </ListItem>
           <ListItem
             component={Link}
-            to="/phim-hay-hang-thang"
+            to="/phim-hay"
             onClick={toggleMobileMenu}
             sx={{ pl: 6, color: COLORS.text, '&:hover': { backgroundColor: COLORS.hover, color: COLORS.primary } }}
           >
