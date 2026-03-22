@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'user'
     },
+    isMaster: {
+      type: Boolean,
+      default: false
+    },
     authType: {
       type: String,
       enum: ['local', 'google', 'facebook'],
