@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useMediaQuery, useTheme } from '@mui/material';
 import {
   Box,
   Container,
@@ -25,6 +26,7 @@ import {
   LocationOn as LocationIcon,
   Movie as MovieIcon,
   ArrowForwardIos as ArrowIcon,
+  ArrowBackIos as ArrowBackIcon,
   PlayCircleFilled as PlayIcon,
   Close as CloseIcon,
   StarBorder as StarBorderIcon,
@@ -57,13 +59,12 @@ const COLORS = {
 const getNextDays = (count = 7) => {
   const days = [];
   const today = new Date();
-  const dayNames = ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'];
+  const fullDayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
   for (let i = 0; i < count; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
 
-    // Format as YYYY-MM-DD using LOCAL timezone (not UTC)
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -71,9 +72,15 @@ const getNextDays = (count = 7) => {
 
     days.push({
       date: dateString,
-      dayOfWeek: dayNames[date.getDay()],
+      dayOfWeek: fullDayNames[date.getDay()],
       dayNumber: date.getDate(),
-      month: date.getMonth() + 1
+      month: date.getMonth() + 1,
+      // Label ngắn: "Hôm Nay" hoặc "Thứ Hai"
+      dayLabel: i === 0 ? 'Hôm Nay' : fullDayNames[date.getDay()],
+      // Ngày/tháng: "22/03"
+      dateLabel: `${day}/${month}`,
+      // Label đầy đủ cho header: "Chủ Nhật, 22/03/2026"
+      fullLabel: `${fullDayNames[date.getDay()]}, ${day}/${month}/${year}`
     });
   }
   return days;
@@ -83,6 +90,10 @@ const getNextDays = (count = 7) => {
 function BookingPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const visibleDates = isMobile ? 3 : 5;
 
   // Available dates (next 7 days)
   const availableDates = useMemo(() => getNextDays(7), []);
@@ -97,6 +108,7 @@ function BookingPage() {
   const [cities, setCities] = useState([]);
   const [selectedCinema, setSelectedCinema] = useState('all');
   const [selectedArea, setSelectedArea] = useState('all');
+  const [dateStartIndex, setDateStartIndex] = useState(0);
   const [openRatingModal, setOpenRatingModal] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [reviewContent, setReviewContent] = useState('');
@@ -196,6 +208,14 @@ function BookingPage() {
 
   const formatTime = (isoString) => {
     const date = new Date(isoString);
+    return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Tính giờ kết thúc dựa vào duration phim
+  const formatEndTime = (isoString) => {
+    if (!movie?.duration) return '';
+    const date = new Date(isoString);
+    date.setMinutes(date.getMinutes() + movie.duration);
     return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   };
 
@@ -931,81 +951,17 @@ function BookingPage() {
                   Lịch Chiếu
                 </Typography>
 
-                {/* Date Selector */}
-                <Box sx={{
-                  display: 'flex',
-                  gap: 3.7,
-                  overflowX: 'auto',
-                  pb: 3,
-                  mb: 2,
-                  '&::-webkit-scrollbar': { display: 'none' }
-                }}>
-                  {availableDates.map((dateObj, idx) => (
-                    <Box
-                      key={dateObj.date}
-                      onClick={() => setSelectedDate(dateObj.date)}
-                      sx={{
-                        minWidth: 80,
-                        py: 1.5, px: 1,
-                        borderRadius: '8px',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        bgcolor: selectedDate === dateObj.date ? COLORS.primary : COLORS.bgLight,
-                        color: selectedDate === dateObj.date ? COLORS.white : COLORS.text,
-                        border: `1px solid ${selectedDate === dateObj.date ? COLORS.primary : COLORS.border}`,
-                        flexShrink: 0
-                      }}
-                    >
-                      {isToday(dateObj.date) && <Typography sx={{
-                        fontSize: '10px',
-                        fontWeight: 600,
-                        color: selectedDate === dateObj.date ? '#fff' : COLORS.orange
-                      }}>
-                        Hôm Nay
-                      </Typography>}
-                      <Typography sx={{
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        fontFamily: '"Nunito Sans", sans-serif'
-                      }}>
-                        {dateObj.dayOfWeek}
-                      </Typography>
-                      <Typography sx={{
-                        fontWeight: 700,
-                        fontSize: '18px',
-                        fontFamily: '"Nunito Sans", sans-serif'
-                      }}>
-                        {dateObj.dayNumber}
-                      </Typography>
-                      <Typography sx={{
-                        fontSize: '11px',
-                        fontFamily: '"Nunito Sans", sans-serif'
-                      }}>
-                        Th{dateObj.month}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-
-                {/* Filters */}
-                <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-                  <Box sx={{ bgcolor: '#fff' }}>
-                    <FormControl size="small" sx={{ minWidth: 140, maxWidth: 180 }}>
+                {/* Filters - mobile only (trên đầu card) */}
+                <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 2, mb: 2 }}>
+                  <Box sx={{ bgcolor: '#fff', borderRadius: 0, flex: 1 }}>
+                    <FormControl size="small" sx={{ width: '100%' }}>
                       <Select value={selectedArea} onChange={(e) => setSelectedArea(e.target.value)} displayEmpty
                         sx={{
                           fontSize: '14px',
                           fontFamily: '"Nunito Sans", sans-serif',
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: COLORS.border
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: COLORS.border
-                          },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: COLORS.border,
-                            borderWidth: '1px'
-                          }
+                          '& .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border },
+                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border, borderWidth: '1px' }
                         }}>
                         <MenuItem value="all">Toàn quốc</MenuItem>
                         {cities.map((city, idx) => (
@@ -1014,22 +970,15 @@ function BookingPage() {
                       </Select>
                     </FormControl>
                   </Box>
-                  <Box sx={{ bgcolor: '#fff' }}>
-                    <FormControl size="small" sx={{ minWidth: 160, maxWidth: 200 }}>
+                  <Box sx={{ bgcolor: '#fff', borderRadius: 0, flex: 1 }}>
+                    <FormControl size="small" sx={{ width: '100%' }}>
                       <Select value={selectedCinema} onChange={(e) => setSelectedCinema(e.target.value)} displayEmpty
                         sx={{
                           fontSize: '14px',
                           fontFamily: '"Nunito Sans", sans-serif',
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: COLORS.border
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: COLORS.border
-                          },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: COLORS.border,
-                            borderWidth: '1px'
-                          }
+                          '& .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border },
+                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border, borderWidth: '1px' }
                         }}>
                         <MenuItem value="all">Tất cả rạp</MenuItem>
                         {cinemas
@@ -1039,6 +988,129 @@ function BookingPage() {
                           ))}
                       </Select>
                     </FormControl>
+                  </Box>
+                </Box>
+
+                {/* Date Selector — card + nút điều hướng + filters (desktop) */}
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  mb: 2,
+                }}>
+                  {/* Nút lùi */}
+                  <IconButton
+                    onClick={() => setDateStartIndex(Math.max(0, dateStartIndex - 1))}
+                    disabled={dateStartIndex === 0}
+                    size="small"
+                    sx={{
+                      color: '#fff',
+                      p: 0.5,
+                      '&.Mui-disabled': { color: '#fff' }
+                    }}
+                  >
+                    <ArrowBackIcon sx={{ fontSize: 20 }} />
+                  </IconButton>
+
+                  {/* card ngày */}
+                  <Box sx={{ display: 'flex', gap: 1, flex: { xs: 1, sm: 'none' } }}>
+                    {availableDates.slice(dateStartIndex, dateStartIndex + visibleDates).map((dateObj) => {
+                      const isActive = selectedDate === dateObj.date;
+                      return (
+                        <Box
+                          key={dateObj.date}
+                          onClick={() => setSelectedDate(dateObj.date)}
+                          sx={{
+                            flex: { xs: 1, sm: 'none' },
+                            width: { sm: 80 },
+                            height: 65,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            bgcolor: isActive ? COLORS.primary : COLORS.bgLight,
+                            color: isActive ? COLORS.white : COLORS.text,
+                            border: `1.5px solid ${isActive ? COLORS.primary : COLORS.border}`,
+                            borderRadius: '8px',
+                          }}
+                        >
+                          <Typography sx={{
+                            fontWeight: 700,
+                            fontSize: '13px',
+                            fontFamily: '"Nunito Sans", sans-serif',
+                            lineHeight: 1.5
+                          }}>
+                            {dateObj.dayLabel}
+                          </Typography>
+                          <Typography sx={{
+                            fontWeight: 600,
+                            fontSize: '14px',
+                            fontFamily: '"Nunito Sans", sans-serif',
+                            lineHeight: 1.3
+                          }}>
+                            {dateObj.dateLabel}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+
+                  {/* Nút tiến */}
+                  <IconButton
+                    onClick={() => setDateStartIndex(Math.min(availableDates.length - visibleDates, dateStartIndex + 1))}
+                    disabled={dateStartIndex >= availableDates.length - visibleDates}
+                    size="small"
+                    sx={{
+                      color: '#fff',
+                      p: 0.5,
+                      '&.Mui-disabled': { color: '#fff' }
+                    }}
+                  >
+                    <ArrowIcon sx={{ fontSize: 20 }} />
+                  </IconButton>
+
+                  {/* Filters - desktop only (cùng hàng bên phải) */}
+                  <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1, ml: 'auto' }}>
+                    <Box sx={{ bgcolor: '#fff', borderRadius: 0 }}>
+                      <FormControl size="small" sx={{ minWidth: 110 }}>
+                        <Select value={selectedArea} onChange={(e) => setSelectedArea(e.target.value)} displayEmpty
+                          sx={{
+                            fontSize: '12px',
+                            fontFamily: '"Nunito Sans", sans-serif',
+                            height: 36,
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border, borderWidth: '1px' }
+                          }}>
+                          <MenuItem value="all">Toàn quốc</MenuItem>
+                          {cities.map((city, idx) => (
+                            <MenuItem key={idx} value={city}>{city}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Box sx={{ bgcolor: '#fff', borderRadius: 0 }}>
+                      <FormControl size="small" sx={{ minWidth: 110 }}>
+                        <Select value={selectedCinema} onChange={(e) => setSelectedCinema(e.target.value)} displayEmpty
+                          sx={{
+                            fontSize: '12px',
+                            fontFamily: '"Nunito Sans", sans-serif',
+                            height: 36,
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: COLORS.border, borderWidth: '1px' }
+                          }}>
+                          <MenuItem value="all">Tất cả rạp</MenuItem>
+                          {cinemas
+                            .filter(c => selectedArea === 'all' || c.city === selectedArea)
+                            .map(c => (
+                              <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>
+                            ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
                   </Box>
                 </Box>
 
@@ -1095,18 +1167,19 @@ function BookingPage() {
                                 variant="outlined"
                                 onClick={() => handleShowtimeClick(st)}
                                 sx={{
-                                  minWidth: 60,
-                                  py: 0.5,
-                                  px: 1,
+                                  minWidth: 100,
+                                  py: 0.6,
+                                  px: 1.5,
                                   fontSize: '13px',
                                   color: '#333333',
                                   borderColor: '#333333',
                                   borderRadius: '6px',
                                   fontFamily: '"Nunito Sans", sans-serif',
+                                  whiteSpace: 'nowrap',
                                   '&:hover': {
                                     bgcolor: COLORS.primary,
                                     color: COLORS.white,
-                                    borderColor: COLORS.primary
+                                    borderColor: COLORS.primary,
                                   }
                                 }}
                               >
