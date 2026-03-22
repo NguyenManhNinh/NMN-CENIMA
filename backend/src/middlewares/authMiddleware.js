@@ -82,6 +82,11 @@ exports.restrictTo = (...roles) => {
         return next();
       }
 
+      // Fallback: check isMaster trên user document (khi không có roles collection)
+      if (!userRole && req.user.isMaster) {
+        return next();
+      }
+
       // Role có permissions → kiểm tra có ít nhất 1 permission nào không
       if (userRole && userRole.permissions && userRole.permissions.length > 0) {
         return next();

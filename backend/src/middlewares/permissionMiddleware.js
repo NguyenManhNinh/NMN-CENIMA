@@ -18,6 +18,11 @@ const requirePermission = (permissionKey) => {
         return next();
       }
 
+      // Fallback: check isMaster trên user document (khi không có roles collection)
+      if (!userRole && req.user.isMaster) {
+        return next();
+      }
+
       // Kiểm tra permission cụ thể
       if (userRole && userRole.permissions && userRole.permissions.includes(permissionKey)) {
         return next();
