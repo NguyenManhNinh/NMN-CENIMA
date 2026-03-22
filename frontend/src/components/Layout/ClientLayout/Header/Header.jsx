@@ -85,7 +85,8 @@ const styles = {
   toolbar: {
     minHeight: '70px !important',
     justifyContent: 'space-between',
-    gap: 2
+    gap: { xs: 0.5, md: 2 },
+    px: { xs: 0.5, md: 0 }
   },
   logo: {
     display: 'flex',
@@ -144,7 +145,9 @@ const styles = {
   rightSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: 1
+    gap: { xs: 0, md: 1 },
+    flexShrink: 0,
+    flexWrap: 'nowrap'
   },
   searchIcon: {
     color: 'rgba(18, 18, 18, 1)',
@@ -159,8 +162,11 @@ const styles = {
   loginBtn: {
     color: 'hsla(0, 5%, 40%, 1.00)',
     fontWeight: 500,
-    fontSize: '0.9rem',
+    fontSize: { xs: '0.75rem', md: '0.9rem' },
     textTransform: 'none',
+    whiteSpace: 'nowrap',
+    minWidth: 'auto',
+    px: { xs: 0.5, md: 1 },
     '&:hover': {
       backgroundColor: 'transparent',
       color: '#00AE72'
