@@ -86,7 +86,7 @@ const styles = {
     minHeight: '70px !important',
     justifyContent: 'space-between',
     gap: { xs: 0.5, md: 2 },
-    px: { xs: 0.5, md: 0 }
+    px: { xs: 1, md: 0 }
   },
   logo: {
     display: 'flex',
@@ -94,7 +94,7 @@ const styles = {
     textDecoration: 'none'
   },
   logoImage: {
-    height: 96,
+    height: { xs: 60, md: 96 },
     width: 'auto'
   },
   navMenu: {
