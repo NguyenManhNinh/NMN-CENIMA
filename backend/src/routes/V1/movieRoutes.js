@@ -1,6 +1,7 @@
 const express = require('express');
 const movieController = require('../../controllers/movieController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const { requirePermission } = require('../../middlewares/permissionMiddleware');
 const upload = require('../../middlewares/uploadMiddleware');
 
 const reviewRouter = require('./reviewRoutes');
@@ -77,6 +78,7 @@ router
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('phim.them'),
     upload.single('poster'),
     movieController.createMovie
   );
@@ -158,12 +160,14 @@ router
   .patch(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('phim.sua'),
     upload.single('poster'),
     movieController.updateMovie
   )
   .delete(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('phim.xoa'),
     movieController.deleteMovie
   );
 /**

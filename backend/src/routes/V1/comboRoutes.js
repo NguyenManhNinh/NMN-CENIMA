@@ -1,6 +1,7 @@
 const express = require('express');
 const comboController = require('../../controllers/comboController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const { requirePermission } = require('../../middlewares/permissionMiddleware');
 
 const router = express.Router();
 
@@ -59,7 +60,7 @@ router.use(authMiddleware.restrictTo('admin', 'manager'));
  *       201:
  *         description: Tạo combo thành công
  */
-router.post('/', comboController.createCombo);
+router.post('/', requirePermission('combo.them'), comboController.createCombo);
 
 /**
  * @swagger
@@ -94,8 +95,8 @@ router.post('/', comboController.createCombo);
  *         description: Xóa thành công
  */
 router.route('/:id')
-  .patch(comboController.updateCombo)
-  .delete(comboController.deleteCombo);
+  .patch(requirePermission('combo.sua'), comboController.updateCombo)
+  .delete(requirePermission('combo.xoa'), comboController.deleteCombo);
 
 module.exports = router;
 

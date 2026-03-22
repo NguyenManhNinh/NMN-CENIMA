@@ -63,13 +63,13 @@ exports.sendMessage = catchAsync(async (req, res, next) => {
 
   // 1. Phim đang chiếu
   const nowShowingMovies = await Movie.find({ status: 'NOW' })
-    .select('title ageRating duration genre description')
+    .select('title ageRating duration genre description slug')
     .limit(10)
     .lean();
 
   // 2. Phim sắp chiếu
   const comingSoonMovies = await Movie.find({ status: 'COMING' })
-    .select('title releaseDate description')
+    .select('title releaseDate description slug')
     .limit(5)
     .lean();
 
@@ -97,7 +97,7 @@ exports.sendMessage = catchAsync(async (req, res, next) => {
     startAt: { $gte: new Date(), $lt: dayAfterTomorrow },
     status: 'OPEN'
   })
-    .populate('movieId', 'title')
+    .populate('movieId', 'title slug')
     .populate('cinemaId', 'name')
     .populate('roomId', 'name type')
     .select('startAt format basePrice')
@@ -131,6 +131,7 @@ exports.sendMessage = catchAsync(async (req, res, next) => {
       activeVouchers,
       upcomingShowtimes: upcomingShowtimes.map(s => ({
         movie: s.movieId?.title || 'N/A',
+        movieSlug: s.movieId?.slug || '',
         cinema: s.cinemaId?.name || 'N/A',
         room: s.roomId?.name || 'N/A',
         roomType: s.roomId?.type || '2D',

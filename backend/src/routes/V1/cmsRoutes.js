@@ -1,6 +1,7 @@
 const express = require('express');
 const cmsController = require('../../controllers/cmsController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const { requirePermission } = require('../../middlewares/permissionMiddleware');
 
 const router = express.Router();
 
@@ -14,15 +15,15 @@ router.get('/articles/:slug', cmsController.getArticle);
 router.use(authMiddleware.protect);
 router.use(authMiddleware.restrictTo('admin', 'manager'));
 
-// Banners
-router.post('/banners', cmsController.createBanner);
-router.patch('/banners/:id', cmsController.updateBanner);
-router.delete('/banners/:id', cmsController.deleteBanner);
+// Banners (Slide)
+router.post('/banners', requirePermission('slide.them'), cmsController.createBanner);
+router.patch('/banners/:id', requirePermission('slide.sua'), cmsController.updateBanner);
+router.delete('/banners/:id', requirePermission('slide.xoa'), cmsController.deleteBanner);
 
-// Articles
-router.post('/articles', cmsController.createArticle);
-router.patch('/articles/:id', cmsController.updateArticle);
-router.delete('/articles/:id', cmsController.deleteArticle);
+// Articles (Phim hay tháng)
+router.post('/articles', requirePermission('phim-hay.them'), cmsController.createArticle);
+router.patch('/articles/:id', requirePermission('phim-hay.sua'), cmsController.updateArticle);
+router.delete('/articles/:id', requirePermission('phim-hay.xoa'), cmsController.deleteArticle);
 
 
 

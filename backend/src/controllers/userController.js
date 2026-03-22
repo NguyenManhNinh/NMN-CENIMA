@@ -239,6 +239,31 @@ exports.searchUserByEmail = catchAsync(async (req, res, next) => {
   });
 });
 
+/**
+ * Admin: Đặt mật khẩu cho user (dùng cho tài khoản OAuth không có password)
+ * PATCH /api/v1/users/admin/:id/set-password
+ */
+exports.adminSetPassword = catchAsync(async (req, res, next) => {
+  const { password } = req.body;
+
+  if (!password || password.length < 6) {
+    return next(new AppError('Mật khẩu phải có ít nhất 6 ký tự!', 400));
+  }
+
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new AppError('Không tìm thấy người dùng!', 404));
+  }
+
+  user.password = password;
+  await user.save(); // pre-save middleware sẽ hash password
+
+  res.status(200).json({
+    status: 'success',
+    message: `Đã đặt mật khẩu cho ${user.email} thành công!`
+  });
+});
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Không cho phép cập nhật password ở đây
   if (req.body.password || req.body.passwordConfirm) {

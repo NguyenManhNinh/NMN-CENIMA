@@ -159,17 +159,27 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError(`Tài khoản đã bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau ${remainingTime} phút.`, 423));
   }
 
-  // 3) Kiểm tra user tồn tại và mật khẩu đúng
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    // Tăng số lần đăng nhập sai nếu user tồn tại
-    if (user) {
-      await user.incLoginAttempts();
+  // 3) Kiểm tra user tồn tại
+  if (!user) {
+    return next(new AppError('Email hoặc mật khẩu không chính xác!', 401));
+  }
 
-      // Kiểm tra nếu vừa bị khóa
-      const updatedUser = await User.findById(user._id).select('+loginAttempts +lockUntil');
-      if (updatedUser.lockUntil && updatedUser.lockUntil > Date.now()) {
-        return next(new AppError('Tài khoản đã bị khóa do đăng nhập sai quá 5 lần. Vui lòng thử lại sau 30 phút.', 423));
-      }
+  // Nếu user đăng ký qua OAuth (Google) → chưa có password
+  // → Tự động lưu password mà user vừa nhập, rồi đăng nhập luôn
+  if (!user.password) {
+    user.password = password;
+    await user.save(); // pre-save middleware sẽ hash password
+    // Reload để lấy hashed password cho bước compare bên dưới
+    const reloaded = await User.findById(user._id).select('+password +isActive +loginAttempts +lockUntil');
+    user.password = reloaded.password;
+  }
+
+  // Kiểm tra mật khẩu đúng
+  if (!(await user.correctPassword(password, user.password))) {
+    await user.incLoginAttempts();
+    const updatedUser = await User.findById(user._id).select('+loginAttempts +lockUntil');
+    if (updatedUser.lockUntil && updatedUser.lockUntil > Date.now()) {
+      return next(new AppError('Tài khoản đã bị khóa do đăng nhập sai quá 5 lần. Vui lòng thử lại sau 30 phút.', 423));
     }
     return next(new AppError('Email hoặc mật khẩu không chính xác!', 401));
   }
@@ -209,13 +219,25 @@ exports.adminLogin = catchAsync(async (req, res, next) => {
   }
 
   // 3) Kiểm tra user tồn tại và mật khẩu đúng
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    if (user) {
-      await user.incLoginAttempts();
-      const updatedUser = await User.findById(user._id).select('+loginAttempts +lockUntil');
-      if (updatedUser.lockUntil && updatedUser.lockUntil > Date.now()) {
-        return next(new AppError('Tài khoản đã bị khóa do đăng nhập sai quá 5 lần. Vui lòng thử lại sau 30 phút.', 423));
-      }
+  // Nếu user đăng ký qua OAuth (Google) → không có password → báo lỗi rõ ràng
+  if (!user) {
+    return next(new AppError('Email hoặc mật khẩu không chính xác!', 401));
+  }
+
+  // Nếu user OAuth chưa có password → tự động lưu password vừa nhập
+  if (!user.password) {
+    user.password = password;
+    await user.save();
+    // Reload user with hashed password
+    const reloadedUser = await User.findById(user._id).select('+password +isActive +loginAttempts +lockUntil');
+    user.password = reloadedUser.password;
+  }
+
+  if (!(await user.correctPassword(password, user.password))) {
+    await user.incLoginAttempts();
+    const updatedUser = await User.findById(user._id).select('+loginAttempts +lockUntil');
+    if (updatedUser.lockUntil && updatedUser.lockUntil > Date.now()) {
+      return next(new AppError('Tài khoản đã bị khóa do đăng nhập sai quá 5 lần. Vui lòng thử lại sau 30 phút.', 423));
     }
     return next(new AppError('Email hoặc mật khẩu không chính xác!', 401));
   }
@@ -232,8 +254,16 @@ exports.adminLogin = catchAsync(async (req, res, next) => {
   }
 
   // 6) KIỂM TRA QUYỀN ADMIN — Chặn trước khi cấp token
-  if (!['admin', 'manager'].includes(user.role)) {
+  // Role "user" (khách hàng) luôn bị chặn
+  if (user.role === 'user') {
     return next(new AppError('Tài khoản không có quyền truy cập trang quản trị!', 403));
+  }
+
+  // Kiểm tra role có quyền truy cập admin không (isMaster hoặc có permissions)
+  if (userRole && !userRole.isMaster) {
+    if (!userRole.permissions || userRole.permissions.length === 0) {
+      return next(new AppError('Chức vụ của bạn chưa được phân quyền! Liên hệ quản trị viên.', 403));
+    }
   }
 
   // 7) Reset số lần đăng nhập sai
@@ -241,7 +271,13 @@ exports.adminLogin = catchAsync(async (req, res, next) => {
     await user.resetLoginAttempts();
   }
 
-  // 8) Cấp token với cookie riêng cho admin portal
+  // 8) Gắn permissions vào user object để frontend lưu
+  if (userRole) {
+    user._doc.permissions = userRole.isMaster ? ['*'] : (userRole.permissions || []);
+    user._doc.isMaster = userRole.isMaster || false;
+  }
+
+  // 9) Cấp token với cookie riêng cho admin portal
   await createSendToken(user, 200, res, { portal: 'admin' });
 });
 

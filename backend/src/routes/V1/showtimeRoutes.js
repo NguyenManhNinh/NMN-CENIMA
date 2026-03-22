@@ -1,6 +1,7 @@
 const express = require('express');
 const showtimeController = require('../../controllers/showtimeController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const { requirePermission } = require('../../middlewares/permissionMiddleware');
 
 const router = express.Router();
 
@@ -78,6 +79,7 @@ router
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('suat-chieu.them'),
     showtimeController.createShowtime
   );
 
@@ -105,11 +107,13 @@ router
   .put(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('suat-chieu.sua'),
     showtimeController.updateShowtime
   )
   .delete(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('suat-chieu.xoa'),
     showtimeController.deleteShowtime
   );
 

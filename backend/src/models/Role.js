@@ -20,6 +20,11 @@ const roleSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  // Danh sách chức năng được phép truy cập (VD: ['Dashboard', 'Phim', 'Combo'])
+  permissions: {
+    type: [String],
+    default: []
+  }
   // Số lượng user đang giữ chức vụ này (virtual hoặc tính khi query)
 }, {
   timestamps: true

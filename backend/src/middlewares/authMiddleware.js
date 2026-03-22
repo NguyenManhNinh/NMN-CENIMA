@@ -65,17 +65,37 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-// Middleware phân quyền: Chỉ cho phép các role nhất định
+// Middleware phân quyền: Chỉ cho phép các role nhất định hoặc role có permissions phù hợp
 exports.restrictTo = (...roles) => {
-  return (req, res, next) => {
-    // roles ['admin', 'manager']. role='user'
-    if (!roles.includes(req.user.role)) {
+  return async (req, res, next) => {
+    try {
+      // 1) Role nằm trong danh sách cho phép → OK (admin luôn được phép)
+      if (roles.includes(req.user.role)) {
+        return next();
+      }
+
+      // 2) Kiểm tra permissions của role trong DB
+      const userRole = await Role.findOne({ name: req.user.role });
+
+      // Role master luôn được toàn quyền
+      if (userRole && userRole.isMaster) {
+        return next();
+      }
+
+      // Role có permissions → kiểm tra có ít nhất 1 permission nào không
+      if (userRole && userRole.permissions && userRole.permissions.length > 0) {
+        return next();
+      }
+
+      // Không có quyền
       return next(
         new AppError('Bạn không có quyền thực hiện hành động này!', 403)
       );
+    } catch (err) {
+      return next(
+        new AppError('Lỗi kiểm tra quyền truy cập!', 500)
+      );
     }
-
-    next();
   };
 };
 

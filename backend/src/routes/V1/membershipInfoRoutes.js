@@ -6,6 +6,7 @@ const {
   getAllMembershipInfo
 } = require('../../controllers/membershipInfoController');
 const { protect, restrictTo } = require('../../middlewares/authMiddleware');
+const { requirePermission } = require('../../middlewares/permissionMiddleware');
 
 // PUBLIC ROUTES
 
@@ -15,9 +16,8 @@ router.get('/', getMembershipInfo);
 // ADMIN ROUTES
 
 // Lấy tất cả trang thành viên (bao gồm draft) - dành cho trang quản trị
-router.get('/admin/all', protect, restrictTo('admin'), getAllMembershipInfo);
+router.get('/admin/all', protect, restrictTo('admin'), requirePermission('thanh-vien.xem'), getAllMembershipInfo);
 
-// Cập nhật hoặc tạo mới trang thành viên
-router.put('/', protect, restrictTo('admin'), updateMembershipInfo);
+router.put('/', protect, restrictTo('admin'), requirePermission('thanh-vien.sua'), updateMembershipInfo);
 
 module.exports = router;

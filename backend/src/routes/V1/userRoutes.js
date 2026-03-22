@@ -2,6 +2,7 @@ const express = require('express');
 const userController = require('../../controllers/userController');
 const authController = require('../../controllers/authController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const { requirePermission } = require('../../middlewares/permissionMiddleware');
 
 const router = express.Router();
 
@@ -201,21 +202,24 @@ router.use(authMiddleware.restrictTo('admin'));
 router.get('/admin/list', userController.adminGetUserList);
 
 // Admin: Tạo tài khoản mới
-router.post('/admin/create', userController.adminCreateUser);
+router.post('/admin/create', requirePermission('nhan-vien.them'), userController.adminCreateUser);
 
 // Admin: Bật/Tắt tình trạng hoạt động
 router.patch('/admin/:id/toggle-active', userController.toggleUserActive);
 
 // Admin: Đổi chức vụ (role)
-router.patch('/admin/:id/change-role', userController.changeUserRole);
+router.patch('/admin/:id/change-role', requirePermission('nhan-vien.sua'), userController.changeUserRole);
 
 // Admin: Tìm user theo email
 router.get('/admin/search-email', userController.searchUserByEmail);
 
+// Admin: Đặt mật khẩu cho user (dùng cho tài khoản OAuth không có password)
+router.patch('/admin/:id/set-password', requirePermission('nhan-vien.sua'), userController.adminSetPassword);
+
 router.route('/:id')
   .get(userController.getUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .patch(requirePermission('khach-hang.sua'), userController.updateUser)
+  .delete(requirePermission('khach-hang.xoa'), userController.deleteUser);
 
 module.exports = router;
 

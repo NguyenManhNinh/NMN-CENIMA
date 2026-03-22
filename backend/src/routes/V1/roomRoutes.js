@@ -1,6 +1,7 @@
 const express = require('express');
 const roomController = require('../../controllers/roomController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const { requirePermission } = require('../../middlewares/permissionMiddleware');
 
 // mergeParams: true để nhận được cinemaId từ nested route
 const router = express.Router({ mergeParams: true });
@@ -57,6 +58,7 @@ router
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('phong.them'),
     roomController.createRoom
   );
 
@@ -110,11 +112,13 @@ router
   .patch(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('phong.sua'),
     roomController.updateRoom
   )
   .delete(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('phong.xoa'),
     roomController.deleteRoom
   );
 

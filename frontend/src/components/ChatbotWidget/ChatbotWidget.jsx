@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { createSessionAPI, sendMessageAPI, getQuickRepliesAPI } from '../../apis/chatbotApi'
@@ -135,6 +136,37 @@ function ChatbotWidget() {
     return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
   }
 
+  // Parse markdown links [text](/url) thành clickable links
+  const renderMessage = (text) => {
+    if (!text) return null
+    // Split text by markdown link pattern [text](url)
+    const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g)
+    return parts.map((part, i) => {
+      const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+      if (linkMatch) {
+        const [, linkText, url] = linkMatch
+        // Internal link
+        if (url.startsWith('/')) {
+          return (
+            <Link key={i} to={url} className="chatbot-link" onClick={() => setIsOpen(false)}>
+              {linkText}
+            </Link>
+          )
+        }
+        // External link
+        return (
+          <a key={i} href={url} className="chatbot-link" target="_blank" rel="noopener noreferrer">
+            {linkText}
+          </a>
+        )
+      }
+      // Render newlines as <br/>
+      return part.split('\n').map((line, j, arr) => (
+        <span key={`${i}-${j}`}>{line}{j < arr.length - 1 && <br />}</span>
+      ))
+    })
+  }
+
   return (
     <>
       {/* Floating Button */}
@@ -179,7 +211,9 @@ function ChatbotWidget() {
                   <img src={chatbotAvatar} alt="" className="chatbot-msg-avatar" />
                 )}
                 <div>
-                  <div className="chatbot-msg-bubble">{msg.message}</div>
+                  <div className="chatbot-msg-bubble">
+                    {msg.sender === 'BOT' ? renderMessage(msg.message) : msg.message}
+                  </div>
                   <div className="chatbot-msg-time">{formatTime(msg.time)}</div>
                 </div>
               </div>

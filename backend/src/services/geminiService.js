@@ -17,10 +17,25 @@ QUY TẮC BẮT BUỘC:
 4. Nếu hỏi về phim nhưng không có trong danh sách, nói: "Phim này hiện không có trong lịch chiếu của rạp."
 5. Nếu hỏi về combo nhưng không có dữ liệu combo, nói: "Vui lòng kiểm tra menu combo tại quầy hoặc trên website."
 
+QUY TẮC TRẢ LỜI THEO NGỮ CẢNH (RẤT QUAN TRỌNG):
+1. Khi user hỏi về MỘT RẠP CỤ THỂ (ví dụ "rạp NMN Nguyễn Du") → CHỈ trả lời phim/suất chiếu TẠI RẠP ĐÓ, KHÔNG liệt kê các rạp khác
+2. Khi user hỏi về MỘT PHIM CỤ THỂ (ví dụ "Quỷ Nhập Tràng 2") → CHỈ trả lời thông tin + suất chiếu CỦA PHIM ĐÓ
+3. Khi user hỏi về MỘT COMBO CỤ THỂ → CHỈ trả lời thông tin combo đó
+4. Khi user hỏi về MỘT KHUYẾN MÃI CỤ THỂ → CHỈ trả lời khuyến mãi đó
+5. Khi user hỏi về MỘT RẠP CỤ THỂ (địa chỉ, SĐT) → CHỈ trả lời thông tin rạp đó
+6. Khi user hỏi CHUNG (ví dụ "có phim gì hay", "tất cả combo", "danh sách rạp") → MỚI liệt kê tất cả
+7. KHÔNG BAO GIỜ trả lời dài dòng liệt kê tất cả khi user chỉ hỏi về 1 thứ cụ thể
+
+QUY TẮC VỀ LINK PHIM (BẮT BUỘC):
+- Khi nhắc đến tên phim, LUÔN kèm link markdown: [Tên Phim](/dat-ve/slug-phim)
+- Slug phim được cung cấp trong dữ liệu bên cạnh tên phim
+- Ví dụ: Phim "Quỷ Nhập Tràng 2" có slug "quy-nhap-trang-2" → viết [Quỷ Nhập Tràng 2](/dat-ve/quy-nhap-trang-2)
+- Link phải chính xác theo slug trong dữ liệu, KHÔNG tự bịa slug
+
 CÁCH TRẢ LỜI:
 - Ngắn gọn, thân thiện, chuyên nghiệp
 - Sử dụng emoji phù hợp 🎬🍿🎫
-- Nếu user hỏi về đặt vé, hướng dẫn: "Bạn có thể đặt vé trực tiếp trên website của chúng tôi."
+- Nếu user hỏi về đặt vé, hướng dẫn: "Bạn có thể ấn vào link phim để đặt vé trực tiếp."
 - Nếu câu hỏi KHÔNG liên quan đến rạp phim, trả lời: "Xin lỗi, tôi chỉ có thể hỗ trợ về rạp phim và đặt vé thôi ạ. Bạn cần hỗ trợ gì về phim không? 🎬"
 
 THÔNG TIN CỐ ĐỊNH (chỉ sử dụng nếu user hỏi):
@@ -43,11 +58,11 @@ exports.chat = async (userMessage, conversationHistory = [], context = {}) => {
     // Xây dựng context động từ dữ liệu thực
     let dynamicContext = '\n\n=== DỮ LIỆU THỰC TỪ HỆ THỐNG (CHỈ TRẢ LỜI DỰA TRÊN DỮ LIỆU NÀY) ===';
 
-    // Phim đang chiếu
+    // Phim đang chiếu (kèm slug để tạo link)
     if (context.nowShowingMovies && context.nowShowingMovies.length > 0) {
       dynamicContext += `\n\n📽️ PHIM ĐANG CHIẾU (${context.nowShowingMovies.length} phim):`;
       context.nowShowingMovies.forEach(m => {
-        dynamicContext += `\n- ${m.title} (${m.ageRating || 'P'}, ${m.duration} phút, thể loại: ${m.genre?.join(', ') || 'N/A'})`;
+        dynamicContext += `\n- ${m.title} | slug: ${m.slug || 'N/A'} | ${m.ageRating || 'P'}, ${m.duration} phút, thể loại: ${m.genre?.join(', ') || 'N/A'}`;
       });
     } else {
       dynamicContext += `\n\n📽️ PHIM ĐANG CHIẾU: Hiện không có phim nào.`;
@@ -58,7 +73,7 @@ exports.chat = async (userMessage, conversationHistory = [], context = {}) => {
       dynamicContext += `\n\n🎬 PHIM SẮP CHIẾU:`;
       context.comingSoonMovies.forEach(m => {
         const date = m.releaseDate ? new Date(m.releaseDate).toLocaleDateString('vi-VN') : 'Sắp công bố';
-        dynamicContext += `\n- ${m.title} (Khởi chiếu: ${date})`;
+        dynamicContext += `\n- ${m.title} | slug: ${m.slug || 'N/A'} | Khởi chiếu: ${date}`;
       });
     } else {
       dynamicContext += `\n\n🎬 PHIM SẮP CHIẾU: Chưa có thông tin phim sắp chiếu.`;
@@ -84,14 +99,14 @@ exports.chat = async (userMessage, conversationHistory = [], context = {}) => {
       dynamicContext += `\n\n🎁 KHUYẾN MÃI: Hiện không có khuyến mãi nào.`;
     }
 
-    // Suất chiếu sắp tới
+    // Suất chiếu sắp tới (kèm slug phim)
     if (context.upcomingShowtimes && context.upcomingShowtimes.length > 0) {
       dynamicContext += `\n\n🎫 SUẤT CHIẾU SẮP TỚI:`;
-      context.upcomingShowtimes.slice(0, 15).forEach(s => {
+      context.upcomingShowtimes.slice(0, 20).forEach(s => {
         const dateTime = new Date(s.time);
         const dateStr = dateTime.toLocaleDateString('vi-VN');
         const timeStr = dateTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        dynamicContext += `\n- ${s.movie} | ${s.cinema} - ${s.room} | ${dateStr} ${timeStr} | ${s.format} | ${s.price?.toLocaleString('vi-VN')} VND`;
+        dynamicContext += `\n- ${s.movie} | slug: ${s.movieSlug || 'N/A'} | ${s.cinema} - ${s.room} | ${dateStr} ${timeStr} | ${s.format} | ${s.price?.toLocaleString('vi-VN')} VND`;
       });
     } else {
       dynamicContext += `\n\n🎫 SUẤT CHIẾU: Chưa có suất chiếu nào trong thời gian tới.`;

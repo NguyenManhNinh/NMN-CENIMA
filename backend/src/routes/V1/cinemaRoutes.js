@@ -1,6 +1,7 @@
 const express = require('express');
 const cinemaController = require('../../controllers/cinemaController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const { requirePermission } = require('../../middlewares/permissionMiddleware');
 const roomRouter = require('./roomRoutes');
 
 const router = express.Router();
@@ -67,6 +68,7 @@ router
   .post(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('rap.them'),
     cinemaController.createCinema
   );
 
@@ -120,11 +122,13 @@ router
   .patch(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('rap.sua'),
     cinemaController.updateCinema
   )
   .delete(
     authMiddleware.protect,
     authMiddleware.restrictTo('admin'),
+    requirePermission('rap.xoa'),
     cinemaController.deleteCinema
   );
 

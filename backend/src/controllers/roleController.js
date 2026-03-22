@@ -135,3 +135,27 @@ exports.deleteRole = async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
+
+// Cập nhật danh sách quyền (permissions) cho chức vụ
+exports.updateRolePermissions = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { permissions } = req.body;
+
+    if (!Array.isArray(permissions)) {
+      return res.status(400).json({ status: 'error', message: 'permissions phải là mảng!' });
+    }
+
+    const role = await Role.findById(id);
+    if (!role) {
+      return res.status(404).json({ status: 'error', message: 'Không tìm thấy chức vụ!' });
+    }
+
+    role.permissions = permissions;
+    await role.save();
+
+    res.status(200).json({ status: 'success', data: role });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
