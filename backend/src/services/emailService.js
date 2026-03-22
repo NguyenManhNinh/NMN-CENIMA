@@ -1,24 +1,55 @@
 const nodemailer = require('nodemailer');
 const logger = require('../utils/logger');
 
-// Cấu hình Email - Dùng Gmail SMTP với port 465 (SSL)
-// Port 587 (STARTTLS) bị timeout trên một số hosting (Render), port 465 hoạt động ổn định hơn
+// === Brevo HTTP API (dùng trên Render — SMTP bị chặn) ===
+const sendViaBrevo = async (options) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.EMAIL_USERNAME || 'nmncinema@gmail.com';
+
+  const body = {
+    sender: { name: 'NMN Cinema', email: senderEmail },
+    to: [{ email: options.email }],
+    subject: options.subject,
+    htmlContent: options.html || `<p>${options.message}</p>`
+  };
+
+  // Brevo chưa hỗ trợ inline attachments qua API cơ bản
+  // Nếu có attachments (QR code), encode base64
+  if (options.attachments && options.attachments.length > 0) {
+    body.attachment = options.attachments.map(att => ({
+      name: att.filename,
+      content: att.content.toString('base64')
+    }));
+  }
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': apiKey,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`Brevo API error ${response.status}: ${errorData.message || response.statusText}`);
+  }
+
+  logger.info(`Email sent via Brevo to ${options.email}`);
+};
+
+// === Nodemailer SMTP fallback (dùng trên localhost) ===
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // SSL trực tiếp
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USERNAME,
     pass: process.env.EMAIL_PASSWORD
-  },
-  connectionTimeout: 10000, // 10s timeout
-  greetingTimeout: 10000,
-  socketTimeout: 15000
+  }
 });
 
-
-const sendEmail = async (options) => {
-  // options: { email, subject, message, attachments }
+const sendViaSMTP = async (options) => {
   const mailOptions = {
     from: `NMN Cinema <${process.env.EMAIL_USERNAME}>`,
     to: options.email,
@@ -27,13 +58,21 @@ const sendEmail = async (options) => {
     html: options.html,
     attachments: options.attachments
   };
+  await transporter.sendMail(mailOptions);
+  logger.info(`Email sent via SMTP to ${options.email}`);
+};
 
+// === Main: chọn Brevo API hoặc SMTP tùy môi trường ===
+const sendEmail = async (options) => {
   try {
-    await transporter.sendMail(mailOptions);
-    logger.info(`Email sent to ${options.email}`);
+    if (process.env.BREVO_API_KEY) {
+      await sendViaBrevo(options);
+    } else {
+      await sendViaSMTP(options);
+    }
   } catch (error) {
-    logger.error(`Email send failed to ${options.email}: ${error.message} | Code: ${error.code || 'N/A'}`);
-    throw error; // Để caller quyết định xử lý
+    logger.error(`Email send failed to ${options.email}: ${error.message}`);
+    throw error;
   }
 };
 
