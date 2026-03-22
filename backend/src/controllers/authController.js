@@ -539,13 +539,27 @@ exports.googleCallback = catchAsync(async (req, res, next) => {
     user.otpCode = undefined;
     user.otpExpires = undefined;
 
+    // Lấy permissions từ role hoặc user document
+    const userRole = await Role.findOne({ name: user.role });
+    let userPermissions = [];
+    let isUserMaster = false;
+    if (userRole) {
+      isUserMaster = userRole.isMaster || false;
+      userPermissions = userRole.isMaster ? ['*'] : (userRole.permissions || []);
+    } else if (user.isMaster) {
+      isUserMaster = true;
+      userPermissions = ['*'];
+    }
+
     // Encode user data để truyền qua URL
     const userData = encodeURIComponent(JSON.stringify({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      avatar: user.avatar
+      avatar: user.avatar,
+      isMaster: isUserMaster,
+      permissions: userPermissions
     }));
 
     // Redirect về frontend với token
