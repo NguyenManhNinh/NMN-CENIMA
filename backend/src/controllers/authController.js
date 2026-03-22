@@ -540,7 +540,6 @@ exports.googleCallback = catchAsync(async (req, res, next) => {
     user.otpExpires = undefined;
 
     // Lấy permissions từ role hoặc user document
-    const userRole = await Role.findOne({ name: user.role });
     let userPermissions = [];
     let isUserMaster = false;
     if (userRole) {
