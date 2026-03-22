@@ -27,9 +27,8 @@ const sendEmail = async (options) => {
     await transporter.sendMail(mailOptions);
     logger.info(`Email sent to ${options.email}`);
   } catch (error) {
-    logger.error(`Email send failed: ${error.message}`);
-    // Don't throw in dev/test to avoid blocking flow if creds are missing
-    if (process.env.NODE_ENV === 'production') throw error;
+    logger.error(`Email send failed to ${options.email}: ${error.message} | Code: ${error.code || 'N/A'}`);
+    throw error; // Để caller quyết định xử lý
   }
 };
 

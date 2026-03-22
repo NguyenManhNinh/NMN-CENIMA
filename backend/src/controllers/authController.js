@@ -89,19 +89,20 @@ exports.register = catchAsync(async (req, res, next) => {
   // Gửi email chứa OTP
   try {
     await sendEmail.sendOTP(newUser.email, otp);
-
-    res.status(201).json({
-      status: 'success',
-      message: 'Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP kích hoạt tài khoản.',
-      data: {
-        email: newUser.email
-      }
-    });
   } catch (err) {
-    // Nếu gửi email lỗi, có thể xóa user hoặc giữ lại để user yêu cầu gửi lại OTP
-    // Ở đây ta tạm thời báo lỗi nhưng vẫn giữ user (để user có thể resend OTP sau này)
-    return next(new AppError('Đã có lỗi khi gửi email! Vui lòng thử lại sau.', 500));
+    // Log lỗi chi tiết để debug trên production
+    console.error('Email send failed:', err.message, err.code, err.response);
   }
+
+  // Luôn trả success để frontend chuyển sang trang nhập OTP
+  // (dù email fail, user vẫn có thể gửi lại OTP sau)
+  res.status(201).json({
+    status: 'success',
+    message: 'Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP kích hoạt tài khoản.',
+    data: {
+      email: newUser.email
+    }
+  });
 });
 
 // Xác thực tài khoản bằng OTP
