@@ -178,22 +178,7 @@ function BannerSlider({ banners = [], autoplay = true, autoplaySpeed = 4000 }) {
         </>
       )}
 
-      {/* Dots indicator */}
-      {banners.length > 1 && (
-        <Box sx={styles.dotsContainer}>
-          {banners.map((_, index) => (
-            <Box
-              key={index}
-              component="button"
-              onClick={() => handleDotClick(index)}
-              sx={{
-                ...styles.dot,
-                ...(index === currentIndex ? styles.dotActive : {})
-              }}
-            />
-          ))}
-        </Box>
-      )}
+      {/* Dots indicator - đã ẩn */}
     </Box>
   );
 }
