@@ -599,8 +599,13 @@ function SeatSelectionPage() {
           return s;
         }));
       } else if (error.response?.status === 400) {
-        // Lỗi giới hạn số ghế - hiện modal cảnh báo
-        setMaxSeatsWarningOpen(true);
+        // Kiểm tra xem lỗi có phải giới hạn ghế không
+        const msg = error.response?.data?.message || '';
+        if (msg.includes('tối đa') || msg.includes('MAX') || msg.includes('8 ghế')) {
+          setMaxSeatsWarningOpen(true);
+        } else {
+          alert(msg || 'Có lỗi xảy ra. Vui lòng thử lại!');
+        }
       } else if (error.response?.status === 401) {
         setLoginModalOpen(true);
       } else {
