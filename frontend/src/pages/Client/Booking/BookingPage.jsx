@@ -462,6 +462,12 @@ function BookingPage() {
             component="img"
             src={movie.bannerUrl || movie.posterUrl}
             alt=""
+            onError={(e) => {
+              if (!e.target.dataset.fallback && movie.posterUrl) {
+                e.target.dataset.fallback = 'true';
+                e.target.src = movie.posterUrl;
+              }
+            }}
             sx={{
               position: 'absolute',
               top: '50%',
@@ -479,6 +485,12 @@ function BookingPage() {
             component="img"
             src={movie.bannerUrl || movie.posterUrl}
             alt={movie.title}
+            onError={(e) => {
+              if (!e.target.dataset.fallback && movie.posterUrl) {
+                e.target.dataset.fallback = 'true';
+                e.target.src = movie.posterUrl;
+              }
+            }}
             sx={{
               position: 'relative',
               zIndex: 1,
