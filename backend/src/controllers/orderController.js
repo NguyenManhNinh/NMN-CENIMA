@@ -27,7 +27,7 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     // Kiểm tra order chưa quá 15 phút (còn valid)
     const orderAge = Date.now() - new Date(existingPendingOrder.createdAt).getTime();
     const MAX_ORDER_AGE = 15 * 60 * 1000; // Gía trị thời gian realtime thật 15 phút 15 * 60 * 1000
-    // const MAX_ORDER_AGE = 2 * 60 * 1000; // Gía trị thời gian realtime để test là 2p 2 * 60 * 1000
+    // const MAX_ORDER_AGE = 20 * 1000; // Gía trị thời gian realtime  20 giây
 
     // So sánh seats: lấy seatCode từ order và so với seats từ request
     const orderSeatCodes = existingPendingOrder.seats.map(s => s.seatCode).sort();

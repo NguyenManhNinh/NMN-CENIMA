@@ -10,6 +10,7 @@ module.exports = {
 
   // === SEAT HOLD ===
   SEAT_HOLD_DURATION_MINUTES: 15, // Thời gian giữ ghế (phút)
+  // SEAT_HOLD_DURATION_MINUTES: 0.33, // Test 20 giây (0.33 phút)
 
   // === ROOM ===
   DEFAULT_SEATS_PER_ROOM: 50, // Số ghế mặc định/phòng (dùng cho tính occupancy)

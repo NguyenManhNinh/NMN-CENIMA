@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { verifyHoldAPI } from '../apis/seatHoldApi';
 
 const RESERVATION_TIME = 900; // 15 minutes in seconds
-// const RESERVATION_TIME = 120; // 2 minutes (for testing)
+// const RESERVATION_TIME = 20; // 20 giây (for testing)
 const POLL_INTERVAL = 30000; // Poll server every 30 seconds
 
 /**

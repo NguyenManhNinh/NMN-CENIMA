@@ -25,7 +25,7 @@ const seatHoldSchema = new mongoose.Schema({
   expiredAt: {
     type: Date,
     default: () => new Date(Date.now() + 15 * 60 * 1000), // thời gian reatltime thật 15 phút
-    // default: () => new Date(Date.now() + 2 * 60 * 1000), // thời gian realitme để tét 2 phút
+    // default: () => new Date(Date.now() + 20 * 1000), // thời gian realtime để test 20 giây
     index: { expires: 0 } // TTL Index: MongoDB tự xóa khi thời gian hiện tại >= expiredAt
   }
 }, {
