@@ -21,5 +21,6 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Docs
-docs/
+# Docs (allow screenshots for README)
+docs/*
+!docs/screenshots/
