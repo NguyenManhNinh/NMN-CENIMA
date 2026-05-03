@@ -130,4 +130,4 @@ DATN-Cinema/
 
 ## 👨‍💻 Author
 
-**Nguyen Manh Ninh** – Graduation Thesis, 2026
+**Nguyen Manh Ninh** 
