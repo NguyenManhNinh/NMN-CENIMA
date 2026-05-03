@@ -1,9 +1,10 @@
-# 🎬 NMN Cinema - Phát triển hệ thống quản lý rạp chiếu phim tích hợp thanh toán trực tuyến và Chatbot AI
+# 🎬 NMN Cinema – Cinema Management System with Online Payment & AI Chatbot
+
 <p align="center">
   <img src="frontend/src/assets/images/NMN_CENIMA_LOGO.png" alt="NMN Cinema Logo" width="200"/>
 </p>
 <p align="center">
-  <strong>Đồ án tốt nghiệp – NMN Cinema - Phát triển hệ thống quản lý rạp chiếu phim tích hợp thanh toán trực tuyến và Chatbot AI</strong>
+  <strong>Graduation Thesis – NMN Cinema: A full-stack cinema management system with online ticketing, VNPay payment, and AI Chatbot support.</strong>
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white" alt="Node.js"/>
@@ -12,81 +13,101 @@
   <img src="https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white" alt="Redis"/>
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white" alt="Docker"/>
 </p>
----
-## 📖 Giới thiệu
-**NMN Cinema** là hệ thống quản lý rạp chiếu phim và đặt vé xem phim trực tuyến Mern stack, được xây dựng như đồ án tốt nghiệp. Hệ thống hỗ trợ 3 vai trò chính:
 
-- 🎥 **Khách hàng (Client):** Xem phim đang chiếu / sắp chiếu, chọn suất chiếu, chọn ghế, đặt combo bắp nước, thanh toán trực tuyến (VNPay), nhận vé QR Code, đánh giá phim, tích điểm thành viên.
-- 🛡️ **Admin:** Dashboard thống kê doanh thu, quản lý phim / suất chiếu / phòng chiếu / ghế ngồi / combo / khuyến mãi / voucher / banner / bài viết / người dùng / vai trò & phân quyền.
-- 📱 **Nhân viên (Staff):** Quét mã QR kiểm tra vé tại rạp.
+---
+
+## 📖 Overview
+
+**NMN Cinema** is a full-stack MERN cinema management and online ticket booking system, built as a graduation thesis project. The system supports 3 main roles:
+
+- 🎥 **Customer (Client):** Browse now-showing / upcoming movies, select showtimes, choose seats, add food combos, pay online via VNPay, receive QR Code tickets, rate movies, and earn membership points.
+- 🛡️ **Admin:** Revenue dashboard, manage movies / showtimes / screening rooms / seats / combos / promotions / vouchers / banners / articles / users / roles & permissions.
+- 📱 **Staff:** Scan QR codes to verify tickets at the cinema.
+
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Công nghệ |
+| Layer | Technology |
 |---|---|
 | **Frontend** | React 18, Vite, Material UI 5, Redux Toolkit, React Router 6, Socket.IO Client, Swiper, React Hook Form |
 | **Backend** | Node.js, Express 4, Mongoose (MongoDB), Socket.IO, JWT, Zod Validation, Swagger API Docs |
 | **Database** | MongoDB 7, Redis 7 (caching & rate limiting) |
 | **Infra / DevOps** | Docker & Docker Compose, Winston Logger, Node-Cron Jobs |
-| **Thanh toán** | VNPay Payment Gateway |
-| **Khác** | Google OAuth 2.0, Nodemailer (email), QR Code generation, Gemini AI Chatbot, Multer (upload ảnh) |
+| **Payment** | VNPay Payment Gateway |
+| **Other** | Google OAuth 2.0, Nodemailer (email), QR Code generation, Gemini AI Chatbot, Multer (image upload) |
+
 ---
 
-## ✨ Tính năng nổi bật
+## ✨ Key Features
 
-- 🎟️ Đặt vé online với chọn ghế realtime (Socket.IO)
-- 💳 Thanh toán qua VNPay
-- 📊 Dashboard admin với biểu đồ doanh thu, thống kê suất chiếu, tỷ lệ lấp đầy ghế
-- 🤖 Chatbot AI tư vấn phim (Google Gemini)
-- 🔐 Phân quyền đa vai trò (Admin / Staff / User)
-- 🎫 Vé điện tử QR Code
-- ⭐ Đánh giá & bình luận phim
-- 🏷️ Hệ thống khuyến mãi & voucher
-- 🏅 Tích điểm thành viên (Membership)
-- 🚀 Dockerized – deploy nhanh với 1 lệnh
+- 🎟️ Online seat booking with real-time seat locking (Socket.IO)
+- 💳 Payment via VNPay
+- 📊 Admin dashboard with revenue charts, showtime stats, and seat occupancy rates
+- 🤖 AI movie recommendation chatbot (Google Gemini)
+- 🔐 Role-based access control (Admin / Staff / User)
+- 🎫 Electronic QR Code tickets
+- ⭐ Movie ratings & comments
+- 🏷️ Promotions & voucher system
+- 🏅 Membership points system
+- 🚀 Dockerized – deploy with a single command
+
 ---
 
 ## 📸 Screenshots
 
-### Trang đặt vé
+### Booking Page
 ![Booking](docs/screenshots/Booking.png)
-### Chọn ghế ngồi
+
+### Seat Selection
 ![Seat Selection](docs/screenshots/chair%20booking%20page.png)
+
 ---
-## 🚀 Cài đặt & Chạy
-### Yêu cầu
+
+## 🚀 Getting Started
+
+### Prerequisites
+
 - Docker & Docker Compose
-- Node.js >= 18 (nếu chạy không dùng Docker)
-### Chạy với Docker (khuyến nghị)
+- Node.js >= 18 (if running without Docker)
+
+### Run with Docker (recommended)
+
 ```bash
-# Clone repo
+# Clone the repository
 git clone https://github.com/NguyenManhNinh/NMN-CENIMA.git
 cd NMN-CENIMA
-# Cấu hình backend
+
+# Configure backend environment
 cp backend/.env.example backend/.env
-# Sửa file .env với thông tin của bạn (MongoDB URI, JWT Secret, VNPay, ...)
-# Khởi chạy backend + MongoDB + Redis
+# Edit .env with your credentials (MongoDB URI, JWT Secret, VNPay, ...)
+
+# Start backend + MongoDB + Redis
 cd backend
 docker compose up -d
-# Cài đặt & chạy frontend
+
+# Install & run frontend
 cd ../frontend
 npm install
 npm run dev
 ```
-Frontend mặc định chạy tại: `http://localhost:5173`
-Backend API chạy tại: `http://localhost:5000`
+
+- Frontend runs at: `http://localhost:5173`
+- Backend API runs at: `http://localhost:5000`
+
 ---
-## 📁 Cấu trúc thư mục
+
+## 📁 Project Structure
+
 ```
 DATN-Cinema/
 ├── backend/                # REST API Server
 │   ├── src/
-│   │   ├── controllers/    # Xử lý request
+│   │   ├── controllers/    # Request handlers
 │   │   ├── models/         # Mongoose schemas (31 models)
 │   │   ├── routes/         # API endpoints
 │   │   ├── services/       # Business logic
-│   │   ├── middlewares/     # Auth, validation, error handling
+│   │   ├── middlewares/    # Auth, validation, error handling
 │   │   ├── jobs/           # Cron jobs
 │   │   └── utils/          # Helper functions
 │   ├── docker-compose.yml
@@ -104,7 +125,9 @@ DATN-Cinema/
 │
 └── README.md
 ```
----
-## 👨‍💻 Tác giả
-**Nguyễn Mạnh Ninh** – Đồ án tốt nghiệp
 
+---
+
+## 👨‍💻 Author
+
+**Nguyen Manh Ninh** – Graduation Thesis, 2026
